@@ -7,7 +7,7 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 
 ### Frontend
 - **Framework**: React 18
-- **UI Library**: NextUI (dark theme enforced)
+- **UI Library**: heroUI (dark theme enforced)
 - **State Management**: Context API (no Redux)
 - **Routing**: React Router v6
 - **HTTP Client**: Axios
