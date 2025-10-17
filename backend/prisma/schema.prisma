@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// backend/prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -10,17 +9,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
+// User model - Google OAuth only
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  picture       String?   // Google profile picture URL
+  googleId      String    @unique
+  refreshToken  String?   @db.Text // For future calendar integration
+  
+  // Settings
+  autoDeleteDays Int      @default(30) // Auto-delete audio after X days
+  emailNotifications Boolean @default(true)
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime  @default(now())
+  
+  // Relations
+  meetings      Meeting[]
+  
+  @@index([email])
+  @@index([googleId])
+  @@map("users")
+}
+
+// Meeting status enum
 enum MeetingStatus {
   UPLOADING
-  PROCESSING
+  PROCESSING_AUDIO
   TRANSCRIBING
-  ANALYZING
+  PROCESSING_NLP
   SUMMARIZING
   COMPLETED
   FAILED
 }
 
+// Meeting category enum
 enum MeetingCategory {
   SALES
   PLANNING
@@ -29,47 +55,91 @@ enum MeetingCategory {
   OTHER
 }
 
-// Models
-model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  name         String?
-  googleId     String    @unique
-  picture      String?
-  refreshToken String?   @db.Text
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  // Relations
-  meetings     Meeting[]
-
-  @@index([email])
-  @@index([googleId])
-  @@map("users")
-}
-
+// Meeting model - Core entity
 model Meeting {
-  id             String          @id @default(uuid())
-  userId         String
-  title          String
-  category       MeetingCategory @default(OTHER)
-  audioUrl       String?         // Supabase Storage URL (optional, deleted after processing)
-  transcriptText String?         @db.Text
-  summary        String?         @db.Text
-  status         MeetingStatus   @default(UPLOADING)
-  duration       Float?          // Duration in seconds
-  errorMessage   String?         @db.Text // Store error details if status = FAILED
-  processingTime Float?          // Total processing time in seconds (for analytics)
-
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-
+  id            String          @id @default(uuid())
+  title         String
+  description   String?         @db.Text
+  category      MeetingCategory @default(OTHER)
+  status        MeetingStatus   @default(UPLOADING)
+  
+  // Audio metadata
+  audioUrl      String?         // Processed audio URL (Supabase storage)
+  audioSize     Int?            // File size in bytes
+  audioDuration Float?          // Duration in seconds (max 180)
+  audioFormat   String?         // e.g., "mp3", "wav"
+  
+  // Processing results
+  transcriptText String?        @db.Text
+  transcriptWordCount Int?
+  
+  // NLP results (JSON for flexibility)
+  nlpEntities   Json?           // Named entities, dates, organizations
+  nlpKeyPhrases Json?           // Key phrases extracted
+  nlpActions    Json?           // Action items detected by NLP
+  
+  // AI Summary (structured format)
+  summaryExecutive String?      @db.Text // Executive summary
+  summaryKeyDecisions String?   @db.Text // Key decisions made
+  summaryActionItems Json?      // [{task, assignee?, deadline?}]
+  summaryNextSteps String?      @db.Text // Next steps
+  
+  // Processing metadata
+  processingError String?       @db.Text
+  processingStartedAt DateTime?
+  processingCompletedAt DateTime?
+  processingDuration Float?     // Total processing time in seconds
+  
+  // Audio deletion tracking
+  audioDeletedAt DateTime?      // When audio was auto-deleted
+  shouldDeleteAudioAt DateTime? // Scheduled deletion date
+  
+  // Email notification
+  emailSent      Boolean        @default(false)
+  emailSentAt    DateTime?
+  
+  // Timestamps
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  
   // Relations
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   @@index([userId])
   @@index([status])
   @@index([category])
   @@index([createdAt])
+  @@index([shouldDeleteAudioAt]) // For cron job cleanup
   @@map("meetings")
+}
+
+// Processing log for debugging and analytics
+model ProcessingLog {
+  id            String   @id @default(uuid())
+  meetingId     String
+  stage         String   // "audio", "transcription", "nlp", "summary"
+  status        String   // "started", "completed", "failed"
+  details       Json?    // Additional details, errors, metrics
+  duration      Float?   // Stage duration in seconds
+  createdAt     DateTime @default(now())
+  
+  @@index([meetingId])
+  @@index([stage])
+  @@index([createdAt])
+  @@map("processing_logs")
+}
+
+// User activity tracking (optional for analytics)
+model UserActivity {
+  id            String   @id @default(uuid())
+  userId        String
+  action        String   // "login", "record", "view_meeting", "download"
+  metadata      Json?    // Additional context
+  createdAt     DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("user_activities")
 }
