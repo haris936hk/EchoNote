@@ -6,7 +6,7 @@ import {
   Input,
   Divider,
   Chip
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { 
   FiFileText, 
   FiCopy, 

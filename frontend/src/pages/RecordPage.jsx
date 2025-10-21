@@ -12,7 +12,7 @@ import {
   Progress,
   Chip,
   Divider
-} from '@nextui-org/react';
+} from '@heroui/react';
 import {
   FiMic,
   FiSquare,

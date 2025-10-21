@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { Spinner } from '@nextui-org/react';
+import { Spinner } from '@heroui/react';
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';

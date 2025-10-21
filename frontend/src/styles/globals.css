@@ -93,10 +93,6 @@
    ============================================ */
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   html {
     @apply antialiased;
     -webkit-font-smoothing: antialiased;

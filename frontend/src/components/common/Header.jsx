@@ -13,7 +13,7 @@ import {
   DropdownItem,
   Avatar,
   Link as NextUILink
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { FiMic, FiSun, FiMoon, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router } from 'react-router-dom';
-import { NextUIProvider } from '@nextui-org/react';
+import { HeroUIProvider } from '@heroui/react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Providers
@@ -24,7 +24,7 @@ function App() {
     <ErrorBoundary>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <ThemeProvider>
-          <NextUIProvider>
+          <HeroUIProvider>
             <AuthProvider>
               <MeetingProvider>
                 <Router>
@@ -32,7 +32,7 @@ function App() {
                 </Router>
               </MeetingProvider>
             </AuthProvider>
-          </NextUIProvider>
+          </HeroUIProvider>
         </ThemeProvider>
       </GoogleOAuthProvider>
     </ErrorBoundary>

@@ -5,7 +5,7 @@ import {
   Button, 
   Progress,
   Chip
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { FiMic, FiSquare, FiAlertCircle } from 'react-icons/fi';
 import { useMeeting } from '../../contexts/MeetingContext';
 

@@ -7,7 +7,7 @@ import {
   Button,
   Divider,
   Chip
-} from '@nextui-org/react';
+} from '@heroui/react';
 import {
   FiMic,
   FiClock,
@@ -118,8 +118,32 @@ const DashboardPage = () => {
           </Button>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Empty State */}
+        {meetings.length === 0 && !loading && (
+          <Card>
+            <CardBody className="text-center py-16">
+              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FiMic size={48} className="text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">No meetings yet</h3>
+              <p className="text-default-500 mb-6 max-w-md mx-auto">
+                Start by recording your first meeting. Your AI-powered transcription and summary will be ready in minutes.
+              </p>
+              <Button
+                color="primary"
+                size="lg"
+                startContent={<FiPlus size={20} />}
+                onPress={handleNewRecording}
+              >
+                Record Your First Meeting
+              </Button>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Statistics Cards - Only show when there are meetings */}
+        {meetings.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
@@ -182,9 +206,10 @@ const DashboardPage = () => {
             </CardBody>
           </Card>
         </div>
+        )}
 
         {/* Failed Meetings Alert */}
-        {stats.failed > 0 && (
+        {meetings.length > 0 && stats.failed > 0 && (
           <Card className="border-danger/20 bg-danger/5">
             <CardBody>
               <div className="flex items-start gap-3">
@@ -203,7 +228,8 @@ const DashboardPage = () => {
         )}
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {meetings.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Meetings List - Left Column (3/4) */}
           <div className="lg:col-span-3 space-y-6">
             {/* Search and Filters */}
@@ -241,20 +267,47 @@ const DashboardPage = () => {
                 <h3 className="text-lg font-semibold">Categories</h3>
               </CardHeader>
               <Divider />
-              <CardBody className="gap-3">
+              <CardBody className="gap-3 max-h-80 overflow-y-auto">
                 {Object.entries(categoryCounts).length > 0 ? (
-                  Object.entries(categoryCounts).map(([category, count]) => (
+                  <>
                     <div
-                      key={category}
-                      className="flex items-center justify-between p-2 hover:bg-default-100 rounded-lg cursor-pointer transition-colors"
-                      onClick={() => setSelectedCategory(category)}
+                      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                        selectedCategory === 'ALL'
+                          ? 'bg-primary/10 border border-primary/20'
+                          : 'hover:bg-default-100'
+                      }`}
+                      onClick={() => setSelectedCategory('ALL')}
                     >
-                      <span className="text-sm font-medium">{category}</span>
-                      <Chip size="sm" variant="flat" color="primary">
-                        {count}
+                      <span className="text-sm font-medium">All Categories</span>
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        color={selectedCategory === 'ALL' ? 'primary' : 'default'}
+                      >
+                        {stats.total}
                       </Chip>
                     </div>
-                  ))
+                    {Object.entries(categoryCounts).map(([category, count]) => (
+                      <div
+                        key={category}
+                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedCategory === category
+                            ? 'bg-primary/10 border border-primary/20'
+                            : 'hover:bg-default-100'
+                        }`}
+                        onClick={() => setSelectedCategory(category)}
+                      >
+                        <span className="text-sm font-medium">{category}</span>
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          color={selectedCategory === category ? 'primary' : 'default'}
+                        >
+                          {count}
+                        </Chip>
+                      </div>
+                    ))}
+                  </>
                 ) : (
                   <p className="text-center text-default-500 text-sm py-4">
                     No meetings yet
@@ -316,28 +369,6 @@ const DashboardPage = () => {
             </Card>
           </div>
         </div>
-
-        {/* Empty State */}
-        {meetings.length === 0 && !loading && (
-          <Card>
-            <CardBody className="text-center py-16">
-              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FiMic size={48} className="text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">No meetings yet</h3>
-              <p className="text-default-500 mb-6 max-w-md mx-auto">
-                Start by recording your first meeting. Your AI-powered transcription and summary will be ready in minutes.
-              </p>
-              <Button
-                color="primary"
-                size="lg"
-                startContent={<FiPlus size={20} />}
-                onPress={handleNewRecording}
-              >
-                Record Your First Meeting
-              </Button>
-            </CardBody>
-          </Card>
         )}
       </div>
     </div>

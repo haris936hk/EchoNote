@@ -1,4 +1,4 @@
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Button } from '@nextui-org/react';
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Button } from '@heroui/react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiMic, FiGrid, FiList } from 'react-icons/fi';
 import UserMenu from '../user/UserMenu';

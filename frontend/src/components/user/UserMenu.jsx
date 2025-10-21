@@ -6,7 +6,7 @@ import {
   DropdownSection,
   Avatar,
   User
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';

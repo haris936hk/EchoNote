@@ -1,4 +1,4 @@
-const prisma = require('../config/database');
+const { prisma } = require('../config/database');
 const audioService = require('./audio.service');
 const transcriptionService = require('./transcription.service');
 const nlpService = require('./nlp.service');

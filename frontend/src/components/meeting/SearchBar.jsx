@@ -1,4 +1,4 @@
-import { Input, Button } from '@nextui-org/react';
+import { Input, Button } from '@heroui/react';
 import { FiSearch, FiX } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 

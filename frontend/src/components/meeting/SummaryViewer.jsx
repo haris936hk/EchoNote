@@ -7,7 +7,7 @@ import {
   Accordion,
   AccordionItem,
   Chip
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { 
   FiFileText, 
   FiCheckCircle, 

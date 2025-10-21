@@ -3,7 +3,12 @@
     "allow": [
       "Bash(pip install:*)",
       "Bash(python:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(find:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npm run prisma:generate:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

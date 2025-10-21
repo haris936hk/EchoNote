@@ -317,7 +317,7 @@ export const initGoogleAuth = () => {
 
     try {
       window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
         callback: () => {}, // Callback handled by component
         auto_select: false,
         cancel_on_tap_outside: true

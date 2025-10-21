@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Divider } from '@nextui-org/react';
+import { Divider } from '@heroui/react';
 import { FiGithub, FiMail, FiHeart } from 'react-icons/fi';
 
 const Footer = () => {

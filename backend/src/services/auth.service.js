@@ -1,6 +1,6 @@
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
-const prisma = require('../config/database');
+const { prisma } = require('../config/database');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -53,7 +53,7 @@ async function authenticateWithGoogle(googleToken) {
         data: {
           name: googleProfile.name,
           picture: googleProfile.picture,
-          lastLogin: new Date()
+          lastLoginAt: new Date()
         }
       });
       console.log(`✅ User logged in: ${user.email}`);
@@ -65,8 +65,7 @@ async function authenticateWithGoogle(googleToken) {
           name: googleProfile.name,
           picture: googleProfile.picture,
           googleId: googleProfile.googleId,
-          emailVerified: googleProfile.emailVerified,
-          lastLogin: new Date()
+          lastLoginAt: new Date()
         }
       });
       console.log(`✅ New user created: ${user.email}`);

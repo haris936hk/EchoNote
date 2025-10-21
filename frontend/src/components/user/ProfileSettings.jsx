@@ -8,7 +8,7 @@ import {
   Switch,
   Select,
   SelectItem
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { 
   FiUser, 
   FiMail, 

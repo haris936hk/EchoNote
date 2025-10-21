@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Pagination } from '@nextui-org/react';
+import { Button, Pagination } from '@heroui/react';
 import { FiGrid, FiList } from 'react-icons/fi';
 import MeetingCard from './MeetingCard';
 import { SkeletonLoader } from '../common/Loader';

@@ -10,8 +10,8 @@
 export const APP_NAME = 'EchoNote';
 export const APP_VERSION = '1.0.0';
 export const APP_DESCRIPTION = 'AI-powered meeting transcription and summarization';
-export const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const APP_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
+export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // ============================================
 // RECORDING LIMITS
@@ -451,16 +451,16 @@ export const HTTP_STATUS = {
 // ============================================
 
 export const ENVIRONMENT = {
-  isDevelopment: import.meta.env.DEV,
-  isProduction: import.meta.env.PROD,
-  mode: import.meta.env.MODE
+  isDevelopment: process.env.NODE_ENV === 'development',
+  isProduction: process.env.NODE_ENV === 'production',
+  mode: process.env.NODE_ENV || 'development'
 };
 
 // ============================================
 // GOOGLE OAUTH
 // ============================================
 
-export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 // ============================================
 // EXPORT ALL

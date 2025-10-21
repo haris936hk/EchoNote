@@ -7,7 +7,7 @@ import {
   Tabs,
   Tab,
   Chip
-} from '@nextui-org/react';
+} from '@heroui/react';
 import {
   FiPlus,
   FiFilter,

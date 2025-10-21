@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Button, Card, CardBody } from '@nextui-org/react';
+import { Button, Card, CardBody } from '@heroui/react';
 import { FiAlertTriangle, FiRefreshCw } from 'react-icons/fi';
 
 class ErrorBoundary extends Component {
