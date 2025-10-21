@@ -1,5 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { Spinner } from '@nextui-org/react';
+
+// Components
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import MainLayout from './components/layout/MainLayout';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -11,57 +16,24 @@ import MeetingDetailPage from './pages/MeetingDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-// Layout Components
-import MainLayout from './components/layout/MainLayout';
-
-/**
- * Protected Route Component
- * Redirects to login if user is not authenticated
- */
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  // Show nothing while loading
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-default-500">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Redirect to login if not authenticated
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
-
 /**
  * Public Route Component
  * Redirects to dashboard if user is already authenticated
  */
 const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  // Show nothing while loading
+  // Show loading spinner while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-default-500">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" label="Loading..." color="primary" />
       </div>
     );
   }
 
   // Redirect to dashboard if already authenticated
-  if (user) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
