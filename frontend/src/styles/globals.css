@@ -1,0 +1,596 @@
+/**
+ * EchoNote Global Styles
+ * Main stylesheet with Tailwind CSS and custom utilities
+ */
+
+/* ============================================
+   TAILWIND BASE, COMPONENTS, UTILITIES
+   ============================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   CSS VARIABLES (THEME COLORS)
+   ============================================ */
+
+:root {
+  /* Primary colors */
+  --color-primary: 17 94 250;
+  --color-primary-foreground: 255 255 255;
+
+  /* Secondary colors */
+  --color-secondary: 156 163 175;
+  --color-secondary-foreground: 17 24 39;
+
+  /* Success colors */
+  --color-success: 34 197 94;
+  --color-success-foreground: 255 255 255;
+
+  /* Warning colors */
+  --color-warning: 234 179 8;
+  --color-warning-foreground: 17 24 39;
+
+  /* Danger colors */
+  --color-danger: 239 68 68;
+  --color-danger-foreground: 255 255 255;
+
+  /* Background colors */
+  --color-background: 255 255 255;
+  --color-foreground: 17 24 39;
+
+  /* Content colors */
+  --color-content1: 255 255 255;
+  --color-content2: 249 250 251;
+  --color-content3: 243 244 246;
+  --color-content4: 229 231 235;
+
+  /* Default/muted colors */
+  --color-default: 229 231 235;
+  --color-default-foreground: 55 65 81;
+  --color-default-100: 249 250 251;
+  --color-default-200: 243 244 246;
+  --color-default-300: 229 231 235;
+  --color-default-400: 156 163 175;
+  --color-default-500: 107 114 128;
+  --color-default-600: 75 85 99;
+
+  /* Divider */
+  --color-divider: 229 231 235;
+
+  /* Focus ring */
+  --color-focus: 17 94 250;
+
+  /* Overlay */
+  --overlay-opacity: 0.5;
+}
+
+/* Dark theme variables */
+.dark {
+  --color-background: 0 0 0;
+  --color-foreground: 255 255 255;
+
+  --color-content1: 24 24 27;
+  --color-content2: 39 39 42;
+  --color-content3: 63 63 70;
+  --color-content4: 82 82 91;
+
+  --color-default: 63 63 70;
+  --color-default-foreground: 228 228 231;
+  --color-default-100: 39 39 42;
+  --color-default-200: 39 39 42;
+  --color-default-300: 63 63 70;
+  --color-default-400: 113 113 122;
+  --color-default-500: 161 161 170;
+  --color-default-600: 212 212 216;
+
+  --color-divider: 63 63 70;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-default-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-default-300 rounded-lg;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-default-400;
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-content2;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-default-300;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-default-400;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Focus visible */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+}
+
+/* ============================================
+   CUSTOM COMPONENTS
+   ============================================ */
+
+@layer components {
+  /* Container */
+  .container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:scale-[1.02];
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-md;
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+  }
+
+  .btn-outline {
+    @apply border border-default-300 bg-transparent hover:bg-default-100;
+  }
+
+  /* Input base */
+  .input {
+    @apply flex w-full rounded-lg border border-default-300 bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-default-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors;
+  }
+
+  .badge-primary {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .badge-success {
+    @apply bg-success/10 text-success;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .badge-danger {
+    @apply bg-danger/10 text-danger;
+  }
+}
+
+/* ============================================
+   CUSTOM UTILITIES
+   ============================================ */
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+
+  .bg-gradient-conic {
+    background-image: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+  }
+
+  /* Animation utilities */
+  .animate-in {
+    animation: animate-in 0.5s ease-out;
+  }
+
+  .animate-out {
+    animation: animate-out 0.5s ease-in;
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes animate-out {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-default-200 rounded;
+  }
+
+  .dark .skeleton {
+    @apply bg-default-300;
+  }
+
+  /* Blur effects */
+  .blur-sm {
+    backdrop-filter: blur(4px);
+  }
+
+  .blur-md {
+    backdrop-filter: blur(8px);
+  }
+
+  .blur-lg {
+    backdrop-filter: blur(16px);
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(17, 94, 250, 0.7);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 10px rgba(17, 94, 250, 0);
+  }
+}
+
+/* ============================================
+   AUDIO PLAYER STYLES
+   ============================================ */
+
+audio {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+}
+
+audio::-webkit-media-controls-panel {
+  @apply bg-content2;
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-mute-button {
+  @apply text-primary;
+}
+
+audio::-webkit-media-controls-timeline {
+  @apply bg-default-200;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Mobile-first breakpoints */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible for keyboard navigation */
+.focus-visible-only:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px;
+  }
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+}
+
+.spinner-lg {
+  @apply w-8 h-8;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR STYLES
+   ============================================ */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--color-default-300)) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-default-300 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-default-400;
+}
+
+/* ============================================
+   UTILITY CLASSES FOR COMMON PATTERNS
+   ============================================ */
+
+/* Truncate text */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Safe area insets for mobile */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ============================================
+   NEXTUI OVERRIDES (if needed)
+   ============================================ */
+
+/* Customize NextUI components */
+.nextui-override {
+  /* Add any NextUI-specific overrides here */
+}
