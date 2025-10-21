@@ -689,7 +689,7 @@ export const sanitizeFilename = (filename) => {
 // EXPORT ALL
 // ============================================
 
-export default {
+const validators = {
   // Meeting validation
   validateMeetingTitle,
   validateMeetingDescription,
@@ -735,3 +735,5 @@ export default {
   sanitizeString,
   sanitizeFilename
 };
+
+export default validators;
