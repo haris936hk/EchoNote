@@ -8,7 +8,8 @@
       "Bash(find:*)",
       "Bash(npx prisma generate:*)",
       "Bash(npm run prisma:generate:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

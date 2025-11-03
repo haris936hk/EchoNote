@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useRef } from 'react';
-import axios from 'axios';
 import RecordRTC from 'recordrtc';
+import api from '../services/api';
 
 const MeetingContext = createContext(null);
 
@@ -34,7 +34,7 @@ export const MeetingProvider = ({ children }) => {
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
 
-      const { data } = await axios.get(`http://localhost:5000/api/meetings?${params}`);
+      const { data } = await api.get(`/meetings?${params}`);
       setMeetings(data.data);
       return { success: true, data: data.data };
     } catch (error) {
@@ -49,7 +49,7 @@ export const MeetingProvider = ({ children }) => {
   const fetchMeeting = async (id) => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`http://localhost:5000/api/meetings/${id}`);
+      const { data } = await api.get(`/meetings/${id}`);
       setCurrentMeeting(data.data);
       return { success: true, data: data.data };
     } catch (error) {
@@ -140,7 +140,7 @@ export const MeetingProvider = ({ children }) => {
         formData.append('description', meetingData.description);
       }
 
-      const { data } = await axios.post('http://localhost:5000/api/meetings/upload', formData, {
+      const { data } = await api.post('/meetings/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -162,7 +162,7 @@ export const MeetingProvider = ({ children }) => {
   const updateMeeting = async (id, updates) => {
     try {
       setLoading(true);
-      const { data } = await axios.put(`http://localhost:5000/api/meetings/${id}`, updates);
+      const { data } = await api.put(`/meetings/${id}`, updates);
       
       // Update in list
       setMeetings((prev) =>
@@ -187,7 +187,7 @@ export const MeetingProvider = ({ children }) => {
   const deleteMeeting = async (id) => {
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:5000/api/meetings/${id}`);
+      await api.delete(`/meetings/${id}`);
       
       // Remove from list
       setMeetings((prev) => prev.filter((meeting) => meeting.id !== id));

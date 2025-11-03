@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Senator Josh Hawley confronted Mark Zuckerberg during a Senate hearing on child safety, accusing Meta and Instagram of harming teenagers, especially girls, through exposure to harmful content and mental health impacts. Zuckerberg defended Meta’s efforts to build safety tools but did not accept personal or financial responsibility, apologize directly, or commit to compensating victims.",
+  "keyDecisions": "No major decisions recorded",
+  "actionItems": [
+    {
+      "task": "Continue developing and improving industry-leading tools to detect and remove harmful content on social media platforms.",
+      "assignee": "Mark Zuckerberg / Meta",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Evaluate internal accountability regarding child safety data and employee oversight related to content exposure.",
+      "assignee": "Meta leadership",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Meta is expected to maintain or enhance its safety initiatives, while further congressional scrutiny or legal discussions around platform accountability and child protection are likely to follow.",
+  "keyTopics": ["child safety", "mental health", "corporate responsibility", "content moderation", "victim compensation"],
+  "sentiment": "negative"
+}
