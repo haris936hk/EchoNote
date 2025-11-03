@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "James and Joanna from Raleigh, North Carolina pitched their Latin-inspired gourmet French fry business, Bueno Papa, on Shark Tank seeking $400,000 for 7% equity. After strong interest and negotiation, they accepted an offer from Robert for $400,000 in exchange for 19% equity.",
+  "keyDecisions": "Robert invested $400,000 for 19% equity in Bueno Papa.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement with Robert for $400,000 at 19% equity.",
+      "assignee": "James and Joanna",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Open new store in Wynwood, Miami as planned.",
+      "assignee": "James and Joanna",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Continue franchise expansion following successful initial sales.",
+      "assignee": "James and Joanna",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "James and Joanna will proceed with Robert’s investment, open their Miami location, and expand the Bueno Papa franchise network to grow their brand nationally.",
+  "keyTopics": ["business growth", "franchising", "restaurant expansion", "investment negotiation", "Latin-inspired cuisine"],
+  "sentiment": "positive"
+}

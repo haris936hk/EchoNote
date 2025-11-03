@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Entrepreneur Zach from Dallas, Texas, pitched his company PermaPlug on Shark Tank, seeking $350,000 for 15% equity. After strong sales performance and a compelling pitch, Lori Greiner offered $350,000 for 20% equity plus a $1 royalty until payback, which Zach accepted.",
+  "keyDecisions": "Zach accepted Lori Greiner’s offer of $350,000 for 20% equity and a $1 royalty until repayment.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement and partnership terms with Lori Greiner",
+      "assignee": "Zach",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Scale up production and inventory management using new investment capital",
+      "assignee": "Zach",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Leverage Lori’s retail and distribution network to expand market reach",
+      "assignee": "Zach and Lori Greiner",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Zach will work with Lori Greiner to finalize the deal, increase production, and expand distribution, leveraging her expertise to bring PermaPlug to wider retail and commercial markets.",
+  "keyTopics": ["investment offer", "sales performance", "marketing strategy", "inventory management", "business growth"],
+  "sentiment": "positive"
+}
