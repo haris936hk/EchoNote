@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "13-year-old entrepreneur Sophie Overton pitched her company, Wise Pocket Products, on Shark Tank seeking $30,000 for 15% equity. She impressed the sharks with her product innovation—socks and leggings with patent-pending pockets—and her negotiating skills, ultimately securing $35,000 for 25% equity from Lori and Damon.",
+  "keyDecisions": "Sophie accepted an investment deal of $35,000 for 25% equity from Lori and Damon.",
+  "actionItems": [
+    {
+      "task": "Streamline production to increase output beyond 100 units per month",
+      "assignee": "Sophie Overton",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "License Wise Pocket Products when production is scaled",
+      "assignee": "Sophie Overton",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Sophie will use the investment to scale production and explore licensing opportunities to expand the reach of Wise Pocket Products.",
+  "keyTopics": ["socks", "pockets", "kid entrepreneur", "product innovation", "investment negotiation"],
+  "sentiment": "positive"
+}
