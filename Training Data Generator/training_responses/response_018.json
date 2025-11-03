@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Entrepreneurs Mark and Michael pitched Knife Aid, a mail-in knife sharpening service, seeking $400,000 for 15% equity. After several offers and negotiations among the Sharks, Lori Greiner and Rohan Oza secured a deal for $500,000 for 20%, following an intense bidding and hallway negotiation.",
+  "keyDecisions": "Knife Aid accepted a joint offer from Lori Greiner and Rohan Oza for $500,000 in exchange for 20% equity.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement with Lori Greiner and Rohan Oza",
+      "assignee": "Mark and Michael",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Enhance brand messaging and outreach strategy for U.S. market",
+      "assignee": null,
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Pursue retail partnerships with stores like Williams Sonoma for co-branded sharpening services",
+      "assignee": null,
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Mark and Michael will collaborate with Lori and Rohan to refine U.S. marketing and retail strategy, scale Knife Aid’s operations, and formalize the partnership terms post-show.",
+  "keyTopics": ["knife sharpening", "investment deal", "U.S. market expansion"],
+  "sentiment": "positive"
+}
