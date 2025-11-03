@@ -353,13 +353,7 @@ def process_youtube_url(youtube_url, category="General"):
         print(f"\n⚠️  WARNING: This transcript is VERY LONG ({word_count} words)")
         print(f"  Recommended: Use videos 5-15 minutes long")
         print(f"  This video: {duration}")
-        print(f"\nOptions:")
-        print(f"  1. Continue anyway (may take 2-3 minutes to process)")
-        print(f"  2. Skip this video")
-        response = input("\nContinue? (yes/no): ").strip().lower()
-        if response not in ['yes', 'y']:
-            print("Skipped.")
-            return False
+        print(f"  Processing anyway (may take 2-3 minutes)...")
     
     # Run NLP processor
     result = run_nlp_processor(transcript)
@@ -428,14 +422,8 @@ def main():
     
     # Process
     success = process_youtube_url(youtube_url, category)
-    
-    if success:
-        # Ask if user wants to process another
-        print("\nProcess another video? (yes/no): ", end="")
-        response = input().strip().lower()
-        if response in ['yes', 'y']:
-            main()
-    else:
+
+    if not success:
         sys.exit(1)
 
 if __name__ == '__main__':
