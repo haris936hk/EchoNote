@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Dinesh Taripali, co-founder of Incredible Eats, pitched his edible cutlery company to the Sharks, seeking $500,000 for 7% equity. After discussions on cost, scalability, and market strategy, Lori Greiner ultimately invested $500,000 for 15% equity, securing a deal.",
+  "keyDecisions": "Lori Greiner agreed to invest $500,000 for 15% equity in Incredible Eats.",
+  "actionItems": [
+    {
+      "task": "Scale production and reduce per-unit cost of edible cutlery from 20 cents to 15 cents or lower.",
+      "assignee": "Dinesh Taripali",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Develop retail packaging and marketing materials to emphasize the product’s edible and eco-friendly nature.",
+      "assignee": "Dinesh Taripali",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Expand distribution to both food service and grocery retail channels with Lori Greiner’s guidance.",
+      "assignee": "Dinesh Taripali and Lori Greiner",
+      "deadline": null,
+      "priority": "high"
+    }
+  ],
+  "nextSteps": "Dinesh and Lori will collaborate to scale production, refine product marketing, and expand into retail and food service markets while leveraging Lori’s business network for growth.",
+  "keyTopics": ["edible cutlery", "sustainability", "cost and scalability", "investment negotiation", "retail expansion"],
+  "sentiment": "positive"
+}
