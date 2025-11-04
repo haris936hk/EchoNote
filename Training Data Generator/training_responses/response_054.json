@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Robbie Adams pitched his West Australian app, Mobilizer, to the Shark Tank investors seeking $1 million for 25% equity. The app aims to help employees and employers track work versus personal mobile usage. Despite initial interest, all sharks ultimately decided not to invest, citing lack of market validation and consumer need.",
+  "keyDecisions": "All sharks decided not to invest in Mobilizer.",
+  "actionItems": [
+    {
+      "task": "Validate market need by identifying real paying customers before further investment",
+      "assignee": "Robbie Adams",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Explore alternative applications for existing software to salvage the investment",
+      "assignee": "Robbie Adams",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Robbie Adams should focus on market research and refining the business model, potentially pivoting the software to alternative uses or customer segments.",
+  "keyTopics": ["Mobilizer", "customer", "market validation", "investment", "subscription model"],
+  "sentiment": "negative"
+}

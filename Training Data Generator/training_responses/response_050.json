@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Fergus, a 26-year-old entrepreneur, pitched his startup 'Find My Future' seeking $300,000 for a 25% stake to develop a career guidance app for students. The Sharks expressed concern that the product does not yet exist, costs are inflated, and Fergus lacks a technical co-founder. Despite positive energy and intent, no investments were made.",
+  "keyDecisions": "No major decisions recorded",
+  "actionItems": [
+    {
+      "task": "Find a qualified tech co-founder to help build and validate the app concept",
+      "assignee": "Fergus",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Test the app concept with a smaller $25,000 prototype before seeking large investment",
+      "assignee": "Fergus",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Consult additional mentors and experienced professionals in the tech and education industries",
+      "assignee": "Fergus",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Fergus should refine his business strategy, validate the market with a minimal viable product, and seek a technical partner before re-approaching investors.",
+  "keyTopics": ["business", "student", "tech", "school", "investment"],
+  "sentiment": "mixed"
+}

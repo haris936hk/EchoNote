@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "AES Day, an entrepreneur from Nashville, Tennessee, pitched his company Flora on Shark Tank, seeking $300,000 for 10% equity. Flora offers a patented plant sensor called the Flora Pod and a companion app that helps users care for plants by monitoring moisture, light, temperature, and humidity. After negotiations, AES secured a deal with a Shark for $300,000 in exchange for 15% equity, 5% advisory shares, and a $2 royalty per unit until $300,000 is repaid.",
+  "keyDecisions": "Deal made for $300,000 investment with 15% equity, 5% advisory shares, and $2 per-unit royalty until repayment.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement with the Shark and initiate royalty repayment structure.",
+      "assignee": "AES Day",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Scale production to reduce manufacturing cost from $28 per unit to targeted lower cost for next batch.",
+      "assignee": "AES Day",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Continue improving Flora app and expand subscription base.",
+      "assignee": "AES Day",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "AES Day will move forward with the investment partnership, execute manufacturing improvements, and leverage the Shark’s advisory support to scale sales and subscriptions.",
+  "keyTopics": ["plant care technology", "investment negotiation", "subscription model", "manufacturing cost reduction", "entrepreneurship"],
+  "sentiment": "positive"
+}

@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Emma and Miles pitched their company, FinalStraw, on Shark Tank seeking $625,000 for 5% equity. The company offers a reusable, collapsible straw to address plastic pollution, with strong early sales through Kickstarter and pre-sales. Sharks expressed concerns over market adoption, valuation, and competition, resulting in no deal being finalized.",
+  "keyDecisions": "No major decisions recorded; no Shark invested in FinalStraw during this episode.",
+  "actionItems": [
+    {
+      "task": "Continue fulfilling Kickstarter orders and manage pre-sales",
+      "assignee": "Emma and Miles",
+      "deadline": "November (as per transcript)",
+      "priority": "high"
+    },
+    {
+      "task": "Develop marketing and education campaigns to encourage consumer adoption",
+      "assignee": "Emma and Miles",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Monitor competition and consider pricing strategies for scalability",
+      "assignee": "Emma and Miles",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Emma and Miles will continue fulfilling Kickstarter orders, focus on growing their consumer base, and refine their business strategy to attract potential investors in the future.",
+  "keyTopics": ["reusable straws", "investment offer", "market adoption", "Kickstarter sales", "competition"],
+  "sentiment": "positive"
+}

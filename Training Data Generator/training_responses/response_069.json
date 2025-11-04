@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Entrepreneur Maxwell Cohen presented AfreSheet, a peel-away disposable bed sheet, seeking $100,000 for 20% equity. The Sharks expressed concerns over the comfort and market fit of the polyester sheets, with Lori Greiner and others ultimately deciding not to invest due to low consumer adoption despite institutional interest.",
+  "keyDecisions": "All Sharks decided not to invest in AfreSheet.",
+  "actionItems": [
+    {
+      "task": "Explore alternative materials to improve comfort and breathability of AfreSheet",
+      "assignee": "Maxwell Cohen",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Focus marketing and sales on institutional clients like summer camps, elderly homes, and hospitals",
+      "assignee": "Maxwell Cohen",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Maxwell Cohen will refine the product for better comfort and continue pursuing institutional markets while awaiting incoming orders from initial sales.",
+  "keyTopics": ["AfreSheet product features", "market fit", "sales and distribution", "material comfort", "institutional applications"],
+  "sentiment": "mixed"
+}

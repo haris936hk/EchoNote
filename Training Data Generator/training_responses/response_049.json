@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Jason Hernandez, from San Diego, California, pitched his product 'Pooch Selfie' to the Sharks, seeking $100,000 for 20% equity. The product is a smartphone attachment designed to help pet owners take better selfies with their dogs. After sharing his sales figures, background, and passion for the product, Jason secured a deal with Daymond John for $100,000 in exchange for 33.3% equity.",
+  "keyDecisions": "Daymond John agreed to invest $100,000 for 33.3% equity in Pooch Selfie.",
+  "actionItems": [
+    {
+      "task": "Redesign Pooch Selfie for improved compatibility with various smartphones.",
+      "assignee": "Jason Hernandez",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Redo the product packaging to increase shelf appeal and customer understanding.",
+      "assignee": "Jason Hernandez",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Develop and launch a follow-up version of Pooch Selfie that holds a treat instead of a tennis ball.",
+      "assignee": "Jason Hernandez",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Jason will begin working with Daymond John to refine the product design, improve packaging, and explore expansion opportunities through retail and new product variations.",
+  "keyTopics": ["dog", "selfie", "product design", "retail sales", "investment deal"],
+  "sentiment": "positive"
+}

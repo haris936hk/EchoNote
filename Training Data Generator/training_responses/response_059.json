@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Greg and James pitched their company 'Chalkless,' a revolutionary grip enhancement technology designed to improve athletic performance by removing oils from the skin. They sought $400,000 for 4% equity and ultimately secured a deal with Kevin O’Leary and guest shark Rashan for $400,000 under a royalty structure tied to unit sales and long-term residuals.",
+  "keyDecisions": "The entrepreneurs accepted a joint investment offer from Kevin O’Leary and Rashan for $400,000 with a $2.50 per unit royalty until $4 million in revenue is reached, then $0.25 per unit in perpetuity, plus 4% equity.",
+  "actionItems": [
+    {
+      "task": "Distribute small product packages to 100 athletes to drive brand exposure and endorsements.",
+      "assignee": "Greg and James",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Leverage Kevin’s social media team to reduce customer acquisition costs and increase awareness.",
+      "assignee": "Kevin O’Leary",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Use Rashan’s connections to introduce Chalkless to professional athletes for testing and promotion.",
+      "assignee": "Rashan",
+      "deadline": null,
+      "priority": "high"
+    }
+  ],
+  "nextSteps": "The Chalkless founders will collaborate with Kevin and Rashan to scale marketing efforts, get the product into athletes’ hands, and build brand credibility through social media and professional endorsements.",
+  "keyTopics": ["grip technology", "athletic performance", "investment negotiation", "product demonstration", "marketing strategy"],
+  "sentiment": "positive"
+}
