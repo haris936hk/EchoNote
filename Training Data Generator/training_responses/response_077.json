@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Daniel Wood and David Marinski presented their innovation, the Self-Balancing Unicycle (SBU), to the Sharks, seeking $300,000 for 10% equity. After demonstrating the product and discussing its technical details, patents, and sales performance, they secured a joint investment deal with two Sharks offering $300,000 for 33% equity.",
+  "keyDecisions": "A deal was made with two Sharks for $300,000 in exchange for 33% equity.",
+  "actionItems": [
+    {
+      "task": "Finalize partnership and investment agreement with the Sharks.",
+      "assignee": "Daniel Wood and David Marinski",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Continue production of the first 100 SBU units and ensure quality assurance with the overseas factory.",
+      "assignee": "Daniel Wood and David Marinski",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Explore further licensing opportunities for proprietary electric vehicle controller technology.",
+      "assignee": "Daniel Wood and David Marinski",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Daniel and David will move forward with the Shark partnership, scale up production, and pursue additional licensing deals for their embedded controller technology.",
+  "keyTopics": ["electric unicycle", "Shark Tank pitch", "investment deal", "manufacturing", "technology licensing"],
+  "sentiment": "positive"
+}
