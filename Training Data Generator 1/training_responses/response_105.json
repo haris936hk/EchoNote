@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Entrepreneurs Adam Cookson and Craig Bicki from Denver, Colorado, pitched TekDry, a machine that restores water-damaged electronic devices using heat and vacuum technology. They sought $500,000 for 5% equity, valuing their company at $10 million. After several Sharks declined due to valuation and market risk concerns, Kevin O'Leary offered a $500,000 loan at 13% interest with a 5% equity warrant, which the entrepreneurs accepted.",
+  "keyDecisions": "Adam Cookson and Craig Bicki accepted Kevin O'Leary's offer of a $500,000 loan at 13% interest with a 5% equity warrant, repayable in 36 months.",
+  "actionItems": [
+    {
+      "task": "Finalize loan and equity warrant agreement with Kevin O'Leary.",
+      "assignee": "Adam Cookson and Craig Bicki",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Expand TekDry’s presence in additional retail stores as planned.",
+      "assignee": "Adam Cookson and Craig Bicki",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Develop and implement national marketing strategy for TekDry’s online services.",
+      "assignee": "Adam Cookson and Craig Bicki",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "The founders will proceed with Kevin O'Leary’s financing deal, continue scaling retail installations from 82 to 600 stores, and strengthen online marketing to grow TekDry’s customer base.",
+  "keyTopics": ["water damage repair", "retail expansion", "valuation", "financing", "technology innovation"],
+  "sentiment": "positive"
+}
