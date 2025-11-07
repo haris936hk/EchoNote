@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Nick Taranto and Josh Hicks, founders of Plated, pitched their meal-kit delivery company to the Sharks, seeking $500,000 for 4% equity at a $12.5 million valuation. After discussing business metrics, scalability, and customer value, one Shark offered $500,000 at a $9 million valuation (approximately 5.5% equity) with advisory shares, which the founders considered on the spot.",
+  "keyDecisions": "One Shark offered $500,000 at a $9 million valuation with advisory shares; final deal acceptance not confirmed during the meeting.",
+  "actionItems": [
+    {
+      "task": "Send free Plated trial to interested Sharks for feedback",
+      "assignee": "Nick Taranto and Josh Hicks",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Evaluate Shark’s offer and confirm decision on investment terms",
+      "assignee": "Nick Taranto and Josh Hicks",
+      "deadline": null,
+      "priority": "high"
+    }
+  ],
+  "nextSteps": "Plated founders to review the investment offer, potentially accept the deal, and continue scaling their meal-kit delivery business nationwide.",
+  "keyTopics": ["business pitch", "valuation", "meal delivery model", "customer acquisition", "investment negotiation"],
+  "sentiment": "positive"
+}

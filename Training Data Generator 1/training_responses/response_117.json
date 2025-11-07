@@ -1,0 +1,22 @@
+{
+  "executiveSummary": "Alexander Simone, an inventor from San Francisco, pitched his product 'ProntoBev'—a rapid wine chiller capable of cooling a bottle of wine by 20° in 30 seconds—to the Sharks, seeking $100,000 for 5% equity. After several Sharks declined due to valuation concerns, Kevin O'Leary offered $100,000 for 50%, which Alexander negotiated down. Ultimately, he secured a contingent deal with Mark Cuban for $100,000 for 25%, provided he raised another $100,000 from other investors.",
+  "keyDecisions": "Mark Cuban offered Alexander Simone $100,000 for 25% equity, contingent upon Alexander raising an additional $100,000.",
+  "actionItems": [
+    {
+      "task": "Raise an additional $100,000 in funding to fulfill contingent deal terms with Mark Cuban",
+      "assignee": "Alexander Simone",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Continue developing and refining ProntoBev for market readiness",
+      "assignee": "Alexander Simone",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Alexander must secure the additional $100,000 investment to finalize the deal with Mark Cuban and prepare ProntoBev for production and market launch.",
+  "keyTopics": ["wine", "product", "valuation", "investment", "temperature"],
+  "sentiment": "positive"
+}
+
