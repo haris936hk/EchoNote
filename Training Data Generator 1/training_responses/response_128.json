@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "JD Clarage and Charles Manning from XCraft pitched their innovative drone technology combining helicopter precision and airplane speed, seeking $500,000 for 20% equity. After multiple offers and a competitive bidding process, all five sharks collectively invested $1.5 million for 25% equity, forming a rare full-shark syndicate deal valuing the company at $6 million.",
+  "keyDecisions": "All five sharks agreed to invest collectively $1.5 million for 25% equity in XCraft at a $6 million valuation.",
+  "actionItems": [
+    {
+      "task": "Scale production of the X+1 drone to reduce manufacturing costs",
+      "assignee": "JD Clarage",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Complete development of the PhoneDrone product",
+      "assignee": "Charles Manning",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Collaborate with the shark investors to leverage their operational expertise and networks",
+      "assignee": null,
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "XCraft will begin scaling production of the X+1, finalize development of the PhoneDrone, and work with all five shark investors to operationalize and commercialize their drone technology.",
+  "keyTopics": ["drone innovation", "investment negotiation", "product development", "valuation", "collaboration"],
+  "sentiment": "positive"
+}
