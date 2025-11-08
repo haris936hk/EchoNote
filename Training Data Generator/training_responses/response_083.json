@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Jonathan from Minnesota pitched his company 'Snow in Seconds' to the Sharks, seeking $50,000 for 10%. The product creates realistic artificial snow instantly when mixed with water. After skepticism from several Sharks about its seasonality and lack of proprietary technology, Barbara Corcoran offered $50,000 for 33%, which Jonathan accepted.",
+  "keyDecisions": "Barbara Corcoran invested $50,000 for 33% equity in Snow in Seconds.",
+  "actionItems": [
+    {
+      "task": "Collaborate with Barbara Corcoran to expand Snow in Seconds into retail and seasonal markets.",
+      "assignee": "Jonathan",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Leverage Barbara's existing connections with holiday product distributors and retailers.",
+      "assignee": "Barbara Corcoran",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Jonathan will work with Barbara Corcoran to scale Snow in Seconds, aiming to increase retail presence and grow the business beyond its seasonal niche.",
+  "keyTopics": ["snow product", "seasonality", "sales performance", "retail distribution", "investment deal"],
+  "sentiment": "positive"
+}
