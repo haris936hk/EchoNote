@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Ben and Jen, co-founders of Toy Box, pitched their 3D printer designed for kids to the Sharks, seeking $150,000 for a 5% equity stake. After deliberations and multiple counteroffers, they accepted Kevin O’Leary’s deal for $150,000 in exchange for 13% equity plus 2% advisory shares.",
+  "keyDecisions": "Toy Box accepted Kevin O’Leary’s offer of $150,000 for 13% equity and 2% advisory shares.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement with Kevin O’Leary for $150,000, 13% equity, and 2% advisory shares",
+      "assignee": "Ben and Jen",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Begin discussions on potential licensing partnerships for branded toys (e.g., Disney, Minecraft, Marvel)",
+      "assignee": "Kevin O’Leary",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Continue expanding Toy Box’s toy library by adding 7–10 new toys per week",
+      "assignee": "Ben and Jen",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Toy Box will move forward with Kevin O’Leary as an investor, leveraging his business expertise and connections to pursue licensing opportunities and scale operations.",
+  "keyTopics": ["3D printing", "toy innovation", "investment offer", "licensing opportunity", "kids creativity"],
+  "sentiment": "positive"
+}

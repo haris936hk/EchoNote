@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Venezuelan sisters MAF and Coko pitched their frozen Latin American food brand, Toast-It, on Shark Tank, seeking $100,000 for 5% equity. After presenting their product’s strong retail presence and growth but facing concerns over low margins, they secured a deal with Daniel Lubetzky for $150,000 in exchange for 20% equity.",
+  "keyDecisions": "Daniel Lubetzky invested $150,000 for 20% equity in Toast-It.",
+  "actionItems": [
+    {
+      "task": "Optimize production processes with newly acquired machinery to improve margins.",
+      "assignee": null,
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Implement new packaging deal to reduce packaging costs by half.",
+      "assignee": null,
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Collaborate with Daniel Lubetzky to scale distribution and refine business strategy.",
+      "assignee": "MAF and Coko",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "MAF and Coko will partner with Daniel Lubetzky to grow Toast-It, enhance production efficiency, and improve margins for sustainable scaling.",
+  "keyTopics": ["investment deal", "product margins", "Latin American food", "retail distribution", "business growth"],
+  "sentiment": "positive"
+}

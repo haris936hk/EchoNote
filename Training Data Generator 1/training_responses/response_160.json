@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Entrepreneurs Adam Kalan and Matt Campbell pitched BottleKeeper, an insulated stainless-steel container designed to keep beer bottles cold and protected, seeking $1 million for 5% equity. Despite skepticism over their high valuation, they ultimately secured a deal from Lori Greiner and Mark Cuban for a $1 million investment with a $1.50 per unit royalty until $1.5 million is repaid, in exchange for 5% equity.",
+  "keyDecisions": "Lori Greiner and Mark Cuban agreed to invest $1 million jointly for 5% equity with a $1.50 per unit royalty until $1.5 million is recouped.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement with Lori Greiner and Mark Cuban based on negotiated royalty and equity terms",
+      "assignee": "Adam Kalan and Matt Campbell",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Prepare to expand retail distribution to meet demand from over 3,000 interested stores",
+      "assignee": "Adam Kalan and Matt Campbell",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "The entrepreneurs will formalize the investment deal with Lori and Mark and use the capital to scale production, enforce IP protection, and expand into retail markets.",
+  "keyTopics": ["valuation", "beer", "bottle", "royalty deal", "marketing spend"],
+  "sentiment": "positive"
+}
