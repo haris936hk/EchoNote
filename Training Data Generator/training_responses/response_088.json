@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Tracy and Glenn Baress pitched their product 'Sock Tabs' on Shark Tank, seeking $50,000 for 20% equity to prevent socks from getting lost in the laundry. After initial rejections from several sharks, Mark Cuban ultimately offered $50,000 for 30% contingent on approval from his Bombas team, which Tracy accepted.",
+  "keyDecisions": "Mark Cuban offered $50,000 for 30% equity in Sock Tabs, contingent upon agreement with his Bombas partners; Tracy accepted the offer.",
+  "actionItems": [
+    {
+      "task": "Coordinate with Mark Cuban's Bombas team to finalize the investment agreement.",
+      "assignee": "Tracy Baress",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Begin steps toward potential licensing deal with a sock or shoe manufacturer.",
+      "assignee": "Tracy and Glenn Baress",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Tracy and Glenn will work with Mark Cuban’s Bombas team to confirm the partnership terms and explore product licensing opportunities.",
+  "keyTopics": ["sock", "business", "investment", "product pitch", "licensing deal"],
+  "sentiment": "positive"
+}

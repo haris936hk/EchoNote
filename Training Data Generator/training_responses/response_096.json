@@ -1,0 +1,15 @@
+{
+  "executiveSummary": "Jimmy Kimmel and his sidekick Guillermo presented a humorous business pitch for 'Horse Pants' on Shark Tank, seeking $500,000 for 10% equity in their fictional company. The pitch combined comedy with a mock entrepreneurial presentation, culminating in a lighthearted acceptance of a $5 million offer and post-pitch banter about their 'success.'",
+  "keyDecisions": "A mock agreement was made to accept a $5 million offer for 10% equity in the 'Horse Pants' company.",
+  "actionItems": [
+    {
+      "task": "Tell Jimmy Kimmel’s mother to start making more horse pants.",
+      "assignee": "Jimmy Kimmel",
+      "deadline": null,
+      "priority": "low"
+    }
+  ],
+  "nextSteps": "Jimmy and Guillermo humorously plan to enjoy their fictional earnings and possibly invest in personal luxuries rather than continue the horse pants business.",
+  "keyTopics": ["horse pants", "entrepreneurship parody", "Shark Tank pitch", "investment", "comedy"],
+  "sentiment": "positive"
+}
