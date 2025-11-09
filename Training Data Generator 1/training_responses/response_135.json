@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Cassidy Crowley, a 10-year-old entrepreneur from Honolulu, Hawaii, presented her invention 'The Baby Toon' on Shark Tank. Seeking $50,000 for 50% equity, she impressed the sharks with her innovative and safe baby spoon design made from 100% soft silicone. Lori Greiner offered $50,000 for 50%, which Cassidy accepted, securing a partnership and investment.",
+  "keyDecisions": "Lori Greiner invested $50,000 for 50% equity in The Baby Toon.",
+  "actionItems": [
+    {
+      "task": "Finalize partnership terms and investment agreement with Lori Greiner.",
+      "assignee": "Cassidy Crowley and Lori Greiner",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Scale up manufacturing using adjusted silicone durometer for optimal product quality.",
+      "assignee": "Cassidy Crowley and production team",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Prepare for increased sales and distribution following Shark Tank exposure.",
+      "assignee": "Cassidy Crowley and Lori Greiner",
+      "deadline": null,
+      "priority": "high"
+    }
+  ],
+  "nextSteps": "Cassidy and Lori will collaborate to expand The Baby Toon's market presence and production, leveraging Lori's experience in retail and product distribution to reach more customers.",
+  "keyTopics": ["baby product innovation", "entrepreneurship", "manufacturing", "investment deal", "product design"],
+  "sentiment": "positive"
+}

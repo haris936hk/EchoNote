@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "Alexander Simone, an inventor from San Francisco, pitched his product ProntoBev—a rapid wine chiller capable of cooling wine by 20° in 30 seconds—to the Sharks, seeking $100,000 for 5% equity. After negotiations and feedback about his high valuation and limited sales, Kevin O’Leary offered $100,000 for 25% contingent on Alexander raising an additional $100,000, which Alexander accepted.",
+  "keyDecisions": "Kevin O’Leary invested $100,000 for 25% equity contingent upon Alexander Simone raising an additional $100,000.",
+  "actionItems": [
+    {
+      "task": "Raise an additional $100,000 in funding to fulfill the terms of Kevin O’Leary’s offer.",
+      "assignee": "Alexander Simone",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Continue product development to ensure ProntoBev becomes food-grade and production-ready.",
+      "assignee": "Alexander Simone",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Prepare for launch of next product, ProntoMartini, requiring additional $100,000 funding.",
+      "assignee": "Alexander Simone",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Alexander must raise the additional $100,000 required by Kevin O’Leary’s contingent offer, finalize ProntoBev’s production readiness, and pursue the next product line once funding is secured.",
+  "keyTopics": ["wine chiller", "valuation", "investment", "product development", "fundraising"],
+  "sentiment": "positive"
+}
