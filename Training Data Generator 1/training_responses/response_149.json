@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Entrepreneur Tanya Patruno and NFL player Brandon Jacobs pitched their product Pro Energy, a protein-infused flavored water, on Shark Tank seeking $250,000 for 15% equity. Despite concerns about taste, unclear branding, and low margins, Daymond John offered $250,000 for 30% contingent on a partnership with a supplement company, which Tanya accepted.",
+  "keyDecisions": "Daymond John invested $250,000 for 30% equity contingent on forming a partnership with Badass, a protein and supplement company.",
+  "actionItems": [
+    {
+      "task": "Pursue partnership deal with Badass supplement company to distribute Pro Energy",
+      "assignee": "Tanya Patruno",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Assist in sales pitch and promotional meetings using Super Bowl endorsement story",
+      "assignee": "Brandon Jacobs",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Tanya and Daymond will collaborate to finalize a distribution partnership with the Badass supplement company, with Brandon supporting marketing efforts through athlete endorsements.",
+  "keyTopics": ["Pro Energy", "investment negotiation", "product taste and branding", "business margins", "celebrity endorsement"],
+  "sentiment": "mixed"
+}
