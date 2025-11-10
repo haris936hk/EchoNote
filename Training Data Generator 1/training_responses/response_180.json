@@ -1,0 +1,21 @@
+{
+  "executiveSummary": "Entrepreneurs Adam Kalan and Matt Campbell from El Segundo, California, pitched their company BottleKeeper, seeking a $1 million investment for 5% equity. After intense negotiations centered on valuation and structure, they accepted a joint royalty-based deal with Lori Greiner and Mark Cuban involving a $1 million investment for 5% equity and a $1.50 per unit royalty until $1.5 million is repaid.",
+  "keyDecisions": "BottleKeeper accepted Lori Greiner and Mark Cuban’s joint offer of $1 million for 5% equity with a $1.50 per unit royalty until $1.5 million is repaid.",
+  "actionItems": [
+    {
+      "task": "Finalize investment agreement terms with Lori Greiner and Mark Cuban.",
+      "assignee": "Adam Kalan and Matt Campbell",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Prepare operational plans to scale production and enter retail channels.",
+      "assignee": "Adam Kalan and Matt Campbell",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Adam Kalan and Matt Campbell will collaborate with Lori Greiner and Mark Cuban to execute the investment agreement, allocate capital for scaling BottleKeeper’s retail expansion, and implement royalty repayment terms.",
+  "keyTopics": ["valuation", "investment", "royalty deal", "marketing", "retail expansion"],
+  "sentiment": "positive"
+}

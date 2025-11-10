@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "David Restiano and Dr. Dan Stats from Point Pleasant, New Jersey, pitched their company Sore Soap on Shark Tank, seeking $100,000 for 10% equity. Their product combines natural soap with a muscle-scraping therapy tool to aid recovery and relaxation. After evaluation by the Sharks, Mark Cuban offered $100,000 for 20%, which was accepted.",
+  "keyDecisions": "Mark Cuban invested $100,000 in Sore Soap for 20% equity.",
+  "actionItems": [
+    {
+      "task": "Finalize partnership agreement with Mark Cuban",
+      "assignee": "David Restiano and Dr. Dan Stats",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Collaborate with Mark Cuban’s team to expand direct-to-consumer (DTC) strategy",
+      "assignee": "David Restiano and Dr. Dan Stats",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Continue production and retail distribution through physical therapy offices and boutique gyms",
+      "assignee": "David Restiano and Dr. Dan Stats",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "Sore Soap will proceed with Mark Cuban’s investment, leveraging his business expertise to strengthen operations and marketing, particularly in the direct-to-consumer space.",
+  "keyTopics": ["product pitch", "investment", "physical therapy", "soap innovation", "direct-to-consumer strategy"],
+  "sentiment": "positive"
+}

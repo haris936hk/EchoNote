@@ -1,0 +1,27 @@
+{
+  "executiveSummary": "James and Joanna from Raleigh, North Carolina pitched their company, Bueno Papa, on Shark Tank seeking $400,000 for 7% equity. The couple shared their inspiring entrepreneurial journey, rapid business growth, and franchising plans. After negotiations, Robert Herjavec invested $400,000 for 19% equity.",
+  "keyDecisions": "Robert Herjavec offered $400,000 for 20% equity, and the founders countered, finalizing a deal at $400,000 for 19%.",
+  "actionItems": [
+    {
+      "task": "Close investment deal with Robert Herjavec at 19% equity for $400,000",
+      "assignee": "James and Joanna",
+      "deadline": null,
+      "priority": "high"
+    },
+    {
+      "task": "Proceed with opening the fourth store in Miami (Wynwood location)",
+      "assignee": "James and Joanna",
+      "deadline": null,
+      "priority": "medium"
+    },
+    {
+      "task": "Continue expanding franchising program following first four sales",
+      "assignee": "James and Joanna",
+      "deadline": null,
+      "priority": "medium"
+    }
+  ],
+  "nextSteps": "James and Joanna will finalize the partnership with Robert Herjavec and use the investment to accelerate expansion through new stores and franchise growth.",
+  "keyTopics": ["business growth", "franchising", "restaurant expansion", "investment negotiation", "valuation"],
+  "sentiment": "positive"
+}
