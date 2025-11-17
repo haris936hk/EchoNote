@@ -1,0 +1,10 @@
+services:
+  execa:
+    image: execa
+    build:
+      context: frontend/node_modules/execa
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
