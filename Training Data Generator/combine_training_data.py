@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Combine prompt and response files into training_data.json
-Works with training_prompts/ and training_responses/ folders
+Combine prompt and response files into training_data.json for Mistral fine-tuning
 """
 
 import json
@@ -21,35 +20,30 @@ def find_pairs(prompt_dir="training_prompts", response_dir="training_responses")
         print(f"❌ {response_dir} folder not found")
         return []
     
-    # Find all prompt files (they're Text Documents, likely no extension or .txt)
     prompt_files = list(prompt_folder.glob("prompt_*"))
-    # Filter out metadata files
     prompt_files = [f for f in prompt_files if not f.name.endswith('_meta.json')]
     
     pairs = []
     for prompt_file in sorted(prompt_files):
-        # Extract number (e.g., "001" from "prompt_001")
         match = re.search(r'prompt_(\d+)', prompt_file.name)
         if not match:
             continue
         
         number = match.group(1)
-        
-        # Look for corresponding response (could be .json or no extension)
         response_file = response_folder / f"response_{number}"
         if not response_file.exists():
             response_file = response_folder / f"response_{number}.json"
         
         if response_file.exists():
             pairs.append((str(prompt_file), str(response_file), number))
-            print(f"  ✓ Found pair: {number}")
+            print(f"  ✓ Pair {number}")
         else:
-            print(f"  ⚠ Missing response for prompt_{number}")
+            print(f"  ⚠ Missing response_{number}")
     
     return pairs
 
 def create_training_data(pairs, output_file="training_data.json"):
-    """Combine pairs into training format"""
+    """Combine pairs into Mistral instruction format"""
     training_data = []
     
     for prompt_path, response_path, number in pairs:
@@ -62,17 +56,19 @@ def create_training_data(pairs, output_file="training_data.json"):
             with open(response_path, 'r', encoding='utf-8') as f:
                 response = json.load(f)
             
-            # Add to training data
-            training_data.append({
-                "prompt": prompt,
-                "response": response
-            })
+            # Format response as JSON string (model should output this)
+            response_str = json.dumps(response, indent=2, ensure_ascii=False)
+            
+            # Create Mistral instruction format
+            # [INST] marks instruction, model learns to generate what comes after [/INST]
+            text = f"[INST] {prompt} [/INST] {response_str}"
+            
+            training_data.append({"text": text})
             
         except Exception as e:
-            print(f"  ❌ Error processing pair {number}: {e}")
+            print(f"  ❌ Error {number}: {e}")
             continue
     
-    # Save training data
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(training_data, f, indent=2, ensure_ascii=False)
     
@@ -80,7 +76,7 @@ def create_training_data(pairs, output_file="training_data.json"):
 
 def main():
     print("\n" + "="*60)
-    print("Training Data Combiner")
+    print("Training Data Combiner - Mistral Format")
     print("="*60)
     
     print("\nScanning for prompt/response pairs...")
@@ -91,16 +87,14 @@ def main():
         return
     
     print(f"\n✓ Found {len(pairs)} pairs")
-    
-    print("\nCombining into training_data.json...")
+    print("\nCombining with [INST] tags...")
     count = create_training_data(pairs)
     
     print(f"\n{'='*60}")
-    print(f"✅ SUCCESS!")
-    print(f"{'='*60}")
-    print(f"Created: training_data.json")
-    print(f"Examples: {count}")
-    print(f"\nNext: Upload training_data.json to Colab")
+    print(f"✅ Created training_data.json")
+    print(f"   Examples: {count}")
+    print(f"   Format: [INST] prompt [/INST] response")
+    print(f"\nReady for Colab fine-tuning!")
     print("="*60 + "\n")
 
 if __name__ == '__main__':
