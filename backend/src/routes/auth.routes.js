@@ -16,7 +16,7 @@ const { sanitizeBody } = require('../middleware/validation.middleware');
  */
 router.post(
   '/google',
-  rateLimit(10, 60000), // 10 requests per minute
+  rateLimit(process.env.NODE_ENV === 'development' ? 1000 : 10, 60000), // Development: 1000/min, Production: 10/min
   sanitizeBody,
   authController.googleAuth
 );
@@ -53,7 +53,7 @@ router.get(
  */
 router.post(
   '/refresh',
-  rateLimit(20, 60000), // 20 requests per minute
+  rateLimit(process.env.NODE_ENV === 'development' ? 1000 : 20, 60000), // Development: 1000/min, Production: 20/min
   sanitizeBody,
   authController.refreshToken
 );

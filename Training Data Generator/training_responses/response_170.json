@@ -38,3 +38,31 @@
   ],
   "sentiment": "mixed"
 }
+
+{
+"executiveSummary": "Nick and Josh, founders of Plated, pitched their meal delivery service to the Sharks, seeking $500,000 in exchange for 4% equity. The service delivers pre-portioned ingredients and recipes for chef-designed meals, targeting busy professionals and families.",
+"keyDecisions": "No major decisions recorded",
+"actionItems": [
+{
+"task": "Josh to send a free trial to Mark's wife",
+"assignee": "Josh",
+"deadline": null,
+"priority": "medium"
+},
+{
+"task": "Nick and Josh to consider expansion and competition",
+"assignee": "Nick and Josh",
+"deadline": null,
+"priority": "high"
+},
+{
+"task": "Mark to discuss the premium value of the investment",
+"assignee": "Mark",
+"deadline": null,
+"priority": "high"
+}
+],
+"nextSteps": "Mark to discuss the premium value of the investment, Nick and Josh to consider expansion and competition",
+"keyTopics": ["business", "customer", "month", "dollar", "guy"],
+"sentiment": "mixed"
+}

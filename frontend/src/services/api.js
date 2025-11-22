@@ -12,13 +12,41 @@ const api = axios.create({
   }
 });
 
-// Request interceptor - Add auth token to requests
+// Request deduplication map - Track pending requests
+const pendingRequests = new Map();
+
+// Helper function to generate request key for deduplication
+const getRequestKey = (config) => {
+  const { method, url, params, data } = config;
+  return `${method}:${url}:${JSON.stringify(params)}:${JSON.stringify(data)}`;
+};
+
+// Request interceptor - Add auth token and handle deduplication
 api.interceptors.request.use(
   (config) => {
+    // Add auth token
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Request deduplication - Only for GET requests to prevent loops
+    if (config.method === 'get') {
+      const requestKey = getRequestKey(config);
+
+      // If same request is already pending, cancel this one
+      if (pendingRequests.has(requestKey)) {
+        const controller = new AbortController();
+        controller.abort();
+        config.signal = controller.signal;
+        console.log(`[API] Deduplicated request: ${requestKey}`);
+      } else {
+        // Mark this request as pending
+        pendingRequests.set(requestKey, true);
+        config.metadata = { requestKey }; // Store key for cleanup
+      }
+    }
+
     return config;
   },
   (error) => {
@@ -26,12 +54,46 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle errors globally
+// Track if a token refresh is already in progress to prevent multiple simultaneous refreshes
+let isRefreshing = false;
+let failedQueue = [];
+
+// Process queued requests after token refresh
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Response interceptor - Handle errors globally, token refresh, and cleanup
 api.interceptors.response.use(
   (response) => {
+    // Clean up pending request tracker
+    const requestKey = response.config?.metadata?.requestKey;
+    if (requestKey) {
+      pendingRequests.delete(requestKey);
+    }
     return response;
   },
-  (error) => {
+  async (error) => {
+    // Clean up pending request tracker
+    const requestKey = error.config?.metadata?.requestKey;
+    if (requestKey) {
+      pendingRequests.delete(requestKey);
+    }
+
+    // Skip error handling for aborted requests (deduplicated)
+    if (error.code === 'ERR_CANCELED') {
+      return Promise.reject(error);
+    }
+
+    const originalRequest = error.config;
+
     // Handle different error scenarios
     if (error.response) {
       // Server responded with error status
@@ -39,11 +101,104 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-          break;
+          // Unauthorized - Attempt token refresh before logging out
+          console.log('[API] 401 Unauthorized - Attempting token refresh');
+
+          // Prevent infinite loop - don't retry if this IS the refresh endpoint
+          if (originalRequest.url?.includes('/auth/refresh')) {
+            console.log('[API] Refresh token expired - Logging out');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+            return Promise.reject(error);
+          }
+
+          // Prevent retry loops - don't retry if already retried
+          if (originalRequest._retry) {
+            console.log('[API] Retry failed - Logging out');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+            return Promise.reject(error);
+          }
+
+          const refreshToken = localStorage.getItem('refreshToken');
+
+          // No refresh token available - logout
+          if (!refreshToken) {
+            console.log('[API] No refresh token - Logging out');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+            return Promise.reject(error);
+          }
+
+          // If already refreshing, queue this request
+          if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject });
+            })
+              .then(token => {
+                originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                return api(originalRequest);
+              })
+              .catch(err => Promise.reject(err));
+          }
+
+          originalRequest._retry = true;
+          isRefreshing = true;
+
+          // Attempt to refresh token
+          try {
+            const response = await axios.post(
+              `${API_BASE_URL}/auth/refresh`,
+              { refreshToken },
+              { headers: { 'Content-Type': 'application/json' } }
+            );
+
+            const { accessToken } = response.data.data;
+
+            // Update token in localStorage
+            localStorage.setItem('token', accessToken);
+            console.log('[API] Token refreshed successfully');
+
+            // Update authorization header for original request
+            originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+
+            // Process queued requests
+            processQueue(null, accessToken);
+
+            // Retry original request
+            return api(originalRequest);
+          } catch (refreshError) {
+            console.error('[API] Token refresh failed:', refreshError);
+            processQueue(refreshError, null);
+
+            // Clear all auth data and redirect to login
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+
+            return Promise.reject(refreshError);
+          } finally {
+            isRefreshing = false;
+          }
+
         case 403:
           console.error('Forbidden:', data.message);
           break;

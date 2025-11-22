@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import axios from 'axios';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -25,10 +25,11 @@ const AuthProviderInner = ({ children }) => {
     if (token && userData) {
       try {
         setUser(JSON.parse(userData));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // Note: Authorization header is handled by api.js interceptor
       } catch (err) {
         console.error('Failed to parse user data:', err);
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
       }
     }
@@ -42,7 +43,7 @@ const AuthProviderInner = ({ children }) => {
       setError(null);
 
       // Send ID token to backend
-      const { data } = await axios.post('http://localhost:5000/api/auth/google', {
+      const { data } = await api.post('/auth/google', {
         idToken: credentialResponse.credential
       });
 
@@ -50,7 +51,13 @@ const AuthProviderInner = ({ children }) => {
       localStorage.setItem('token', data.data.accessToken);
       localStorage.setItem('refreshToken', data.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.data.user));
-      axios.defaults.headers.common['Authorization'] = `Bearer ${data.data.accessToken}`;
+      // Note: Authorization header is handled by api.js interceptor
+
+      console.log('[Auth] Login successful:', {
+        user: data.data.user.email,
+        tokenLength: data.data.accessToken.length,
+        hasRefreshToken: !!data.data.refreshToken
+      });
 
       setUser(data.data.user);
       setLoading(false);
@@ -66,10 +73,11 @@ const AuthProviderInner = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
+    console.log('[Auth] Logging out user');
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
+    // Note: Authorization header is handled by api.js interceptor
     setUser(null);
     setError(null);
   }, []);

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useRef } from 'react';
+import { createContext, useContext, useState, useRef, useCallback } from 'react';
 import RecordRTC from 'recordrtc';
 import api from '../services/api';
 
@@ -22,13 +22,21 @@ export const MeetingProvider = ({ children }) => {
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const timerRef = useRef(null);
+  const fetchingRef = useRef(false); // Prevent duplicate fetches
 
   // Fetch all meetings
-  const fetchMeetings = async (filters = {}) => {
+  const fetchMeetings = useCallback(async (filters = {}) => {
+    // Prevent multiple simultaneous fetches
+    if (fetchingRef.current) {
+      console.log('[MeetingContext] Fetch already in progress, skipping');
+      return { success: false, error: 'Fetch already in progress' };
+    }
+
     try {
+      fetchingRef.current = true;
       setLoading(true);
       const params = new URLSearchParams();
-      
+
       if (filters.search) params.append('search', filters.search);
       if (filters.category) params.append('category', filters.category);
       if (filters.startDate) params.append('startDate', filters.startDate);
@@ -41,12 +49,13 @@ export const MeetingProvider = ({ children }) => {
       console.error('Fetch meetings failed:', error);
       return { success: false, error: error.response?.data?.error || 'Failed to fetch meetings' };
     } finally {
+      fetchingRef.current = false;
       setLoading(false);
     }
-  };
+  }, []);
 
   // Fetch single meeting
-  const fetchMeeting = async (id) => {
+  const fetchMeeting = useCallback(async (id) => {
     try {
       setLoading(true);
       const { data } = await api.get(`/meetings/${id}`);
@@ -58,7 +67,7 @@ export const MeetingProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Start recording
   const startRecording = async () => {
@@ -129,7 +138,7 @@ export const MeetingProvider = ({ children }) => {
   };
 
   // Upload meeting
-  const uploadMeeting = async (audioBlob, meetingData) => {
+  const uploadMeeting = useCallback(async (audioBlob, meetingData) => {
     try {
       setLoading(true);
       const formData = new FormData();
@@ -156,19 +165,19 @@ export const MeetingProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Update meeting
-  const updateMeeting = async (id, updates) => {
+  const updateMeeting = useCallback(async (id, updates) => {
     try {
       setLoading(true);
       const { data } = await api.put(`/meetings/${id}`, updates);
-      
+
       // Update in list
       setMeetings((prev) =>
         prev.map((meeting) => (meeting.id === id ? data.data : meeting))
       );
-      
+
       // Update current if viewing
       if (currentMeeting?.id === id) {
         setCurrentMeeting(data.data);
@@ -181,17 +190,17 @@ export const MeetingProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMeeting]);
 
   // Delete meeting
-  const deleteMeeting = async (id) => {
+  const deleteMeeting = useCallback(async (id) => {
     try {
       setLoading(true);
       await api.delete(`/meetings/${id}`);
-      
+
       // Remove from list
       setMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
-      
+
       // Clear current if viewing
       if (currentMeeting?.id === id) {
         setCurrentMeeting(null);
@@ -204,7 +213,7 @@ export const MeetingProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMeeting]);
 
   // Format recording time
   const formatTime = (seconds) => {

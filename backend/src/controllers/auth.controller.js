@@ -208,7 +208,7 @@ const verifyToken = async (req, res) => {
       data: {
         valid: true,
         user: {
-          userId: decoded.userId,
+          userId: decoded.id,  // Changed from decoded.userId to decoded.id
           email: decoded.email,
           name: decoded.name
         }

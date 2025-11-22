@@ -102,19 +102,23 @@ async function authenticateWithGoogle(googleToken) {
 }
 
 /**
- * Generate JWT access token (short-lived, 15 minutes)
+ * Generate JWT access token (short-lived, 1 hour)
  * @param {Object} user - User object from database
  * @returns {string} JWT access token
  */
 function generateAccessToken(user) {
   return jwt.sign(
     {
-      userId: user.id,
+      id: user.id,
       email: user.email,
       name: user.name
     },
     process.env.JWT_SECRET,
-    { expiresIn: '15m' }
+    {
+      expiresIn: process.env.JWT_EXPIRE || '1h',
+      issuer: 'echonote-api',
+      audience: 'echonote-client'
+    }
   );
 }
 
@@ -126,11 +130,15 @@ function generateAccessToken(user) {
 function generateRefreshToken(user) {
   return jwt.sign(
     {
-      userId: user.id,
+      id: user.id,
       email: user.email
     },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d',
+      issuer: 'echonote-api',
+      audience: 'echonote-client'
+    }
   );
 }
 
@@ -142,11 +150,15 @@ function generateRefreshToken(user) {
 async function refreshAccessToken(refreshToken) {
   try {
     // Step 1: Verify refresh token signature
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+    const decoded = jwt.verify(refreshToken, secret, {
+      issuer: 'echonote-api',
+      audience: 'echonote-client'
+    });
 
     // Step 2: Find user and verify stored refresh token matches
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId }
+      where: { id: decoded.id }
     });
 
     if (!user) {
