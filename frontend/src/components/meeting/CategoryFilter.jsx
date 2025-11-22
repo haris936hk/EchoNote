@@ -29,7 +29,7 @@ const CategoryFilter = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3 p-1">
       {CATEGORIES.map((category) => {
         const Icon = category.icon;
         const isSelected = selectedCategory === category.value;
@@ -42,12 +42,12 @@ const CategoryFilter = ({
             variant={isSelected ? 'solid' : 'flat'}
             startContent={<Icon size={16} />}
             onPress={() => handleCategoryClick(category.value)}
-            className="cursor-pointer transition-all hover:scale-105"
+            className="cursor-pointer transition-colors"
             size="md"
           >
             {category.label}
             {showCount && category.value !== 'ALL' && (
-              <span className="ml-1.5 text-xs opacity-80">
+              <span className="ml-2 text-xs opacity-80">
                 ({count})
               </span>
             )}

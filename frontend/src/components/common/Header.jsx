@@ -118,36 +118,37 @@ const Header = () => {
 
         {/* User Dropdown */}
         <NavbarItem>
-          <Dropdown placement="bottom-end">
+          <Dropdown placement="bottom-end" className="min-w-[240px]">
             <DropdownTrigger>
               <Avatar
                 isBordered
                 as="button"
-                className="transition-transform cursor-pointer"
+                className="transition-transform cursor-pointer w-9 h-9"
                 color="primary"
-                size="sm"
                 src={user?.picture}
                 name={user?.name}
                 showFallback
               />
             </DropdownTrigger>
             <DropdownMenu aria-label="User menu actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2" textValue="Profile">
-                <p className="font-semibold">Signed in as</p>
-                <p className="font-semibold text-default-500">{user?.email}</p>
+              <DropdownItem key="profile" className="h-16 gap-2 py-3" textValue="Profile">
+                <p className="font-semibold text-sm">Signed in as</p>
+                <p className="font-semibold text-default-500 text-sm truncate max-w-[200px]">{user?.email}</p>
               </DropdownItem>
-              
-              <DropdownItem 
-                key="settings" 
+
+              <DropdownItem
+                key="settings"
+                className="py-2"
                 startContent={<FiSettings size={16} />}
                 onPress={() => navigate('/settings')}
               >
                 Settings
               </DropdownItem>
-              
-              <DropdownItem 
-                key="logout" 
-                color="danger" 
+
+              <DropdownItem
+                key="logout"
+                className="py-2"
+                color="danger"
                 startContent={<FiLogOut size={16} />}
                 onPress={handleLogout}
               >

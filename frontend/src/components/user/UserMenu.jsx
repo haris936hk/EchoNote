@@ -4,8 +4,7 @@ import {
   DropdownMenu,
   DropdownItem,
   DropdownSection,
-  Avatar,
-  User
+  Avatar
 } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -52,14 +51,13 @@ const UserMenu = () => {
   };
 
   return (
-    <Dropdown placement="bottom-end">
+    <Dropdown placement="bottom-end" className="min-w-[240px]">
       <DropdownTrigger>
         <Avatar
           isBordered
           as="button"
-          className="transition-transform hover:scale-105"
+          className="transition-transform cursor-pointer w-9 h-9"
           color="primary"
-          size="sm"
           src={user.picture}
           name={user.name}
           showFallback
@@ -75,18 +73,14 @@ const UserMenu = () => {
         <DropdownSection showDivider>
           <DropdownItem
             key="user-info"
-            className="h-14 gap-2"
+            className="h-16 gap-2 py-3"
             textValue={user.name}
             isReadOnly
           >
-            <User
-              name={user.name}
-              description={user.email}
-              avatarProps={{
-                src: user.picture,
-                size: "sm"
-              }}
-            />
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold text-sm truncate max-w-[200px]">{user.name}</p>
+              <p className="text-xs text-default-500 truncate max-w-[200px]">{user.email}</p>
+            </div>
           </DropdownItem>
         </DropdownSection>
 
@@ -94,6 +88,7 @@ const UserMenu = () => {
         <DropdownSection showDivider>
           <DropdownItem
             key="profile"
+            className="py-2"
             startContent={<FiUser size={16} />}
           >
             Profile
@@ -101,6 +96,7 @@ const UserMenu = () => {
 
           <DropdownItem
             key="settings"
+            className="py-2"
             startContent={<FiSettings size={16} />}
           >
             Settings
@@ -108,6 +104,7 @@ const UserMenu = () => {
 
           <DropdownItem
             key="theme"
+            className="py-2"
             startContent={isDark ? <FiSun size={16} /> : <FiMoon size={16} />}
           >
             {isDark ? 'Light Mode' : 'Dark Mode'}
@@ -118,8 +115,8 @@ const UserMenu = () => {
         <DropdownSection>
           <DropdownItem
             key="logout"
+            className="py-2"
             color="danger"
-            className="text-danger"
             startContent={<FiLogOut size={16} />}
           >
             Logout

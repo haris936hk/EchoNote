@@ -56,7 +56,7 @@ const SearchBar = ({
       classNames={{
         base: className,
         input: "text-sm",
-        inputWrapper: "h-12 bg-default-100 data-[hover=true]:bg-default-200"
+        inputWrapper: "h-12 bg-default-100 data-[hover=true]:bg-default-200 border-0 shadow-none"
       }}
       isClearable={false}
       size="lg"
