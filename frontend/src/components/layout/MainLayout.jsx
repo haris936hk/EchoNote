@@ -17,7 +17,13 @@ const MainLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation Bar */}
-      <Navbar isBordered maxWidth="full" className="bg-content1">
+      <Navbar
+        isBordered
+        isBlurred
+        maxWidth="full"
+        position="sticky"
+        className="bg-content1/95 backdrop-blur-md backdrop-saturate-150"
+      >
         <NavbarBrand>
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="bg-gradient-to-r from-primary to-secondary rounded-lg p-2">

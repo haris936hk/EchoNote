@@ -96,9 +96,9 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
-        {/* Header */}
+    <div className="space-y-8 -mx-4 -my-6">
+      {/* Page Header */}
+      <div className="sticky top-[65px] z-40 bg-background/95 backdrop-blur-md backdrop-saturate-150 border-b border-divider/10 shadow-sm px-4 py-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -117,6 +117,10 @@ const DashboardPage = () => {
             New Recording
           </Button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="px-4 space-y-8">
 
         {/* Empty State */}
         {meetings.length === 0 && !loading && (
