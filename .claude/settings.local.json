@@ -9,7 +9,8 @@
       "Bash(npx prisma generate:*)",
       "Bash(npm run prisma:generate:*)",
       "Bash(node -e:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(timeout /t 3)"
     ],
     "deny": [],
     "ask": []

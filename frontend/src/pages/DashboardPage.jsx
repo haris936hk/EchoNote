@@ -30,6 +30,8 @@ const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -37,6 +39,29 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
+
+  // Handle scroll to show/hide header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 10) {
+        // At the top, always show
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past threshold, hide
+        setShowHeader(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up, show
+        setShowHeader(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Filter meetings based on search and category
   useEffect(() => {
@@ -97,11 +122,23 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-8 -mx-4 -my-6">
-      {/* Page Header */}
-      <div className="sticky top-[65px] z-40 bg-background/95 backdrop-blur-md backdrop-saturate-150 border-b border-divider/10 shadow-sm px-4 py-4">
+      {/* Page Header - Fades on scroll */}
+      <div
+        className={`sticky top-[65px] z-40 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border-b border-divider/20 shadow-lg px-4 py-5 ${
+          showHeader
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-1 opacity-0 pointer-events-none'
+        }`}
+        style={{
+          willChange: 'transform, opacity',
+          transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }}
+      >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Dashboard
+            </h1>
             <p className="text-default-500 mt-1">
               Manage and review your meeting recordings
             </p>
@@ -112,7 +149,8 @@ const DashboardPage = () => {
             size="lg"
             startContent={<FiPlus size={20} />}
             onPress={handleNewRecording}
-            className="w-full md:w-auto"
+            className="w-full md:w-auto font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 rounded-2xl"
+            radius="full"
           >
             New Recording
           </Button>
@@ -120,27 +158,53 @@ const DashboardPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 space-y-8">
+      <div className="px-4 pt-4 space-y-8">
 
         {/* Empty State */}
         {meetings.length === 0 && !loading && (
-          <Card>
-            <CardBody className="text-center py-16">
-              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FiMic size={48} className="text-primary" />
+          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
+            <CardBody className="text-center py-20">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="relative w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 backdrop-blur-sm border border-primary/20">
+                  <FiMic size={56} className="text-primary" />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-2">No meetings yet</h3>
-              <p className="text-default-500 mb-6 max-w-md mx-auto">
+              <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                No meetings yet
+              </h3>
+              <p className="text-default-600 mb-8 max-w-md mx-auto text-lg">
                 Start by recording your first meeting. Your AI-powered transcription and summary will be ready in minutes.
               </p>
               <Button
                 color="primary"
                 size="lg"
-                startContent={<FiPlus size={20} />}
+                startContent={<FiPlus size={22} />}
                 onPress={handleNewRecording}
+                className="font-semibold px-6 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
+                radius="full"
               >
                 Record Your First Meeting
               </Button>
+
+              {/* Feature hints */}
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20">
+                  <div className="text-3xl mb-2">🎙️</div>
+                  <p className="text-sm font-semibold mb-1">Quick Recording</p>
+                  <p className="text-xs text-default-500">Up to 3 minutes</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20">
+                  <div className="text-3xl mb-2">🤖</div>
+                  <p className="text-sm font-semibold mb-1">AI Transcription</p>
+                  <p className="text-xs text-default-500">90%+ accuracy</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20">
+                  <div className="text-3xl mb-2">✨</div>
+                  <p className="text-sm font-semibold mb-1">Smart Summaries</p>
+                  <p className="text-xs text-default-500">Key insights extracted</p>
+                </div>
+              </div>
             </CardBody>
           </Card>
         )}

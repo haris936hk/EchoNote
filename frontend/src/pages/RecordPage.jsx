@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -56,9 +56,31 @@ const RecordPage = () => {
   const [formErrors, setFormErrors] = useState({});
   const [uploadError, setUploadError] = useState(null);
   const [step, setStep] = useState('record'); // record, details, uploading, success
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const MAX_RECORDING_TIME = 180; // 3 minutes
   const progress = (recordingTime / MAX_RECORDING_TIME) * 100;
+
+  // Handle scroll to show/hide header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 10) {
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowHeader(false);
+      } else if (currentScrollY < lastScrollY) {
+        setShowHeader(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const handleStartRecording = async () => {
     const result = await startRecording();
@@ -160,34 +182,49 @@ const RecordPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        {/* Back Button */}
-        <Button
-          variant="light"
-          startContent={<FiArrowLeft size={18} />}
-          onPress={handleBack}
-          className="mb-6"
-        >
-          Back
-        </Button>
-
-        {/* Main Card */}
-        <Card>
-          <CardHeader className="flex-col items-start gap-2 px-6 py-4">
-            <h1 className="text-2xl font-bold">
+      {/* Sticky Header with Smooth Fade */}
+      <div
+        className={`sticky top-[65px] z-40 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border-b border-divider/20 shadow-lg px-4 py-5 ${
+          showHeader
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-1 opacity-0 pointer-events-none'
+        }`}
+        style={{
+          willChange: 'transform, opacity',
+          transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }}
+      >
+        <div className="container mx-auto max-w-3xl flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {step === 'record' && 'Record Meeting'}
               {step === 'details' && 'Meeting Details'}
               {step === 'uploading' && 'Uploading...'}
               {step === 'success' && 'Success!'}
             </h1>
-            <p className="text-sm text-default-500">
+            <p className="text-sm text-default-500 mt-1">
               {step === 'record' && 'Record up to 3 minutes of audio'}
               {step === 'details' && 'Add details about your meeting'}
               {step === 'uploading' && 'Processing your recording...'}
               {step === 'success' && 'Your meeting is being processed'}
             </p>
-          </CardHeader>
+          </div>
+          <Button
+            variant="light"
+            startContent={<FiArrowLeft size={18} />}
+            onPress={handleBack}
+            radius="full"
+            className="shadow-md hover:shadow-lg transition-all duration-300"
+          >
+            Back
+          </Button>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8 max-w-3xl pt-4">
+        {/* Main Card */}
+        <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
           <Divider />
 
           <CardBody className="gap-6 p-6">
@@ -196,15 +233,18 @@ const RecordPage = () => {
               <>
                 {/* Timer Display */}
                 <div className="text-center py-8">
-                  <div className="inline-flex items-center justify-center w-32 h-32 bg-primary/10 rounded-full mb-6">
-                    <FiMic
-                      size={64}
-                      className={isRecording ? 'text-danger animate-pulse' : 'text-primary'}
-                    />
+                  <div className="relative mb-8">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div className={`relative w-32 h-32 ${isRecording ? 'bg-gradient-to-br from-danger/20 to-danger/30' : 'bg-gradient-to-br from-primary/20 to-secondary/20'} rounded-3xl flex items-center justify-center mx-auto shadow-2xl ${isRecording ? 'shadow-danger/25' : 'shadow-primary/25'} backdrop-blur-sm border ${isRecording ? 'border-danger/20' : 'border-primary/20'}`}>
+                      <FiMic
+                        size={64}
+                        className={isRecording ? 'text-danger animate-pulse' : 'text-primary'}
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-5xl font-mono font-bold">
+                    <p className="text-5xl font-mono font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                       {recordingTimeFormatted}
                     </p>
                     <p className="text-sm text-default-500">
@@ -244,7 +284,8 @@ const RecordPage = () => {
                       size="lg"
                       startContent={<FiMic size={24} />}
                       onPress={handleStartRecording}
-                      className="min-w-[200px]"
+                      radius="full"
+                      className="min-w-[200px] font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
                     >
                       Start Recording
                     </Button>
@@ -256,7 +297,8 @@ const RecordPage = () => {
                       size="lg"
                       startContent={<FiSquare size={24} />}
                       onPress={handleStopRecording}
-                      className="min-w-[200px]"
+                      radius="full"
+                      className="min-w-[200px] font-semibold shadow-lg shadow-danger/30 hover:shadow-xl hover:shadow-danger/40 hover:scale-105 transition-all duration-300"
                     >
                       Stop Recording
                     </Button>
@@ -294,6 +336,8 @@ const RecordPage = () => {
                           variant="flat"
                           onPress={handleReset}
                           fullWidth
+                          radius="full"
+                          className="font-semibold hover:scale-105 transition-all duration-300"
                         >
                           Re-record
                         </Button>
@@ -301,6 +345,8 @@ const RecordPage = () => {
                           color="primary"
                           onPress={() => setStep('details')}
                           fullWidth
+                          radius="full"
+                          className="font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
                         >
                           Continue
                         </Button>
@@ -310,12 +356,12 @@ const RecordPage = () => {
                 </div>
 
                 {/* Tips */}
-                <Card className="bg-primary/5 border border-primary/20">
+                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg">
                   <CardBody className="gap-2">
-                    <p className="text-sm font-semibold text-primary">
-                      Tips for better results:
+                    <p className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      💡 Tips for better results:
                     </p>
-                    <ul className="text-xs text-primary/80 space-y-1 ml-4">
+                    <ul className="text-xs text-default-600 space-y-1 ml-4">
                       <li>• Speak clearly and minimize background noise</li>
                       <li>• Keep the meeting under 3 minutes</li>
                       <li>• Use a good quality microphone if available</li>
@@ -387,6 +433,8 @@ const RecordPage = () => {
                     variant="flat"
                     onPress={() => setStep('record')}
                     fullWidth
+                    radius="full"
+                    className="font-semibold hover:scale-105 transition-all duration-300"
                   >
                     Back
                   </Button>
@@ -396,6 +444,8 @@ const RecordPage = () => {
                     onPress={handleSubmit}
                     isLoading={uploadLoading}
                     fullWidth
+                    radius="full"
+                    className="font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
                   >
                     Upload Meeting
                   </Button>
@@ -406,10 +456,13 @@ const RecordPage = () => {
             {/* Step 3: Uploading */}
             {step === 'uploading' && (
               <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-primary/10 rounded-full mb-6">
-                  <FiUpload size={48} className="text-primary animate-bounce" />
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="relative w-24 h-24 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 backdrop-blur-sm border border-primary/20">
+                    <FiUpload size={48} className="text-primary animate-bounce" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">
+                <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   Uploading your meeting...
                 </h3>
                 <p className="text-default-500 mb-6">
@@ -422,16 +475,19 @@ const RecordPage = () => {
             {/* Step 4: Success */}
             {step === 'success' && (
               <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-success/10 rounded-full mb-6">
-                  <FiCheck size={48} className="text-success" />
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-r from-success/20 to-success/30 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="relative w-24 h-24 bg-gradient-to-br from-success/20 to-success/30 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-success/25 backdrop-blur-sm border border-success/20">
+                    <FiCheck size={48} className="text-success" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">
+                <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent">
                   Meeting Uploaded Successfully!
                 </h3>
                 <p className="text-default-500 mb-6">
                   Your meeting is now being processed. You'll receive an email when it's ready.
                 </p>
-                <Chip color="success" variant="flat">
+                <Chip color="success" variant="flat" radius="full" className="shadow-md">
                   Redirecting to meeting details...
                 </Chip>
               </div>
