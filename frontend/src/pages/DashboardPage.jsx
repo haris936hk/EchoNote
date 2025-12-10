@@ -14,7 +14,8 @@ import {
   FiCheckCircle,
   FiAlertCircle,
   FiTrendingUp,
-  FiPlus
+  FiPlus,
+  FiArrowUp
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import MeetingList from '../components/meeting/MeetingList';
@@ -32,6 +33,7 @@ const DashboardPage = () => {
   const [filteredMeetings, setFilteredMeetings] = useState([]);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -40,7 +42,7 @@ const DashboardPage = () => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  // Handle scroll to show/hide header
+  // Handle scroll to show/hide header and scroll-to-top button
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -48,12 +50,15 @@ const DashboardPage = () => {
       if (currentScrollY < 10) {
         // At the top, always show
         setShowHeader(true);
+        setShowScrollTop(false);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down & past threshold, hide
         setShowHeader(false);
+        setShowScrollTop(true);
       } else if (currentScrollY < lastScrollY) {
         // Scrolling up, show
         setShowHeader(true);
+        setShowScrollTop(currentScrollY > 300);
       }
 
       setLastScrollY(currentScrollY);
@@ -62,6 +67,11 @@ const DashboardPage = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Filter meetings based on search and category
   useEffect(() => {
@@ -124,7 +134,7 @@ const DashboardPage = () => {
     <div className="space-y-8 -mx-4 -my-6">
       {/* Page Header - Fades on scroll */}
       <div
-        className={`sticky top-[65px] z-40 px-4 py-2 ${
+        className={`sticky top-[80px] md:top-[96px] z-40 px-4 py-4 ${
           showHeader
             ? 'translate-y-0 opacity-100'
             : '-translate-y-1 opacity-0 pointer-events-none'
@@ -166,7 +176,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 pt-4 space-y-8">
+      <div className="container mx-auto px-4 py-8 max-w-7xl pt-4 space-y-8">
 
         {/* Empty State */}
         {meetings.length === 0 && !loading && (
@@ -452,6 +462,28 @@ const DashboardPage = () => {
         </div>
         )}
       </div>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <div className="fixed bottom-8 right-8 z-50">
+          {/* Glowing effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/40 via-secondary/40 to-primary/40 rounded-full blur-2xl animate-pulse"></div>
+
+          {/* Button */}
+          <Button
+            isIconOnly
+            color="primary"
+            variant="shadow"
+            className={`relative w-14 h-14 shadow-2xl shadow-primary/50 hover:shadow-3xl hover:shadow-primary/60 transition-all duration-300 ${
+              showScrollTop ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+            }`}
+            radius="full"
+            onPress={scrollToTop}
+          >
+            <FiArrowUp size={24} />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
