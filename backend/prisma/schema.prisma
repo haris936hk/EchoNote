@@ -69,20 +69,25 @@ model Meeting {
   audioDuration Float?          // Duration in seconds (max 180)
   audioFormat   String?         // e.g., "mp3", "wav"
   
-  // Processing results
-  transcriptText String?        @db.Text
+  // Processing results - Full transcript with embedded NLP features
+  transcriptText String?        @db.Text // Full transcript text
   transcriptWordCount Int?
-  
-  // NLP results (JSON for flexibility)
-  nlpEntities   Json?           // Named entities, dates, organizations
-  nlpKeyPhrases Json?           // Key phrases extracted
-  nlpActions    Json?           // Action items detected by NLP
-  
-  // AI Summary (structured format)
-  summaryExecutive String?      @db.Text // Executive summary
+
+  // NLP Features (extracted from transcript)
+  nlpEntities   String?         @db.Text // Named entities (e.g., "John Doe (PERSON), Q4 2024 (DATE)")
+  nlpKeyPhrases String?         @db.Text // Key phrases (e.g., "you guys, all ages, a deal")
+  nlpActionPatterns String?     @db.Text // Action patterns (e.g., "cut: it, love: you")
+  nlpSentiment  String?         // Sentiment label (positive/negative/neutral)
+  nlpSentimentScore Float?      // Sentiment polarity score
+  nlpTopics     Json?           // Array of main topics
+
+  // AI Summary (structured format matching dataset)
+  summaryExecutive String?      @db.Text // Executive summary (2-3 sentences)
   summaryKeyDecisions String?   @db.Text // Key decisions made
-  summaryActionItems Json?      // [{task, assignee?, deadline?}]
+  summaryActionItems Json?      // [{task, assignee?, deadline?, priority?}]
   summaryNextSteps String?      @db.Text // Next steps
+  summaryKeyTopics Json?        // Array of key topics from summary
+  summarySentiment String?      // Overall sentiment from summary
   
   // Processing metadata
   processingError String?       @db.Text
