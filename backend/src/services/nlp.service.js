@@ -373,37 +373,52 @@ const extractDates = async (text) => {
 /**
  * Complete NLP pipeline for meeting transcripts
  * Runs all NLP analyses in sequence
+ * Returns data in dataset format
  * @param {string} text - Transcript text
- * @returns {Object} Complete NLP analysis
+ * @returns {Object} Complete NLP analysis in dataset format
  */
 const processMeetingTranscript = async (text) => {
   try {
     logger.info(`🚀 Starting complete NLP pipeline`);
     const startTime = Date.now();
 
-    // Run comprehensive NLP processing
-    const result = await processText(text);
+    const pythonOptions = {
+      mode: 'json',
+      pythonPath: NLP_CONFIG.pythonPath,
+      scriptPath: NLP_CONFIG.scriptsDir,
+      args: [text, 'full']
+    };
 
-    // Add text statistics
-    result.statistics = getTextStatistics(text);
+    // Run SpaCy NLP processor with updated format
+    const results = await PythonShell.run('nlp_processor.py', pythonOptions);
+    const result = results[0];
 
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Complete NLP pipeline finished in ${totalTime}s`);
 
+    // Return in dataset format
     return {
-      success: true,
-      entities: result.entities,
-      keyPhrases: result.keyPhrases,
-      actions: result.actions,
-      sentiment: result.sentiment,
-      topics: result.topics,
-      statistics: result.statistics,
+      success: result.success || true,
+      entities: result.entities || [],        // [{text, label}]
+      keyPhrases: result.keyPhrases || [],    // ["phrase1", "phrase2"]
+      actionPatterns: result.actionPatterns || [], // [{action, object}]
+      sentiment: result.sentiment || {label: 'neutral', score: 0}, // {label, score}
+      topics: result.topics || [],            // ["topic1", "topic2"]
       processingTime: parseFloat(totalTime)
     };
 
   } catch (error) {
     logger.error(`❌ NLP pipeline failed: ${error.message}`);
-    throw error;
+    return {
+      success: false,
+      error: error.message,
+      entities: [],
+      keyPhrases: [],
+      actionPatterns: [],
+      sentiment: {label: 'neutral', score: 0},
+      topics: [],
+      processingTime: 0
+    };
   }
 };
 

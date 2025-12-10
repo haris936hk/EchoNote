@@ -7,90 +7,119 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def process_text(text, model_name):
-    # Load SpaCy model with all components
-    nlp = spacy.load(model_name)
-    
-    # Process text
-    doc = nlp(text)
-    
-    # Extract named entities
-    entities = []
-    for ent in doc.ents:
-        entities.append({
-            'text': ent.text,
-            'label': ent.label_,
-            'start': ent.start_char,
-            'end': ent.end_char
-        })
-    
-    # Extract key phrases (noun chunks)
-    key_phrases = []
-    phrase_freq = {}
-    for chunk in doc.noun_chunks:
-        phrase = chunk.text.lower()
-        phrase_freq[phrase] = phrase_freq.get(phrase, 0) + 1
-    
-    # Sort by frequency and score
-    for phrase, freq in sorted(phrase_freq.items(), key=lambda x: x[1], reverse=True)[:10]:
-        key_phrases.append({
-            'phrase': phrase,
-            'score': min(freq / len(list(doc.noun_chunks)), 1.0),
-            'frequency': freq
-        })
-    
-    # Extract action items (verb patterns)
-    actions = []
-    for token in doc:
-        if token.pos_ == 'VERB' and token.dep_ == 'ROOT':
-            # Find objects of the verb
-            objects = [child.text for child in token.children if child.dep_ in ['dobj', 'pobj']]
-            context = [child.text for child in token.children if child.dep_ in ['prep', 'advmod']]
-            
-            if objects:
-                actions.append({
-                    'text': token.sent.text.strip(),
-                    'verb': token.lemma_,
-                    'object': ' '.join(objects),
-                    'context': ' '.join(context) if context else None,
-                    'confidence': 0.7 + (0.2 if context else 0)
-                })
-    
-    # Sentiment analysis using TextBlob
-    blob = TextBlob(text)
-    sentiment = {
-        'polarity': blob.sentiment.polarity,
-        'subjectivity': blob.sentiment.subjectivity
+    """
+    Process text and extract NLP features matching the dataset format.
+    Returns: {
+        "success": true,
+        "entities": [{"text": "Ky", "label": "PERSON"}, ...],
+        "keyPhrases": ["you guys", "all ages", "a deal"],
+        "actionPatterns": [{"action": "cut", "object": "it"}, ...],
+        "sentiment": {"label": "positive", "score": 0.18},
+        "topics": ["kid", "cardboard", "offer"]
     }
-    
-    # Extract topics (most frequent nouns and proper nouns)
-    topics = []
-    word_freq = {}
-    for token in doc:
-        if token.pos_ in ['NOUN', 'PROPN'] and not token.is_stop:
-            word = token.lemma_.lower()
-            word_freq[word] = word_freq.get(word, 0) + 1
-    
-    for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:5]:
-        topics.append({
-            'term': word,
-            'score': min(freq / 10, 1.0),
-            'category': 'general'
-        })
-    
-    # Statistics
-    statistics = {
-        'sentence_count': len(list(doc.sents)),
-        'token_count': len(doc),
-        'word_count': len([token for token in doc if not token.is_punct])}
-    
-    return {
-        'entities': entities,
-        'key_phrases': key_phrases,
-        'actions': actions,
-        'sentiment': sentiment,
-        'topics': topics,
-        'statistics': statistics
-    }
+    """
+    try:
+        # Load SpaCy model with all components
+        nlp = spacy.load(model_name)
+
+        # Process text
+        doc = nlp(text)
+
+        # Extract named entities (with text and label only)
+        entities = []
+        for ent in doc.ents:
+            entities.append({
+                'text': ent.text,
+                'label': ent.label_
+            })
+
+        # Extract key phrases (simple strings, top 8)
+        phrase_freq = {}
+        for chunk in doc.noun_chunks:
+            phrase = chunk.text.lower().strip()
+            if len(phrase.split()) <= 4 and len(phrase) > 2:  # 2-4 word phrases
+                phrase_freq[phrase] = phrase_freq.get(phrase, 0) + 1
+
+        # Get top phrases by frequency
+        key_phrases = [phrase for phrase, freq in sorted(phrase_freq.items(), key=lambda x: x[1], reverse=True)[:8]]
+
+        # Extract action patterns (verb: object format)
+        action_patterns = []
+        seen_patterns = set()
+
+        for token in doc:
+            if token.pos_ == 'VERB' and token.dep_ in ['ROOT', 'relcl', 'ccomp']:
+                # Find direct objects
+                objects = []
+                for child in token.children:
+                    if child.dep_ in ['dobj', 'pobj', 'attr']:
+                        obj_text = child.text
+                        # Include compound nouns
+                        compounds = [c.text for c in child.children if c.dep_ == 'compound']
+                        if compounds:
+                            obj_text = ' '.join(compounds + [child.text])
+                        objects.append(obj_text)
+
+                if objects:
+                    for obj in objects:
+                        pattern_key = f"{token.lemma_}:{obj.lower()}"
+                        if pattern_key not in seen_patterns:
+                            action_patterns.append({
+                                'action': token.lemma_,
+                                'object': obj.lower()
+                            })
+                            seen_patterns.add(pattern_key)
+                            if len(action_patterns) >= 10:  # Limit to 10
+                                break
+            if len(action_patterns) >= 10:
+                break
+
+        # Sentiment analysis using TextBlob
+        blob = TextBlob(text)
+        polarity = round(blob.sentiment.polarity, 2)
+
+        # Determine sentiment label
+        if polarity > 0.05:
+            sentiment_label = 'positive'
+        elif polarity < -0.05:
+            sentiment_label = 'negative'
+        else:
+            sentiment_label = 'neutral'
+
+        sentiment = {
+            'label': sentiment_label,
+            'score': polarity
+        }
+
+        # Extract topics (top 5 most frequent nouns/proper nouns)
+        word_freq = {}
+        for token in doc:
+            if token.pos_ in ['NOUN', 'PROPN'] and not token.is_stop and len(token.text) > 2:
+                word = token.lemma_.lower()
+                word_freq[word] = word_freq.get(word, 0) + 1
+
+        # Get top 5 topics as simple strings
+        topics = [word for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:5]]
+
+        return {
+            'success': True,
+            'entities': entities,
+            'keyPhrases': key_phrases,
+            'actionPatterns': action_patterns,
+            'sentiment': sentiment,
+            'topics': topics
+        }
+
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e),
+            'entities': [],
+            'keyPhrases': [],
+            'actionPatterns': [],
+            'sentiment': {'label': 'neutral', 'score': 0.0},
+            'topics': []
+        }
 
 def extract_entities(text, model_name):
     nlp = spacy.load(model_name)
