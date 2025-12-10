@@ -14,13 +14,18 @@ import {
   FiSettings,
   FiMoon,
   FiSun,
-  FiLogOut
+  FiLogOut,
+  FiRefreshCw
 } from 'react-icons/fi';
 
 const UserMenu = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUserData } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  // Debug: Log user data to check if picture is available
+  console.log('[UserMenu] User data:', user);
+  console.log('[UserMenu] User picture URL:', user?.picture);
 
   if (!user) return null;
 
@@ -34,6 +39,9 @@ const UserMenu = () => {
         break;
       case 'theme':
         toggleTheme();
+        break;
+      case 'refresh':
+        refreshUserData();
         break;
       case 'logout':
         handleLogout();
@@ -56,11 +64,14 @@ const UserMenu = () => {
         <Avatar
           isBordered
           as="button"
-          className="transition-transform cursor-pointer w-9 h-9"
+          className="transition-transform cursor-pointer w-9 h-9 hover:scale-110"
           color="primary"
-          src={user.picture}
-          name={user.name}
+          src={user?.picture || ''}
+          name={user?.name || 'User'}
           showFallback
+          fallback={
+            <FiUser size={18} className="text-primary" />
+          }
         />
       </DropdownTrigger>
 
@@ -108,6 +119,14 @@ const UserMenu = () => {
             startContent={isDark ? <FiSun size={16} /> : <FiMoon size={16} />}
           >
             {isDark ? 'Light Mode' : 'Dark Mode'}
+          </DropdownItem>
+
+          <DropdownItem
+            key="refresh"
+            className="py-2"
+            startContent={<FiRefreshCw size={16} />}
+          >
+            Refresh Profile
           </DropdownItem>
         </DropdownSection>
 

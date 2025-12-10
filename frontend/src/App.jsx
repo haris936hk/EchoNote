@@ -20,6 +20,12 @@ import { GOOGLE_CLIENT_ID } from './utils/constants';
 import './styles/globals.css';
 
 function App() {
+  console.log('[App] Google Client ID:', GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : 'NOT SET');
+
+  if (!GOOGLE_CLIENT_ID) {
+    console.error('[App] GOOGLE_CLIENT_ID is not set! Check your .env file');
+  }
+
   return (
     <ErrorBoundary>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

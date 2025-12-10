@@ -30,6 +30,8 @@ const MeetingsPage = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
   const [selectedMeetings, setSelectedMeetings] = useState([]);
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -37,6 +39,26 @@ const MeetingsPage = () => {
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
+
+  // Handle scroll to show/hide header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 10) {
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowHeader(false);
+      } else if (currentScrollY < lastScrollY) {
+        setShowHeader(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Filter meetings based on all filters
   useEffect(() => {
@@ -131,35 +153,63 @@ const MeetingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">My Meetings</h1>
-            <p className="text-default-500 mt-1">
-              {filteredMeetings.length} of {meetings.length} meeting(s)
-            </p>
-          </div>
+    <div className="space-y-6 -mx-4 -my-6">
+      {/* Page Header - Fades on scroll */}
+      <div
+        className={`sticky top-[65px] z-40 px-4 py-2 ${
+          showHeader
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-1 opacity-0 pointer-events-none'
+        }`}
+        style={{
+          willChange: 'transform, opacity',
+          transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }}
+      >
+        <div className="relative max-w-7xl mx-auto">
+          {/* Glowing effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-3xl blur-xl opacity-50"></div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="flat"
-              startContent={<FiDownload size={18} />}
-              onPress={handleExportAll}
-            >
-              Export
-            </Button>
+          {/* Header content */}
+          <div className="relative bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border border-primary/20 shadow-2xl shadow-primary/25 rounded-3xl px-6 md:px-8 py-5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  My Meetings
+                </h1>
+                <p className="text-default-500 mt-1">
+                  {filteredMeetings.length} of {meetings.length} meeting(s)
+                </p>
+              </div>
 
-            <Button
-              color="primary"
-              startContent={<FiPlus size={18} />}
-              onPress={handleNewRecording}
-            >
-              New Recording
-            </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="flat"
+                  startContent={<FiDownload size={18} />}
+                  onPress={handleExportAll}
+                  className="transition-all duration-300 hover:scale-105"
+                  radius="lg"
+                >
+                  Export
+                </Button>
+
+                <Button
+                  color="primary"
+                  startContent={<FiPlus size={18} />}
+                  onPress={handleNewRecording}
+                  className="font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 hover:scale-105"
+                  radius="full"
+                >
+                  New Recording
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="px-4 pt-4 space-y-6">
 
         {/* Status Tabs */}
         <Card>
@@ -296,24 +346,42 @@ const MeetingsPage = () => {
             itemsPerPage={12}
           />
         ) : (
-          <Card>
-            <CardBody className="text-center py-16">
-              <div className="w-20 h-20 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiFilter size={32} className="text-default-400" />
+          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
+            <CardBody className="text-center py-20">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="relative w-28 h-28 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 backdrop-blur-sm border border-primary/20">
+                  <FiFilter size={48} className="text-primary" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">No meetings found</h3>
-              <p className="text-default-500 mb-6">
+              <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                No meetings found
+              </h3>
+              <p className="text-default-600 mb-8 max-w-md mx-auto text-lg">
                 {searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL'
                   ? 'Try adjusting your filters to see more results'
-                  : 'Start by recording your first meeting'}
+                  : 'Start by recording your first meeting to see it here'}
               </p>
               {searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL' ? (
-                <Button variant="flat" onPress={handleClearFilters}>
+                <Button
+                  variant="flat"
+                  onPress={handleClearFilters}
+                  size="lg"
+                  className="font-semibold transition-all duration-300 hover:scale-105"
+                  radius="full"
+                >
                   Clear Filters
                 </Button>
               ) : (
-                <Button color="primary" onPress={handleNewRecording}>
-                  Record Meeting
+                <Button
+                  color="primary"
+                  onPress={handleNewRecording}
+                  size="lg"
+                  startContent={<FiPlus size={20} />}
+                  className="font-semibold px-8 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
+                  radius="full"
+                >
+                  Record Your First Meeting
                 </Button>
               )}
             </CardBody>
