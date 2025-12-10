@@ -173,7 +173,7 @@ const LoginPage = () => {
       {/* Footer */}
       <div className="absolute bottom-4 left-0 right-0 text-center">
         <p className="text-xs text-default-400">
-          © 2025 EchoNote. Made with ❤️ by Haris Khan.
+          © 2025 EchoNote. Made by Haris Khan.
         </p>
       </div>
     </div>

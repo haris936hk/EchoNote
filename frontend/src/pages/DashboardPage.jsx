@@ -124,7 +124,7 @@ const DashboardPage = () => {
     <div className="space-y-8 -mx-4 -my-6">
       {/* Page Header - Fades on scroll */}
       <div
-        className={`sticky top-[65px] z-40 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border-b border-divider/20 shadow-lg px-4 py-5 ${
+        className={`sticky top-[65px] z-40 px-4 py-2 ${
           showHeader
             ? 'translate-y-0 opacity-100'
             : '-translate-y-1 opacity-0 pointer-events-none'
@@ -134,26 +134,34 @@ const DashboardPage = () => {
           transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
         }}
       >
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Dashboard
-            </h1>
-            <p className="text-default-500 mt-1">
-              Manage and review your meeting recordings
-            </p>
-          </div>
+        <div className="relative max-w-7xl mx-auto">
+          {/* Glowing effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-3xl blur-xl opacity-50"></div>
 
-          <Button
-            color="primary"
-            size="lg"
-            startContent={<FiPlus size={20} />}
-            onPress={handleNewRecording}
-            className="w-full md:w-auto font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 rounded-2xl"
-            radius="full"
-          >
-            New Recording
-          </Button>
+          {/* Header content */}
+          <div className="relative bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border border-primary/20 shadow-2xl shadow-primary/25 rounded-3xl px-6 md:px-8 py-5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Dashboard
+                </h1>
+                <p className="text-default-500 mt-1">
+                  Manage and review your meeting recordings
+                </p>
+              </div>
+
+              <Button
+                color="primary"
+                size="lg"
+                startContent={<FiPlus size={20} />}
+                onPress={handleNewRecording}
+                className="w-full md:w-auto font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 rounded-2xl"
+                radius="full"
+              >
+                New Recording
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -164,9 +172,8 @@ const DashboardPage = () => {
         {meetings.length === 0 && !loading && (
           <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
             <CardBody className="text-center py-20">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="relative w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 backdrop-blur-sm border border-primary/20">
+              <div className="mb-8">
+                <div className="w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-primary/20">
                   <FiMic size={56} className="text-primary" />
                 </div>
               </div>
@@ -189,18 +196,24 @@ const DashboardPage = () => {
 
               {/* Feature hints */}
               <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20">
-                  <div className="text-3xl mb-2">🎙️</div>
+                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center">
+                  <div className="p-3 bg-primary/10 rounded-lg w-fit mb-3 mx-auto">
+                    <FiMic className="text-primary" size={24} />
+                  </div>
                   <p className="text-sm font-semibold mb-1">Quick Recording</p>
                   <p className="text-xs text-default-500">Up to 3 minutes</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20">
-                  <div className="text-3xl mb-2">🤖</div>
+                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center">
+                  <div className="p-3 bg-secondary/10 rounded-lg w-fit mb-3 mx-auto">
+                    <FiCheckCircle className="text-secondary" size={24} />
+                  </div>
                   <p className="text-sm font-semibold mb-1">AI Transcription</p>
                   <p className="text-xs text-default-500">90%+ accuracy</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20">
-                  <div className="text-3xl mb-2">✨</div>
+                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center">
+                  <div className="p-3 bg-primary/10 rounded-lg w-fit mb-3 mx-auto">
+                    <FiTrendingUp className="text-primary" size={24} />
+                  </div>
                   <p className="text-sm font-semibold mb-1">Smart Summaries</p>
                   <p className="text-xs text-default-500">Key insights extracted</p>
                 </div>

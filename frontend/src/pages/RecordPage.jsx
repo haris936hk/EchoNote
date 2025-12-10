@@ -184,7 +184,7 @@ const RecordPage = () => {
     <div className="min-h-screen bg-background">
       {/* Sticky Header with Smooth Fade */}
       <div
-        className={`sticky top-[65px] z-40 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border-b border-divider/20 shadow-lg px-4 py-5 ${
+        className={`sticky top-[65px] z-40 px-4 py-2 ${
           showHeader
             ? 'translate-y-0 opacity-100'
             : '-translate-y-1 opacity-0 pointer-events-none'
@@ -194,30 +194,38 @@ const RecordPage = () => {
           transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
         }}
       >
-        <div className="container mx-auto max-w-3xl flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {step === 'record' && 'Record Meeting'}
-              {step === 'details' && 'Meeting Details'}
-              {step === 'uploading' && 'Uploading...'}
-              {step === 'success' && 'Success!'}
-            </h1>
-            <p className="text-sm text-default-500 mt-1">
-              {step === 'record' && 'Record up to 3 minutes of audio'}
-              {step === 'details' && 'Add details about your meeting'}
-              {step === 'uploading' && 'Processing your recording...'}
-              {step === 'success' && 'Your meeting is being processed'}
-            </p>
+        <div className="relative max-w-7xl mx-auto">
+          {/* Glowing effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-3xl blur-xl opacity-50"></div>
+
+          {/* Header content */}
+          <div className="relative bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border border-primary/20 shadow-2xl shadow-primary/25 rounded-3xl px-6 md:px-8 py-5">
+            <div className="container mx-auto max-w-3xl flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {step === 'record' && 'Record Meeting'}
+                  {step === 'details' && 'Meeting Details'}
+                  {step === 'uploading' && 'Uploading...'}
+                  {step === 'success' && 'Success!'}
+                </h1>
+                <p className="text-sm text-default-500 mt-1">
+                  {step === 'record' && 'Record up to 3 minutes of audio'}
+                  {step === 'details' && 'Add details about your meeting'}
+                  {step === 'uploading' && 'Processing your recording...'}
+                  {step === 'success' && 'Your meeting is being processed'}
+                </p>
+              </div>
+              <Button
+                variant="light"
+                startContent={<FiArrowLeft size={18} />}
+                onPress={handleBack}
+                radius="full"
+                className="shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                Back
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="light"
-            startContent={<FiArrowLeft size={18} />}
-            onPress={handleBack}
-            radius="full"
-            className="shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            Back
-          </Button>
         </div>
       </div>
 
