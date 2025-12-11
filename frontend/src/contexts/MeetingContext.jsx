@@ -138,16 +138,27 @@ export const MeetingProvider = ({ children }) => {
   };
 
   // Upload meeting
-  const uploadMeeting = useCallback(async (audioBlob, meetingData) => {
+  const uploadMeeting = useCallback(async (meetingData) => {
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'meeting.webm');
-      formData.append('title', meetingData.title);
-      formData.append('category', meetingData.category);
-      if (meetingData.description) {
-        formData.append('description', meetingData.description);
+
+      // Extract audioFile from meetingData
+      const { audioFile, title, description, category } = meetingData;
+
+      if (!audioFile) {
+        throw new Error('No audio file provided');
       }
+
+      const formData = new FormData();
+      formData.append('audio', audioFile, 'meeting.webm');
+      formData.append('title', title);
+      formData.append('category', category);
+      if (description) {
+        formData.append('description', description);
+      }
+
+      console.log('🚀 Uploading meeting to /api/meetings/upload');
+      console.log('📦 FormData contents:', { title, category, description, audioFileSize: audioFile.size });
 
       const { data } = await api.post('/meetings/upload', formData, {
         headers: {
@@ -155,12 +166,15 @@ export const MeetingProvider = ({ children }) => {
         },
       });
 
+      console.log('✅ Upload successful:', data);
+
       // Add to meetings list
       setMeetings((prev) => [data.data, ...prev]);
 
       return { success: true, data: data.data };
     } catch (error) {
-      console.error('Upload meeting failed:', error);
+      console.error('❌ Upload meeting failed:', error);
+      console.error('Error details:', error.response?.data);
       return { success: false, error: error.response?.data?.error || 'Failed to upload meeting' };
     } finally {
       setLoading(false);

@@ -22,6 +22,85 @@ const logger = winston.createLogger({
 });
 
 /**
+ * Create new meeting with audio upload (combined endpoint)
+ * POST /api/meetings/upload
+ */
+const createMeetingWithAudio = async (req, res) => {
+  try {
+    const { title, description, category } = req.body;
+    const userId = req.userId;
+
+    // Validate required fields
+    if (!title || !title.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Title is required'
+      });
+    }
+
+    // Check if file was uploaded (after validateAudioFile middleware, file is in req.uploadedFile or req.file)
+    if (!req.file && !req.uploadedFile) {
+      return res.status(400).json({
+        success: false,
+        error: 'No audio file provided'
+      });
+    }
+
+    const audioFile = req.uploadedFile || req.file;
+
+    // Validate category
+    const validCategories = ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'];
+    if (category && !validCategories.includes(category)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid category',
+        validCategories
+      });
+    }
+
+    // Note: File validation (size, type) is already done by upload middleware
+    logger.info(`📤 Creating meeting with audio for user ${userId}: ${audioFile.filename || audioFile.originalname}`);
+
+    // Create meeting first
+    const meeting = await meetingService.createMeeting({
+      userId,
+      title: title.trim(),
+      description: description?.trim() || '',
+      category: category || 'OTHER'
+    });
+
+    logger.info(`✅ Meeting created: ${meeting.id}`);
+
+    // Use uploadedFile if available (after validation), otherwise use req.file
+    const fileToProcess = req.uploadedFile || req.file;
+
+    // Start audio processing pipeline in the background
+    // We don't await this to allow the response to return quickly
+    meetingService.uploadAndProcessAudio(meeting.id, userId, fileToProcess)
+      .then(() => {
+        logger.info(`✅ Audio processing completed for meeting ${meeting.id}`);
+      })
+      .catch((error) => {
+        logger.error(`❌ Audio processing failed for meeting ${meeting.id}: ${error.message}`);
+      });
+
+    return res.status(201).json({
+      success: true,
+      data: meeting,
+      message: 'Meeting created and audio processing started'
+    });
+
+  } catch (error) {
+    logger.error(`Error creating meeting with audio: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to create meeting',
+      details: error.message
+    });
+  }
+};
+
+/**
  * Create new meeting
  * POST /api/meetings
  */
@@ -74,15 +153,15 @@ const uploadAudio = async (req, res) => {
     const meetingId = req.params.id;
     const userId = req.userId;
 
-    // Check if file was uploaded
-    if (!req.files || !req.files.audio) {
+    // Check if file was uploaded (after validateAudioFile middleware, file is in req.uploadedFile or req.file)
+    if (!req.file && !req.uploadedFile) {
       return res.status(400).json({
         success: false,
         error: 'No audio file provided'
       });
     }
 
-    const audioFile = req.files.audio;
+    const audioFile = req.uploadedFile || req.file;
 
     // Validate file size (10MB max)
     const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 10485760; // 10MB
@@ -580,6 +659,7 @@ const getProcessingStatus = async (req, res) => {
 
 module.exports = {
   createMeeting,
+  createMeetingWithAudio,
   uploadAudio,
   getMeetings,
   getMeetingById,

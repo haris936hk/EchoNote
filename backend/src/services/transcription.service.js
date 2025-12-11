@@ -88,7 +88,7 @@ const transcribeAudio = async (audioPath, options = {}) => {
       language: result.language,
       duration: result.duration,
       wordCount: countWords(result.text),
-      confidence: result.avg_logprob,
+      confidence: result.confidence || 0,
       processingTime: parseFloat(duration),
       model: transcriptionOptions.model
     };

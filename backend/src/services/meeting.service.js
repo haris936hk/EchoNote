@@ -84,14 +84,12 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       throw new Error('Meeting not found or unauthorized');
     }
 
-    // Save uploaded file temporarily
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'temp');
-    await fs.mkdir(uploadsDir, { recursive: true });
+    // With multer, file is already saved to disk
+    // audioFile can be either req.uploadedFile (after validateAudioFile) or req.file
+    tempPath = audioFile.path; // Multer saves file here
+    const originalFileName = audioFile.originalname || audioFile.filename;
 
-    tempPath = path.join(uploadsDir, `${meetingId}_${Date.now()}_${audioFile.name}`);
-    await audioFile.mv(tempPath);
-
-    console.log(`📁 Audio file saved: ${audioFile.name}`);
+    console.log(`📁 Audio file saved: ${originalFileName} at ${tempPath}`);
 
     // Step 1: Update status to PROCESSING_AUDIO
     await updateMeetingStatus(meetingId, 'PROCESSING_AUDIO');
@@ -494,6 +492,36 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 }
 
 /**
+ * Transform meeting data from database format to frontend format
+ * @param {Object} meeting - Raw meeting from database
+ * @returns {Object} Transformed meeting
+ */
+function transformMeetingForFrontend(meeting) {
+  if (!meeting) return null;
+
+  return {
+    ...meeting,
+    // Map transcript field
+    transcript: meeting.transcriptText || null,
+
+    // Map duration field
+    duration: meeting.audioDuration || null,
+
+    // Combine summary fields into single object
+    summary: (meeting.summaryExecutive || meeting.summaryKeyDecisions || meeting.summaryActionItems || meeting.summaryNextSteps)
+      ? {
+          executiveSummary: meeting.summaryExecutive,
+          keyDecisions: meeting.summaryKeyDecisions,
+          actionItems: meeting.summaryActionItems,
+          nextSteps: meeting.summaryNextSteps,
+          keyTopics: meeting.summaryKeyTopics,
+          sentiment: meeting.summarySentiment
+        }
+      : null
+  };
+}
+
+/**
  * Get meeting by ID with user validation
  * @param {string} meetingId - Meeting ID
  * @param {string} userId - User ID (for authorization)
@@ -517,7 +545,10 @@ async function getMeetingById(meetingId, userId) {
       }
     });
 
-    return meeting; // Return meeting directly or null
+    if (!meeting) return null;
+
+    // Transform meeting data for frontend
+    return transformMeetingForFrontend(meeting);
   } catch (error) {
     console.error('Get meeting error:', error.message);
     throw error;
@@ -579,8 +610,11 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
       }
     });
 
+    // Transform meetings for frontend
+    const transformedMeetings = meetings.map(m => transformMeetingForFrontend(m));
+
     return {
-      meetings,
+      meetings: transformedMeetings,
       total,
       page,
       limit,

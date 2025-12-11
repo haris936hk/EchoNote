@@ -52,13 +52,13 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Summary generated in ${duration}s`);
 
-    // Validate and structure the response
+    // Validate and structure the response (match echonote_dataset.json format)
     const summary = {
       executiveSummary: result.summary.executiveSummary || '',
       keyDecisions: result.summary.keyDecisions || 'No major decisions recorded',
-      actionItems: validateActionItems(result.summary.actionItems || []),
+      actionItems: Array.isArray(result.summary.actionItems) ? validateActionItems(result.summary.actionItems) : [],
       nextSteps: result.summary.nextSteps || '',
-      keyTopics: result.summary.keyTopics || [],
+      keyTopics: Array.isArray(result.summary.keyTopics) ? result.summary.keyTopics : [],
       sentiment: result.summary.sentiment || 'neutral',
       metadata: {
         model: result.metadata.model,
@@ -167,16 +167,20 @@ const enhanceSummaryWithNLP = (summary, nlpData) => {
   // Add key phrases if not in topics
   if (nlpData.keyPhrases && nlpData.keyPhrases.length > 0) {
     const existingTopics = new Set(
-      (enhanced.keyTopics || []).map(t => t.toLowerCase())
+      (enhanced.keyTopics || []).filter(t => t).map(t => t.toLowerCase())
     );
-    
+
     nlpData.keyPhrases
       .slice(0, 5)
       .forEach(kp => {
-        const phrase = kp.phrase.toLowerCase();
-        if (!existingTopics.has(phrase)) {
+        // Handle both string and object formats
+        const phrase = (typeof kp === 'string' ? kp : kp.phrase);
+        if (!phrase) return;
+
+        const phraseLower = phrase.toLowerCase();
+        if (!existingTopics.has(phraseLower)) {
           enhanced.keyTopics = enhanced.keyTopics || [];
-          enhanced.keyTopics.push(kp.phrase);
+          enhanced.keyTopics.push(phrase);
         }
       });
   }
@@ -326,7 +330,7 @@ const validateActionItems = (actionItems) => {
  */
 const validatePriority = (priority) => {
   const validPriorities = ['high', 'medium', 'low'];
-  if (priority && validPriorities.includes(priority.toLowerCase())) {
+  if (priority && typeof priority === 'string' && validPriorities.includes(priority.toLowerCase())) {
     return priority.toLowerCase();
   }
   return 'medium'; // Default
@@ -389,10 +393,12 @@ const extractDeadline = (context) => {
 const mergeActionItems = (aiActions, nlpActions) => {
   const merged = [...aiActions];
   const existingTasks = new Set(
-    aiActions.map(a => a.task.toLowerCase().trim())
+    aiActions.filter(a => a.task).map(a => a.task.toLowerCase().trim())
   );
 
   nlpActions.forEach(action => {
+    if (!action.task) return; // Skip actions without task
+
     const task = action.task.toLowerCase().trim();
     // Check for similarity (not just exact match)
     const isDuplicate = Array.from(existingTasks).some(existingTask => {

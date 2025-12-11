@@ -54,9 +54,7 @@ const processAudioWithPython = async (inputPath, outputPath) => {
       scriptPath: AUDIO_CONFIG.scriptsDir,
       args: [
         inputPath,
-        outputPath,
-        AUDIO_CONFIG.targetSampleRate.toString(),
-        AUDIO_CONFIG.targetChannels.toString()
+        outputPath
       ]
     };
 
@@ -67,26 +65,22 @@ const processAudioWithPython = async (inputPath, outputPath) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Python audio processing completed in ${duration}s`);
 
+    // Get file size from the output file
+    const fileSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
+
     return {
       success: true,
       outputPath: result.output_path,
       duration: result.duration,
       sampleRate: result.sample_rate,
       channels: result.channels,
-      fileSize: result.file_size,
+      fileSize: fileSize,
       processingTime: parseFloat(duration),
       method: 'python'
     };
 
   } catch (error) {
     logger.error(`❌ Python audio processing failed: ${error.message}`);
-    
-    // Try FFmpeg fallback if enabled
-    if (AUDIO_CONFIG.useFfmpegFallback) {
-      logger.warn('⚠️ Attempting FFmpeg fallback...');
-      return await processAudioWithFFmpeg(inputPath, outputPath);
-    }
-    
     throw new Error(`Audio processing failed: ${error.message}`);
   }
 };
@@ -388,42 +382,43 @@ const generateWaveform = async (filePath, points = 100) => {
  */
 const processAudioPipeline = async (inputPath, outputDir) => {
   try {
-    logger.info(`🚀 Starting audio processing pipeline`);
+    logger.info(`🚀 Starting Python-only audio processing pipeline`);
     const startTime = Date.now();
 
-    // Step 1: Validate audio
-    logger.info('📋 Step 1/3: Validating audio...');
-    const validation = await validateAudio(inputPath);
+    // Check if input file exists
+    if (!fs.existsSync(inputPath)) {
+      throw new Error(`Input file not found: ${inputPath}`);
+    }
 
-    // Step 2: Process audio
-    logger.info('🔧 Step 2/3: Processing audio...');
+    const inputStats = fs.statSync(inputPath);
+    logger.info(`📁 Input file: ${path.basename(inputPath)} (${(inputStats.size / 1024).toFixed(1)} KB)`);
+
+    // Process audio with Python (Python script handles all validation internally)
+    logger.info('🐍 Processing audio with Python (includes validation, noise reduction, optimization)...');
     const outputFilename = `processed_${Date.now()}.wav`;
     const outputPath = path.join(outputDir, outputFilename);
-    
+
     const processing = await processAudioWithPython(inputPath, outputPath);
 
-    // Step 3: Verify output
-    logger.info('✔️ Step 3/3: Verifying output...');
-    const outputMetadata = await getAudioMetadata(outputPath);
+    // Get output file stats
+    const outputStats = fs.statSync(outputPath);
+    const outputFileSize = outputStats.size;
 
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.info(`✅ Audio processing pipeline completed in ${totalTime}s`);
+    logger.info(`✅ Audio processing completed in ${totalTime}s`);
 
     return {
       success: true,
       input: {
         path: inputPath,
-        duration: validation.duration,
-        fileSize: validation.fileSize,
-        sampleRate: validation.sampleRate,
-        channels: validation.channels
+        fileSize: inputStats.size
       },
       output: {
         path: outputPath,
-        duration: outputMetadata.duration,
-        fileSize: outputMetadata.fileSize,
-        sampleRate: outputMetadata.sampleRate,
-        channels: outputMetadata.channels
+        duration: processing.duration,
+        fileSize: outputFileSize,
+        sampleRate: processing.sampleRate,
+        channels: processing.channels
       },
       processing: {
         method: processing.method,
@@ -463,7 +458,49 @@ const cleanupAudioFiles = (filePaths) => {
   return { deleted, failed, total: filePaths.length };
 };
 
+/**
+ * Simple wrapper for processAudioPipeline - used by meeting service
+ * Automatically determines output directory from input path
+ * @param {string} inputPath - Path to input audio file
+ * @returns {Object} Processing result with simplified structure
+ */
+const processAudioFile = async (inputPath) => {
+  try {
+    // Determine output directory (processed folder next to raw folder)
+    const inputDir = path.dirname(inputPath);
+    const outputDir = inputDir.replace('/raw', '/processed').replace('\\raw', '\\processed');
+
+    // Ensure output directory exists
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Run the full pipeline
+    const result = await processAudioPipeline(inputPath, outputDir);
+
+    // Return simplified format for meeting service
+    return {
+      success: true,
+      outputPath: result.output.path,
+      duration: result.output.duration,
+      sampleRate: result.output.sampleRate,
+      channels: result.output.channels,
+      fileSize: result.output.fileSize,
+      processingTime: result.processing.totalTime,
+      method: result.processing.method
+    };
+
+  } catch (error) {
+    logger.error(`❌ processAudioFile failed: ${error.message}`);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
 module.exports = {
+  processAudioFile,
   processAudioWithPython,
   processAudioWithFFmpeg,
   validateAudio,

@@ -69,6 +69,24 @@ router.get(
 );
 
 /**
+ * @route   POST /api/meetings/upload
+ * @desc    Create new meeting and upload audio (combined endpoint)
+ * @access  Private
+ * @body    FormData with 'audio', 'title', 'description', 'category'
+ * @returns { success, data: meeting, message }
+ */
+router.post(
+  '/upload',
+  authenticate,
+  rateLimit(10, 60000), // 10 uploads per minute
+  uploadAudio,
+  handleMulterError,
+  validateAudioFile,
+  sanitizeBody,
+  meetingController.createMeetingWithAudio
+);
+
+/**
  * @route   POST /api/meetings
  * @desc    Create new meeting
  * @access  Private

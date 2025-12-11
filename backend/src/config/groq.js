@@ -57,40 +57,65 @@ const groqClient = axios.create({
 const generateMeetingSummary = async (transcript, metadata = {}) => {
   try {
     const startTime = Date.now();
-    
-    // Build system prompt for meeting summarization
-    const systemPrompt = `You are an expert meeting assistant that creates structured, actionable summaries. Your summaries are:
-- Concise yet comprehensive
-- Action-oriented and practical
-- Well-organized with clear sections
-- Focused on decisions, action items, and next steps
 
-Always return a valid JSON object with this exact structure:
+    // Build system prompt for meeting summarization
+    const systemPrompt = `You are an expert meeting assistant that creates structured, actionable summaries.
+
+You will receive:
+1. A meeting transcript
+2. Pre-extracted NLP features to guide your analysis
+
+TASK
+Create a comprehensive summary in JSON format using BOTH the transcript and NLP features:
+
 {
-  "executiveSummary": "2-3 sentence overview of the meeting",
-  "keyDecisions": "List of important decisions made (or 'No major decisions recorded')",
+  "executiveSummary": "2-3 sentences capturing main purpose and outcomes",
+  "keyDecisions": "Important decisions made, or 'No major decisions recorded'",
   "actionItems": [
     {
-      "task": "Description of the task",
-      "assignee": "Person responsible (or null if not mentioned)",
-      "deadline": "Deadline if mentioned (or null)",
+      "task": "What needs to be done",
+      "assignee": "Person responsible or null",
+      "deadline": "When due or null",
       "priority": "high/medium/low"
     }
   ],
-  "nextSteps": "What should happen next",
+  "nextSteps": "What happens next after this meeting",
   "keyTopics": ["topic1", "topic2", "topic3"],
   "sentiment": "positive/neutral/negative/mixed"
-}`;
+}
 
-    // Build user prompt with transcript and context
+GUIDELINES
+- Use identified entities to ensure accuracy in assignees
+- Match action items with extracted action patterns
+- Align topics with pre-identified themes
+- Use sentiment analysis to determine overall meeting tone
+- Be concise but comprehensive
+- Extract ONLY information from the transcript
+- If assignee/deadline not mentioned, use null
+- If no action items, return empty array []
+
+Return ONLY the JSON object, no additional text.`;
+
+    // Build NLP features section
+    const nlpFeaturesSection = metadata.entities || metadata.keyPhrases || metadata.sentiment
+      ? `
+NLP FEATURES (Pre-extracted):
+${metadata.entities && metadata.entities.length > 0 ? `- Entities: ${metadata.entities.map(e => `${e.text} (${e.label})`).join(', ')}` : '- Entities: None detected'}
+${metadata.keyPhrases && metadata.keyPhrases.length > 0 ? `- Key Phrases: ${metadata.keyPhrases.join(', ')}` : '- Key Phrases: None detected'}
+${metadata.sentiment ? `- Sentiment: ${metadata.sentiment.label || 'neutral'} (score: ${metadata.sentiment.score || 0})` : '- Sentiment: Not analyzed'}
+${metadata.topics && metadata.topics.length > 0 ? `- Topics: ${metadata.topics.join(', ')}` : ''}
+`
+      : '';
+
+    // Build user prompt with transcript and NLP context
     const userPrompt = `Meeting Title: ${metadata.title || 'Untitled Meeting'}
 Category: ${metadata.category || 'General'}
 Duration: ${metadata.duration ? Math.round(metadata.duration / 60) + ' minutes' : 'Unknown'}
-
+${nlpFeaturesSection}
 Transcript:
 ${transcript}
 
-Please analyze this meeting transcript and provide a comprehensive summary in the JSON format specified. Focus on extracting concrete action items, decisions, and next steps.`;
+Please analyze this meeting transcript using the NLP features above to guide your analysis. Provide a comprehensive summary in the JSON format specified.`;
 
     logger.info('🤖 Generating summary with Groq API...');
 

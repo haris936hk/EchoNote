@@ -23,7 +23,7 @@ TARGET_SAMPLE_RATE = 16000  # Whisper requires 16kHz
 TARGET_CHANNELS = 1  # Mono audio
 NOISE_REDUCTION_STRENGTH = 0.8  # 0.0 to 1.0
 SPEECH_FREQ_MIN = 85  # Human speech starts at ~85 Hz
-SPEECH_FREQ_MAX = 8000  # Human speech ends at ~8000 Hz
+SPEECH_FREQ_MAX = 7800  # Human speech ends at ~8000 Hz (must be < fs/2=8000Hz)
 
 
 class AudioProcessor:

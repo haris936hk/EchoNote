@@ -29,9 +29,15 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 ### AI/ML Pipeline
 - **Audio Processing**: Python (librosa, noisereduce, scipy) - 5-10s processing
 - **Transcription**: Whisper base.en model - ~60s processing, 88% accuracy acceptable
-- **NLP**: SpaCy en_core_web_lg - ~2s processing
-- **Summarization**: Groq API (Mistral-7B-Instruct) - ~5s processing
-- **Fallback Audio**: FFmpeg - 2s processing
+- **NLP**: SpaCy en_core_web_lg - ~2s processing (extracts entities, key phrases, sentiment, topics)
+- **Summarization**: Groq API (Mistral-7B-Instruct) - ~5s processing (uses NLP features to guide summary generation)
+
+**NLP → AI Integration**:
+- NLP extracts entities, key phrases, action patterns, sentiment, and topics
+- These features are passed to Groq API alongside the transcript
+- AI uses NLP features to ensure accuracy in assignees, topics, and sentiment
+- If NLP doesn't extract features (e.g., no action items), AI still generates summary with empty arrays
+- Format matches echonote_dataset.json exactly
 
 ## Core Architecture Principles
 
@@ -46,7 +52,7 @@ Audio Capture (3-min max)
 ```
 
 ### 2. Processing Time Expectations
-- Audio optimization: 5-10s (Python), 2s (FFmpeg fallback)
+- Audio optimization: 5-10s (Python only)
 - Transcription: ~60s
 - NLP: ~2s
 - Summarization: ~5s
@@ -79,13 +85,30 @@ When there's a conflict between accuracy and speed, **ALWAYS choose accuracy**. 
 - Noise reduction mandatory
 - Handle background noise gracefully
 
-### Summary Format (Always Structured)
+### Summary Format (Always Structured - matches echonote_dataset.json)
+```json
+{
+  "executiveSummary": "2-3 sentences capturing main purpose and outcomes",
+  "keyDecisions": "Important decisions made, or 'No major decisions recorded'",
+  "actionItems": [
+    {
+      "task": "What needs to be done",
+      "assignee": "Person responsible or null",
+      "deadline": "When due or null",
+      "priority": "high/medium/low"
+    }
+  ],
+  "nextSteps": "What happens next after this meeting",
+  "keyTopics": ["topic1", "topic2", "topic3"],
+  "sentiment": "positive/neutral/negative/mixed"
+}
 ```
-Executive Summary: [2-3 sentences]
-Key Decisions: [bullet points]
-Action Items: [bullet points with owners if identifiable]
-Next Steps: [bullet points]
-```
+
+**Important**:
+- If no action items found, return empty array `[]`
+- If assignee/deadline not mentioned, use `null`
+- Backend must handle missing NLP features gracefully
+- AI uses NLP features (entities, key phrases, sentiment) to guide summary generation
 
 ## Database Schema (Prisma)
 
@@ -191,7 +214,7 @@ Next Steps: [bullet points]
 - console.error for debugging (Winston for production)
 - Return consistent response format: `{success, data/error}`
 - Update database status at each pipeline stage
-- Handle FFmpeg fallback if Python fails
+- Python-only audio processing (no fallbacks)
 
 ### Testing Approach
 - Use 30-second test clips for rapid iteration
@@ -310,17 +333,19 @@ try {
 - User documentation
 - Deployment preparation
 
-## When to Use FFmpeg vs Python
+## Audio Processing Architecture
 
-### Use Python (Default - Accuracy First)
-- All production audio processing
-- When processing time <15 seconds is acceptable
-- Professional-grade noise reduction needed
+### Python-Only Processing (Accuracy First)
+- **All audio processing** uses Python with librosa, noisereduce, and scipy
+- **No fallbacks** - Python script handles all validation and error cases internally
+- **Multi-stage pipeline**: Normalization → Silence Removal → Spectral Gating → Noise Reduction → Speech Enhancement
+- **Processing time**: 5-10s (acceptable for accuracy-first MVP)
+- **Output format**: 16kHz mono PCM WAV (optimized for Whisper)
 
-### Use FFmpeg (Fallback - Speed)
-- Python script fails
-- Quick testing during development
-- Simple format conversion without enhancement
+### Python Dependencies Required
+```bash
+pip install librosa noisereduce soundfile scipy numpy
+```
 
 ## Status Codes & Database Enums
 
