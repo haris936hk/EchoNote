@@ -160,16 +160,18 @@ const DashboardPage = () => {
                 </p>
               </div>
 
-              <Button
-                color="primary"
-                size="lg"
-                startContent={<FiPlus size={20} />}
-                onPress={handleNewRecording}
-                className="w-full md:w-auto font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 rounded-2xl"
-                radius="full"
-              >
-                New Recording
-              </Button>
+              <div className="relative group w-full md:w-auto">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                <Button
+                  color="primary"
+                  size="lg"
+                  startContent={<FiPlus size={20} />}
+                  onPress={handleNewRecording}
+                  className="relative w-full md:w-auto font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 rounded-3xl hover:scale-105"
+                >
+                  New Recording
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -180,10 +182,10 @@ const DashboardPage = () => {
 
         {/* Empty State */}
         {meetings.length === 0 && !loading && (
-          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
+          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
             <CardBody className="text-center py-20">
               <div className="mb-8">
-                <div className="w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-primary/20">
+                <div className="w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-primary/30 border border-primary/20 hover:scale-110 transition-all duration-300">
                   <FiMic size={56} className="text-primary" />
                 </div>
               </div>
@@ -193,36 +195,38 @@ const DashboardPage = () => {
               <p className="text-default-600 mb-8 max-w-md mx-auto text-lg">
                 Start by recording your first meeting. Your AI-powered transcription and summary will be ready in minutes.
               </p>
-              <Button
-                color="primary"
-                size="lg"
-                startContent={<FiPlus size={22} />}
-                onPress={handleNewRecording}
-                className="font-semibold px-6 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
-                radius="full"
-              >
-                Record Your First Meeting
-              </Button>
+              <div className="relative inline-block group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
+                <Button
+                  color="primary"
+                  size="md"
+                  startContent={<FiPlus size={18} />}
+                  onPress={handleNewRecording}
+                  className="relative font-semibold px-5 shadow-xl shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 hover:scale-105 rounded-3xl"
+                >
+                  Record Your First Meeting
+                </Button>
+              </div>
 
               {/* Feature hints */}
               <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center">
-                  <div className="p-3 bg-primary/10 rounded-lg w-fit mb-3 mx-auto">
-                    <FiMic className="text-primary" size={24} />
+                <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
+                  <div className="p-3 bg-primary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
+                    <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
                   <p className="text-sm font-semibold mb-1">Quick Recording</p>
                   <p className="text-xs text-default-500">Up to 3 minutes</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center">
-                  <div className="p-3 bg-secondary/10 rounded-lg w-fit mb-3 mx-auto">
-                    <FiCheckCircle className="text-secondary" size={24} />
+                <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/20 transition-all duration-300 group">
+                  <div className="p-3 bg-secondary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
+                    <FiCheckCircle className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
                   <p className="text-sm font-semibold mb-1">AI Transcription</p>
                   <p className="text-xs text-default-500">90%+ accuracy</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center">
-                  <div className="p-3 bg-primary/10 rounded-lg w-fit mb-3 mx-auto">
-                    <FiTrendingUp className="text-primary" size={24} />
+                <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
+                  <div className="p-3 bg-primary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
+                    <FiTrendingUp className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
                   <p className="text-sm font-semibold mb-1">Smart Summaries</p>
                   <p className="text-xs text-default-500">Key insights extracted</p>
@@ -235,63 +239,63 @@ const DashboardPage = () => {
         {/* Statistics Cards - Only show when there are meetings */}
         {meetings.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="rounded-3xl border border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-default-500">Total Meetings</p>
-                  <p className="text-3xl font-bold mt-1">{stats.total}</p>
+                  <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{stats.total}</p>
                 </div>
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <FiMic className="text-primary" size={24} />
+                <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
+                  <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
                 </div>
               </div>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card className="rounded-3xl border border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-default-500">Completed</p>
-                  <p className="text-3xl font-bold text-success mt-1">
+                  <p className="text-3xl font-bold text-success mt-1 group-hover:scale-105 transition-transform duration-300">
                     {stats.completed}
                   </p>
                 </div>
-                <div className="p-3 bg-success/10 rounded-lg">
-                  <FiCheckCircle className="text-success" size={24} />
+                <div className="p-3 bg-success/10 rounded-2xl group-hover:bg-success/20 transition-colors duration-300 shadow-lg">
+                  <FiCheckCircle className="text-success group-hover:scale-110 transition-transform duration-300" size={24} />
                 </div>
               </div>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card className="rounded-3xl border border-divider hover:border-warning/40 hover:shadow-xl hover:shadow-warning/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-default-500">Processing</p>
-                  <p className="text-3xl font-bold text-warning mt-1">
+                  <p className="text-3xl font-bold text-warning mt-1 group-hover:scale-105 transition-transform duration-300">
                     {stats.processing}
                   </p>
                 </div>
-                <div className="p-3 bg-warning/10 rounded-lg">
-                  <FiClock className="text-warning" size={24} />
+                <div className="p-3 bg-warning/10 rounded-2xl group-hover:bg-warning/20 transition-colors duration-300 shadow-lg">
+                  <FiClock className="text-warning group-hover:scale-110 transition-transform duration-300" size={24} />
                 </div>
               </div>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card className="rounded-3xl border border-divider hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-default-500">Total Time</p>
-                  <p className="text-3xl font-bold mt-1">
+                  <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {Math.floor(stats.totalDuration / 60)}m
                   </p>
                 </div>
-                <div className="p-3 bg-secondary/10 rounded-lg">
-                  <FiTrendingUp className="text-secondary" size={24} />
+                <div className="p-3 bg-secondary/10 rounded-2xl group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
+                  <FiTrendingUp className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
                 </div>
               </div>
             </CardBody>
@@ -301,7 +305,7 @@ const DashboardPage = () => {
 
         {/* Failed Meetings Alert */}
         {meetings.length > 0 && stats.failed > 0 && (
-          <Card className="border-danger/20 bg-danger/5">
+          <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300">
             <CardBody>
               <div className="flex items-start gap-3">
                 <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
@@ -324,7 +328,7 @@ const DashboardPage = () => {
           {/* Meetings List - Left Column (3/4) */}
           <div className="lg:col-span-3 space-y-6">
             {/* Search and Filters */}
-            <Card>
+            <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
               <CardBody className="gap-4">
                 <SearchBar
                   value={searchQuery}
@@ -353,19 +357,19 @@ const DashboardPage = () => {
           {/* Sidebar - Right Column (1/4) */}
           <div className="space-y-6">
             {/* Category Breakdown */}
-            <Card>
+            <Card className="rounded-3xl border border-divider">
               <CardHeader>
-                <h3 className="text-lg font-semibold">Categories</h3>
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Categories</h3>
               </CardHeader>
               <Divider />
               <CardBody className="gap-3 max-h-80 overflow-y-auto">
                 {Object.entries(categoryCounts).length > 0 ? (
                   <>
                     <div
-                      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                      className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${
                         selectedCategory === 'ALL'
-                          ? 'bg-primary/10 border border-primary/20'
-                          : 'hover:bg-default-100'
+                          ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
+                          : 'hover:bg-default-100 hover:shadow-md'
                       }`}
                       onClick={() => setSelectedCategory('ALL')}
                     >
@@ -374,6 +378,7 @@ const DashboardPage = () => {
                         size="sm"
                         variant="flat"
                         color={selectedCategory === 'ALL' ? 'primary' : 'default'}
+                        className="rounded-xl"
                       >
                         {stats.total}
                       </Chip>
@@ -381,10 +386,10 @@ const DashboardPage = () => {
                     {Object.entries(categoryCounts).map(([category, count]) => (
                       <div
                         key={category}
-                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                        className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${
                           selectedCategory === category
-                            ? 'bg-primary/10 border border-primary/20'
-                            : 'hover:bg-default-100'
+                            ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
+                            : 'hover:bg-default-100 hover:shadow-md'
                         }`}
                         onClick={() => setSelectedCategory(category)}
                       >
@@ -393,6 +398,7 @@ const DashboardPage = () => {
                           size="sm"
                           variant="flat"
                           color={selectedCategory === category ? 'primary' : 'default'}
+                          className="rounded-xl"
                         >
                           {count}
                         </Chip>
@@ -408,9 +414,9 @@ const DashboardPage = () => {
             </Card>
 
             {/* Quick Actions */}
-            <Card>
+            <Card className="rounded-3xl border border-divider">
               <CardHeader>
-                <h3 className="text-lg font-semibold">Quick Actions</h3>
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Quick Actions</h3>
               </CardHeader>
               <Divider />
               <CardBody className="gap-2">
@@ -419,7 +425,7 @@ const DashboardPage = () => {
                   onPress={handleNewRecording}
                   startContent={<FiPlus size={16} />}
                   fullWidth
-                  className="justify-start"
+                  className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
                 >
                   New Recording
                 </Button>
@@ -428,7 +434,7 @@ const DashboardPage = () => {
                   variant="flat"
                   onPress={() => setSelectedCategory('ALL')}
                   fullWidth
-                  className="justify-start"
+                  className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
                 >
                   View All Meetings
                 </Button>
@@ -437,7 +443,7 @@ const DashboardPage = () => {
                   variant="flat"
                   onPress={() => navigate('/settings')}
                   fullWidth
-                  className="justify-start"
+                  className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
                 >
                   Settings
                 </Button>
@@ -445,10 +451,12 @@ const DashboardPage = () => {
             </Card>
 
             {/* Tips Card */}
-            <Card className="bg-primary/5 border border-primary/20">
+            <Card className="bg-primary/5 border border-primary/20 rounded-3xl hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
               <CardBody className="gap-3">
                 <div className="flex items-start gap-2">
-                  <FiMic className="text-primary mt-0.5 flex-shrink-0" size={18} />
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <FiMic className="text-primary" size={18} />
+                  </div>
                   <div>
                     <p className="text-sm font-semibold text-primary">Pro Tip</p>
                     <p className="text-xs text-primary/80 mt-1">

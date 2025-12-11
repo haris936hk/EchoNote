@@ -50,17 +50,19 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4 overflow-hidden">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative">
         {/* Left Column - Branding & Features */}
         <div className="space-y-8 text-center lg:text-left">
           {/* Logo & Tagline */}
-          <div>
+          <div className="animate-fade-in">
             <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
-              <div className="p-3 bg-primary rounded-2xl">
+              <div className="p-3 bg-primary rounded-3xl shadow-lg shadow-primary/50 hover:shadow-primary/80 transition-all duration-300 hover:scale-105">
                 <FiMic size={32} className="text-white" />
               </div>
-              <h1 className="text-4xl font-bold">EchoNote</h1>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                EchoNote
+              </h1>
             </div>
             <p className="text-xl text-default-600">
               Transform your meetings into actionable insights
@@ -77,10 +79,10 @@ const LoginPage = () => {
               return (
                 <div
                   key={index}
-                  className="flex items-start gap-3 p-4 bg-content1 rounded-lg border border-divider"
+                  className="flex items-start gap-3 p-4 bg-content1 rounded-2xl border border-divider hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 cursor-pointer group"
                 >
-                  <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                    <Icon className="text-primary" size={20} />
+                  <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0 group-hover:bg-primary/20 transition-colors duration-300">
+                    <Icon className="text-primary group-hover:scale-110 transition-transform duration-300" size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm">{feature.title}</h3>
@@ -111,9 +113,11 @@ const LoginPage = () => {
         </div>
 
         {/* Right Column - Login Card */}
-        <Card className="w-full max-w-md mx-auto lg:mx-0">
+        <Card className="w-full max-w-md mx-auto lg:mx-0 rounded-3xl shadow-2xl border-2 border-primary/20 hover:border-primary/40 transition-all duration-500 backdrop-blur-sm bg-content1/95">
           <CardHeader className="flex flex-col items-center gap-2 pb-4">
-            <h2 className="text-2xl font-bold">Welcome Back</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Welcome Back
+            </h2>
             <p className="text-sm text-default-500 text-center">
               Sign in to access your meetings and continue where you left off
             </p>
@@ -123,7 +127,10 @@ const LoginPage = () => {
 
           <CardBody className="gap-6 py-8">
             {/* Login Button */}
-            <LoginButton size="lg" fullWidth />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 blur-2xl opacity-50 rounded-3xl"></div>
+              <LoginButton size="lg" fullWidth />
+            </div>
 
             {/* Privacy Notice */}
             <div className="space-y-3">
@@ -131,7 +138,7 @@ const LoginPage = () => {
                 By signing in, you agree to our Terms of Service and Privacy Policy
               </p>
 
-              <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-2xl border border-primary/20 hover:border-primary/40 transition-all duration-300">
                 <FiLock className="text-primary mt-0.5 flex-shrink-0" size={16} />
                 <p className="text-xs text-default-600">
                   <strong className="text-primary">Secure & Private:</strong> We use Google OAuth for authentication. Your meeting data is encrypted and never shared with third parties.

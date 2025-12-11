@@ -103,15 +103,18 @@ const MeetingDetailPage = () => {
   if (!currentMeeting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md">
+        <Card className="max-w-md rounded-3xl border border-divider shadow-xl">
           <CardBody className="text-center py-12">
             <p className="text-xl font-semibold mb-2">Meeting Not Found</p>
             <p className="text-default-500 mb-6">
               The meeting you're looking for doesn't exist or has been deleted.
             </p>
-            <Button color="primary" onPress={handleBack}>
-              Back to Dashboard
-            </Button>
+            <div className="relative group inline-block">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+              <Button color="primary" onPress={handleBack} className="relative rounded-3xl shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300">
+                Back to Dashboard
+              </Button>
+            </div>
           </CardBody>
         </Card>
       </div>
@@ -126,12 +129,13 @@ const MeetingDetailPage = () => {
           variant="light"
           startContent={<FiArrowLeft size={18} />}
           onPress={handleBack}
+          className="rounded-3xl hover:bg-default-100 hover:shadow-md transition-all duration-300"
         >
           Back to Dashboard
         </Button>
 
         {/* Header Card */}
-        <Card>
+        <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
           <CardHeader className="flex-col items-start gap-4 p-6">
             {/* Title and Actions Row */}
             <div className="flex items-start justify-between w-full gap-4">
@@ -151,6 +155,7 @@ const MeetingDetailPage = () => {
                     variant="flat"
                     startContent={<FiDownload size={18} />}
                     onPress={handleDownloadAudio}
+                    className="rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
                   >
                     Audio
                   </Button>
@@ -158,7 +163,7 @@ const MeetingDetailPage = () => {
 
                 <Dropdown>
                   <DropdownTrigger>
-                    <Button isIconOnly variant="flat" isDisabled={deleting}>
+                    <Button isIconOnly variant="flat" isDisabled={deleting} className="rounded-2xl hover:bg-default-100 transition-all duration-300">
                       <FiMoreVertical size={18} />
                     </Button>
                   </DropdownTrigger>
@@ -227,7 +232,7 @@ const MeetingDetailPage = () => {
 
         {/* Processing State */}
         {currentMeeting.status === 'PROCESSING' && (
-          <Card className="border-warning/20 bg-warning/5">
+          <Card className="border-warning/20 bg-warning/5 rounded-3xl hover:border-warning/40 transition-all duration-300">
             <CardBody>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-warning rounded-full animate-pulse" />
@@ -244,7 +249,7 @@ const MeetingDetailPage = () => {
 
         {/* Failed State */}
         {currentMeeting.status === 'FAILED' && (
-          <Card className="border-danger/20 bg-danger/5">
+          <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300">
             <CardBody>
               <div className="flex items-start gap-3">
                 <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
@@ -253,7 +258,7 @@ const MeetingDetailPage = () => {
                   <p className="text-sm text-danger/80 mb-3">
                     There was an error processing this meeting. Please try uploading the audio again.
                   </p>
-                  <Button size="sm" color="danger" variant="flat">
+                  <Button size="sm" color="danger" variant="flat" className="rounded-2xl hover:bg-danger/10 transition-all duration-300">
                     Retry Processing
                   </Button>
                 </div>
@@ -264,7 +269,7 @@ const MeetingDetailPage = () => {
 
         {/* Content Tabs - Only show if completed */}
         {currentMeeting.status === 'COMPLETED' && (
-          <Card>
+          <Card className="rounded-3xl border border-divider">
             <CardBody className="p-0">
               <Tabs
                 aria-label="Meeting content"
@@ -320,7 +325,7 @@ const MeetingDetailPage = () => {
 
         {/* Audio Player - If available */}
         {currentMeeting.audioUrl && currentMeeting.status === 'COMPLETED' && (
-          <Card>
+          <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
             <CardHeader>
               <h3 className="text-lg font-semibold">Audio Recording</h3>
             </CardHeader>

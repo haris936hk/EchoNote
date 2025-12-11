@@ -30,16 +30,24 @@ const LoginButton = ({ size = 'lg', fullWidth = false }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={handleSuccess}
-          onError={handleError}
-          size={size === 'lg' ? 'large' : 'medium'}
-          width={fullWidth ? '100%' : undefined}
-          theme="outline"
-          text="continue_with"
-          shape="rectangular"
-        />
+      <div className="flex justify-center relative group">
+        {/* Glowing background effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 rounded-2xl"></div>
+
+        {/* Button wrapper with glow */}
+        <div className="relative p-[2px] bg-gradient-to-r from-primary via-secondary to-primary bg-200 rounded-3xl shadow-lg hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 animate-gradient">
+          <div className="bg-content1 rounded-3xl overflow-hidden">
+            <GoogleLogin
+              onSuccess={handleSuccess}
+              onError={handleError}
+              size={size === 'lg' ? 'large' : 'medium'}
+              width={fullWidth ? '100%' : undefined}
+              theme="outline"
+              text="continue_with"
+              shape="rectangular"
+            />
+          </div>
+        </div>
       </div>
 
       {error && (

@@ -107,7 +107,11 @@ const RecordPage = () => {
   };
 
   const handleFormChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Prevent unnecessary updates if value hasn't changed
+    setFormData(prev => {
+      if (prev[field] === value) return prev;
+      return { ...prev, [field]: value };
+    });
     // Clear error for this field
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: null }));
@@ -229,8 +233,7 @@ const RecordPage = () => {
                 variant="light"
                 startContent={<FiArrowLeft size={18} />}
                 onPress={handleBack}
-                radius="full"
-                className="shadow-md hover:shadow-lg transition-all duration-300"
+                className="rounded-3xl shadow-md hover:shadow-lg hover:bg-default-100 transition-all duration-300"
               >
                 Back
               </Button>
@@ -242,7 +245,7 @@ const RecordPage = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-3xl pt-4">
         {/* Main Card */}
-        <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
+        <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
           <Divider />
 
           <CardBody className="gap-6 p-6">
@@ -284,7 +287,7 @@ const RecordPage = () => {
 
                 {/* Recording Error */}
                 {recordingError && (
-                  <Card className="border-danger/20 bg-danger/5">
+                  <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300">
                     <CardBody>
                       <div className="flex items-start gap-3">
                         <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
@@ -297,35 +300,39 @@ const RecordPage = () => {
                 {/* Recording Controls */}
                 <div className="flex flex-col items-center gap-4">
                   {!isRecording && !audioBlob && (
-                    <Button
-                      color="primary"
-                      size="lg"
-                      startContent={<FiMic size={24} />}
-                      onPress={handleStartRecording}
-                      radius="full"
-                      className="min-w-[200px] font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
-                    >
-                      Start Recording
-                    </Button>
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
+                      <Button
+                        color="primary"
+                        size="lg"
+                        startContent={<FiMic size={24} />}
+                        onPress={handleStartRecording}
+                        className="relative min-w-[200px] font-semibold shadow-xl shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 hover:scale-105 transition-all duration-300 rounded-3xl"
+                      >
+                        Start Recording
+                      </Button>
+                    </div>
                   )}
 
                   {isRecording && (
-                    <Button
-                      color="danger"
-                      size="lg"
-                      startContent={<FiSquare size={24} />}
-                      onPress={handleStopRecording}
-                      radius="full"
-                      className="min-w-[200px] font-semibold shadow-lg shadow-danger/30 hover:shadow-xl hover:shadow-danger/40 hover:scale-105 transition-all duration-300"
-                    >
-                      Stop Recording
-                    </Button>
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-danger to-danger opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
+                      <Button
+                        color="danger"
+                        size="lg"
+                        startContent={<FiSquare size={24} />}
+                        onPress={handleStopRecording}
+                        className="relative min-w-[200px] font-semibold shadow-xl shadow-danger/40 hover:shadow-2xl hover:shadow-danger/60 hover:scale-105 transition-all duration-300 rounded-3xl"
+                      >
+                        Stop Recording
+                      </Button>
+                    </div>
                   )}
 
                   {audioBlob && !isRecording && (
                     <>
                       <div className="w-full space-y-4">
-                        <Card className="border-success/20 bg-success/5">
+                        <Card className="border-success/20 bg-success/5 rounded-3xl hover:border-success/40 transition-all duration-300">
                           <CardBody>
                             <div className="flex items-center gap-3">
                               <FiCheck className="text-success" size={20} />
@@ -354,27 +361,28 @@ const RecordPage = () => {
                           variant="flat"
                           onPress={handleReset}
                           fullWidth
-                          radius="full"
-                          className="font-semibold hover:scale-105 transition-all duration-300"
+                          className="font-semibold rounded-3xl hover:bg-default-100 hover:scale-105 transition-all duration-300"
                         >
                           Re-record
                         </Button>
-                        <Button
-                          color="primary"
-                          onPress={() => setStep('details')}
-                          fullWidth
-                          radius="full"
-                          className="font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
-                        >
-                          Continue
-                        </Button>
+                        <div className="relative group flex-1">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                          <Button
+                            color="primary"
+                            onPress={() => setStep('details')}
+                            fullWidth
+                            className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl"
+                          >
+                            Continue
+                          </Button>
+                        </div>
                       </div>
                     </>
                   )}
                 </div>
 
                 {/* Tips */}
-                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg">
+                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg rounded-3xl hover:border-primary/30 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300">
                   <CardBody className="gap-2">
                     <p className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                       💡 Tips for better results:
@@ -393,17 +401,24 @@ const RecordPage = () => {
             {/* Step 2: Details Form */}
             {step === 'details' && (
               <>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {/* Title */}
                   <Input
                     label="Meeting Title"
                     placeholder="e.g., Q1 Planning Session"
                     value={formData.title}
-                    onChange={(e) => handleFormChange('title', e.target.value)}
+                    onValueChange={(value) => handleFormChange('title', value)}
                     isRequired
                     isInvalid={!!formErrors.title}
                     errorMessage={formErrors.title}
                     size="lg"
+                    labelPlacement="outside"
+                    classNames={{
+                      input: "rounded-2xl",
+                      inputWrapper: "rounded-2xl hover:border-primary/30 focus-within:border-primary transition-all duration-300",
+                      label: "text-sm font-medium mb-2",
+                      mainWrapper: "gap-2"
+                    }}
                   />
 
                   {/* Description */}
@@ -411,19 +426,35 @@ const RecordPage = () => {
                     label="Description (Optional)"
                     placeholder="Add any additional context or notes..."
                     value={formData.description}
-                    onChange={(e) => handleFormChange('description', e.target.value)}
+                    onValueChange={(value) => handleFormChange('description', value)}
                     minRows={3}
+                    labelPlacement="outside"
+                    classNames={{
+                      input: "rounded-2xl",
+                      inputWrapper: "rounded-2xl hover:border-primary/30 focus-within:border-primary transition-all duration-300",
+                      label: "text-sm font-medium mb-2",
+                      mainWrapper: "gap-2"
+                    }}
                   />
 
                   {/* Category */}
                   <Select
                     label="Category"
                     placeholder="Select a category"
-                    selectedKeys={[formData.category]}
-                    onChange={(e) => handleFormChange('category', e.target.value)}
+                    selectedKeys={new Set([formData.category])}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0];
+                      if (selected) handleFormChange('category', selected);
+                    }}
                     isRequired
                     isInvalid={!!formErrors.category}
                     errorMessage={formErrors.category}
+                    labelPlacement="outside"
+                    classNames={{
+                      trigger: "rounded-2xl hover:border-primary/30 focus-within:border-primary transition-all duration-300",
+                      label: "text-sm font-medium mb-2",
+                      mainWrapper: "gap-2"
+                    }}
                   >
                     {CATEGORIES.map((category) => (
                       <SelectItem key={category.value} value={category.value}>
@@ -435,7 +466,7 @@ const RecordPage = () => {
 
                 {/* Upload Error */}
                 {uploadError && (
-                  <Card className="border-danger/20 bg-danger/5">
+                  <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300">
                     <CardBody>
                       <div className="flex items-start gap-3">
                         <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
@@ -451,22 +482,23 @@ const RecordPage = () => {
                     variant="flat"
                     onPress={() => setStep('record')}
                     fullWidth
-                    radius="full"
-                    className="font-semibold hover:scale-105 transition-all duration-300"
+                    className="font-semibold rounded-3xl hover:bg-default-100 hover:scale-105 transition-all duration-300"
                   >
                     Back
                   </Button>
-                  <Button
-                    color="primary"
-                    startContent={<FiUpload size={18} />}
-                    onPress={handleSubmit}
-                    isLoading={uploadLoading}
-                    fullWidth
-                    radius="full"
-                    className="font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
-                  >
-                    Upload Meeting
-                  </Button>
+                  <div className="relative group flex-1">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                    <Button
+                      color="primary"
+                      startContent={<FiUpload size={18} />}
+                      onPress={handleSubmit}
+                      isLoading={uploadLoading}
+                      fullWidth
+                      className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl"
+                    >
+                      Upload Meeting
+                    </Button>
+                  </div>
                 </div>
               </>
             )}

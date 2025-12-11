@@ -197,21 +197,22 @@ const MeetingsPage = () => {
                   variant="flat"
                   startContent={<FiDownload size={18} />}
                   onPress={handleExportAll}
-                  className="transition-all duration-300 hover:scale-105"
-                  radius="lg"
+                  className="rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300 hover:scale-105"
                 >
                   Export
                 </Button>
 
-                <Button
-                  color="primary"
-                  startContent={<FiPlus size={18} />}
-                  onPress={handleNewRecording}
-                  className="font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 hover:scale-105"
-                  radius="full"
-                >
-                  New Recording
-                </Button>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                  <Button
+                    color="primary"
+                    startContent={<FiPlus size={18} />}
+                    onPress={handleNewRecording}
+                    className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105 rounded-3xl"
+                  >
+                    New Recording
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -222,7 +223,7 @@ const MeetingsPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl pt-4 space-y-6">
 
         {/* Status Tabs */}
-        <Card>
+        <Card className="rounded-3xl border border-divider">
           <CardBody className="p-0">
             <Tabs
               aria-label="Status filter"
@@ -285,7 +286,7 @@ const MeetingsPage = () => {
         </Card>
 
         {/* Search and Filters */}
-        <Card>
+        <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
           <CardBody className="gap-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -301,6 +302,7 @@ const MeetingsPage = () => {
                   variant="flat"
                   onPress={handleClearFilters}
                   startContent={<FiFilter size={16} />}
+                  className="rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
                 >
                   Clear Filters
                 </Button>
@@ -318,7 +320,7 @@ const MeetingsPage = () => {
 
         {/* Bulk Actions */}
         {selectedMeetings.length > 0 && (
-          <Card className="border-primary/20 bg-primary/5">
+          <Card className="border-primary/20 bg-primary/5 rounded-3xl hover:border-primary/30 transition-all duration-300">
             <CardBody>
               <div className="flex items-center justify-between">
                 <p className="font-medium">
@@ -329,6 +331,7 @@ const MeetingsPage = () => {
                     size="sm"
                     variant="flat"
                     onPress={() => setSelectedMeetings([])}
+                    className="rounded-2xl hover:bg-default-100 transition-all duration-300"
                   >
                     Cancel
                   </Button>
@@ -338,6 +341,7 @@ const MeetingsPage = () => {
                     variant="flat"
                     startContent={<FiTrash2 size={16} />}
                     onPress={handleBulkDelete}
+                    className="rounded-2xl hover:bg-danger/10 transition-all duration-300"
                   >
                     Delete Selected
                   </Button>
@@ -356,11 +360,11 @@ const MeetingsPage = () => {
             itemsPerPage={12}
           />
         ) : (
-          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl">
+          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
             <CardBody className="text-center py-20">
               <div className="relative mb-8">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="relative w-28 h-28 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 backdrop-blur-sm border border-primary/20">
+                <div className="relative w-28 h-28 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/30 backdrop-blur-sm border border-primary/20 hover:scale-110 transition-all duration-300">
                   <FiFilter size={48} className="text-primary" />
                 </div>
               </div>
@@ -377,22 +381,23 @@ const MeetingsPage = () => {
                   variant="flat"
                   onPress={handleClearFilters}
                   size="lg"
-                  className="font-semibold transition-all duration-300 hover:scale-105"
-                  radius="full"
+                  className="font-semibold rounded-3xl hover:bg-primary/10 transition-all duration-300 hover:scale-105"
                 >
                   Clear Filters
                 </Button>
               ) : (
-                <Button
-                  color="primary"
-                  onPress={handleNewRecording}
-                  size="lg"
-                  startContent={<FiPlus size={20} />}
-                  className="font-semibold px-8 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
-                  radius="full"
-                >
-                  Record Your First Meeting
-                </Button>
+                <div className="relative inline-block group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
+                  <Button
+                    color="primary"
+                    onPress={handleNewRecording}
+                    size="lg"
+                    startContent={<FiPlus size={20} />}
+                    className="relative font-semibold px-8 shadow-xl shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 hover:scale-105 rounded-3xl"
+                  >
+                    Record Your First Meeting
+                  </Button>
+                </div>
               )}
             </CardBody>
           </Card>

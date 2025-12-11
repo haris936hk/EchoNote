@@ -297,6 +297,19 @@
   .blur-lg {
     backdrop-filter: blur(16px);
   }
+
+  /* Animation delays */
+  .delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
 }
 
 /* ============================================
