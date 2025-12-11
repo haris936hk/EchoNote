@@ -55,7 +55,10 @@ const MainLayout = ({ children }) => {
           isBordered
           isBlurred
           maxWidth="full"
-          className="bg-content1/95 backdrop-blur-md backdrop-saturate-150"
+          className="bg-content1/95 backdrop-blur-md backdrop-saturate-150 h-20 md:h-24"
+          classNames={{
+            wrapper: "h-20 md:h-24 py-4 md:py-6"
+          }}
         >
         <NavbarBrand>
           <Link to="/dashboard" className="flex items-center gap-2">
@@ -66,7 +69,7 @@ const MainLayout = ({ children }) => {
           </Link>
         </NavbarBrand>
 
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarContent className="hidden sm:flex gap-8 md:gap-12 lg:gap-16 max-w-2xl lg:max-w-3xl" justify="center">
           <NavbarItem isActive={isActive('/dashboard')}>
             <Button
               as={Link}

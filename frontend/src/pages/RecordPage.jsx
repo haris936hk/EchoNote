@@ -19,7 +19,8 @@ import {
   FiUpload,
   FiArrowLeft,
   FiCheck,
-  FiAlertCircle
+  FiAlertCircle,
+  FiArrowUp
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import useAudioRecorder from '../hooks/useAudioRecorder';
@@ -58,21 +59,25 @@ const RecordPage = () => {
   const [step, setStep] = useState('record'); // record, details, uploading, success
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const MAX_RECORDING_TIME = 180; // 3 minutes
   const progress = (recordingTime / MAX_RECORDING_TIME) * 100;
 
-  // Handle scroll to show/hide header
+  // Handle scroll to show/hide header and scroll-to-top button
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
       if (currentScrollY < 10) {
         setShowHeader(true);
+        setShowScrollTop(false);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setShowHeader(false);
+        setShowScrollTop(true);
       } else if (currentScrollY < lastScrollY) {
         setShowHeader(true);
+        setShowScrollTop(currentScrollY > 300);
       }
 
       setLastScrollY(currentScrollY);
@@ -81,6 +86,11 @@ const RecordPage = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleStartRecording = async () => {
     const result = await startRecording();
@@ -184,7 +194,7 @@ const RecordPage = () => {
     <div className="min-h-screen bg-background">
       {/* Sticky Header with Smooth Fade */}
       <div
-        className={`sticky top-[65px] z-40 px-4 py-2 ${
+        className={`sticky top-[80px] md:top-[96px] z-40 px-4 py-4 ${
           showHeader
             ? 'translate-y-0 opacity-100'
             : '-translate-y-1 opacity-0 pointer-events-none'
@@ -503,6 +513,22 @@ const RecordPage = () => {
           </CardBody>
         </Card>
       </div>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          isIconOnly
+          color="primary"
+          variant="shadow"
+          className={`fixed bottom-8 right-8 z-50 w-14 h-14 shadow-2xl shadow-primary/50 hover:shadow-3xl hover:shadow-primary/60 transition-all duration-300 ${
+            showScrollTop ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+          }`}
+          radius="full"
+          onPress={scrollToTop}
+        >
+          <FiArrowUp size={24} />
+        </Button>
+      )}
     </div>
   );
 };
