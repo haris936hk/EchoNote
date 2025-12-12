@@ -39,7 +39,9 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       ...metadata,
       entities: nlpData?.entities || [],
       keyPhrases: nlpData?.keyPhrases || [],
-      sentiment: nlpData?.sentiment || null
+      actionPatterns: nlpData?.actionPatterns || [],
+      sentiment: nlpData?.sentiment || null,
+      topics: nlpData?.topics || []
     };
 
     // Generate summary using Groq
@@ -53,13 +55,14 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     logger.info(`✅ Summary generated in ${duration}s`);
 
     // Validate and structure the response (match echonote_dataset.json format)
+    // Groq now returns flat structure, not nested under 'summary'
     const summary = {
-      executiveSummary: result.summary.executiveSummary || '',
-      keyDecisions: result.summary.keyDecisions || 'No major decisions recorded',
-      actionItems: Array.isArray(result.summary.actionItems) ? validateActionItems(result.summary.actionItems) : [],
-      nextSteps: result.summary.nextSteps || '',
-      keyTopics: Array.isArray(result.summary.keyTopics) ? result.summary.keyTopics : [],
-      sentiment: result.summary.sentiment || 'neutral',
+      executiveSummary: result.executiveSummary || '',
+      keyDecisions: result.keyDecisions || 'No major decisions recorded',
+      actionItems: Array.isArray(result.actionItems) ? validateActionItems(result.actionItems) : [],
+      nextSteps: result.nextSteps || '',
+      keyTopics: Array.isArray(result.keyTopics) ? result.keyTopics : [],
+      sentiment: result.sentiment || 'neutral',
       metadata: {
         model: result.metadata.model,
         tokensUsed: result.metadata.tokensUsed,
@@ -90,11 +93,11 @@ const generateExecutiveSummary = async (transcript, metadata = {}) => {
     logger.info(`📋 Generating executive summary`);
     
     const result = await generateMeetingSummary(transcript, metadata);
-    
+
     return {
       success: true,
-      executiveSummary: result.summary.executiveSummary,
-      sentiment: result.summary.sentiment,
+      executiveSummary: result.executiveSummary,
+      sentiment: result.sentiment,
       processingTime: result.metadata.duration
     };
 

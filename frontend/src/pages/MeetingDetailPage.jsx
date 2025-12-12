@@ -72,9 +72,40 @@ const MeetingDetailPage = () => {
     console.log('Edit meeting:', id);
   };
 
-  const handleDownloadAudio = () => {
-    if (currentMeeting?.audioUrl) {
-      window.open(currentMeeting.audioUrl, '_blank');
+  const handleDownloadAudio = async () => {
+    if (!currentMeeting?.audioUrl) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/${id}/download/audio`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download audio');
+      }
+
+      // Get filename from Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+      const filename = filenameMatch ? filenameMatch[1] : `${currentMeeting.title}_audio.wav`;
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading audio:', error);
+      window.alert('Failed to download audio file. Please try again.');
     }
   };
 
@@ -332,7 +363,7 @@ const MeetingDetailPage = () => {
             <Divider />
             <CardBody>
               <audio
-                src={currentMeeting.audioUrl}
+                src={`${process.env.REACT_APP_API_URL}/meetings/${id}/audio?token=${localStorage.getItem('token')}`}
                 controls
                 className="w-full"
                 preload="metadata"

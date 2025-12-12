@@ -401,19 +401,19 @@ const securityHeaders = (req, res, next) => {
 const requireCompletedMeeting = async (req, res, next) => {
   try {
     const meetingId = req.params.id || req.params.meetingId;
-    
+
     const meeting = await prisma.meeting.findUnique({
       where: { id: meetingId },
       select: { status: true }
     });
-    
+
     if (!meeting) {
       return res.status(404).json({
         success: false,
         error: 'Meeting not found'
       });
     }
-    
+
     if (meeting.status !== 'COMPLETED') {
       return res.status(400).json({
         success: false,
@@ -422,9 +422,9 @@ const requireCompletedMeeting = async (req, res, next) => {
         status: meeting.status
       });
     }
-    
+
     next();
-    
+
   } catch (error) {
     logger.error(`Meeting status check error: ${error.message}`);
     return res.status(500).json({
@@ -434,8 +434,90 @@ const requireCompletedMeeting = async (req, res, next) => {
   }
 };
 
+/**
+ * Authenticate from query parameter (for media streaming)
+ * HTML audio/video elements can't send Authorization headers,
+ * so we need to accept token from query string
+ */
+const authenticateMedia = async (req, res, next) => {
+  try {
+    // Try Authorization header first
+    let token = extractTokenFromHeader(req.headers.authorization);
+
+    // Fallback to query parameter
+    if (!token && req.query.token) {
+      token = req.query.token;
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required. No token provided.'
+      });
+    }
+
+    // Verify JWT token
+    let decoded;
+    try {
+      decoded = verifyToken(token);
+    } catch (error) {
+      if (error.message === 'Token has expired') {
+        return res.status(401).json({
+          success: false,
+          error: 'Token has expired. Please login again.',
+          code: 'TOKEN_EXPIRED'
+        });
+      }
+
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token. Please login again.',
+        code: 'INVALID_TOKEN'
+      });
+    }
+
+    // Fetch user from database
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        picture: true,
+        googleId: true,
+        autoDeleteDays: true,
+        emailNotifications: true,
+        createdAt: true,
+        lastLoginAt: true
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not found. Account may have been deleted.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // Attach user to request object
+    req.user = user;
+    req.userId = user.id;
+
+    next();
+
+  } catch (error) {
+    logger.error(`Media authentication error: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Authentication failed. Please try again.'
+    });
+  }
+};
+
 module.exports = {
   authenticate,
+  authenticateMedia,
   optionalAuth,
   authorize,
   rateLimit,

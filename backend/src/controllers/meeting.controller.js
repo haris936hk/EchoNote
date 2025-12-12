@@ -449,14 +449,39 @@ const downloadAudio = async (req, res) => {
       });
     }
 
-    // Redirect to Supabase URL or return download URL
-    return res.status(200).json({
-      success: true,
-      data: {
-        url: audioData.url,
-        filename: audioData.filename,
-        size: audioData.size,
-        expiresAt: audioData.expiresAt // Signed URL expiration
+    // Stream the audio file directly to the client
+    const fs = require('fs');
+    const path = require('path');
+
+    // Check if file exists
+    if (!fs.existsSync(audioData.url)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Audio file not found on server'
+      });
+    }
+
+    // Set headers for file download
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+    const sanitizedTitle = meeting.title.replace(/[^a-z0-9]/gi, '_');
+    const fileExt = path.extname(audioData.url);
+    const downloadFilename = `${sanitizedTitle}_audio${fileExt}`;
+
+    res.setHeader('Content-Type', 'audio/wav');
+    res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
+    res.setHeader('Content-Length', audioData.size);
+
+    // Stream the file
+    const fileStream = fs.createReadStream(audioData.url);
+    fileStream.pipe(res);
+
+    fileStream.on('error', (err) => {
+      logger.error(`Error streaming audio file: ${err.message}`);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          error: 'Failed to stream audio file'
+        });
       }
     });
 
@@ -657,6 +682,92 @@ const getProcessingStatus = async (req, res) => {
   }
 };
 
+/**
+ * Stream meeting audio (for audio player)
+ * GET /api/meetings/:id/audio
+ * Supports range requests for seeking
+ */
+const streamAudio = async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const audioData = await meetingService.getAudioDownloadUrl(meetingId, userId);
+
+    if (!audioData || !audioData.url) {
+      return res.status(404).json({
+        success: false,
+        error: 'Audio not available'
+      });
+    }
+
+    const fs = require('fs');
+    const path = require('path');
+
+    // Check if file exists
+    if (!fs.existsSync(audioData.url)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Audio file not found on server'
+      });
+    }
+
+    const stat = fs.statSync(audioData.url);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    // Set content type
+    res.setHeader('Content-Type', 'audio/wav');
+    res.setHeader('Accept-Ranges', 'bytes');
+
+    if (range) {
+      // Parse range header
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunkSize = (end - start) + 1;
+
+      // Set partial content headers
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+      res.setHeader('Content-Length', chunkSize);
+
+      // Stream the requested range
+      const fileStream = fs.createReadStream(audioData.url, { start, end });
+      fileStream.pipe(res);
+
+      fileStream.on('error', (err) => {
+        logger.error(`Error streaming audio range: ${err.message}`);
+        if (!res.headersSent) {
+          res.status(500).end();
+        }
+      });
+    } else {
+      // Stream entire file
+      res.setHeader('Content-Length', fileSize);
+      const fileStream = fs.createReadStream(audioData.url);
+      fileStream.pipe(res);
+
+      fileStream.on('error', (err) => {
+        logger.error(`Error streaming audio: ${err.message}`);
+        if (!res.headersSent) {
+          res.status(500).end();
+        }
+      });
+    }
+
+  } catch (error) {
+    logger.error(`Error streaming audio: ${error.message}`);
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to stream audio',
+        details: error.message
+      });
+    }
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -672,5 +783,6 @@ module.exports = {
   downloadSummary,
   searchMeetings,
   getMeetingStats,
-  getProcessingStatus
+  getProcessingStatus,
+  streamAudio
 };

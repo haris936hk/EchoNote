@@ -32,52 +32,22 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
     );
   }
 
-  const parseSummary = (summaryText) => {
-    const sections = {
-      executive: '',
-      decisions: [],
-      actions: [],
-      nextSteps: '',
-      keyPoints: []
-    };
-
-    const lines = summaryText.split('\n');
-    let currentSection = '';
-
-    lines.forEach(line => {
-      const trimmedLine = line.trim();
-      
-      if (!trimmedLine) return;
-
-      if (trimmedLine.toLowerCase().includes('executive summary')) {
-        currentSection = 'executive';
-      } else if (trimmedLine.toLowerCase().includes('key decisions')) {
-        currentSection = 'decisions';
-      } else if (trimmedLine.toLowerCase().includes('action items')) {
-        currentSection = 'actions';
-      } else if (trimmedLine.toLowerCase().includes('next steps')) {
-        currentSection = 'nextSteps';
-      } else if (trimmedLine.toLowerCase().includes('key points')) {
-        currentSection = 'keyPoints';
-      } else {
-        if (currentSection === 'executive') {
-          sections.executive += trimmedLine + ' ';
-        } else if (currentSection === 'decisions' && (trimmedLine.startsWith('-') || trimmedLine.startsWith('•'))) {
-          sections.decisions.push(trimmedLine.substring(1).trim());
-        } else if (currentSection === 'actions' && (trimmedLine.startsWith('-') || trimmedLine.startsWith('•'))) {
-          sections.actions.push(trimmedLine.substring(1).trim());
-        } else if (currentSection === 'keyPoints' && (trimmedLine.startsWith('-') || trimmedLine.startsWith('•'))) {
-          sections.keyPoints.push(trimmedLine.substring(1).trim());
-        } else if (currentSection === 'nextSteps') {
-          sections.nextSteps += trimmedLine + ' ';
-        }
-      }
-    });
-
-    return sections;
+  // Handle structured summary object from backend (echonote_dataset.json format)
+  const summaryData = typeof summary === 'object' ? {
+    executive: summary.executiveSummary || '',
+    decisions: summary.keyDecisions || '',
+    actions: Array.isArray(summary.actionItems) ? summary.actionItems : [],
+    nextSteps: summary.nextSteps || '',
+    keyTopics: Array.isArray(summary.keyTopics) ? summary.keyTopics : [],
+    sentiment: summary.sentiment || 'neutral'
+  } : {
+    executive: '',
+    decisions: '',
+    actions: [],
+    nextSteps: '',
+    keyTopics: [],
+    sentiment: 'neutral'
   };
-
-  const summaryData = parseSummary(summary);
 
   const copyToClipboard = async (text, section) => {
     try {
@@ -94,7 +64,19 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
     if (typeof content === 'string') {
       text = content;
     } else if (Array.isArray(content)) {
-      text = content.map((item, i) => `${i + 1}. ${item}`).join('\n');
+      // Handle action items (objects with task, assignee, deadline, priority)
+      if (content.length > 0 && typeof content[0] === 'object' && content[0].task) {
+        text = content.map((item, i) => {
+          let line = `${i + 1}. ${item.task}`;
+          if (item.assignee) line += ` (Assignee: ${item.assignee})`;
+          if (item.deadline) line += ` (Deadline: ${item.deadline})`;
+          if (item.priority) line += ` [${item.priority.toUpperCase()}]`;
+          return line;
+        }).join('\n');
+      } else {
+        // Handle simple string arrays (topics, etc.)
+        text = content.map((item, i) => `${i + 1}. ${item}`).join('\n');
+      }
     }
     copyToClipboard(text, sectionName);
   };
@@ -102,15 +84,30 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
   return (
     <Card>
       <CardHeader className="flex items-center justify-between px-6 py-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <FiFileText className="text-primary" />
-          {title}
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <FiFileText className="text-primary" />
+            {title}
+          </h2>
+          {summaryData.sentiment && (
+            <Chip
+              size="sm"
+              variant="flat"
+              color={
+                summaryData.sentiment === 'positive' ? 'success' :
+                summaryData.sentiment === 'negative' ? 'danger' :
+                summaryData.sentiment === 'mixed' ? 'warning' : 'default'
+              }
+            >
+              {summaryData.sentiment.charAt(0).toUpperCase() + summaryData.sentiment.slice(1)} Tone
+            </Chip>
+          )}
+        </div>
         <Button
           size="sm"
           variant="flat"
           startContent={copiedSection === 'all' ? <FiCheck size={16} /> : <FiCopy size={16} />}
-          onPress={() => copyToClipboard(summary, 'all')}
+          onPress={() => copyToClipboard(JSON.stringify(summary, null, 2), 'all')}
         >
           {copiedSection === 'all' ? 'Copied!' : 'Copy All'}
         </Button>
@@ -144,44 +141,43 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
           </div>
         )}
 
-        {/* Key Points */}
-        {summaryData.keyPoints.length > 0 && (
+        {/* Key Topics */}
+        {summaryData.keyTopics.length > 0 && (
           <>
             <Divider />
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <FiList className="text-secondary" size={20} />
-                  Key Points
+                  Key Topics
                 </h3>
                 <Button
                   size="sm"
                   isIconOnly
                   variant="light"
-                  onPress={() => copyEntireSection('keyPoints', summaryData.keyPoints)}
+                  onPress={() => copyEntireSection('keyTopics', summaryData.keyTopics)}
                 >
-                  {copiedSection === 'keyPoints' ? <FiCheck size={16} /> : <FiCopy size={16} />}
+                  {copiedSection === 'keyTopics' ? <FiCheck size={16} /> : <FiCopy size={16} />}
                 </Button>
               </div>
-              <ul className="space-y-2">
-                {summaryData.keyPoints.map((point, index) => (
-                  <li 
+              <div className="flex flex-wrap gap-2">
+                {summaryData.keyTopics.map((topic, index) => (
+                  <Chip
                     key={index}
-                    className="flex items-start gap-3 p-3 bg-secondary/5 rounded-lg hover:bg-secondary/10 transition-colors"
+                    color="secondary"
+                    variant="flat"
+                    className="capitalize"
                   >
-                    <Chip size="sm" color="secondary" variant="flat" className="mt-0.5">
-                      {index + 1}
-                    </Chip>
-                    <span className="text-default-700 flex-1">{point}</span>
-                  </li>
+                    {topic}
+                  </Chip>
                 ))}
-              </ul>
+              </div>
             </div>
           </>
         )}
 
         {/* Key Decisions */}
-        {summaryData.decisions.length > 0 && (
+        {summaryData.decisions && summaryData.decisions !== 'No major decisions recorded' && (
           <>
             <Divider />
             <div>
@@ -199,17 +195,11 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
                   {copiedSection === 'decisions' ? <FiCheck size={16} /> : <FiCopy size={16} />}
                 </Button>
               </div>
-              <ul className="space-y-2">
-                {summaryData.decisions.map((decision, index) => (
-                  <li 
-                    key={index}
-                    className="flex items-start gap-3 p-3 bg-success/10 rounded-lg"
-                  >
-                    <FiCheckCircle className="text-success mt-0.5 flex-shrink-0" size={18} />
-                    <span className="text-default-700">{decision}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="bg-success/10 border-l-4 border-success rounded-lg p-4">
+                <p className="text-default-700 leading-relaxed">
+                  {summaryData.decisions}
+                </p>
+              </div>
             </div>
           </>
         )}
@@ -233,17 +223,45 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
                   {copiedSection === 'actions' ? <FiCheck size={16} /> : <FiCopy size={16} />}
                 </Button>
               </div>
-              <ul className="space-y-2">
+              <div className="space-y-3">
                 {summaryData.actions.map((action, index) => (
-                  <li 
+                  <div
                     key={index}
-                    className="flex items-start gap-3 p-3 bg-warning/10 rounded-lg group hover:bg-warning/20 transition-colors"
+                    className="bg-warning/10 border-l-4 border-warning rounded-lg p-4 hover:bg-warning/20 transition-colors"
                   >
-                    <div className="w-5 h-5 rounded border-2 border-warning flex-shrink-0 mt-0.5 cursor-pointer hover:bg-warning/20" />
-                    <span className="text-default-700 flex-1">{action}</span>
-                  </li>
+                    <div className="flex items-start gap-3">
+                      <div className="w-5 h-5 rounded border-2 border-warning flex-shrink-0 mt-0.5 cursor-pointer hover:bg-warning/20" />
+                      <div className="flex-1 space-y-2">
+                        <p className="text-default-700 font-medium">{action.task}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {action.assignee && (
+                            <Chip size="sm" variant="flat" color="primary">
+                              👤 {action.assignee}
+                            </Chip>
+                          )}
+                          {action.deadline && (
+                            <Chip size="sm" variant="flat" color="secondary">
+                              📅 {action.deadline}
+                            </Chip>
+                          )}
+                          {action.priority && (
+                            <Chip
+                              size="sm"
+                              variant="flat"
+                              color={
+                                action.priority === 'high' ? 'danger' :
+                                action.priority === 'medium' ? 'warning' : 'success'
+                              }
+                            >
+                              {action.priority.toUpperCase()}
+                            </Chip>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </>
         )}

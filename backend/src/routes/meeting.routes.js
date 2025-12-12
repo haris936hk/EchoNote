@@ -4,11 +4,12 @@
 const express = require('express');
 const router = express.Router();
 const meetingController = require('../controllers/meeting.controller');
-const { 
-  authenticate, 
-  authorize, 
+const {
+  authenticate,
+  authenticateMedia,
+  authorize,
   rateLimit,
-  requireCompletedMeeting 
+  requireCompletedMeeting
 } = require('../middleware/auth.middleware');
 const {
   validateCreateMeeting,
@@ -208,6 +209,22 @@ router.get(
   validateUUIDParam('id'),
   authorize('meeting'),
   meetingController.getProcessingStatus
+);
+
+/**
+ * @route   GET /api/meetings/:id/audio
+ * @desc    Stream meeting audio file (for audio player)
+ * @access  Private (owner only)
+ * @query   token=<jwt_token> (optional, for audio elements that can't send headers)
+ * @returns Audio file stream (inline)
+ */
+router.get(
+  '/:id/audio',
+  authenticateMedia,
+  validateUUIDParam('id'),
+  authorize('meeting'),
+  rateLimit(30, 60000), // 30 streams per minute
+  meetingController.streamAudio
 );
 
 /**

@@ -96,26 +96,27 @@ GUIDELINES
 
 Return ONLY the JSON object, no additional text.`;
 
-    // Build NLP features section
-    const nlpFeaturesSection = metadata.entities || metadata.keyPhrases || metadata.sentiment
+    // Build NLP features section (matching echonote_dataset.json format)
+    const nlpFeaturesSection = metadata.entities || metadata.keyPhrases || metadata.sentiment || metadata.actionPatterns
       ? `
-NLP FEATURES (Pre-extracted):
-${metadata.entities && metadata.entities.length > 0 ? `- Entities: ${metadata.entities.map(e => `${e.text} (${e.label})`).join(', ')}` : '- Entities: None detected'}
-${metadata.keyPhrases && metadata.keyPhrases.length > 0 ? `- Key Phrases: ${metadata.keyPhrases.join(', ')}` : '- Key Phrases: None detected'}
-${metadata.sentiment ? `- Sentiment: ${metadata.sentiment.label || 'neutral'} (score: ${metadata.sentiment.score || 0})` : '- Sentiment: Not analyzed'}
-${metadata.topics && metadata.topics.length > 0 ? `- Topics: ${metadata.topics.join(', ')}` : ''}
+NLP FEATURES:
+${metadata.entities && metadata.entities.length > 0 ? `**Entities:** ${metadata.entities.map(e => `${e.text} (${e.label})`).join(', ')}` : '**Entities:** None detected'}
+
+${metadata.keyPhrases && metadata.keyPhrases.length > 0 ? `**Key Phrases:** ${metadata.keyPhrases.join(', ')}` : '**Key Phrases:** None detected'}
+
+${metadata.actionPatterns && metadata.actionPatterns.length > 0 ? `**Action Patterns:**\n${metadata.actionPatterns.map(ap => `  • ${ap.action}: ${ap.object}`).join('\n')}` : '**Action Patterns:** None detected'}
+
+${metadata.sentiment ? `**Sentiment:** ${metadata.sentiment.label || 'neutral'} (polarity: ${metadata.sentiment.score || 0})` : '**Sentiment:** Not analyzed'}
+
+${metadata.topics && metadata.topics.length > 0 ? `**Topics:** ${metadata.topics.join(', ')}` : '**Topics:** None detected'}
 `
       : '';
 
-    // Build user prompt with transcript and NLP context
-    const userPrompt = `Meeting Title: ${metadata.title || 'Untitled Meeting'}
-Category: ${metadata.category || 'General'}
-Duration: ${metadata.duration ? Math.round(metadata.duration / 60) + ' minutes' : 'Unknown'}
-${nlpFeaturesSection}
-Transcript:
+    // Build user prompt matching echonote_dataset.json format exactly
+    // Format: "MEETING TRANSCRIPT:\n[transcript]\n\nNLP FEATURES:\n..."
+    const userPrompt = `MEETING TRANSCRIPT:
 ${transcript}
-
-Please analyze this meeting transcript using the NLP features above to guide your analysis. Provide a comprehensive summary in the JSON format specified.`;
+${nlpFeaturesSection}`;
 
     logger.info('🤖 Generating summary with Groq API...');
 
@@ -148,9 +149,15 @@ Please analyze this meeting transcript using the NLP features above to guide you
       logger.info(`📊 Token usage: ${response.data.usage.total_tokens} (prompt: ${response.data.usage.prompt_tokens}, completion: ${response.data.usage.completion_tokens})`);
     }
 
+    // Return flat structure (not nested under 'summary')
     return {
       success: true,
-      summary,
+      executiveSummary: summary.executiveSummary,
+      keyDecisions: summary.keyDecisions,
+      actionItems: summary.actionItems,
+      nextSteps: summary.nextSteps,
+      keyTopics: summary.keyTopics,
+      sentiment: summary.sentiment,
       metadata: {
         model: response.data.model,
         duration: parseFloat(duration),

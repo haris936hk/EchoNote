@@ -138,14 +138,28 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     const summaryResult = await summarizationService.generateSummary(transcript, {
       title: meeting.title,
       category: meeting.category,
-      duration: audioDuration
+      duration: audioDuration,
+      // Pass NLP features to guide AI summary generation (matches echonote_dataset.json format)
+      entities: nlpResult.success ? nlpResult.entities : [],
+      keyPhrases: nlpResult.success ? nlpResult.keyPhrases : [],
+      actionPatterns: nlpResult.success ? nlpResult.actionPatterns : [],
+      sentiment: nlpResult.success ? nlpResult.sentiment : null,
+      topics: nlpResult.success ? nlpResult.topics : []
     });
 
     if (!summaryResult.success) {
       throw new Error(`Summary generation failed: ${summaryResult.error}`);
     }
 
-    const summary = summaryResult.summary;
+    // Extract summary fields (they're at top level of summaryResult, not nested)
+    const summary = {
+      executiveSummary: summaryResult.executiveSummary,
+      keyDecisions: summaryResult.keyDecisions,
+      actionItems: summaryResult.actionItems,
+      nextSteps: summaryResult.nextSteps,
+      keyTopics: summaryResult.keyTopics,
+      sentiment: summaryResult.sentiment
+    };
 
     // Enhance summary with NLP data if available
     const enhancedSummary = nlpResult.success
@@ -153,6 +167,14 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       : summary;
 
     console.log(`✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`);
+    console.log(`📝 Summary data to save:`, {
+      executiveSummary: enhancedSummary.executiveSummary ? enhancedSummary.executiveSummary.substring(0, 50) + '...' : 'null',
+      keyDecisions: enhancedSummary.keyDecisions ? enhancedSummary.keyDecisions.substring(0, 50) + '...' : 'null',
+      actionItemsCount: enhancedSummary.actionItems?.length || 0,
+      nextSteps: enhancedSummary.nextSteps ? enhancedSummary.nextSteps.substring(0, 50) + '...' : 'null',
+      keyTopicsCount: enhancedSummary.keyTopics?.length || 0,
+      sentiment: enhancedSummary.sentiment || 'null'
+    });
 
     // Step 6: Store processed audio in permanent location
     const audioStoragePath = await storeAudioFile(processedAudioPath, meetingId);
@@ -170,7 +192,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       : null;
 
     const nlpActionPatternsText = nlpResult.success && nlpResult.actionPatterns
-      ? nlpResult.actionPatterns.map(a => `${a.action}: ${a.object}`).join('\n  • ')
+      ? '  • ' + nlpResult.actionPatterns.map(a => `${a.action}: ${a.object}`).join('\n  • ')
       : null;
 
     const updatedMeeting = await prisma.meeting.update({
@@ -389,7 +411,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       : null;
 
     const nlpActionPatternsText = nlpResult.success && nlpResult.actionPatterns
-      ? nlpResult.actionPatterns.map(a => `${a.action}: ${a.object}`).join('\n  • ')
+      ? '  • ' + nlpResult.actionPatterns.map(a => `${a.action}: ${a.object}`).join('\n  • ')
       : null;
 
     meeting = await prisma.meeting.update({

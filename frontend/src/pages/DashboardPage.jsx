@@ -15,9 +15,11 @@ import {
   FiAlertCircle,
   FiTrendingUp,
   FiPlus,
-  FiArrowUp
+  FiArrowUp,
+  FiGrid
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
+import { useScrollContext } from '../components/layout/MainLayout';
 import MeetingList from '../components/meeting/MeetingList';
 import CategoryFilter from '../components/meeting/CategoryFilter';
 import SearchBar from '../components/meeting/SearchBar';
@@ -27,12 +29,16 @@ import useDebounce from '../hooks/useDebounce';
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { meetings, fetchMeetings, deleteMeeting, loading } = useMeeting();
+  const { showNavbar } = useScrollContext();
+
+  // Debug: Log showNavbar changes
+  useEffect(() => {
+    console.log('Dashboard - showNavbar:', showNavbar);
+  }, [showNavbar]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
-  const [showHeader, setShowHeader] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
@@ -42,31 +48,16 @@ const DashboardPage = () => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  // Handle scroll to show/hide header and scroll-to-top button
+  // Handle scroll for scroll-to-top button
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 10) {
-        // At the top, always show
-        setShowHeader(true);
-        setShowScrollTop(false);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down & past threshold, hide
-        setShowHeader(false);
-        setShowScrollTop(true);
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up, show
-        setShowHeader(true);
-        setShowScrollTop(currentScrollY > 300);
-      }
-
-      setLastScrollY(currentScrollY);
+      setShowScrollTop(currentScrollY > 300);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   // Scroll to top function
   const scrollToTop = () => {
@@ -131,55 +122,45 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="space-y-8 -mx-4 -my-6">
-      {/* Page Header - Fades on scroll */}
+    <div className="-mx-4">
+      {/* Page Header - Slides down when navbar slides up */}
       <div
-        className={`sticky top-[80px] md:top-[96px] z-40 px-4 py-4 ${
-          showHeader
+        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${
+          !showNavbar
             ? 'translate-y-0 opacity-100'
-            : '-translate-y-1 opacity-0 pointer-events-none'
+            : '-translate-y-full opacity-0 pointer-events-none'
         }`}
         style={{
-          willChange: 'transform, opacity',
-          transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          willChange: 'transform, opacity'
         }}
       >
-        <div className="relative max-w-7xl mx-auto">
-          {/* Glowing effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-3xl blur-xl opacity-50"></div>
-
-          {/* Header content */}
-          <div className="relative bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border border-primary/20 shadow-2xl shadow-primary/25 rounded-3xl px-6 md:px-8 py-5">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Dashboard
-                </h1>
-                <p className="text-default-500 mt-1">
-                  Manage and review your meeting recordings
-                </p>
-              </div>
-
-              <div className="relative group w-full md:w-auto">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
-                <Button
-                  color="primary"
-                  size="lg"
-                  startContent={<FiPlus size={20} />}
-                  onPress={handleNewRecording}
-                  className="relative w-full md:w-auto font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 rounded-3xl hover:scale-105"
-                >
-                  New Recording
-                </Button>
-              </div>
+        {/* Centered wrapper */}
+        <div className="max-w-6xl mx-auto flex justify-center">
+          {/* Rounded container with subtle border */}
+          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/30 backdrop-blur-md backdrop-saturate-150">
+            {/* Dashboard Title */}
+            <div className="flex items-center gap-2 text-default-foreground">
+              <FiGrid size={20} />
+              <span className="font-semibold text-sm">Dashboard</span>
             </div>
-          </div>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-gray-700/30"></div>
+
+            {/* New Recording Button */}
+            <button
+              onClick={handleNewRecording}
+              className="flex items-center gap-2 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+            >
+              <FiPlus size={16} />
+              New Recording
+            </button>
+          </nav>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl pt-4 space-y-8">
-
+      <div className="container mx-auto px-4 max-w-7xl">
         {/* Empty State */}
         {meetings.length === 0 && !loading && (
           <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
@@ -305,7 +286,7 @@ const DashboardPage = () => {
 
         {/* Failed Meetings Alert */}
         {meetings.length > 0 && stats.failed > 0 && (
-          <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300">
+          <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300 mt-4">
             <CardBody>
               <div className="flex items-start gap-3">
                 <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
@@ -324,7 +305,7 @@ const DashboardPage = () => {
 
         {/* Main Content Grid */}
         {meetings.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
           {/* Meetings List - Left Column (3/4) */}
           <div className="lg:col-span-3 space-y-6">
             {/* Search and Filters */}
