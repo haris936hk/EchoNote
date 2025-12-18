@@ -1,11 +1,10 @@
-import { 
-  Card, 
-  CardBody, 
+import {
+  Card,
+  CardBody,
   CardHeader,
   Avatar,
   Divider,
   Button,
-  Switch,
   Select,
   SelectItem
 } from '@heroui/react';
@@ -30,6 +29,14 @@ const ProfileSettings = () => {
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
 
+  const retentionOptions = [
+    { value: '7', label: '7 days' },
+    { value: '30', label: '30 days' },
+    { value: '90', label: '90 days' },
+    { value: '180', label: '6 months' },
+    { value: '365', label: '1 year' },
+  ];
+
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
@@ -43,14 +50,6 @@ const ProfileSettings = () => {
       console.log('Delete account');
     }
   };
-
-  const retentionOptions = [
-    { value: '7', label: '7 days' },
-    { value: '30', label: '30 days' },
-    { value: '90', label: '90 days' },
-    { value: '180', label: '6 months' },
-    { value: '365', label: '1 year' },
-  ];
 
   if (!user) {
     return (
@@ -148,11 +147,18 @@ const ProfileSettings = () => {
                 Switch between light and dark theme
               </p>
             </div>
-            <Switch
-              isSelected={isDark}
-              onValueChange={toggleTheme}
-              color="primary"
-            />
+            <button
+              onClick={toggleTheme}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                isDark ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  isDark ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           <Divider />
@@ -165,46 +171,67 @@ const ProfileSettings = () => {
                 Receive email when meeting processing is complete
               </p>
             </div>
-            <Switch
-              isSelected={emailNotifications}
-              onValueChange={setEmailNotifications}
-              color="primary"
-            />
+            <button
+              onClick={() => setEmailNotifications(!emailNotifications)}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                emailNotifications ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  emailNotifications ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           <Divider />
 
           {/* Auto Delete */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
+          <div>
+            <div className="flex justify-between items-center mb-6">
               <div>
                 <p className="text-sm font-medium">Auto-delete Recordings</p>
                 <p className="text-xs text-default-500">
                   Automatically delete audio files after retention period
                 </p>
               </div>
-              <Switch
-                isSelected={autoDelete}
-                onValueChange={setAutoDelete}
-                color="primary"
-              />
+              <button
+                onClick={() => setAutoDelete(!autoDelete)}
+                className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                  autoDelete ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                    autoDelete ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
 
             {autoDelete && (
-              <Select
-                label="Retention Period"
-                placeholder="Select retention period"
-                selectedKeys={[retentionDays]}
-                onChange={(e) => setRetentionDays(e.target.value)}
-                size="sm"
-                variant="bordered"
-              >
-                {retentionOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </Select>
+              <div className="pl-0 w-full">
+                <p className="text-sm font-medium mb-2">Retention Period</p>
+                <Select
+                  placeholder="Select retention period"
+                  selectedKeys={[retentionDays]}
+                  onChange={(e) => setRetentionDays(e.target.value)}
+                  size="sm"
+                  variant="bordered"
+                  className="w-64"
+                  classNames={{
+                    trigger: "h-10",
+                    value: "text-sm",
+                  }}
+                >
+                  {retentionOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
             )}
           </div>
         </CardBody>
