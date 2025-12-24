@@ -214,14 +214,18 @@ const PreferencesContent = () => {
                 <p className="text-sm font-medium mb-2">Retention Period</p>
                 <Select
                   placeholder="Select retention period"
-                  selectedKeys={[retentionDays]}
-                  onChange={(e) => setRetentionDays(e.target.value)}
+                  selectedKeys={new Set([retentionDays])}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0];
+                    if (selected) setRetentionDays(selected);
+                  }}
                   size="sm"
                   variant="bordered"
                   className="w-64"
                   classNames={{
-                    trigger: "h-10",
-                    value: "text-sm",
+                    trigger: "h-10 pr-8",
+                    value: "text-sm text-left",
+                    selectorIcon: "right-2"
                   }}
                 >
                   <SelectItem key="7" value="7">7 days</SelectItem>

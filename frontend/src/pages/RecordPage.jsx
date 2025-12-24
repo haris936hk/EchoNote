@@ -423,21 +423,23 @@ const RecordPage = () => {
                   </div>
 
                   {/* Description */}
-                  <Textarea
-                    label="Description (Optional)"
-                    placeholder="Add any additional context or notes..."
-                    value={formData.description}
-                    onValueChange={(value) => handleFormChange('description', value)}
-                    minRows={2}
-                    maxRows={4}
-                    labelPlacement="outside"
-                    classNames={{
-                      input: "rounded-lg text-sm resize-none px-3 py-2",
-                      inputWrapper: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300",
-                      label: "text-sm font-medium mb-2",
-                      base: "mb-2"
-                    }}
-                  />
+                  <div className="w-full">
+                    <label className="block text-sm font-medium mb-2">
+                      Description (Optional)
+                    </label>
+                    <Textarea
+                      placeholder="Add any additional context or notes..."
+                      value={formData.description}
+                      onValueChange={(value) => handleFormChange('description', value)}
+                      minRows={3}
+                      maxRows={6}
+                      size="sm"
+                      classNames={{
+                        input: "rounded-lg text-sm resize-none px-3 py-2",
+                        inputWrapper: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300"
+                      }}
+                    />
+                  </div>
 
                   {/* Category */}
                   <Select
