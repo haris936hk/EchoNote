@@ -200,15 +200,17 @@ const MeetingDetail = ({ meeting }) => {
       {/* Content Tabs */}
       <Card>
         <CardBody className="p-0">
-          <Tabs 
+          <Tabs
             aria-label="Meeting content"
             selectedKey={activeTab}
             onSelectionChange={setActiveTab}
             classNames={{
-              tabList: "w-full relative rounded-none p-0 border-b border-divider",
+              base: "w-full",
+              tabList: "w-full relative rounded-none p-0 border-b border-divider gap-0",
               cursor: "w-full bg-primary",
-              tab: "max-w-fit px-6 h-12",
-              tabContent: "group-data-[selected=true]:text-primary"
+              tab: "max-w-fit px-6 h-14 data-[selected=true]:text-primary",
+              tabContent: "group-data-[selected=true]:text-primary w-full",
+              panel: "w-full p-0"
             }}
           >
             {/* Summary Tab */}

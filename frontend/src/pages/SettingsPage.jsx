@@ -6,7 +6,6 @@ import {
   Tabs,
   Tab,
   Divider,
-  Switch,
   Select,
   SelectItem,
   Button,
@@ -147,11 +146,18 @@ const PreferencesContent = () => {
                 Switch between light and dark theme
               </p>
             </div>
-            <Switch
-              isSelected={isDark}
-              onValueChange={toggleTheme}
-              color="primary"
-            />
+            <button
+              onClick={toggleTheme}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                isDark ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  isDark ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           <Divider />
@@ -164,46 +170,67 @@ const PreferencesContent = () => {
                 Receive email when meeting processing is complete
               </p>
             </div>
-            <Switch
-              isSelected={emailNotifications}
-              onValueChange={setEmailNotifications}
-              color="primary"
-            />
+            <button
+              onClick={() => setEmailNotifications(!emailNotifications)}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                emailNotifications ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  emailNotifications ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           <Divider />
 
           {/* Auto Delete */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
+          <div>
+            <div className="flex justify-between items-center mb-6">
               <div>
                 <p className="text-sm font-medium">Auto-delete Recordings</p>
                 <p className="text-xs text-default-500">
                   Automatically delete audio files after retention period
                 </p>
               </div>
-              <Switch
-                isSelected={autoDelete}
-                onValueChange={setAutoDelete}
-                color="primary"
-              />
+              <button
+                onClick={() => setAutoDelete(!autoDelete)}
+                className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                  autoDelete ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                    autoDelete ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
 
             {autoDelete && (
-              <Select
-                label="Retention Period"
-                placeholder="Select retention period"
-                selectedKeys={[retentionDays]}
-                onChange={(e) => setRetentionDays(e.target.value)}
-                size="sm"
-                variant="bordered"
-              >
-                <SelectItem key="7" value="7">7 days</SelectItem>
-                <SelectItem key="30" value="30">30 days</SelectItem>
-                <SelectItem key="90" value="90">90 days</SelectItem>
-                <SelectItem key="180" value="180">6 months</SelectItem>
-                <SelectItem key="365" value="365">1 year</SelectItem>
-              </Select>
+              <div className="pl-0 w-full">
+                <p className="text-sm font-medium mb-2">Retention Period</p>
+                <Select
+                  placeholder="Select retention period"
+                  selectedKeys={[retentionDays]}
+                  onChange={(e) => setRetentionDays(e.target.value)}
+                  size="sm"
+                  variant="bordered"
+                  className="w-64"
+                  classNames={{
+                    trigger: "h-10",
+                    value: "text-sm",
+                  }}
+                >
+                  <SelectItem key="7" value="7">7 days</SelectItem>
+                  <SelectItem key="30" value="30">30 days</SelectItem>
+                  <SelectItem key="90" value="90">90 days</SelectItem>
+                  <SelectItem key="180" value="180">6 months</SelectItem>
+                  <SelectItem key="365" value="365">1 year</SelectItem>
+                </Select>
+              </div>
             )}
           </div>
         </CardBody>
