@@ -225,7 +225,7 @@ const PreferencesContent = () => {
                   classNames={{
                     trigger: "h-10 pr-8",
                     value: "text-sm text-left",
-                    selectorIcon: "right-2"
+                    selectorIcon: "right-10",
                   }}
                 >
                   <SelectItem key="7" value="7">7 days</SelectItem>
