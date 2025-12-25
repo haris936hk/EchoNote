@@ -1,23 +1,23 @@
 import { Chip } from '@heroui/react';
-import { 
-  FiDollarSign, 
-  FiCalendar, 
-  FiUsers, 
-  FiMessageCircle, 
-  FiGrid 
+import {
+  FiDollarSign,
+  FiClipboard,
+  FiUsers,
+  FiMessageCircle,
+  FiGrid
 } from 'react-icons/fi';
 
 const CATEGORIES = [
-  { value: 'ALL', label: 'All Meetings', icon: FiGrid, color: 'default' },
-  { value: 'SALES', label: 'Sales', icon: FiDollarSign, color: 'success' },
-  { value: 'PLANNING', label: 'Planning', icon: FiCalendar, color: 'primary' },
-  { value: 'STANDUP', label: 'Stand-up', icon: FiUsers, color: 'secondary' },
-  { value: 'ONE_ON_ONE', label: 'One-on-One', icon: FiMessageCircle, color: 'warning' },
-  { value: 'OTHER', label: 'Other', icon: FiGrid, color: 'default' },
+  { value: 'ALL', label: 'All Meetings', icon: FiGrid, color: 'default', bgClass: 'bg-default/20', borderClass: 'border-default/30', textClass: 'text-default-600' },
+  { value: 'SALES', label: 'Sales', icon: FiDollarSign, color: 'warning', bgClass: 'bg-amber-500/15', borderClass: 'border-amber-500/30', textClass: 'text-amber-500' },
+  { value: 'PLANNING', label: 'Planning', icon: FiClipboard, color: 'primary', bgClass: 'bg-primary/15', borderClass: 'border-primary/30', textClass: 'text-primary' },
+  { value: 'STANDUP', label: 'Stand-up', icon: FiUsers, color: 'secondary', bgClass: 'bg-secondary/15', borderClass: 'border-secondary/30', textClass: 'text-secondary' },
+  { value: 'ONE_ON_ONE', label: 'One-on-One', icon: FiMessageCircle, color: 'warning', bgClass: 'bg-orange-500/15', borderClass: 'border-orange-500/30', textClass: 'text-orange-500' },
+  { value: 'OTHER', label: 'Other', icon: FiGrid, color: 'default', bgClass: 'bg-default/20', borderClass: 'border-default/30', textClass: 'text-default-500' },
 ];
 
-const CategoryFilter = ({ 
-  selectedCategory = 'ALL', 
+const CategoryFilter = ({
+  selectedCategory = 'ALL',
   onCategoryChange,
   showCount = false,
   counts = {}
@@ -59,9 +59,9 @@ const CategoryFilter = ({
 };
 
 // Compact version for mobile
-export const CompactCategoryFilter = ({ 
-  selectedCategory = 'ALL', 
-  onCategoryChange 
+export const CompactCategoryFilter = ({
+  selectedCategory = 'ALL',
+  onCategoryChange
 }) => {
   const handleChange = (e) => {
     if (onCategoryChange) {
@@ -91,10 +91,13 @@ export const CategoryBadge = ({ category, size = 'md' }) => {
 
   return (
     <Chip
-      color={categoryData.color}
       variant="flat"
       startContent={<Icon size={14} />}
       size={size}
+      classNames={{
+        base: `${categoryData.bgClass} ${categoryData.borderClass} border px-3 gap-1.5`,
+        content: `${categoryData.textClass} text-xs font-medium px-0`
+      }}
     >
       {categoryData.label}
     </Chip>

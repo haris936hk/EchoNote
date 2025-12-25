@@ -60,11 +60,12 @@ const SearchBar = ({
       classNames={{
         base: `${className} w-full`,
         input: "text-sm md:text-base",
-        inputWrapper: "h-12 md:h-14 bg-gradient-to-r from-default-100 to-default-50 data-[hover=true]:from-default-200 data-[hover=true]:to-default-100 border-2 border-transparent data-[focus=true]:border-primary/50 shadow-sm data-[hover=true]:shadow-md transition-all duration-300"
+        inputWrapper: "h-12 md:h-14 bg-default-100 data-[hover=true]:bg-default-200 data-[focus=true]:bg-default-100 shadow-sm data-[hover=true]:shadow-md transition-all duration-300 rounded-3xl"
       }}
       isClearable={false}
       size="lg"
-      radius="lg"
+      radius="full"
+      variant="flat"
     />
   );
 };

@@ -4,8 +4,8 @@ import { FiGrid, FiList } from 'react-icons/fi';
 import MeetingCard from './MeetingCard';
 import { SkeletonLoader } from '../common/Loader';
 
-const MeetingList = ({ 
-  meetings = [], 
+const MeetingList = ({
+  meetings = [],
   loading = false,
   onDelete,
   onEdit,
@@ -28,7 +28,7 @@ const MeetingList = ({
   if (loading) {
     return (
       <div className={
-        viewMode === 'grid' 
+        viewMode === 'grid'
           ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
           : 'space-y-4'
       }>
@@ -86,7 +86,7 @@ const MeetingList = ({
       {/* Meeting Cards */}
       <div className={
         viewMode === 'grid'
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'
           : 'space-y-4'
       }>
         {currentMeetings.map((meeting) => (

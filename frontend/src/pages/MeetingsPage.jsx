@@ -164,58 +164,53 @@ const MeetingsPage = () => {
 
   return (
     <div className="space-y-6 -mx-4 -my-6">
-      {/* Page Header - Fades on scroll */}
+      {/* Page Header - Slides down when navbar slides up */}
       <div
-        className={`sticky top-[80px] md:top-[96px] z-40 px-4 py-4 ${
-          showHeader
+        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${
+          !showHeader
             ? 'translate-y-0 opacity-100'
-            : '-translate-y-1 opacity-0 pointer-events-none'
+            : '-translate-y-full opacity-0 pointer-events-none'
         }`}
         style={{
-          willChange: 'transform, opacity',
-          transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          willChange: 'transform, opacity'
         }}
       >
-        <div className="relative max-w-7xl mx-auto">
-          {/* Glowing effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-3xl blur-xl opacity-50"></div>
-
-          {/* Header content */}
-          <div className="relative bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border border-primary/20 shadow-2xl shadow-primary/25 rounded-3xl px-6 md:px-8 py-5">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  My Meetings
-                </h1>
-                <p className="text-default-500 mt-1">
-                  {filteredMeetings.length} of {meetings.length} meeting(s)
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="flat"
-                  startContent={<FiDownload size={18} />}
-                  onPress={handleExportAll}
-                  className="rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300 hover:scale-105"
-                >
-                  Export
-                </Button>
-
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
-                  <Button
-                    color="primary"
-                    startContent={<FiPlus size={18} />}
-                    onPress={handleNewRecording}
-                    className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105 rounded-3xl"
-                  >
-                    New Recording
-                  </Button>
-                </div>
-              </div>
+        {/* Centered wrapper */}
+        <div className="max-w-6xl mx-auto flex justify-center">
+          {/* Rounded container with subtle border */}
+          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/30 backdrop-blur-md backdrop-saturate-150">
+            {/* Meetings Title with count */}
+            <div className="flex items-center gap-2 text-default-foreground">
+              <FiFilter size={20} />
+              <span className="font-semibold text-sm">
+                My Meetings ({filteredMeetings.length}/{meetings.length})
+              </span>
             </div>
-          </div>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-gray-700/30"></div>
+
+            {/* Export Button */}
+            <button
+              onClick={handleExportAll}
+              className="flex items-center gap-2 text-sm font-medium text-default-500 hover:text-primary transition-colors"
+            >
+              <FiDownload size={16} />
+              Export
+            </button>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-gray-700/30"></div>
+
+            {/* New Recording Button */}
+            <button
+              onClick={handleNewRecording}
+              className="flex items-center gap-2 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+            >
+              <FiPlus size={16} />
+              New Recording
+            </button>
+          </nav>
         </div>
       </div>
 
