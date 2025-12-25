@@ -44,10 +44,14 @@ const CategoryFilter = ({
             onPress={() => handleCategoryClick(category.value)}
             className="cursor-pointer transition-colors"
             size="md"
+            classNames={{
+              base: "px-3 gap-1.5",
+              content: "px-0"
+            }}
           >
             {category.label}
             {showCount && category.value !== 'ALL' && (
-              <span className="ml-2 text-xs opacity-80">
+              <span className="ml-1.5 text-xs opacity-80">
                 ({count})
               </span>
             )}
