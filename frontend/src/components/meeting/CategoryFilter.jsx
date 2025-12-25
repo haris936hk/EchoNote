@@ -29,7 +29,7 @@ const CategoryFilter = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-3 p-1">
+    <div className="flex flex-wrap gap-12 p-1 justify-start">
       {CATEGORIES.map((category) => {
         const Icon = category.icon;
         const isSelected = selectedCategory === category.value;

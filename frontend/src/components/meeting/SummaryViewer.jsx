@@ -1,50 +1,67 @@
-import { 
-  Card, 
-  CardBody, 
+import {
+  Card,
+  CardBody,
   CardHeader,
   Button,
   Divider,
-  Accordion,
-  AccordionItem,
   Chip
 } from '@heroui/react';
-import { 
-  FiFileText, 
-  FiCheckCircle, 
-  FiList, 
-  FiCalendar,
+import {
+  FiFileText,
+  FiCheckSquare,
+  FiList,
+  FiArrowRight,
   FiCopy,
-  FiCheck
+  FiCheck,
+  FiUser,
+  FiCalendar,
+  FiTag
 } from 'react-icons/fi';
 import { useState } from 'react';
 
+// Color palette for topic chips
+const TOPIC_COLORS = [
+  { bg: 'bg-blue-500/15', border: 'border-blue-500/30', text: 'text-blue-400' },
+  { bg: 'bg-purple-500/15', border: 'border-purple-500/30', text: 'text-purple-400' },
+  { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400' },
+  { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400' },
+  { bg: 'bg-pink-500/15', border: 'border-pink-500/30', text: 'text-pink-400' },
+  { bg: 'bg-cyan-500/15', border: 'border-cyan-500/30', text: 'text-cyan-400' },
+  { bg: 'bg-orange-500/15', border: 'border-orange-500/30', text: 'text-orange-400' },
+  { bg: 'bg-indigo-500/15', border: 'border-indigo-500/30', text: 'text-indigo-400' },
+];
+
 const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
   const [copiedSection, setCopiedSection] = useState(null);
+  const [checkedItems, setCheckedItems] = useState({});
 
   if (!summary) {
     return (
-      <Card>
-        <CardBody className="text-center py-12">
-          <FiFileText size={48} className="mx-auto text-default-300 mb-4" />
-          <p className="text-default-500">No summary available</p>
+      <Card className="border border-divider rounded-2xl">
+        <CardBody className="text-center py-16">
+          <div className="w-16 h-16 bg-default-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FiFileText size={32} className="text-default-300" />
+          </div>
+          <p className="text-default-500 text-lg">No summary available</p>
+          <p className="text-default-400 text-sm mt-1">The summary will appear here once processing is complete</p>
         </CardBody>
       </Card>
     );
   }
 
-  // Handle structured summary object from backend (echonote_dataset.json format)
+  // Handle structured summary object from backend (matching OUTPUT_SCHEMA)
   const summaryData = typeof summary === 'object' ? {
     executive: summary.executiveSummary || '',
-    decisions: summary.keyDecisions || '',
+    decisions: Array.isArray(summary.keyDecisions) ? summary.keyDecisions : [],
     actions: Array.isArray(summary.actionItems) ? summary.actionItems : [],
-    nextSteps: summary.nextSteps || '',
+    nextSteps: Array.isArray(summary.nextSteps) ? summary.nextSteps : [],
     keyTopics: Array.isArray(summary.keyTopics) ? summary.keyTopics : [],
     sentiment: summary.sentiment || 'neutral'
   } : {
     executive: '',
-    decisions: '',
+    decisions: [],
     actions: [],
-    nextSteps: '',
+    nextSteps: [],
     keyTopics: [],
     sentiment: 'neutral'
   };
@@ -64,7 +81,6 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
     if (typeof content === 'string') {
       text = content;
     } else if (Array.isArray(content)) {
-      // Handle action items (objects with task, assignee, deadline, priority)
       if (content.length > 0 && typeof content[0] === 'object' && content[0].task) {
         text = content.map((item, i) => {
           let line = `${i + 1}. ${item.task}`;
@@ -74,306 +90,292 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
           return line;
         }).join('\n');
       } else {
-        // Handle simple string arrays (topics, etc.)
         text = content.map((item, i) => `${i + 1}. ${item}`).join('\n');
       }
     }
     copyToClipboard(text, sectionName);
   };
 
+  const toggleActionItem = (index) => {
+    setCheckedItems(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const getSentimentConfig = (sentiment) => {
+    switch (sentiment) {
+      case 'positive':
+        return { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400', label: 'Positive Tone' };
+      case 'negative':
+        return { bg: 'bg-red-500/15', border: 'border-red-500/30', text: 'text-red-400', label: 'Negative Tone' };
+      case 'mixed':
+        return { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400', label: 'Mixed Tone' };
+      default:
+        return { bg: 'bg-default/20', border: 'border-default/30', text: 'text-default-500', label: 'Neutral Tone' };
+    }
+  };
+
+  const getPriorityConfig = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case 'high':
+        return { bg: 'bg-red-500/15', border: 'border-red-500/30', text: 'text-red-400' };
+      case 'medium':
+        return { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400' };
+      case 'low':
+        return { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400' };
+      default:
+        return { bg: 'bg-default/20', border: 'border-default/30', text: 'text-default-500' };
+    }
+  };
+
+  const sentimentConfig = getSentimentConfig(summaryData.sentiment);
+
+  const CopyButton = ({ section, content, className = '' }) => (
+    <Button
+      size="sm"
+      isIconOnly
+      variant="light"
+      className={`opacity-60 hover:opacity-100 transition-opacity ${className}`}
+      onPress={() => copyEntireSection(section, content)}
+    >
+      {copiedSection === section ? (
+        <FiCheck size={16} className="text-success" />
+      ) : (
+        <FiCopy size={16} />
+      )}
+    </Button>
+  );
+
+  const SectionHeader = ({ icon: Icon, title, iconColor, section, content }) => (
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-base font-semibold flex items-center gap-2.5">
+        <div className={`p-1.5 rounded-lg ${iconColor}/10`}>
+          <Icon className={iconColor} size={18} />
+        </div>
+        {title}
+      </h3>
+      <CopyButton section={section} content={content} />
+    </div>
+  );
+
   return (
-    <Card>
-      <CardHeader className="flex items-center justify-between px-6 py-4">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <FiFileText className="text-primary" />
+          <h2 className="text-xl font-bold flex items-center gap-2.5">
+            <FiFileText className="text-primary" size={22} />
             {title}
           </h2>
-          {summaryData.sentiment && (
-            <Chip
-              size="sm"
-              variant="flat"
-              color={
-                summaryData.sentiment === 'positive' ? 'success' :
-                summaryData.sentiment === 'negative' ? 'danger' :
-                summaryData.sentiment === 'mixed' ? 'warning' : 'default'
-              }
-            >
-              {summaryData.sentiment.charAt(0).toUpperCase() + summaryData.sentiment.slice(1)} Tone
-            </Chip>
-          )}
+          <Chip
+            size="sm"
+            variant="flat"
+            classNames={{
+              base: `${sentimentConfig.bg} ${sentimentConfig.border} border px-2.5`,
+              content: `${sentimentConfig.text} text-xs font-medium`
+            }}
+          >
+            {sentimentConfig.label}
+          </Chip>
         </div>
         <Button
           size="sm"
           variant="flat"
-          startContent={copiedSection === 'all' ? <FiCheck size={16} /> : <FiCopy size={16} />}
+          className="rounded-xl"
+          startContent={copiedSection === 'all' ? <FiCheck size={14} className="text-success" /> : <FiCopy size={14} />}
           onPress={() => copyToClipboard(JSON.stringify(summary, null, 2), 'all')}
         >
           {copiedSection === 'all' ? 'Copied!' : 'Copy All'}
         </Button>
-      </CardHeader>
+      </div>
 
-      <Divider />
+      {/* Executive Summary */}
+      {summaryData.executive && (
+        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
+          <CardBody className="p-5">
+            <SectionHeader
+              icon={FiFileText}
+              title="Executive Summary"
+              iconColor="text-primary"
+              section="executive"
+              content={summaryData.executive}
+            />
+            <p className="text-default-600 leading-relaxed">
+              {summaryData.executive}
+            </p>
+          </CardBody>
+        </Card>
+      )}
 
-      <CardBody className="p-6 space-y-6">
-        {/* Executive Summary */}
-        {summaryData.executive && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <FiFileText className="text-primary" size={20} />
-                Executive Summary
-              </h3>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="light"
-                onPress={() => copyEntireSection('executive', summaryData.executive)}
-              >
-                {copiedSection === 'executive' ? <FiCheck size={16} /> : <FiCopy size={16} />}
-              </Button>
-            </div>
-            <div className="bg-primary/5 border-l-4 border-primary rounded-lg p-4">
-              <p className="text-default-700 leading-relaxed">
-                {summaryData.executive}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Key Topics */}
-        {summaryData.keyTopics.length > 0 && (
-          <>
-            <Divider />
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FiList className="text-secondary" size={20} />
-                  Key Topics
-                </h3>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="light"
-                  onPress={() => copyEntireSection('keyTopics', summaryData.keyTopics)}
-                >
-                  {copiedSection === 'keyTopics' ? <FiCheck size={16} /> : <FiCopy size={16} />}
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {summaryData.keyTopics.map((topic, index) => (
+      {/* Key Topics */}
+      {summaryData.keyTopics.length > 0 && (
+        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
+          <CardBody className="p-5">
+            <SectionHeader
+              icon={FiTag}
+              title="Key Topics"
+              iconColor="text-secondary"
+              section="keyTopics"
+              content={summaryData.keyTopics}
+            />
+            <div className="flex flex-wrap gap-2.5">
+              {summaryData.keyTopics.map((topic, index) => {
+                const colorConfig = TOPIC_COLORS[index % TOPIC_COLORS.length];
+                return (
                   <Chip
                     key={index}
-                    color="secondary"
                     variant="flat"
-                    className="capitalize"
+                    classNames={{
+                      base: `${colorConfig.bg} ${colorConfig.border} border px-3 py-1`,
+                      content: `${colorConfig.text} text-sm font-medium capitalize`
+                    }}
                   >
                     {topic}
                   </Chip>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </>
-        )}
+          </CardBody>
+        </Card>
+      )}
 
-        {/* Key Decisions */}
-        {summaryData.decisions && summaryData.decisions !== 'No major decisions recorded' && (
-          <>
-            <Divider />
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FiCheckCircle className="text-success" size={20} />
-                  Key Decisions
-                </h3>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="light"
-                  onPress={() => copyEntireSection('decisions', summaryData.decisions)}
+      {/* Key Decisions */}
+      {summaryData.decisions.length > 0 && (
+        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
+          <CardBody className="p-5">
+            <SectionHeader
+              icon={FiCheckSquare}
+              title="Key Decisions"
+              iconColor="text-success"
+              section="decisions"
+              content={summaryData.decisions}
+            />
+            <div className="space-y-2">
+              {summaryData.decisions.map((decision, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 bg-success/5 border border-success/10 rounded-xl"
                 >
-                  {copiedSection === 'decisions' ? <FiCheck size={16} /> : <FiCopy size={16} />}
-                </Button>
-              </div>
-              <div className="bg-success/10 border-l-4 border-success rounded-lg p-4">
-                <p className="text-default-700 leading-relaxed">
-                  {summaryData.decisions}
-                </p>
-              </div>
+                  <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-success text-xs font-semibold">{index + 1}</span>
+                  </div>
+                  <p className="text-default-600 leading-relaxed">{decision}</p>
+                </div>
+              ))}
             </div>
-          </>
-        )}
+          </CardBody>
+        </Card>
+      )}
 
-        {/* Action Items */}
-        {summaryData.actions.length > 0 && (
-          <>
-            <Divider />
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FiList className="text-warning" size={20} />
-                  Action Items
-                </h3>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="light"
-                  onPress={() => copyEntireSection('actions', summaryData.actions)}
-                >
-                  {copiedSection === 'actions' ? <FiCheck size={16} /> : <FiCopy size={16} />}
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {summaryData.actions.map((action, index) => (
+      {/* Action Items */}
+      {summaryData.actions.length > 0 && (
+        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
+          <CardBody className="p-5">
+            <SectionHeader
+              icon={FiCheckSquare}
+              title="Action Items"
+              iconColor="text-warning"
+              section="actions"
+              content={summaryData.actions}
+            />
+            <div className="space-y-3">
+              {summaryData.actions.map((action, index) => {
+                const isChecked = checkedItems[index];
+                const priorityConfig = getPriorityConfig(action.priority);
+
+                return (
                   <div
                     key={index}
-                    className="bg-warning/10 border-l-4 border-warning rounded-lg p-4 hover:bg-warning/20 transition-colors"
+                    className={`
+                      group relative rounded-xl p-4 
+                      border border-divider/50 
+                      bg-gradient-to-r from-default-50/50 to-transparent
+                      hover:border-primary/30 hover:shadow-sm
+                      transition-all duration-200
+                      ${isChecked ? 'opacity-60' : ''}
+                    `}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded border-2 border-warning flex-shrink-0 mt-0.5 cursor-pointer hover:bg-warning/20" />
-                      <div className="flex-1 space-y-2">
-                        <p className="text-default-700 font-medium">{action.task}</p>
-                        <div className="flex flex-wrap gap-2">
+                      <div
+                        onClick={() => toggleActionItem(index)}
+                        className={`
+                          w-5 h-5 rounded-md border-2 flex-shrink-0 mt-0.5 cursor-pointer
+                          flex items-center justify-center
+                          transition-all duration-200
+                          ${isChecked
+                            ? 'bg-success border-success'
+                            : 'border-default-300 hover:border-success/50'
+                          }
+                        `}
+                      >
+                        {isChecked && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-2.5">
+                        <p className={`text-default-700 font-medium leading-relaxed ${isChecked ? 'line-through' : ''}`}>
+                          {action.task}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
                           {action.assignee && (
-                            <Chip size="sm" variant="flat" color="primary">
-                              👤 {action.assignee}
-                            </Chip>
+                            <div className="flex items-center gap-1.5 text-xs text-default-500 bg-default-100 px-2.5 py-1 rounded-lg">
+                              <FiUser size={12} />
+                              <span>{action.assignee}</span>
+                            </div>
                           )}
                           {action.deadline && (
-                            <Chip size="sm" variant="flat" color="secondary">
-                              📅 {action.deadline}
-                            </Chip>
+                            <div className="flex items-center gap-1.5 text-xs text-default-500 bg-default-100 px-2.5 py-1 rounded-lg">
+                              <FiCalendar size={12} />
+                              <span>{action.deadline}</span>
+                            </div>
                           )}
                           {action.priority && (
-                            <Chip
-                              size="sm"
-                              variant="flat"
-                              color={
-                                action.priority === 'high' ? 'danger' :
-                                action.priority === 'medium' ? 'warning' : 'success'
-                              }
-                            >
-                              {action.priority.toUpperCase()}
-                            </Chip>
+                            <div className={`flex items-center gap-1.5 text-xs font-semibold uppercase ${priorityConfig.bg} px-2.5 py-1 rounded-lg`}>
+                              <span className={priorityConfig.text}>{action.priority}</span>
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </>
-        )}
+          </CardBody>
+        </Card>
+      )}
 
-        {/* Next Steps */}
-        {summaryData.nextSteps && (
-          <>
-            <Divider />
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FiCalendar className="text-primary" size={20} />
-                  Next Steps
-                </h3>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="light"
-                  onPress={() => copyEntireSection('nextSteps', summaryData.nextSteps)}
+      {/* Next Steps */}
+      {summaryData.nextSteps.length > 0 && (
+        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
+          <CardBody className="p-5">
+            <SectionHeader
+              icon={FiArrowRight}
+              title="Next Steps"
+              iconColor="text-emerald-500"
+              section="nextSteps"
+              content={summaryData.nextSteps}
+            />
+            <div className="space-y-2">
+              {summaryData.nextSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 bg-default-50 border border-default-100 rounded-xl"
                 >
-                  {copiedSection === 'nextSteps' ? <FiCheck size={16} /> : <FiCopy size={16} />}
-                </Button>
-              </div>
-              <div className="bg-default-100 rounded-lg p-4">
-                <p className="text-default-700 leading-relaxed">
-                  {summaryData.nextSteps}
-                </p>
-              </div>
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <FiArrowRight size={12} className="text-emerald-500" />
+                  </div>
+                  <p className="text-default-600 leading-relaxed">{step}</p>
+                </div>
+              ))}
             </div>
-          </>
-        )}
-      </CardBody>
-    </Card>
-  );
-};
-
-// Compact version with accordion
-export const CompactSummaryViewer = ({ summary }) => {
-  const parseSummary = (summaryText) => {
-    // Same parsing logic as above
-    const sections = {
-      executive: '',
-      decisions: [],
-      actions: [],
-      nextSteps: ''
-    };
-    // ... parsing code
-    return sections;
-  };
-
-  const summaryData = parseSummary(summary);
-
-  return (
-    <Accordion variant="splitted">
-      {summaryData.executive && (
-        <AccordionItem
-          key="executive"
-          title="Executive Summary"
-          startContent={<FiFileText className="text-primary" />}
-        >
-          <p className="text-sm text-default-700 leading-relaxed">
-            {summaryData.executive}
-          </p>
-        </AccordionItem>
+          </CardBody>
+        </Card>
       )}
-
-      {summaryData.decisions.length > 0 && (
-        <AccordionItem
-          key="decisions"
-          title={`Key Decisions (${summaryData.decisions.length})`}
-          startContent={<FiCheckCircle className="text-success" />}
-        >
-          <ul className="space-y-2">
-            {summaryData.decisions.map((decision, index) => (
-              <li key={index} className="text-sm flex items-start gap-2">
-                <span className="text-success">•</span>
-                <span>{decision}</span>
-              </li>
-            ))}
-          </ul>
-        </AccordionItem>
-      )}
-
-      {summaryData.actions.length > 0 && (
-        <AccordionItem
-          key="actions"
-          title={`Action Items (${summaryData.actions.length})`}
-          startContent={<FiList className="text-warning" />}
-        >
-          <ul className="space-y-2">
-            {summaryData.actions.map((action, index) => (
-              <li key={index} className="text-sm flex items-start gap-2">
-                <span className="text-warning">•</span>
-                <span>{action}</span>
-              </li>
-            ))}
-          </ul>
-        </AccordionItem>
-      )}
-
-      {summaryData.nextSteps && (
-        <AccordionItem
-          key="nextSteps"
-          title="Next Steps"
-          startContent={<FiCalendar className="text-primary" />}
-        >
-          <p className="text-sm text-default-700 leading-relaxed">
-            {summaryData.nextSteps}
-          </p>
-        </AccordionItem>
-      )}
-    </Accordion>
+    </div>
   );
 };
 

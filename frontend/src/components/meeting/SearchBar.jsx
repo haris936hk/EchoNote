@@ -40,7 +40,7 @@ const SearchBar = ({
       onChange={(e) => setLocalValue(e.target.value)}
       placeholder={placeholder}
       startContent={
-        <FiSearch className="text-default-400 flex-shrink-0" size={20} />
+        <FiSearch className="text-default-400 flex-shrink-0 mr-2" size={20} />
       }
       endContent={
         localValue && (

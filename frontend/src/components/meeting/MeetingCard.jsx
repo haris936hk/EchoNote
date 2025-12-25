@@ -53,8 +53,9 @@ const STATUS_CONFIG = {
   },
 };
 
-const MeetingCard = ({ meeting, onDelete, onEdit }) => {
+const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
   const navigate = useNavigate();
+  const isListView = viewMode === 'list';
 
   const handleView = () => {
     navigate(`/meeting/${meeting.id}`);
