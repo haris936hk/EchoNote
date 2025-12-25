@@ -59,12 +59,18 @@ const MeetingList = ({
           Showing {startIndex + 1}-{Math.min(endIndex, meetings.length)} of {meetings.length} meeting(s)
         </p>
 
-        <div className="flex gap-1 border border-divider rounded-lg p-1">
+        <div className="flex gap-1 bg-content2/50 backdrop-blur-sm border border-divider/50 rounded-xl p-1 shadow-sm">
           <Button
             size="sm"
             isIconOnly
-            variant={viewMode === 'grid' ? 'solid' : 'light'}
-            color={viewMode === 'grid' ? 'primary' : 'default'}
+            variant="light"
+            className={`
+              rounded-lg transition-all duration-200
+              ${viewMode === 'grid'
+                ? 'bg-primary text-white shadow-md shadow-primary/25'
+                : 'text-default-500 hover:text-foreground hover:bg-default-100'
+              }
+            `}
             onPress={() => setViewMode('grid')}
             aria-label="Grid view"
           >
@@ -73,8 +79,14 @@ const MeetingList = ({
           <Button
             size="sm"
             isIconOnly
-            variant={viewMode === 'list' ? 'solid' : 'light'}
-            color={viewMode === 'list' ? 'primary' : 'default'}
+            variant="light"
+            className={`
+              rounded-lg transition-all duration-200
+              ${viewMode === 'list'
+                ? 'bg-primary text-white shadow-md shadow-primary/25'
+                : 'text-default-500 hover:text-foreground hover:bg-default-100'
+              }
+            `}
             onPress={() => setViewMode('list')}
             aria-label="List view"
           >
