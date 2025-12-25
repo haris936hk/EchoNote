@@ -4,38 +4,21 @@ import {
   CardHeader,
   Avatar,
   Divider,
-  Button,
-  Select,
-  SelectItem
+  Button
 } from '@heroui/react';
-import { 
-  FiUser, 
-  FiMail, 
+import {
+  FiUser,
+  FiMail,
   FiShield,
   FiLogOut,
   FiTrash2
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const ProfileSettings = () => {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [autoDelete, setAutoDelete] = useState(false);
-  const [retentionDays, setRetentionDays] = useState('30');
-
-  const retentionOptions = [
-    { value: '7', label: '7 days' },
-    { value: '30', label: '30 days' },
-    { value: '90', label: '90 days' },
-    { value: '180', label: '6 months' },
-    { value: '365', label: '1 year' },
-  ];
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -78,11 +61,16 @@ const ProfileSettings = () => {
             <Avatar
               src={user.picture}
               name={user.name}
-              size="lg"
               isBordered
               color="primary"
-              className="w-20 h-20"
               showFallback
+              fallback={
+                <FiUser size={32} className="text-primary" />
+              }
+              classNames={{
+                base: "w-20 h-20",
+                img: "w-full h-full object-cover !opacity-100"
+              }}
             />
             <div className="flex-1">
               <h3 className="text-lg font-semibold">{user.name}</h3>
@@ -128,111 +116,6 @@ const ProfileSettings = () => {
                 </p>
               </div>
             </div>
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* App Preferences */}
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">App Preferences</h2>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-4">
-          {/* Dark Mode */}
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm font-medium">Dark Mode</p>
-              <p className="text-xs text-default-500">
-                Switch between light and dark theme
-              </p>
-            </div>
-            <button
-              onClick={toggleTheme}
-              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                isDark ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                  isDark ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-
-          <Divider />
-
-          {/* Email Notifications */}
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm font-medium">Email Notifications</p>
-              <p className="text-xs text-default-500">
-                Receive email when meeting processing is complete
-              </p>
-            </div>
-            <button
-              onClick={() => setEmailNotifications(!emailNotifications)}
-              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                emailNotifications ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                  emailNotifications ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-
-          <Divider />
-
-          {/* Auto Delete */}
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <p className="text-sm font-medium">Auto-delete Recordings</p>
-                <p className="text-xs text-default-500">
-                  Automatically delete audio files after retention period
-                </p>
-              </div>
-              <button
-                onClick={() => setAutoDelete(!autoDelete)}
-                className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                  autoDelete ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                    autoDelete ? 'translate-x-6' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {autoDelete && (
-              <div className="pl-0 w-full">
-                <p className="text-sm font-medium mb-2">Retention Period</p>
-                <Select
-                  placeholder="Select retention period"
-                  selectedKeys={[retentionDays]}
-                  onChange={(e) => setRetentionDays(e.target.value)}
-                  size="sm"
-                  variant="bordered"
-                  className="w-64"
-                  classNames={{
-                    trigger: "h-10",
-                    value: "text-sm",
-                  }}
-                >
-                  {retentionOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-            )}
           </div>
         </CardBody>
       </Card>
@@ -283,13 +166,13 @@ const ProfileSettings = () => {
           <h2 className="text-xl font-semibold">Account Actions</h2>
         </CardHeader>
         <Divider />
-        <CardBody className="gap-3">
+        <CardBody className="gap-3 items-start">
           <Button
-            color="default"
+            color="primary"
             variant="flat"
             startContent={<FiLogOut size={18} />}
             onPress={handleLogout}
-            className="justify-start"
+            radius="full"
           >
             Logout
           </Button>
@@ -299,7 +182,7 @@ const ProfileSettings = () => {
             variant="flat"
             startContent={<FiTrash2 size={18} />}
             onPress={handleDeleteAccount}
-            className="justify-start"
+            radius="full"
           >
             Delete Account
           </Button>
@@ -325,6 +208,13 @@ export const ProfileCard = () => {
             size="md"
             isBordered
             color="primary"
+            showFallback
+            fallback={
+              <FiUser size={18} className="text-primary" />
+            }
+            classNames={{
+              img: "!opacity-100"
+            }}
           />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate">{user.name}</p>
