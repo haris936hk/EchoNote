@@ -431,7 +431,7 @@ const RecordPage = () => {
                       maxRows={6}
                       size="sm"
                       classNames={{
-                        input: "rounded-lg text-sm resize-none px-3 py-2",
+                        input: "rounded-lg text-sm resize-none px-3 pt-0 pb-3",
                         inputWrapper: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300"
                       }}
                     />
@@ -496,7 +496,7 @@ const RecordPage = () => {
                       onPress={handleSubmit}
                       isLoading={uploadLoading}
                       fullWidth
-                      className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl"
+                      className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl whitespace-nowrap"
                     >
                       Upload Meeting
                     </Button>
