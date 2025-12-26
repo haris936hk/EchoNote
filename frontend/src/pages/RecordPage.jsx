@@ -51,7 +51,7 @@ const RecordPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'OTHER'
+    category: ''
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -175,7 +175,7 @@ const RecordPage = () => {
 
   const handleReset = () => {
     resetRecorder();
-    setFormData({ title: '', description: '', category: 'OTHER' });
+    setFormData({ title: '', description: '', category: '' });
     setFormErrors({});
     setUploadError(null);
     setStep('record');
@@ -438,32 +438,33 @@ const RecordPage = () => {
                   </div>
 
                   {/* Category */}
-                  <Select
-                    label="Category"
-                    placeholder="Select a category"
-                    selectedKeys={new Set([formData.category])}
-                    onSelectionChange={(keys) => {
-                      const selected = Array.from(keys)[0];
-                      if (selected) handleFormChange('category', selected);
-                    }}
-                    isRequired
-                    isInvalid={!!formErrors.category}
-                    errorMessage={formErrors.category}
-                    labelPlacement="outside"
-                    classNames={{
-                      trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9 pl-3 pr-8",
-                      label: "text-sm font-medium mb-2",
-                      base: "mb-2",
-                      value: "text-sm text-left",
-                      selectorIcon: "right-2"
-                    }}
-                  >
-                    {CATEGORIES.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium mb-2">
+                      Category <span className="text-danger">*</span>
+                    </label>
+                    <Select
+                      placeholder="Select a category"
+                      selectedKeys={formData.category ? new Set([formData.category]) : new Set()}
+                      onSelectionChange={(keys) => {
+                        const selected = Array.from(keys)[0];
+                        if (selected) handleFormChange('category', selected);
+                      }}
+                      isRequired
+                      isInvalid={!!formErrors.category}
+                      errorMessage={formErrors.category}
+                      size="sm"
+                      classNames={{
+                        trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9",
+                        value: "text-sm text-left"
+                      }}
+                    >
+                      {CATEGORIES.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Upload Error */}
