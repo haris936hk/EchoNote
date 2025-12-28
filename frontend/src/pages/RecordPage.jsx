@@ -454,8 +454,9 @@ const RecordPage = () => {
                       errorMessage={formErrors.category}
                       size="sm"
                       classNames={{
-                        trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9",
-                        value: "text-sm text-left"
+                        trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9 pl-3 pr-8",
+                        value: "text-sm text-left",
+                        selectorIcon: "right-2"
                       }}
                     >
                       {CATEGORIES.map((category) => (
@@ -482,10 +483,11 @@ const RecordPage = () => {
                 {/* Actions */}
                 <div className="flex gap-3">
                   <Button
-                    variant="flat"
+                    variant="bordered"
                     onPress={() => setStep('record')}
                     fullWidth
-                    className="font-semibold rounded-3xl hover:bg-default-100 hover:scale-105 transition-all duration-300"
+                    startContent={<FiArrowLeft size={18} />}
+                    className="font-semibold rounded-3xl border-default-300 hover:bg-default-100 hover:border-default-400 hover:scale-105 transition-all duration-300"
                   >
                     Back
                   </Button>
