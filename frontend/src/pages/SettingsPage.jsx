@@ -39,7 +39,7 @@ const SettingsPage = () => {
         </div>
 
         {/* Settings Tabs */}
-        <Card>
+        <Card className="rounded-xl">
           <CardBody className="p-0">
             <Tabs
               aria-label="Settings tabs"
@@ -47,7 +47,7 @@ const SettingsPage = () => {
               onSelectionChange={setActiveTab}
               variant="underlined"
               classNames={{
-                tabList: 'w-full relative rounded-none p-0 border-b border-divider',
+                tabList: 'w-full relative rounded-t-xl p-0 border-b border-divider',
                 cursor: 'w-full bg-primary',
                 tab: 'max-w-fit px-6 h-14',
                 tabContent: 'group-data-[selected=true]:text-primary'
@@ -214,15 +214,30 @@ const PreferencesContent = () => {
                 <p className="text-sm font-medium mb-2">Retention Period</p>
                 <Select
                   placeholder="Select retention period"
-                  selectedKeys={[retentionDays]}
-                  onChange={(e) => setRetentionDays(e.target.value)}
+                  selectedKeys={new Set([retentionDays])}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0];
+                    if (selected) setRetentionDays(selected);
+                  }}
                   size="sm"
                   variant="bordered"
-                  className="w-64"
+                  className="max-w-[140px]"
                   classNames={{
-                    trigger: "h-10",
+                    trigger: "h-9 rounded-lg bg-default-100 px-2.5",
                     value: "text-sm",
+                    innerWrapper: "pr-5",
+                    selectorIcon: "right-1.5",
+                    popoverContent: "rounded-lg bg-content1 shadow-lg border border-default-200 w-[140px]",
+                    listboxWrapper: "rounded-lg",
+                    listbox: "p-2",
                   }}
+                  listboxProps={{
+                    itemClasses: {
+                      base: "rounded-md px-3 py-1.5 mb-0.5 data-[hover=true]:bg-default-200 data-[selectable=true]:focus:bg-default-200 data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground transition-colors",
+                      title: "text-sm font-medium",
+                    },
+                  }}
+                  radius="lg"
                 >
                   <SelectItem key="7" value="7">7 days</SelectItem>
                   <SelectItem key="30" value="30">30 days</SelectItem>
@@ -237,7 +252,7 @@ const PreferencesContent = () => {
       </Card>
 
       <div className="flex justify-end">
-        <Button color="primary">
+        <Button color="primary" radius="full">
           Save Preferences
         </Button>
       </div>
@@ -320,7 +335,7 @@ const PrivacyContent = () => {
       </Card>
 
       {/* Privacy Notice */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-primary/20 bg-primary/5 rounded-xl">
         <CardBody>
           <div className="flex items-start gap-3">
             <FiShield className="text-primary mt-0.5 flex-shrink-0" size={20} />
@@ -348,7 +363,7 @@ const PrivacyContent = () => {
                 Download all your meetings, transcripts, and summaries
               </p>
             </div>
-            <Button variant="flat" startContent={<FiDownload size={16} />}>
+            <Button color="primary" variant="flat" startContent={<FiDownload size={16} />} radius="full">
               Export
             </Button>
           </div>
@@ -365,7 +380,7 @@ const PrivacyContent = () => {
                 Permanently delete all your meetings and account data
               </p>
             </div>
-            <Button color="danger" variant="flat" startContent={<FiTrash2 size={16} />}>
+            <Button color="danger" variant="flat" startContent={<FiTrash2 size={16} />} radius="full">
               Delete
             </Button>
           </div>
@@ -416,16 +431,16 @@ const HelpContent = () => {
         </CardHeader>
         <Divider />
         <CardBody className="gap-2">
-          <Button variant="flat" className="justify-start" fullWidth>
+          <Button variant="flat" className="justify-start" radius="full">
             📚 Documentation
           </Button>
-          <Button variant="flat" className="justify-start" fullWidth>
+          <Button variant="flat" className="justify-start" radius="full">
             💬 Contact Support
           </Button>
-          <Button variant="flat" className="justify-start" fullWidth>
+          <Button variant="flat" className="justify-start" radius="full">
             🐛 Report a Bug
           </Button>
-          <Button variant="flat" className="justify-start" fullWidth>
+          <Button variant="flat" className="justify-start" radius="full">
             💡 Request a Feature
           </Button>
         </CardBody>
@@ -447,7 +462,7 @@ const HelpContent = () => {
       </div>
 
       {/* Contact Card */}
-      <Card className="bg-primary/5 border border-primary/20">
+      <Card className="bg-primary/5 border border-primary/20 rounded-xl">
         <CardBody className="text-center gap-3">
           <p className="text-sm font-semibold text-primary">
             Still need help?
@@ -455,7 +470,7 @@ const HelpContent = () => {
           <p className="text-sm text-default-600">
             Our support team is here to assist you
           </p>
-          <Button color="primary" variant="flat">
+          <Button color="primary" variant="flat" radius="full">
             Contact Support
           </Button>
         </CardBody>

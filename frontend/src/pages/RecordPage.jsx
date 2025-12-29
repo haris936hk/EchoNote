@@ -51,7 +51,7 @@ const RecordPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'OTHER'
+    category: ''
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -175,7 +175,7 @@ const RecordPage = () => {
 
   const handleReset = () => {
     resetRecorder();
-    setFormData({ title: '', description: '', category: 'OTHER' });
+    setFormData({ title: '', description: '', category: '' });
     setFormErrors({});
     setUploadError(null);
     setStep('record');
@@ -196,49 +196,47 @@ const RecordPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky Header with Smooth Fade */}
+      {/* Page Header - Slides down when navbar slides up */}
       <div
-        className={`sticky top-[80px] md:top-[96px] z-40 px-4 py-4 ${
-          showHeader
+        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${
+          !showHeader
             ? 'translate-y-0 opacity-100'
-            : '-translate-y-1 opacity-0 pointer-events-none'
+            : '-translate-y-full opacity-0 pointer-events-none'
         }`}
         style={{
-          willChange: 'transform, opacity',
-          transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          willChange: 'transform, opacity'
         }}
       >
-        <div className="relative max-w-7xl mx-auto">
-          {/* Glowing effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-3xl blur-xl opacity-50"></div>
-
-          {/* Header content */}
-          <div className="relative bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl backdrop-saturate-150 border border-primary/20 shadow-2xl shadow-primary/25 rounded-3xl px-6 md:px-8 py-5">
-            <div className="container mx-auto max-w-3xl flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {step === 'record' && 'Record Meeting'}
-                  {step === 'details' && 'Meeting Details'}
-                  {step === 'uploading' && 'Uploading...'}
-                  {step === 'success' && 'Success!'}
-                </h1>
-                <p className="text-sm text-default-500 mt-1">
-                  {step === 'record' && 'Record up to 3 minutes of audio'}
-                  {step === 'details' && 'Add details about your meeting'}
-                  {step === 'uploading' && 'Processing your recording...'}
-                  {step === 'success' && 'Your meeting is being processed'}
-                </p>
-              </div>
-              <Button
-                variant="light"
-                startContent={<FiArrowLeft size={18} />}
-                onPress={handleBack}
-                className="rounded-3xl shadow-md hover:shadow-lg hover:bg-default-100 transition-all duration-300"
-              >
-                Back
-              </Button>
+        {/* Centered wrapper */}
+        <div className="max-w-6xl mx-auto flex justify-center">
+          {/* Rounded container with subtle border */}
+          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/30 backdrop-blur-md backdrop-saturate-150">
+            {/* Title with icon (changes based on step) */}
+            <div className="flex items-center gap-2 text-default-foreground">
+              {step === 'record' && <FiMic size={20} />}
+              {step === 'details' && <FiUpload size={20} />}
+              {step === 'uploading' && <FiUpload size={20} className="animate-bounce" />}
+              {step === 'success' && <FiCheck size={20} />}
+              <span className="font-semibold text-sm">
+                {step === 'record' && 'Record Meeting'}
+                {step === 'details' && 'Meeting Details'}
+                {step === 'uploading' && 'Uploading...'}
+                {step === 'success' && 'Success!'}
+              </span>
             </div>
-          </div>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-gray-700/30"></div>
+
+            {/* Back Button */}
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-sm font-medium text-default-500 hover:text-primary transition-colors"
+            >
+              <FiArrowLeft size={16} />
+              Back
+            </button>
+          </nav>
         </div>
       </div>
 
@@ -246,8 +244,6 @@ const RecordPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-3xl pt-4">
         {/* Main Card */}
         <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
-          <Divider />
-
           <CardBody className="gap-6 p-6">
             {/* Step 1: Recording */}
             {step === 'record' && (
@@ -423,49 +419,53 @@ const RecordPage = () => {
                   </div>
 
                   {/* Description */}
-                  <Textarea
-                    label="Description (Optional)"
-                    placeholder="Add any additional context or notes..."
-                    value={formData.description}
-                    onValueChange={(value) => handleFormChange('description', value)}
-                    minRows={2}
-                    maxRows={4}
-                    labelPlacement="outside"
-                    classNames={{
-                      input: "rounded-lg text-sm resize-none px-3 py-2",
-                      inputWrapper: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300",
-                      label: "text-sm font-medium mb-2",
-                      base: "mb-2"
-                    }}
-                  />
+                  <div className="w-full">
+                    <label className="block text-sm font-medium mb-2">
+                      Description (Optional)
+                    </label>
+                    <Textarea
+                      placeholder="Add any additional context or notes..."
+                      value={formData.description}
+                      onValueChange={(value) => handleFormChange('description', value)}
+                      minRows={3}
+                      maxRows={6}
+                      size="sm"
+                      classNames={{
+                        input: "rounded-lg text-sm resize-none px-3 pt-0 pb-3",
+                        inputWrapper: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300"
+                      }}
+                    />
+                  </div>
 
                   {/* Category */}
-                  <Select
-                    label="Category"
-                    placeholder="Select a category"
-                    selectedKeys={new Set([formData.category])}
-                    onSelectionChange={(keys) => {
-                      const selected = Array.from(keys)[0];
-                      if (selected) handleFormChange('category', selected);
-                    }}
-                    isRequired
-                    isInvalid={!!formErrors.category}
-                    errorMessage={formErrors.category}
-                    labelPlacement="outside"
-                    classNames={{
-                      trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9 pl-3 pr-8",
-                      label: "text-sm font-medium mb-2",
-                      base: "mb-2",
-                      value: "text-sm text-left",
-                      selectorIcon: "right-2"
-                    }}
-                  >
-                    {CATEGORIES.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium mb-2">
+                      Category <span className="text-danger">*</span>
+                    </label>
+                    <Select
+                      placeholder="Select a category"
+                      selectedKeys={formData.category ? new Set([formData.category]) : new Set()}
+                      onSelectionChange={(keys) => {
+                        const selected = Array.from(keys)[0];
+                        if (selected) handleFormChange('category', selected);
+                      }}
+                      isRequired
+                      isInvalid={!!formErrors.category}
+                      errorMessage={formErrors.category}
+                      size="sm"
+                      classNames={{
+                        trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9 pl-3 pr-8",
+                        value: "text-sm text-left",
+                        selectorIcon: "right-2"
+                      }}
+                    >
+                      {CATEGORIES.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Upload Error */}
@@ -483,10 +483,11 @@ const RecordPage = () => {
                 {/* Actions */}
                 <div className="flex gap-3">
                   <Button
-                    variant="flat"
+                    variant="bordered"
                     onPress={() => setStep('record')}
                     fullWidth
-                    className="font-semibold rounded-3xl hover:bg-default-100 hover:scale-105 transition-all duration-300"
+                    startContent={<FiArrowLeft size={18} />}
+                    className="font-semibold rounded-3xl border-default-300 hover:bg-default-100 hover:border-default-400 hover:scale-105 transition-all duration-300"
                   >
                     Back
                   </Button>
@@ -498,7 +499,7 @@ const RecordPage = () => {
                       onPress={handleSubmit}
                       isLoading={uploadLoading}
                       fullWidth
-                      className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl"
+                      className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl whitespace-nowrap"
                     >
                       Upload Meeting
                     </Button>

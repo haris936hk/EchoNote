@@ -4,8 +4,8 @@ import { FiGrid, FiList } from 'react-icons/fi';
 import MeetingCard from './MeetingCard';
 import { SkeletonLoader } from '../common/Loader';
 
-const MeetingList = ({ 
-  meetings = [], 
+const MeetingList = ({
+  meetings = [],
   loading = false,
   onDelete,
   onEdit,
@@ -28,7 +28,7 @@ const MeetingList = ({
   if (loading) {
     return (
       <div className={
-        viewMode === 'grid' 
+        viewMode === 'grid'
           ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
           : 'space-y-4'
       }>
@@ -59,12 +59,18 @@ const MeetingList = ({
           Showing {startIndex + 1}-{Math.min(endIndex, meetings.length)} of {meetings.length} meeting(s)
         </p>
 
-        <div className="flex gap-1 border border-divider rounded-lg p-1">
+        <div className="flex gap-1 bg-content2/50 backdrop-blur-sm border border-divider/50 rounded-xl p-1 shadow-sm">
           <Button
             size="sm"
             isIconOnly
-            variant={viewMode === 'grid' ? 'solid' : 'light'}
-            color={viewMode === 'grid' ? 'primary' : 'default'}
+            variant="light"
+            className={`
+              rounded-lg transition-all duration-200
+              ${viewMode === 'grid'
+                ? 'bg-primary text-white shadow-md shadow-primary/25'
+                : 'text-default-500 hover:text-foreground hover:bg-default-100'
+              }
+            `}
             onPress={() => setViewMode('grid')}
             aria-label="Grid view"
           >
@@ -73,8 +79,14 @@ const MeetingList = ({
           <Button
             size="sm"
             isIconOnly
-            variant={viewMode === 'list' ? 'solid' : 'light'}
-            color={viewMode === 'list' ? 'primary' : 'default'}
+            variant="light"
+            className={`
+              rounded-lg transition-all duration-200
+              ${viewMode === 'list'
+                ? 'bg-primary text-white shadow-md shadow-primary/25'
+                : 'text-default-500 hover:text-foreground hover:bg-default-100'
+              }
+            `}
             onPress={() => setViewMode('list')}
             aria-label="List view"
           >
@@ -86,8 +98,8 @@ const MeetingList = ({
       {/* Meeting Cards */}
       <div className={
         viewMode === 'grid'
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-          : 'space-y-4'
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'
+          : 'flex flex-col gap-4'
       }>
         {currentMeetings.map((meeting) => (
           <MeetingCard
@@ -95,6 +107,7 @@ const MeetingList = ({
             meeting={meeting}
             onDelete={onDelete}
             onEdit={onEdit}
+            viewMode={viewMode}
           />
         ))}
       </div>

@@ -24,7 +24,8 @@ import {
   FiClock,
   FiFileText,
   FiList,
-  FiAlertCircle
+  FiAlertCircle,
+  FiMic
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import SummaryViewer from '../components/meeting/SummaryViewer';
@@ -123,7 +124,10 @@ const MeetingDetailPage = () => {
   const formatDuration = (seconds) => {
     if (!seconds) return 'N/A';
     const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const secs = Math.round(seconds % 60);
+    if (mins === 0) {
+      return `${secs}s`;
+    }
     return `${mins}m ${secs}s`;
   };
 
@@ -154,7 +158,7 @@ const MeetingDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
+      <div className="container mx-auto px-4 py-4 max-w-6xl space-y-6">
         {/* Back Button */}
         <Button
           variant="light"
@@ -192,16 +196,27 @@ const MeetingDetailPage = () => {
                   </Button>
                 )}
 
-                <Dropdown>
+                <Dropdown
+                  placement="bottom-end"
+                  classNames={{
+                    content: "bg-content1/95 backdrop-blur-xl border border-divider/50 shadow-xl shadow-black/20 rounded-xl min-w-[180px] p-1.5"
+                  }}
+                >
                   <DropdownTrigger>
                     <Button isIconOnly variant="flat" isDisabled={deleting} className="rounded-2xl hover:bg-default-100 transition-all duration-300">
                       <FiMoreVertical size={18} />
                     </Button>
                   </DropdownTrigger>
-                  <DropdownMenu>
+                  <DropdownMenu
+                    aria-label="Meeting actions"
+                    itemClasses={{
+                      base: "rounded-lg px-3 py-2.5 gap-3 data-[hover=true]:bg-default-100 transition-colors",
+                      title: "font-medium text-sm",
+                    }}
+                  >
                     <DropdownItem
                       key="edit"
-                      startContent={<FiEdit size={16} />}
+                      startContent={<FiEdit size={16} className="text-default-500" />}
                       onPress={handleEdit}
                       isDisabled={deleting}
                     >
@@ -245,15 +260,20 @@ const MeetingDetailPage = () => {
               )}
 
               <Chip
-                color={
-                  currentMeeting.status === 'COMPLETED'
-                    ? 'success'
-                    : currentMeeting.status === 'PROCESSING'
-                    ? 'warning'
-                    : 'danger'
-                }
                 variant="flat"
                 size="sm"
+                classNames={{
+                  base: currentMeeting.status === 'COMPLETED'
+                    ? 'bg-success/15 border-success/30 border px-2.5'
+                    : currentMeeting.status === 'PROCESSING'
+                      ? 'bg-warning/15 border-warning/30 border px-2.5'
+                      : 'bg-danger/15 border-danger/30 border px-2.5',
+                  content: currentMeeting.status === 'COMPLETED'
+                    ? 'text-success text-xs font-medium'
+                    : currentMeeting.status === 'PROCESSING'
+                      ? 'text-warning text-xs font-medium'
+                      : 'text-danger text-xs font-medium'
+                }}
               >
                 {currentMeeting.status}
               </Chip>
@@ -306,12 +326,13 @@ const MeetingDetailPage = () => {
                 aria-label="Meeting content"
                 selectedKey={activeTab}
                 onSelectionChange={setActiveTab}
+                variant="underlined"
                 classNames={{
                   base: "w-full",
-                  tabList: "w-full relative rounded-none p-0 border-b border-divider gap-0",
-                  cursor: "w-full bg-primary",
-                  tab: "max-w-fit px-6 h-14 data-[selected=true]:text-primary",
-                  tabContent: "group-data-[selected=true]:text-primary w-full",
+                  tabList: "w-full relative p-0 gap-0 border-b border-divider bg-transparent",
+                  cursor: "bg-primary h-0.5 bottom-0",
+                  tab: "h-14 px-6 data-[selected=true]:text-primary font-medium",
+                  tabContent: "group-data-[selected=true]:text-primary",
                   panel: "w-full p-0"
                 }}
               >
@@ -358,20 +379,27 @@ const MeetingDetailPage = () => {
 
         {/* Audio Player - If available */}
         {currentMeeting.audioUrl && currentMeeting.status === 'COMPLETED' && (
-          <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
-            <CardHeader>
-              <h3 className="text-lg font-semibold">Audio Recording</h3>
+          <Card className="rounded-2xl border border-divider/50 bg-content1/50 backdrop-blur-sm">
+            <CardHeader className="px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-primary/10">
+                  <FiMic className="text-primary" size={18} />
+                </div>
+                <h3 className="text-base font-semibold">Audio Recording</h3>
+              </div>
             </CardHeader>
             <Divider />
-            <CardBody>
-              <audio
-                src={`${process.env.REACT_APP_API_URL}/meetings/${id}/audio?token=${localStorage.getItem('token')}`}
-                controls
-                className="w-full"
-                preload="metadata"
-              >
-                Your browser does not support the audio element.
-              </audio>
+            <CardBody className="p-5">
+              <div className="bg-default-50 border border-default-100 rounded-xl p-4">
+                <audio
+                  src={`${process.env.REACT_APP_API_URL}/meetings/${id}/audio?token=${localStorage.getItem('token')}`}
+                  controls
+                  className="w-full"
+                  preload="metadata"
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
             </CardBody>
           </Card>
         )}

@@ -14,6 +14,7 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 - **Audio Recording**: RecordRTC
 - **Styling**: Tailwind CSS
 - **Authentication**: @react-oauth/google (OAuth only)
+- **Design Philosophy**: Rounded corners everywhere (`rounded-xl`, `rounded-3xl`, `rounded-full` for buttons)
 
 ### Backend
 - **Runtime**: Node.js 18+
@@ -215,6 +216,11 @@ When there's a conflict between accuracy and speed, **ALWAYS choose accuracy**. 
 - Return consistent response format: `{success, data/error}`
 - Update database status at each pipeline stage
 - Python-only audio processing (no fallbacks)
+- **UI Components**: Always use rounded corners for a modern, polished look
+  - Cards: `rounded-xl` or `rounded-3xl`
+  - Buttons: `radius="full"` for pill-shaped design
+  - Inputs/Dropdowns: `rounded-lg`
+  - Page headers: Compact pill design with `rounded-full` container
 
 ### Testing Approach
 - Use 30-second test clips for rapid iteration
