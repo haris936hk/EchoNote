@@ -136,15 +136,22 @@ const RecordPage = () => {
   };
 
   const handleSubmit = async () => {
+    console.log('🔵 Upload button clicked');
+    console.log('📋 Form data:', formData);
+    console.log('🎤 Audio blob:', audioBlob);
+
     if (!validateForm()) {
+      console.log('❌ Form validation failed');
       return;
     }
 
     if (!audioBlob) {
+      console.log('❌ No audio blob found');
       setUploadError('No audio recorded. Please record audio first.');
       return;
     }
 
+    console.log('✅ Starting upload process...');
     setStep('uploading');
     setUploadError(null);
 
@@ -156,18 +163,22 @@ const RecordPage = () => {
         audioFile: audioBlob
       });
 
+      console.log('📬 Upload result:', result);
+
       if (result.success) {
+        console.log('✅ Upload successful!');
         setStep('success');
         // Redirect to meeting detail after 2 seconds
         setTimeout(() => {
           navigate(`/meeting/${result.data.id}`);
         }, 2000);
       } else {
+        console.log('❌ Upload failed:', result.error);
         setUploadError(result.error || 'Failed to upload meeting');
         setStep('details');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       setUploadError('An unexpected error occurred. Please try again.');
       setStep('details');
     }
