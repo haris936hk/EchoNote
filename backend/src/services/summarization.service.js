@@ -34,8 +34,25 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     logger.info(`📝 Generating summary for: ${metadata.title || 'Untitled Meeting'}`);
     const startTime = Date.now();
 
-    // Call custom model service directly
-    const result = await customModelService.generateSummary(transcript, nlpData);
+    // STEP 1: Extract NLP features from metadata (FIXED: Critical bug - was never passing NLP features!)
+    const nlpFeatures = nlpData || {
+      // Format entities as strings with labels to match training format
+      entities: (metadata.entities || []).map(e =>
+        typeof e === 'string' ? e : `${e.text} (${e.label})`
+      ),
+      keyPhrases: metadata.keyPhrases || [],
+      topics: metadata.topics || [],
+      // Extract sentiment label (handle both string and object format)
+      sentiment: metadata.sentiment?.label || metadata.sentiment || null
+    };
+
+    // STEP 2: Add sentiment polarity if available (for training format: "positive (polarity: 0.17)")
+    if (metadata.sentiment?.score !== undefined) {
+      nlpFeatures.sentimentPolarity = metadata.sentiment.score;
+    }
+
+    // STEP 3: Call custom model with NLP features (FIXED: Now actually passing them!)
+    const result = await customModelService.generateSummary(transcript, nlpFeatures);
 
     if (!result.success) {
       throw new Error(result.error || 'Summary generation failed');
@@ -47,9 +64,15 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     // Validate and structure the response (match echonote_dataset.json format)
     const summary = {
       executiveSummary: result.data.executiveSummary || '',
-      keyDecisions: result.data.keyDecisions || 'No major decisions recorded',
+      // FIXED: keyDecisions must ALWAYS be array (training schema requirement)
+      keyDecisions: Array.isArray(result.data.keyDecisions)
+        ? result.data.keyDecisions
+        : [],
       actionItems: Array.isArray(result.data.actionItems) ? validateActionItems(result.data.actionItems) : [],
-      nextSteps: result.data.nextSteps || '',
+      // FIXED: nextSteps must ALWAYS be array (training schema requirement)
+      nextSteps: Array.isArray(result.data.nextSteps)
+        ? result.data.nextSteps
+        : [],
       keyTopics: Array.isArray(result.data.keyTopics) ? result.data.keyTopics : [],
       sentiment: result.data.sentiment || 'neutral',
       metadata: {
@@ -229,52 +252,6 @@ const enhanceSummaryWithNLP = (summary, nlpData) => {
   }
 
   return enhanced;
-};
-
-/**
- * Generate summary for multiple meetings (batch)
- * @param {Array} meetings - Array of {transcript, metadata}
- * @returns {Array} Array of summaries
- */
-const batchGenerateSummaries = async (meetings) => {
-  logger.info(`📚 Batch summarizing ${meetings.length} meetings`);
-  const results = [];
-
-  for (let i = 0; i < meetings.length; i++) {
-    try {
-      logger.info(`Summarizing ${i + 1}/${meetings.length}: ${meetings[i].metadata.title}`);
-      
-      const summary = await generateSummary(
-        meetings[i].transcript,
-        meetings[i].metadata,
-        meetings[i].nlpData
-      );
-
-      results.push({
-        meetingId: meetings[i].id,
-        success: true,
-        ...summary
-      });
-
-      // Rate limiting: wait 1 second between requests
-      if (i < meetings.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
-    } catch (error) {
-      logger.error(`Failed to summarize meeting ${i}: ${error.message}`);
-      results.push({
-        meetingId: meetings[i].id,
-        success: false,
-        error: error.message
-      });
-    }
-  }
-
-  const successful = results.filter(r => r.success).length;
-  logger.info(`✅ Batch summarization complete: ${successful}/${meetings.length} successful`);
-
-  return results;
 };
 
 /**
@@ -549,7 +526,6 @@ module.exports = {
   generateExecutiveSummary,
   extractActions,
   enhanceSummaryWithNLP,
-  batchGenerateSummaries,
   regenerateSummary,
   compareSummaries,
   validateActionItems,

@@ -72,74 +72,6 @@ class CustomModelService {
   }
 
   /**
-   * Batch processing for multiple meetings
-   *
-   * @param {Array<{transcript: string, nlpFeatures?: object}>} meetings
-   * @returns {Promise<{success: boolean, data?: Array, error?: string}>}
-   */
-  async generateBatchSummaries(meetings) {
-    try {
-      logger.info('[CustomModel] Starting batch summary generation', {
-        count: meetings.length
-      });
-
-      // Prepare enhanced transcripts
-      const enhancedTranscripts = meetings.map(m =>
-        this._enhanceTranscriptWithNLP(m.transcript, m.nlpFeatures)
-      );
-
-      // Call batch API endpoint
-      const response = await axios.post(
-        `${this.apiUrl}/batch-predict`,
-        { transcripts: enhancedTranscripts },
-        {
-          headers: {
-            'X-API-Key': this.apiKey,
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
-          },
-          timeout: this.timeout * meetings.length // Scale timeout with batch size
-        }
-      );
-
-      const results = response.data.results.map(result => {
-        if (result.status === 'success') {
-          return {
-            success: true,
-            data: this._validateAndFormatSummary(result.summary)
-          };
-        } else {
-          return {
-            success: false,
-            error: result.error
-          };
-        }
-      });
-
-      logger.info('[CustomModel] Batch processing complete', {
-        total: response.data.total,
-        successful: response.data.successful,
-        failed: response.data.failed
-      });
-
-      return {
-        success: true,
-        data: results
-      };
-
-    } catch (error) {
-      logger.error('[CustomModel] Batch generation failed', {
-        error: error.message
-      });
-
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  }
-
-  /**
    * Health check for custom model API
    *
    * @returns {Promise<{success: boolean, data?: object, error?: string}>}
@@ -178,35 +110,77 @@ class CustomModelService {
    * PRIVATE: Enhance transcript with NLP features for better model accuracy
    *
    * The custom model expects NLP features to guide summarization.
-   * This formats them into a structured prompt addition.
+   * This formats them EXACTLY as they appeared in training data.
+   *
+   * Training format from echonote_generator notebook:
+   * ```
+   * MEETING TRANSCRIPT:
+   * [transcript]
+   *
+   * NLP ANALYSIS:
+   * Entities: Name (PERSON), Org (ORG), Date (DATE)
+   * Key Phrases: phrase1, phrase2
+   * Topics: topic1, topic2
+   * Sentiment: Positive (polarity: 0.174)
+   * ```
    */
   _enhanceTranscriptWithNLP(transcript, nlpFeatures) {
     if (!nlpFeatures) {
       return transcript;
     }
 
-    // Format NLP features as structured metadata
-    let enhancedPrompt = `${transcript}\n\n--- NLP ANALYSIS ---\n`;
+    // TEMPORARY TESTING: Log received NLP features
+    console.log('🔍 NLP Features received:', JSON.stringify(nlpFeatures, null, 2));
 
+    // FIXED: Match training format exactly (no dashes, specific field order)
+    let enhancedPrompt = `${transcript}\n\nNLP ANALYSIS:\n`;
+
+    // Entities - FIXED: Already formatted as "Name (LABEL)" strings by summarization.service.js
     if (nlpFeatures.entities?.length > 0) {
-      enhancedPrompt += `\nKey Entities: ${nlpFeatures.entities.join(', ')}`;
+      enhancedPrompt += `Entities: ${nlpFeatures.entities.join(', ')}\n`;
+    } else {
+      enhancedPrompt += `Entities: None\n`;
     }
 
+    // Key Phrases - OK as-is (array of strings)
     if (nlpFeatures.keyPhrases?.length > 0) {
-      enhancedPrompt += `\nKey Phrases: ${nlpFeatures.keyPhrases.join(', ')}`;
+      enhancedPrompt += `Key Phrases: ${nlpFeatures.keyPhrases.join(', ')}\n`;
+    } else {
+      enhancedPrompt += `Key Phrases: None\n`;
     }
 
-    if (nlpFeatures.actionItems?.length > 0) {
-      enhancedPrompt += `\nDetected Actions: ${nlpFeatures.actionItems.join(', ')}`;
-    }
-
-    if (nlpFeatures.sentiment) {
-      enhancedPrompt += `\nOverall Sentiment: ${nlpFeatures.sentiment}`;
-    }
-
+    // Topics - OK as-is (array of strings)
     if (nlpFeatures.topics?.length > 0) {
-      enhancedPrompt += `\nMain Topics: ${nlpFeatures.topics.join(', ')}`;
+      enhancedPrompt += `Topics: ${nlpFeatures.topics.join(', ')}\n`;
+    } else {
+      enhancedPrompt += `Topics: None\n`;
     }
+
+    // Sentiment - FIXED: Format with polarity score to match training
+    if (nlpFeatures.sentiment) {
+      const sentimentLabel = typeof nlpFeatures.sentiment === 'string'
+        ? nlpFeatures.sentiment
+        : nlpFeatures.sentiment.label || nlpFeatures.sentiment;
+
+      // Capitalize first letter to match training format
+      const capitalizedSentiment = sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1);
+
+      // Add polarity if available (format: "Positive (polarity: 0.174)")
+      const polarity = nlpFeatures.sentimentPolarity || nlpFeatures.sentiment?.score || '';
+      const sentimentText = polarity !== ''
+        ? `${capitalizedSentiment} (polarity: ${polarity})`
+        : capitalizedSentiment;
+
+      enhancedPrompt += `Sentiment: ${sentimentText}`;
+    } else {
+      enhancedPrompt += `Sentiment: Neutral`;
+    }
+
+    // REMOVED: "Detected Actions" field - NOT in training data!
+    // The training notebooks never included this field, so we don't add it
+
+    // TEMPORARY TESTING: Log enhanced prompt format
+    console.log('📝 Enhanced transcript format:', enhancedPrompt.split('\n\n').pop().substring(0, 500));
 
     return enhancedPrompt;
   }
@@ -288,7 +262,8 @@ class CustomModelService {
       keyTopics: Array.isArray(summary.keyTopics)
         ? summary.keyTopics
         : [],
-      sentiment: ['positive', 'neutral', 'negative', 'mixed'].includes(summary.sentiment)
+      // FIXED: Remove "mixed" - model only trained on positive, neutral, negative
+      sentiment: ['positive', 'neutral', 'negative'].includes(summary.sentiment)
         ? summary.sentiment
         : 'neutral'
     };
