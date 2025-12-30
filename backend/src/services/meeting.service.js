@@ -132,7 +132,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
 
     console.log(`✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`);
 
-    // Step 5: Generate AI summary using Groq/Mistral
+    // Step 5: Generate AI summary using Custom Model
     await updateMeetingStatus(meetingId, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(transcript, {
@@ -373,7 +373,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
     console.log(`✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`);
 
-    // Step 6: Generate AI summary using Groq/Mistral
+    // Step 6: Generate AI summary using Custom Model
     await updateMeetingStatus(meeting.id, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(transcript, {

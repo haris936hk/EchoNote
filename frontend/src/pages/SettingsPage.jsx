@@ -362,7 +362,7 @@ const PrivacyContent = () => {
             </li>
             <li className="flex items-start gap-2">
               <FiCheck className="text-success mt-0.5 flex-shrink-0" size={16} />
-              <span><strong>Mistral 7B:</strong> AI-powered summarization</span>
+              <span><strong>EchoNote Custom AI Model:</strong> Fine-tuned for meeting summarization</span>
             </li>
           </ul>
           <p className="text-xs text-default-500 mt-4">

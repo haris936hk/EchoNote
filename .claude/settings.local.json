@@ -11,7 +11,10 @@
       "Bash(node -e:*)",
       "Bash(curl:*)",
       "Bash(timeout /t 3)",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(code:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
