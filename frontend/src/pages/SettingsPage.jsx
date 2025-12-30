@@ -126,6 +126,37 @@ const PreferencesContent = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSavePreferences = async () => {
+    setIsSaving(true);
+    try {
+      // TODO: Add API call to save preferences
+      // Example:
+      // await api.patch('/api/user/settings', {
+      //   emailNotifications,
+      //   autoDelete,
+      //   retentionDays: autoDelete ? retentionDays : null
+      // });
+
+      // For now, just simulate a save with a timeout
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Show success message (you can add a toast notification here)
+      console.log('Preferences saved:', {
+        emailNotifications,
+        autoDelete,
+        retentionDays: autoDelete ? retentionDays : null
+      });
+
+      alert('Preferences saved successfully!');
+    } catch (error) {
+      console.error('Failed to save preferences:', error);
+      alert('Failed to save preferences. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -252,8 +283,14 @@ const PreferencesContent = () => {
       </Card>
 
       <div className="flex justify-end">
-        <Button color="primary" radius="full">
-          Save Preferences
+        <Button
+          color="primary"
+          radius="full"
+          onClick={handleSavePreferences}
+          isLoading={isSaving}
+          startContent={!isSaving && <FiCheck size={16} />}
+        >
+          {isSaving ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
     </div>
