@@ -31,11 +31,11 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 - **Audio Processing**: Python (librosa, noisereduce, scipy) - 5-10s processing
 - **Transcription**: Whisper base.en model - ~60s processing, 88% accuracy acceptable
 - **NLP**: SpaCy en_core_web_lg - ~2s processing (extracts entities, key phrases, sentiment, topics)
-- **Summarization**: Groq API (Mistral-7B-Instruct) - ~5s processing (uses NLP features to guide summary generation)
+- **Summarization**: Custom Fine-Tuned Qwen2.5-7B Model (via NGROK API) - ~5s processing (uses NLP features to guide summary generation)
 
 **NLP → AI Integration**:
 - NLP extracts entities, key phrases, action patterns, sentiment, and topics
-- These features are passed to Groq API alongside the transcript
+- These features are passed to custom model API alongside the transcript
 - AI uses NLP features to ensure accuracy in assignees, topics, and sentiment
 - If NLP doesn't extract features (e.g., no action items), AI still generates summary with empty arrays
 - Format matches echonote_dataset.json exactly
@@ -44,11 +44,11 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 
 ### 1. Sequential Processing Pipeline (NEVER PARALLEL)
 ```
-Audio Capture (3-min max) 
+Audio Capture (3-min max)
   → Audio Optimization (16kHz mono PCM)
     → Transcription (Whisper)
       → NLP Processing (SpaCy)
-        → Summarization (Mistral-7B)
+        → Summarization (Custom Qwen2.5-7B)
           → Email Notification
 ```
 
@@ -247,7 +247,9 @@ JWT_SECRET=...
 JWT_REFRESH_SECRET=...
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
-GROQ_API_KEY=...
+CUSTOM_MODEL_API_URL=https://your-domain.ngrok-free.app
+CUSTOM_MODEL_API_KEY=echonote-secret-api-key-2025
+CUSTOM_MODEL_TIMEOUT=70000
 RESEND_API_KEY=...
 FRONTEND_URL=http://localhost:3000
 PORT=5000
@@ -353,6 +355,53 @@ try {
 pip install librosa noisereduce soundfile scipy numpy
 ```
 
+## Custom Model Integration
+
+### Architecture
+- **Model**: Fine-tuned Qwen2.5-7B on EchoNote meeting dataset
+- **Deployment**: FastAPI server exposed via NGROK tunnel
+- **Retry Logic**: 3 attempts with exponential backoff (2s, 4s, 8s delays)
+- **Timeout**: 70 seconds total per request
+- **Authentication**: X-API-Key header authentication
+
+### NGROK URL Management
+The NGROK URL changes every time the inference notebook restarts. To update:
+
+1. Start inference notebook `echonote_inference_api_ngrok.ipynb` in Google Colab
+2. Copy the NGROK public URL from the notebook output
+3. Update `.env` file: `CUSTOM_MODEL_API_URL=<new-ngrok-url>`
+4. Restart backend server: `npm run dev`
+5. No code changes needed - service automatically uses new URL
+
+### Error Handling
+When custom model API is unavailable (NGROK down, notebook stopped):
+
+**User-Facing Message**:
+```
+"AI summarization service is currently unavailable. Please ensure the model API is running and try again."
+```
+
+**Behavior**:
+- Meeting is saved with transcript
+- Summary generation fails gracefully
+- No summary stored
+- User can retry later (future feature: regenerate summary)
+
+**Detection**: Catches network errors (ECONNREFUSED, ETIMEDOUT, ENOTFOUND, EHOSTUNREACH)
+
+### Health Monitoring
+- Custom model service includes built-in retry logic for transient failures
+- Check NGROK tunnel status: `curl <NGROK_URL>/health`
+- Monitor backend logs for connection errors: `tail -f logs/echonote.log`
+- NGROK dashboard for request inspection: `http://localhost:4040`
+
+### Production Deployment (Future)
+For production, migrate from NGROK to:
+- **HuggingFace Inference Endpoints** (managed hosting)
+- **Modal.com** (serverless GPU)
+- **RunPod** (dedicated GPU instances)
+- **Self-hosted** (AWS/GCP with GPU + NGINX)
+
 ## Status Codes & Database Enums
 
 ### Meeting Status
@@ -362,7 +411,7 @@ enum MeetingStatus {
   PROCESSING   // Audio optimization
   TRANSCRIBING // Whisper ASR
   ANALYZING    // SpaCy NLP
-  SUMMARIZING  // Mistral-7B
+  SUMMARIZING  // Custom Qwen2.5-7B
   COMPLETED    // Ready for viewing
   FAILED       // Error occurred
 }

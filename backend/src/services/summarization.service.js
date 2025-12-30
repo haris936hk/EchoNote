@@ -1,7 +1,7 @@
 // backend/src/services/summarization.service.js
-// AI summarization service using Groq/Mistral-7B
+// AI summarization service using Custom Fine-Tuned Qwen2.5-7B Model
 
-const { generateMeetingSummary, extractActionItems } = require('../config/groq');
+const customModelService = require('./customModelService');
 const winston = require('winston');
 
 // Initialize logger
@@ -23,7 +23,7 @@ const logger = winston.createLogger({
 
 /**
  * Generate comprehensive meeting summary
- * Uses Mistral-7B via Groq API
+ * Uses Custom Fine-Tuned Qwen2.5-7B Model via NGROK API
  * @param {string} transcript - Meeting transcript
  * @param {Object} metadata - Meeting metadata (title, category, duration)
  * @param {Object} nlpData - NLP analysis results (optional)
@@ -34,39 +34,27 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     logger.info(`📝 Generating summary for: ${metadata.title || 'Untitled Meeting'}`);
     const startTime = Date.now();
 
-    // Enhance metadata with NLP data if available
-    const enhancedMetadata = {
-      ...metadata,
-      entities: nlpData?.entities || [],
-      keyPhrases: nlpData?.keyPhrases || [],
-      actionPatterns: nlpData?.actionPatterns || [],
-      sentiment: nlpData?.sentiment || null,
-      topics: nlpData?.topics || []
-    };
-
-    // Generate summary using Groq
-    const result = await generateMeetingSummary(transcript, enhancedMetadata);
+    // Call custom model service directly
+    const result = await customModelService.generateSummary(transcript, nlpData);
 
     if (!result.success) {
-      throw new Error('Summary generation failed');
+      throw new Error(result.error || 'Summary generation failed');
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Summary generated in ${duration}s`);
 
     // Validate and structure the response (match echonote_dataset.json format)
-    // Groq now returns flat structure, not nested under 'summary'
     const summary = {
-      executiveSummary: result.executiveSummary || '',
-      keyDecisions: result.keyDecisions || 'No major decisions recorded',
-      actionItems: Array.isArray(result.actionItems) ? validateActionItems(result.actionItems) : [],
-      nextSteps: result.nextSteps || '',
-      keyTopics: Array.isArray(result.keyTopics) ? result.keyTopics : [],
-      sentiment: result.sentiment || 'neutral',
+      executiveSummary: result.data.executiveSummary || '',
+      keyDecisions: result.data.keyDecisions || 'No major decisions recorded',
+      actionItems: Array.isArray(result.data.actionItems) ? validateActionItems(result.data.actionItems) : [],
+      nextSteps: result.data.nextSteps || '',
+      keyTopics: Array.isArray(result.data.keyTopics) ? result.data.keyTopics : [],
+      sentiment: result.data.sentiment || 'neutral',
       metadata: {
-        model: result.metadata.model,
-        tokensUsed: result.metadata.tokensUsed,
-        duration: result.metadata.duration,
+        model: 'EchoNote-Custom-Qwen2.5-7B',
+        duration: parseFloat(duration),
         totalProcessingTime: parseFloat(duration)
       }
     };
@@ -78,7 +66,18 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
 
   } catch (error) {
     logger.error(`❌ Summary generation failed: ${error.message}`);
-    throw new Error(`Summary generation failed: ${error.message}`);
+
+    // User-friendly error messages for NGROK unavailability
+    let userMessage = error.message;
+    if (error.message.includes('ECONNREFUSED') ||
+        error.message.includes('ETIMEDOUT') ||
+        error.message.includes('timeout') ||
+        error.message.includes('ENOTFOUND') ||
+        error.message.includes('EHOSTUNREACH')) {
+      userMessage = 'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+    }
+
+    throw new Error(userMessage);
   }
 };
 
@@ -91,25 +90,39 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
 const generateExecutiveSummary = async (transcript, metadata = {}) => {
   try {
     logger.info(`📋 Generating executive summary`);
-    
-    const result = await generateMeetingSummary(transcript, metadata);
+    const startTime = Date.now();
+
+    const result = await customModelService.generateSummary(transcript, null);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Executive summary generation failed');
+    }
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
     return {
       success: true,
-      executiveSummary: result.executiveSummary,
-      sentiment: result.sentiment,
-      processingTime: result.metadata.duration
+      executiveSummary: result.data.executiveSummary,
+      sentiment: result.data.sentiment,
+      processingTime: parseFloat(duration)
     };
 
   } catch (error) {
     logger.error(`❌ Executive summary generation failed: ${error.message}`);
-    throw new Error(`Executive summary generation failed: ${error.message}`);
+
+    // User-friendly error handling
+    let userMessage = error.message;
+    if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT') || error.message.includes('timeout')) {
+      userMessage = 'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+    }
+
+    throw new Error(userMessage);
   }
 };
 
 /**
  * Extract action items only
- * Faster than full summary generation
+ * Uses full summary generation then extracts action items
  * @param {string} transcript - Meeting transcript
  * @returns {Object} Action items
  */
@@ -118,8 +131,14 @@ const extractActions = async (transcript) => {
     logger.info(`✅ Extracting action items`);
     const startTime = Date.now();
 
-    const actionItems = await extractActionItems(transcript);
+    // Generate full summary and extract action items from it
+    const result = await customModelService.generateSummary(transcript, null);
 
+    if (!result.success) {
+      throw new Error(result.error || 'Action item extraction failed');
+    }
+
+    const actionItems = result.data.actionItems || [];
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Action items extracted in ${duration}s`);
 
@@ -132,7 +151,14 @@ const extractActions = async (transcript) => {
 
   } catch (error) {
     logger.error(`❌ Action item extraction failed: ${error.message}`);
-    throw new Error(`Action item extraction failed: ${error.message}`);
+
+    // User-friendly error handling
+    let userMessage = error.message;
+    if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT') || error.message.includes('timeout')) {
+      userMessage = 'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+    }
+
+    throw new Error(userMessage);
   }
 };
 

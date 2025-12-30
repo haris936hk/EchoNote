@@ -142,7 +142,7 @@ const ProfileSettings = () => {
           <div>
             <p className="text-sm font-medium mb-2">Data Processing</p>
             <p className="text-xs text-default-500 leading-relaxed">
-              Audio is processed using Whisper ASR for transcription, SpaCy for NLP, and Mistral 7B for summarization. Processing happens server-side and data is encrypted in transit and at rest.
+              Audio is processed using Whisper ASR for transcription, SpaCy for NLP, and EchoNote's custom AI model for summarization. Processing happens server-side and data is encrypted in transit and at rest.
             </p>
           </div>
 
