@@ -39,18 +39,9 @@ router.get('/', (req, res) => {
 router.get('/health', async (req, res) => {
   try {
     const { checkDatabaseHealth } = require('../config/database');
-    const { checkGroqHealth } = require('../config/groq');
 
     // Check database
     const dbHealth = await checkDatabaseHealth();
-
-    // Check Groq API (optional - don't fail if unavailable)
-    let groqHealth = { status: 'unknown' };
-    try {
-      groqHealth = await checkGroqHealth();
-    } catch (error) {
-      groqHealth = { status: 'unavailable', error: error.message };
-    }
 
     const overallHealth = dbHealth.status === 'healthy' ? 'healthy' : 'degraded';
 
@@ -61,7 +52,10 @@ router.get('/health', async (req, res) => {
       version: API_VERSION,
       services: {
         database: dbHealth,
-        groq: groqHealth,
+        customModel: {
+          status: 'configured',
+          note: 'Health check available at custom model API endpoint'
+        },
         server: {
           status: 'healthy',
           uptime: process.uptime(),

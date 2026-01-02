@@ -95,7 +95,7 @@ const Footer = () => {
           </p>
           
           <p className="text-xs">
-            Powered by Whisper ASR, SpaCy & Mistral AI
+            Powered by Whisper ASR, SpaCy & EchoNote AI
           </p>
         </div>
       </div>
