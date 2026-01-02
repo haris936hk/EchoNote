@@ -23,7 +23,7 @@ const Header = () => {
       {/* Centered wrapper */}
       <div className="max-w-6xl mx-auto flex justify-center">
         {/* Rounded container with subtle border */}
-        <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/50 backdrop-blur-xl backdrop-saturate-150">
+        <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-xl backdrop-saturate-150 shadow-lg">
           {/* Brand */}
           <Link
             to="/dashboard"
@@ -71,7 +71,7 @@ const Header = () => {
           </Link>
 
           {/* User section */}
-          <div className="flex items-center gap-3 pl-2 border-l border-gray-700/30">
+          <div className="flex items-center gap-3 pl-2 border-l border-divider">
             {user?.picture ? (
               <img
                 src={user.picture}
@@ -79,8 +79,8 @@ const Header = () => {
                 className="w-7 h-7 rounded-full"
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center">
-                <span className="text-xs text-default-400">
+              <div className="w-7 h-7 rounded-full bg-default-200 flex items-center justify-center">
+                <span className="text-xs text-default-600 font-semibold">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
                 </span>
               </div>

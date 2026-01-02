@@ -137,7 +137,7 @@ const DashboardPage = () => {
         {/* Centered wrapper */}
         <div className="max-w-6xl mx-auto flex justify-center">
           {/* Rounded container with subtle border */}
-          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/30 backdrop-blur-md backdrop-saturate-150">
+          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-md backdrop-saturate-150 shadow-lg">
             {/* Dashboard Title */}
             <div className="flex items-center gap-2 text-default-foreground">
               <FiGrid size={20} />
@@ -145,7 +145,7 @@ const DashboardPage = () => {
             </div>
 
             {/* Divider */}
-            <div className="h-6 w-px bg-gray-700/30"></div>
+            <div className="h-6 w-px bg-divider"></div>
 
             {/* New Recording Button */}
             <button
@@ -173,7 +173,7 @@ const DashboardPage = () => {
               <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 No meetings yet
               </h3>
-              <p className="text-default-600 mb-8 max-w-md mx-auto text-lg">
+              <p className="text-default-700 dark:text-default-600 mb-8 max-w-md mx-auto text-lg">
                 Start by recording your first meeting. Your AI-powered transcription and summary will be ready in minutes.
               </p>
               <div className="relative inline-block group">
@@ -220,7 +220,7 @@ const DashboardPage = () => {
         {/* Statistics Cards - Only show when there are meetings */}
         {meetings.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="rounded-3xl border border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
+          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
@@ -234,7 +234,7 @@ const DashboardPage = () => {
             </CardBody>
           </Card>
 
-          <Card className="rounded-3xl border border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
+          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
@@ -250,7 +250,7 @@ const DashboardPage = () => {
             </CardBody>
           </Card>
 
-          <Card className="rounded-3xl border border-divider hover:border-warning/40 hover:shadow-xl hover:shadow-warning/20 transition-all duration-300 group">
+          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-warning/40 hover:shadow-xl hover:shadow-warning/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
@@ -266,7 +266,7 @@ const DashboardPage = () => {
             </CardBody>
           </Card>
 
-          <Card className="rounded-3xl border border-divider hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 group">
+          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 group">
             <CardBody className="gap-2">
               <div className="flex items-center justify-between">
                 <div>
@@ -309,7 +309,7 @@ const DashboardPage = () => {
           {/* Meetings List - Left Column (3/4) */}
           <div className="lg:col-span-3 space-y-6">
             {/* Search and Filters */}
-            <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
               <CardBody className="gap-4">
                 <SearchBar
                   value={searchQuery}
@@ -338,7 +338,7 @@ const DashboardPage = () => {
           {/* Sidebar - Right Column (1/4) */}
           <div className="space-y-6">
             {/* Category Breakdown */}
-            <Card className="rounded-3xl border border-divider">
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
               <CardHeader>
                 <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Categories</h3>
               </CardHeader>
@@ -395,7 +395,7 @@ const DashboardPage = () => {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="rounded-3xl border border-divider">
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
               <CardHeader>
                 <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Quick Actions</h3>
               </CardHeader>

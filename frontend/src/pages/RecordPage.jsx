@@ -221,7 +221,7 @@ const RecordPage = () => {
         {/* Centered wrapper */}
         <div className="max-w-6xl mx-auto flex justify-center">
           {/* Rounded container with subtle border */}
-          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/30 backdrop-blur-md backdrop-saturate-150">
+          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-md backdrop-saturate-150 shadow-lg">
             {/* Title with icon (changes based on step) */}
             <div className="flex items-center gap-2 text-default-foreground">
               {step === 'record' && <FiMic size={20} />}
@@ -237,7 +237,7 @@ const RecordPage = () => {
             </div>
 
             {/* Divider */}
-            <div className="h-6 w-px bg-gray-700/30"></div>
+            <div className="h-6 w-px bg-divider"></div>
 
             {/* Back Button */}
             <button
@@ -254,7 +254,7 @@ const RecordPage = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-3xl pt-4">
         {/* Main Card */}
-        <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
+        <Card className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-default-200 dark:border-primary/20 hover:border-primary/30 transition-all duration-500">
           <CardBody className="gap-6 p-6">
             {/* Step 1: Recording */}
             {step === 'record' && (

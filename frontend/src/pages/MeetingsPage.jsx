@@ -178,7 +178,7 @@ const MeetingsPage = () => {
         {/* Centered wrapper */}
         <div className="max-w-6xl mx-auto flex justify-center">
           {/* Rounded container with subtle border */}
-          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-gray-700/30 bg-gray-900/30 backdrop-blur-md backdrop-saturate-150">
+          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-md backdrop-saturate-150 shadow-lg">
             {/* Meetings Title with count */}
             <div className="flex items-center gap-2 text-default-foreground">
               <FiFilter size={20} />
@@ -188,7 +188,7 @@ const MeetingsPage = () => {
             </div>
 
             {/* Divider */}
-            <div className="h-6 w-px bg-gray-700/30"></div>
+            <div className="h-6 w-px bg-divider"></div>
 
             {/* Export Button */}
             <button
@@ -200,7 +200,7 @@ const MeetingsPage = () => {
             </button>
 
             {/* Divider */}
-            <div className="h-6 w-px bg-gray-700/30"></div>
+            <div className="h-6 w-px bg-divider"></div>
 
             {/* New Recording Button */}
             <button
@@ -218,7 +218,7 @@ const MeetingsPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl pt-4 space-y-6">
 
         {/* Status Tabs */}
-        <Card className="rounded-3xl border border-divider">
+        <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
           <CardBody className="p-0">
             <Tabs
               aria-label="Status filter"
@@ -281,7 +281,7 @@ const MeetingsPage = () => {
         </Card>
 
         {/* Search and Filters */}
-        <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
+        <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
           <CardBody className="gap-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -366,7 +366,7 @@ const MeetingsPage = () => {
               <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 No meetings found
               </h3>
-              <p className="text-default-600 mb-8 max-w-md mx-auto text-lg">
+              <p className="text-default-700 dark:text-default-600 mb-8 max-w-md mx-auto text-lg">
                 {searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL'
                   ? 'Try adjusting your filters to see more results'
                   : 'Start by recording your first meeting to see it here'}

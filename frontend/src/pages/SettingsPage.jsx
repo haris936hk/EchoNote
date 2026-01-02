@@ -149,7 +149,7 @@ const PreferencesContent = () => {
             <button
               onClick={toggleTheme}
               className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                isDark ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+                isDark ? 'bg-primary hover:bg-primary/90' : 'bg-default-300 hover:bg-default-400'
               }`}
             >
               <span
@@ -173,7 +173,7 @@ const PreferencesContent = () => {
             <button
               onClick={() => setEmailNotifications(!emailNotifications)}
               className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                emailNotifications ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+                emailNotifications ? 'bg-success hover:bg-success/90' : 'bg-default-300 hover:bg-default-400'
               }`}
             >
               <span
@@ -198,7 +198,7 @@ const PreferencesContent = () => {
               <button
                 onClick={() => setAutoDelete(!autoDelete)}
                 className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                  autoDelete ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+                  autoDelete ? 'bg-warning hover:bg-warning/90' : 'bg-default-300 hover:bg-default-400'
                 }`}
               >
                 <span

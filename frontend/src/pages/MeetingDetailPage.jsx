@@ -170,7 +170,7 @@ const MeetingDetailPage = () => {
         </Button>
 
         {/* Header Card */}
-        <Card className="rounded-3xl border border-divider hover:border-primary/20 transition-all duration-300">
+        <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
           <CardHeader className="flex-col items-start gap-4 p-6">
             {/* Title and Actions Row */}
             <div className="flex items-start justify-between w-full gap-4">
@@ -179,7 +179,7 @@ const MeetingDetailPage = () => {
                   {currentMeeting.title}
                 </h1>
                 {currentMeeting.description && (
-                  <p className="text-default-600">{currentMeeting.description}</p>
+                  <p className="text-default-700 dark:text-default-600">{currentMeeting.description}</p>
                 )}
               </div>
 

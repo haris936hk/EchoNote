@@ -21,43 +21,43 @@
   --color-primary-foreground: 255 255 255;
 
   /* Secondary colors */
-  --color-secondary: 156 163 175;
-  --color-secondary-foreground: 17 24 39;
+  --color-secondary: 107 114 128;
+  --color-secondary-foreground: 255 255 255;
 
   /* Success colors */
   --color-success: 34 197 94;
   --color-success-foreground: 255 255 255;
 
   /* Warning colors */
-  --color-warning: 234 179 8;
-  --color-warning-foreground: 17 24 39;
+  --color-warning: 202 138 4;
+  --color-warning-foreground: 255 255 255;
 
   /* Danger colors */
-  --color-danger: 239 68 68;
+  --color-danger: 220 38 38;
   --color-danger-foreground: 255 255 255;
 
-  /* Background colors */
-  --color-background: 255 255 255;
-  --color-foreground: 17 24 39;
+  /* Background colors - Enhanced brightness and contrast */
+  --color-background: 249 250 251;
+  --color-foreground: 15 23 42;
 
-  /* Content colors */
+  /* Content colors - Improved hierarchy with better contrast */
   --color-content1: 255 255 255;
-  --color-content2: 249 250 251;
-  --color-content3: 243 244 246;
-  --color-content4: 229 231 235;
+  --color-content2: 248 250 252;
+  --color-content3: 241 245 249;
+  --color-content4: 226 232 240;
 
-  /* Default/muted colors */
-  --color-default: 229 231 235;
-  --color-default-foreground: 55 65 81;
-  --color-default-100: 249 250 251;
-  --color-default-200: 243 244 246;
-  --color-default-300: 229 231 235;
-  --color-default-400: 156 163 175;
-  --color-default-500: 107 114 128;
-  --color-default-600: 75 85 99;
+  /* Default/muted colors - Stronger contrast for light mode */
+  --color-default: 203 213 225;
+  --color-default-foreground: 15 23 42;
+  --color-default-100: 241 245 249;
+  --color-default-200: 226 232 240;
+  --color-default-300: 203 213 225;
+  --color-default-400: 100 116 139;
+  --color-default-500: 71 85 105;
+  --color-default-600: 51 65 85;
 
-  /* Divider */
-  --color-divider: 229 231 235;
+  /* Divider - Increased visibility with stronger contrast */
+  --color-divider: 203 213 225;
 
   /* Focus ring */
   --color-focus: 17 94 250;
@@ -177,6 +177,50 @@
   /* Text gradient */
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+
+  /* Text gradient for light mode with better contrast */
+  .text-gradient-enhanced {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary to-blue-600;
+  }
+
+  .dark .text-gradient-enhanced {
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+
+  /* Enhanced contrast utilities for light mode */
+  .border-enhanced {
+    @apply border-default-300;
+  }
+
+  .dark .border-enhanced {
+    @apply border-divider;
+  }
+
+  /* Card borders with better visibility */
+  .card-border {
+    @apply border border-default-300/60;
+  }
+
+  .dark .card-border {
+    @apply border-divider;
+  }
+
+  /* Text with enhanced readability */
+  .text-muted {
+    @apply text-default-600;
+  }
+
+  .dark .text-muted {
+    @apply text-default-500;
+  }
+
+  .text-subtle {
+    @apply text-default-500;
+  }
+
+  .dark .text-subtle {
+    @apply text-default-400;
   }
 
   /* Button base */
