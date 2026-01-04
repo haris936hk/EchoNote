@@ -150,3 +150,6 @@ backend/src/uploads/raw/a07ea593-2c2d-4f58-95c5-86dcb0ad9872_1765904591962_cd882
 backend/src/uploads/raw/a07ea593-2c2d-4f58-95c5-86dcb0ad9872_1766059727216_f5eb59951a7fd2d8.webm
 backend/src/uploads/raw/a07ea593-2c2d-4f58-95c5-86dcb0ad9872_1766059747431_7f0fd0ec689b4936.webm
 backend/src/uploads/raw/a07ea593-2c2d-4f58-95c5-86dcb0ad9872_1766059988392_0dc802502b1b3ab2.webm
+
+backend/src/uploads/*
+backend/storage*
