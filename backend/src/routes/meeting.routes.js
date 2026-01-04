@@ -8,9 +8,9 @@ const {
   authenticate,
   authenticateMedia,
   authorize,
-  rateLimit,
   requireCompletedMeeting
 } = require('../middleware/auth.middleware');
+const { uploadLimiter, searchLimiter } = require('../middleware/rateLimit.middleware');
 const {
   validateCreateMeeting,
   validateUpdateMeeting,
@@ -24,6 +24,7 @@ const {
 const {
   uploadAudio,
   validateAudioFile,
+  validateAudioDuration,
   handleMulterError
 } = require('../middleware/upload.middleware');
 
@@ -49,6 +50,7 @@ router.get(
 router.get(
   '/search',
   authenticate,
+  searchLimiter, // 30 searches per minute
   sanitizeQuery,
   validateSearch,
   meetingController.searchMeetings
@@ -79,10 +81,11 @@ router.get(
 router.post(
   '/upload',
   authenticate,
-  rateLimit(10, 60000), // 10 uploads per minute
+  uploadLimiter, // 5 uploads per minute (stricter rate limiting)
   uploadAudio,
   handleMulterError,
   validateAudioFile,
+  validateAudioDuration, // FR.45: Validate 3-minute limit
   sanitizeBody,
   meetingController.createMeetingWithAudio
 );
@@ -97,7 +100,6 @@ router.post(
 router.post(
   '/',
   authenticate,
-  rateLimit(30, 60000), // 30 meetings per minute
   sanitizeBody,
   validateCreateMeeting,
   meetingController.createMeeting
@@ -160,10 +162,11 @@ router.post(
   authenticate,
   validateUUIDParam('id'),
   authorize('meeting'),
-  rateLimit(5, 60000), // 5 uploads per minute
+  uploadLimiter, // 5 uploads per minute (stricter rate limiting)
   uploadAudio,
   handleMulterError,
   validateAudioFile,
+  validateAudioDuration, // FR.45: Validate 3-minute limit
   meetingController.uploadAudio
 );
 
@@ -223,7 +226,6 @@ router.get(
   authenticateMedia,
   validateUUIDParam('id'),
   authorize('meeting'),
-  rateLimit(30, 60000), // 30 streams per minute
   meetingController.streamAudio
 );
 
@@ -238,7 +240,6 @@ router.get(
   authenticate,
   validateUUIDParam('id'),
   authorize('meeting'),
-  rateLimit(20, 60000), // 20 downloads per minute
   meetingController.downloadAudio
 );
 
@@ -256,7 +257,6 @@ router.get(
   authorize('meeting'),
   requireCompletedMeeting,
   validateDownloadFormat,
-  rateLimit(20, 60000),
   meetingController.downloadTranscript
 );
 
@@ -274,7 +274,6 @@ router.get(
   authorize('meeting'),
   requireCompletedMeeting,
   validateDownloadFormat,
-  rateLimit(20, 60000),
   meetingController.downloadSummary
 );
 
@@ -290,7 +289,6 @@ router.post(
   authenticate,
   validateUUIDParam('id'),
   authorize('meeting'),
-  rateLimit(3, 60000), // 3 reprocesses per minute
   sanitizeBody,
   (req, res) => {
     // Future feature - reprocess failed or update summary
@@ -356,7 +354,6 @@ router.get(
 router.post(
   '/batch-delete',
   authenticate,
-  rateLimit(5, 60000), // 5 batch operations per minute
   sanitizeBody,
   (req, res) => {
     // Future feature - batch operations

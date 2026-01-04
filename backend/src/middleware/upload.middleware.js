@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const winston = require('winston');
+const ffmpeg = require('fluent-ffmpeg');
 const { AppError } = require('./error.middleware');
 
 // Initialize logger
@@ -198,6 +199,104 @@ const validateAudioFile = async (req, res, next) => {
     }
     
     next(new AppError('File validation failed', 500, 'VALIDATION_ERROR'));
+  }
+};
+
+/**
+ * Validate audio duration (FR.45: 3-minute limit)
+ * Must be called after validateAudioFile or validateExpressFileUpload
+ */
+const validateAudioDuration = async (req, res, next) => {
+  try {
+    if (!req.uploadedFile || !req.uploadedFile.path) {
+      return next(
+        new AppError('No uploaded file found for duration validation', 500, 'NO_FILE_FOR_VALIDATION')
+      );
+    }
+
+    const filePath = req.uploadedFile.path;
+    const maxDuration = UPLOAD_CONFIG.maxDuration; // 180 seconds (3 minutes)
+
+    logger.info(`🎵 Checking audio duration for: ${req.uploadedFile.filename}`);
+
+    return new Promise((resolve) => {
+      ffmpeg.ffprobe(filePath, (err, metadata) => {
+        if (err) {
+          logger.error(`❌ FFprobe error: ${err.message}`);
+          // Clean up invalid file
+          cleanupUploadedFile(filePath);
+          return resolve(
+            next(
+              new AppError(
+                'Invalid audio file. Could not read audio metadata.',
+                400,
+                'INVALID_AUDIO_FILE'
+              )
+            )
+          );
+        }
+
+        const duration = metadata.format.duration;
+
+        if (!duration || duration <= 0) {
+          logger.warn(`❌ Invalid duration: ${duration}`);
+          cleanupUploadedFile(filePath);
+          return resolve(
+            next(
+              new AppError(
+                'Invalid audio file. Duration could not be determined.',
+                400,
+                'INVALID_DURATION'
+              )
+            )
+          );
+        }
+
+        // Check if duration exceeds maximum (3 minutes)
+        if (duration > maxDuration) {
+          const durationMinutes = Math.floor(duration / 60);
+          const durationSeconds = Math.floor(duration % 60);
+          const maxMinutes = Math.floor(maxDuration / 60);
+
+          logger.warn(
+            `❌ Audio too long: ${durationMinutes}m ${durationSeconds}s (max: ${maxMinutes}m)`
+          );
+
+          // Clean up file
+          cleanupUploadedFile(filePath);
+
+          return resolve(
+            next(
+              new AppError(
+                `Audio duration (${durationMinutes}m ${durationSeconds}s) exceeds the maximum limit of ${maxMinutes} minutes. Please upload a shorter recording.`,
+                400,
+                'DURATION_LIMIT_EXCEEDED'
+              )
+            )
+          );
+        }
+
+        // Add duration to uploaded file info
+        req.uploadedFile.duration = duration;
+        req.uploadedFile.durationFormatted = `${Math.floor(duration / 60)}m ${Math.floor(duration % 60)}s`;
+
+        logger.info(
+          `✅ Duration validated: ${req.uploadedFile.durationFormatted} (${duration}s)`
+        );
+
+        resolve(next());
+      });
+    });
+
+  } catch (error) {
+    logger.error(`Error validating audio duration: ${error.message}`);
+
+    // Clean up file if it exists
+    if (req.uploadedFile && req.uploadedFile.path) {
+      cleanupUploadedFile(req.uploadedFile.path);
+    }
+
+    next(new AppError('Audio duration validation failed', 500, 'DURATION_VALIDATION_ERROR'));
   }
 };
 
@@ -482,6 +581,7 @@ module.exports = {
   UPLOAD_CONFIG,
   uploadAudio,
   validateAudioFile,
+  validateAudioDuration,
   expressFileUploadConfig,
   validateExpressFileUpload,
   cleanupUploadedFile,

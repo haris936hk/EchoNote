@@ -4,7 +4,8 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
-const { authenticate, optionalAuth, rateLimit } = require('../middleware/auth.middleware');
+const { authenticate, optionalAuth } = require('../middleware/auth.middleware');
+const { authLimiter } = require('../middleware/rateLimit.middleware');
 const { sanitizeBody } = require('../middleware/validation.middleware');
 
 /**
@@ -16,7 +17,7 @@ const { sanitizeBody } = require('../middleware/validation.middleware');
  */
 router.post(
   '/google',
-  rateLimit(process.env.NODE_ENV === 'development' ? 1000 : 10, 60000), // Development: 1000/min, Production: 10/min
+  authLimiter, // 10 requests per 15 minutes
   sanitizeBody,
   authController.googleAuth
 );
@@ -53,7 +54,7 @@ router.get(
  */
 router.post(
   '/refresh',
-  rateLimit(process.env.NODE_ENV === 'development' ? 1000 : 20, 60000), // Development: 1000/min, Production: 20/min
+  authLimiter, // 10 requests per 15 minutes
   sanitizeBody,
   authController.refreshToken
 );
