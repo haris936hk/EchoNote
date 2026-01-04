@@ -569,7 +569,18 @@ const downloadSummary = async (req, res) => {
       textContent += `Category: ${meeting.category}\n`;
       textContent += `Date: ${new Date(meeting.createdAt).toLocaleString()}\n\n`;
       textContent += `=== EXECUTIVE SUMMARY ===\n${summary.executiveSummary}\n\n`;
-      textContent += `=== KEY DECISIONS ===\n${summary.keyDecisions}\n\n`;
+
+      // Format keyDecisions as numbered list
+      if (Array.isArray(summary.keyDecisions) && summary.keyDecisions.length > 0) {
+        textContent += '=== KEY DECISIONS ===\n';
+        summary.keyDecisions.forEach((decision, index) => {
+          textContent += `${index + 1}. ${decision}\n`;
+        });
+        textContent += '\n';
+      } else {
+        textContent += '=== KEY DECISIONS ===\nNo major decisions recorded.\n\n';
+      }
+
       textContent += `=== ACTION ITEMS ===\n`;
       summary.actionItems.forEach((item, index) => {
         textContent += `${index + 1}. ${item.task}`;
@@ -577,7 +588,17 @@ const downloadSummary = async (req, res) => {
         if (item.deadline) textContent += ` - Due: ${item.deadline}`;
         textContent += `\n`;
       });
-      textContent += `\n=== NEXT STEPS ===\n${summary.nextSteps}\n`;
+
+      // Format nextSteps as numbered list
+      if (Array.isArray(summary.nextSteps) && summary.nextSteps.length > 0) {
+        textContent += '\n=== NEXT STEPS ===\n';
+        summary.nextSteps.forEach((step, index) => {
+          textContent += `${index + 1}. ${step}\n`;
+        });
+        textContent += '\n';
+      } else {
+        textContent += '\n=== NEXT STEPS ===\nNo next steps defined.\n\n';
+      }
 
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}.txt"`);

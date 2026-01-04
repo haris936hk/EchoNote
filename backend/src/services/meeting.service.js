@@ -8,6 +8,25 @@ const path = require('path');
 const fs = require('fs').promises;
 
 /**
+ * Helper function to deserialize JSON string fields back to arrays
+ * Used for keyDecisions and nextSteps which are stored as JSON strings in the database
+ * @param {string|Array} value - The value from database (JSON string or already parsed array)
+ * @returns {Array|null} Parsed array or original value
+ */
+function deserializeArrayField(value) {
+  if (!value) return null;
+  if (typeof value === 'string' && value.startsWith('[')) {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      console.error('Failed to parse JSON array:', e);
+      return value; // Return original if parse fails
+    }
+  }
+  return value; // Already an array or other value
+}
+
+/**
  * Create new meeting without audio (separate from processing)
  * @param {Object} params - Meeting parameters
  * @param {string} params.userId - User ID
@@ -169,9 +188,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     console.log(`✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`);
     console.log(`📝 Summary data to save:`, {
       executiveSummary: enhancedSummary.executiveSummary ? enhancedSummary.executiveSummary.substring(0, 50) + '...' : 'null',
-      keyDecisions: enhancedSummary.keyDecisions ? enhancedSummary.keyDecisions.substring(0, 50) + '...' : 'null',
+      keyDecisions: Array.isArray(enhancedSummary.keyDecisions) ? `[${enhancedSummary.keyDecisions.length} items]` : 'null',
       actionItemsCount: enhancedSummary.actionItems?.length || 0,
-      nextSteps: enhancedSummary.nextSteps ? enhancedSummary.nextSteps.substring(0, 50) + '...' : 'null',
+      nextSteps: Array.isArray(enhancedSummary.nextSteps) ? `[${enhancedSummary.nextSteps.length} items]` : 'null',
       keyTopicsCount: enhancedSummary.keyTopics?.length || 0,
       sentiment: enhancedSummary.sentiment || 'null'
     });
@@ -211,11 +230,15 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
         nlpTopics: nlpResult.success ? nlpResult.topics : null,
 
-        // Summary fields
+        // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
-        summaryKeyDecisions: enhancedSummary.keyDecisions || null,
+        summaryKeyDecisions: Array.isArray(enhancedSummary.keyDecisions)
+          ? JSON.stringify(enhancedSummary.keyDecisions)
+          : enhancedSummary.keyDecisions || null,
         summaryActionItems: enhancedSummary.actionItems || null,
-        summaryNextSteps: enhancedSummary.nextSteps || null,
+        summaryNextSteps: Array.isArray(enhancedSummary.nextSteps)
+          ? JSON.stringify(enhancedSummary.nextSteps)
+          : enhancedSummary.nextSteps || null,
         summaryKeyTopics: enhancedSummary.keyTopics || null,
         summarySentiment: enhancedSummary.sentiment || null,
 
@@ -430,11 +453,15 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
         nlpTopics: nlpResult.success ? nlpResult.topics : null,
 
-        // Summary fields
+        // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
-        summaryKeyDecisions: enhancedSummary.keyDecisions || null,
+        summaryKeyDecisions: Array.isArray(enhancedSummary.keyDecisions)
+          ? JSON.stringify(enhancedSummary.keyDecisions)
+          : enhancedSummary.keyDecisions || null,
         summaryActionItems: enhancedSummary.actionItems || null,
-        summaryNextSteps: enhancedSummary.nextSteps || null,
+        summaryNextSteps: Array.isArray(enhancedSummary.nextSteps)
+          ? JSON.stringify(enhancedSummary.nextSteps)
+          : enhancedSummary.nextSteps || null,
         summaryKeyTopics: enhancedSummary.keyTopics || null,
         summarySentiment: enhancedSummary.sentiment || null,
 
@@ -529,13 +556,13 @@ function transformMeetingForFrontend(meeting) {
     // Map duration field
     duration: meeting.audioDuration || null,
 
-    // Combine summary fields into single object
+    // Combine summary fields into single object - deserialize JSON strings back to arrays
     summary: (meeting.summaryExecutive || meeting.summaryKeyDecisions || meeting.summaryActionItems || meeting.summaryNextSteps)
       ? {
           executiveSummary: meeting.summaryExecutive,
-          keyDecisions: meeting.summaryKeyDecisions,
+          keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
           actionItems: meeting.summaryActionItems,
-          nextSteps: meeting.summaryNextSteps,
+          nextSteps: deserializeArrayField(meeting.summaryNextSteps),
           keyTopics: meeting.summaryKeyTopics,
           sentiment: meeting.summarySentiment
         }
@@ -978,9 +1005,9 @@ async function getSummary(meetingId, userId) {
 
     return {
       executiveSummary: meeting.summaryExecutive,
-      keyDecisions: meeting.summaryKeyDecisions,
+      keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
       actionItems: meeting.summaryActionItems || [],
-      nextSteps: meeting.summaryNextSteps,
+      nextSteps: deserializeArrayField(meeting.summaryNextSteps),
       keyTopics: meeting.summaryKeyTopics || [],
       sentiment: meeting.summarySentiment
     };
@@ -1036,9 +1063,9 @@ async function getMeetingWithNLP(meetingId, userId) {
         : null,
       summary: {
         executiveSummary: meeting.summaryExecutive,
-        keyDecisions: meeting.summaryKeyDecisions,
+        keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
         actionItems: meeting.summaryActionItems || [],
-        nextSteps: meeting.summaryNextSteps,
+        nextSteps: deserializeArrayField(meeting.summaryNextSteps),
         keyTopics: meeting.summaryKeyTopics || [],
         sentiment: meeting.summarySentiment
       }

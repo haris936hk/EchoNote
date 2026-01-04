@@ -24,7 +24,7 @@ const storageRoutes = require('./routes/storage.routes');
 
 // Import middleware
 const { errorHandler } = require('./middleware/error.middleware');
-const { rateLimit } = require('./middleware/auth.middleware');
+const { apiLimiter } = require('./middleware/rateLimit.middleware');
 
 // Initialize Express app
 const app = express();
@@ -62,8 +62,8 @@ if (NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// Rate limiting (global)
-app.use('/api/', rateLimit());
+// Rate limiting (global) - FR.56: 100 requests per hour per user
+app.use('/api/', apiLimiter);
 
 // Serve static files from storage directory
 app.use('/storage', express.static(path.join(__dirname, 'storage')));

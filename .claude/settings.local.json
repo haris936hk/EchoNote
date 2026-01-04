@@ -14,7 +14,14 @@
       "Bash(del nul)",
       "Bash(code:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(grep:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout 15 npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

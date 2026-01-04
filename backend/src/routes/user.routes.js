@@ -4,9 +4,8 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
-const { 
-  authenticate, 
-  rateLimit 
+const {
+  authenticate
 } = require('../middleware/auth.middleware');
 const {
   validateUpdateProfile,
@@ -39,7 +38,6 @@ router.get(
 router.patch(
   '/me',
   authenticate,
-  rateLimit(30, 60000), // 30 updates per minute
   sanitizeBody,
   validateUpdateProfile,
   userController.updateUserProfile
@@ -55,7 +53,6 @@ router.patch(
 router.delete(
   '/me',
   authenticate,
-  rateLimit(3, 60000), // 3 deletion attempts per minute
   sanitizeBody,
   validateAccountDeletion,
   userController.deleteUserAccount
@@ -83,7 +80,6 @@ router.get(
 router.patch(
   '/settings',
   authenticate,
-  rateLimit(30, 60000), // 30 updates per minute
   sanitizeBody,
   validateUpdateSettings,
   userController.updateUserSettings
@@ -125,7 +121,6 @@ router.get(
 router.post(
   '/activity',
   authenticate,
-  rateLimit(60, 60000), // 60 activity logs per minute
   sanitizeBody,
   validateLogActivity,
   userController.logUserActivity
@@ -140,7 +135,6 @@ router.post(
 router.get(
   '/export',
   authenticate,
-  rateLimit(5, 3600000), // 5 exports per hour
   userController.exportUserData
 );
 
@@ -153,7 +147,6 @@ router.get(
 router.post(
   '/login-timestamp',
   authenticate,
-  rateLimit(10, 60000), // 10 updates per minute
   userController.updateLastLogin
 );
 
@@ -207,7 +200,6 @@ router.patch(
 router.post(
   '/avatar',
   authenticate,
-  rateLimit(5, 60000), // 5 uploads per minute
   (req, res) => {
     // Future feature - custom avatar upload
     res.status(501).json({
@@ -416,7 +408,6 @@ router.get(
 router.post(
   '/feedback',
   authenticate,
-  rateLimit(10, 3600000), // 10 feedback submissions per hour
   sanitizeBody,
   (req, res) => {
     // Future feature - user feedback
