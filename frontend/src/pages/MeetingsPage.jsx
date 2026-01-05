@@ -20,10 +20,11 @@ import CategoryFilter from '../components/meeting/CategoryFilter';
 import SearchBar from '../components/meeting/SearchBar';
 import { PageLoader } from '../components/common/Loader';
 import useDebounce from '../hooks/useDebounce';
+import EditMeetingModal from '../components/meeting/EditMeetingModal';
 
 const MeetingsPage = () => {
   const navigate = useNavigate();
-  const { meetings, fetchMeetings, deleteMeeting, loading } = useMeeting();
+  const { meetings, fetchMeetings, deleteMeeting, updateMeeting, loading } = useMeeting();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -33,6 +34,8 @@ const MeetingsPage = () => {
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -141,6 +144,19 @@ const MeetingsPage = () => {
       if (result.success) {
         // Could add toast notification here
       }
+    }
+  };
+
+  const handleEdit = (meeting) => {
+    setEditingMeeting(meeting);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (updates) => {
+    const result = await updateMeeting(editingMeeting.id, updates);
+    if (result.success) {
+      // Refresh meetings list
+      fetchMeetings();
     }
   };
 
@@ -368,6 +384,7 @@ const MeetingsPage = () => {
             meetings={filteredMeetings}
             loading={loading}
             onDelete={handleDelete}
+            onEdit={handleEdit}
             itemsPerPage={12}
           />
         ) : (
@@ -432,6 +449,14 @@ const MeetingsPage = () => {
           <FiArrowUp size={24} />
         </Button>
       )}
+
+      {/* Edit Meeting Modal */}
+      <EditMeetingModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        meeting={editingMeeting}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };

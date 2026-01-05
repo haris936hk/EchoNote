@@ -32,13 +32,15 @@ import SummaryViewer from '../components/meeting/SummaryViewer';
 import TranscriptViewer from '../components/meeting/TranscriptViewer';
 import { CategoryBadge } from '../components/meeting/CategoryFilter';
 import { PageLoader } from '../components/common/Loader';
+import EditMeetingModal from '../components/meeting/EditMeetingModal';
 
 const MeetingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentMeeting, fetchMeeting, deleteMeeting, loading } = useMeeting();
+  const { currentMeeting, fetchMeeting, deleteMeeting, updateMeeting, loading } = useMeeting();
   const [activeTab, setActiveTab] = useState('summary');
   const [deleting, setDeleting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -69,8 +71,15 @@ const MeetingDetailPage = () => {
   };
 
   const handleEdit = () => {
-    // Navigate to edit page or open edit modal
-    console.log('Edit meeting:', id);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (updates) => {
+    const result = await updateMeeting(id, updates);
+    if (result.success) {
+      // Refresh the meeting data
+      fetchMeeting(id);
+    }
   };
 
   const handleDownloadAudio = async () => {
@@ -404,6 +413,14 @@ const MeetingDetailPage = () => {
           </Card>
         )}
       </div>
+
+      {/* Edit Meeting Modal */}
+      <EditMeetingModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        meeting={currentMeeting}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };
