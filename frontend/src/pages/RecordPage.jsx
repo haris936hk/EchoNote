@@ -206,7 +206,7 @@ const RecordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background flex items-center justify-center overflow-hidden">
       {/* Page Header - Slides down when navbar slides up */}
       <div
         className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${
@@ -252,10 +252,10 @@ const RecordPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-3xl pt-4">
+      <div className="container mx-auto px-4 max-w-3xl w-full">
         {/* Main Card */}
-        <Card className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-default-200 dark:border-primary/20 hover:border-primary/30 transition-all duration-500">
-          <CardBody className="gap-6 p-6">
+        <Card className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-default-200 dark:border-primary/20 hover:border-primary/30 transition-all duration-500 max-h-[90vh] overflow-hidden">
+          <CardBody className="gap-6 p-6 overflow-hidden">
             {/* Step 1: Recording */}
             {step === 'record' && (
               <>
@@ -308,13 +308,13 @@ const RecordPage = () => {
                 <div className="flex flex-col items-center gap-4">
                   {!isRecording && !audioBlob && (
                     <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
                       <Button
                         color="primary"
                         size="lg"
                         startContent={<FiMic size={24} />}
                         onPress={handleStartRecording}
-                        className="relative min-w-[200px] font-semibold shadow-xl shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 hover:scale-105 transition-all duration-300 rounded-3xl"
+                        className="relative min-w-[200px] font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
                       >
                         Start Recording
                       </Button>
@@ -323,13 +323,13 @@ const RecordPage = () => {
 
                   {isRecording && (
                     <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-danger to-danger opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-danger to-danger opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
                       <Button
                         color="danger"
                         size="lg"
                         startContent={<FiSquare size={24} />}
                         onPress={handleStopRecording}
-                        className="relative min-w-[200px] font-semibold shadow-xl shadow-danger/40 hover:shadow-2xl hover:shadow-danger/60 hover:scale-105 transition-all duration-300 rounded-3xl"
+                        className="relative min-w-[200px] font-semibold shadow-md shadow-danger/10 hover:shadow-lg hover:shadow-danger/15 hover:scale-105 transition-all duration-300 rounded-3xl"
                       >
                         Stop Recording
                       </Button>
@@ -373,12 +373,12 @@ const RecordPage = () => {
                           Re-record
                         </Button>
                         <div className="relative group flex-1">
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-lg transition-opacity duration-300 rounded-3xl"></div>
                           <Button
                             color="primary"
                             onPress={() => setStep('details')}
                             fullWidth
-                            className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl"
+                            className="relative font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
                           >
                             Continue
                           </Button>
@@ -503,14 +503,14 @@ const RecordPage = () => {
                     Back
                   </Button>
                   <div className="relative group flex-1">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-lg transition-opacity duration-300 rounded-3xl"></div>
                     <Button
                       color="primary"
                       startContent={<FiUpload size={18} />}
                       onPress={handleSubmit}
                       isLoading={uploadLoading}
                       fullWidth
-                      className="relative font-semibold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300 rounded-3xl whitespace-nowrap"
+                      className="relative font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl whitespace-nowrap"
                     >
                       Upload Meeting
                     </Button>
