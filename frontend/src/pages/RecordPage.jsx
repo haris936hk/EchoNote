@@ -372,21 +372,19 @@ const RecordPage = () => {
                         />
                       </div>
 
-                      <div className="flex gap-3 w-full">
+                      <div className="flex justify-between items-center w-full">
                         <Button
-                          variant="flat"
+                          variant="bordered"
                           onPress={handleReset}
-                          fullWidth
-                          className="font-semibold rounded-3xl hover:bg-default-100 hover:scale-105 transition-all duration-300"
+                          className="font-semibold rounded-3xl border-default-300 hover:bg-default-100 hover:border-default-400 hover:scale-105 transition-all duration-300"
                         >
                           Re-record
                         </Button>
-                        <div className="relative group flex-1">
+                        <div className="relative group">
                           <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-lg transition-opacity duration-300 rounded-3xl"></div>
                           <Button
                             color="primary"
                             onPress={() => setStep('details')}
-                            fullWidth
                             className="relative font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
                           >
                             Continue
@@ -397,8 +395,8 @@ const RecordPage = () => {
                   )}
                 </div>
 
-                {/* Tips - Only show when not recording */}
-                {!isRecording && (
+                {/* Tips - Only show when not recording and no audio recorded */}
+                {!isRecording && !audioBlob && (
                   <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg rounded-3xl hover:border-primary/30 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300">
                     <CardBody className="gap-2">
                       <p className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -478,11 +476,20 @@ const RecordPage = () => {
                       classNames={{
                         trigger: "rounded-lg hover:border-primary/30 focus-within:border-primary transition-all duration-300 h-9 pl-3 pr-8",
                         value: "text-sm text-left",
-                        selectorIcon: "right-2"
+                        selectorIcon: "right-2",
+                        popoverContent: "rounded-xl",
+                        listbox: "rounded-xl"
                       }}
                     >
                       {CATEGORIES.map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
+                        <SelectItem
+                          key={category.value}
+                          value={category.value}
+                          classNames={{
+                            base: "hover:bg-primary/10 hover:scale-[1.01] transition-all duration-200 cursor-pointer rounded-lg data-[hover=true]:bg-primary/10 pl-4",
+                            title: "text-sm"
+                          }}
+                        >
                           {category.label}
                         </SelectItem>
                       ))}
@@ -503,24 +510,22 @@ const RecordPage = () => {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-3">
+                <div className="flex justify-between items-center">
                   <Button
                     variant="bordered"
                     onPress={() => setStep('record')}
-                    fullWidth
                     startContent={<FiArrowLeft size={18} />}
                     className="font-semibold rounded-3xl border-default-300 hover:bg-default-100 hover:border-default-400 hover:scale-105 transition-all duration-300"
                   >
                     Back
                   </Button>
-                  <div className="relative group flex-1">
+                  <div className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-lg transition-opacity duration-300 rounded-3xl"></div>
                     <Button
                       color="primary"
                       startContent={<FiUpload size={18} />}
                       onPress={handleSubmit}
                       isLoading={uploadLoading}
-                      fullWidth
                       className="relative font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl whitespace-nowrap"
                     >
                       Upload Meeting
