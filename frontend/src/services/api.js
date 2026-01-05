@@ -338,7 +338,7 @@ export const meetingsAPI = {
    */
   updateMeeting: async (id, updates) => {
     try {
-      const response = await api.put(`/meetings/${id}`, updates);
+      const response = await api.patch(`/meetings/${id}`, updates);
       return { success: true, data: response.data };
     } catch (error) {
       return {

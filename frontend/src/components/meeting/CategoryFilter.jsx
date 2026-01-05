@@ -38,15 +38,14 @@ const CategoryFilter = ({
         return (
           <Chip
             key={category.value}
-            color={isSelected ? category.color : 'default'}
-            variant={isSelected ? 'solid' : 'flat'}
+            variant="flat"
             startContent={<Icon size={16} />}
-            onPress={() => handleCategoryClick(category.value)}
-            className="cursor-pointer transition-colors"
+            onClick={() => handleCategoryClick(category.value)}
+            className="cursor-pointer transition-all hover:scale-105"
             size="md"
             classNames={{
-              base: "px-3 gap-1.5",
-              content: "px-0"
+              base: `px-3 gap-1.5 ${isSelected ? `${category.bgClass} ${category.borderClass} border` : 'bg-default/20 border border-transparent'}`,
+              content: `px-0 ${isSelected ? category.textClass : 'text-default-600'}`
             }}
           >
             {category.label}

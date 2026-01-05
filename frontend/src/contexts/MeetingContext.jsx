@@ -185,7 +185,7 @@ export const MeetingProvider = ({ children }) => {
   const updateMeeting = useCallback(async (id, updates) => {
     try {
       setLoading(true);
-      const { data } = await api.put(`/meetings/${id}`, updates);
+      const { data } = await api.patch(`/meetings/${id}`, updates);
 
       // Update in list
       setMeetings((prev) =>

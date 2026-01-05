@@ -5,8 +5,7 @@ import {
   Card,
   CardBody,
   Tabs,
-  Tab,
-  Chip
+  Tab
 } from '@heroui/react';
 import {
   FiPlus,
@@ -87,12 +86,29 @@ const MeetingsPage = () => {
     // Filter by search query
     if (debouncedSearch) {
       const query = debouncedSearch.toLowerCase();
-      result = result.filter(m =>
-        m.title.toLowerCase().includes(query) ||
-        m.description?.toLowerCase().includes(query) ||
-        m.transcript?.toLowerCase().includes(query) ||
-        m.summary?.toLowerCase().includes(query)
-      );
+      result = result.filter(m => {
+        // Search in title and description
+        if (m.title.toLowerCase().includes(query)) return true;
+        if (m.description?.toLowerCase().includes(query)) return true;
+
+        // Search in transcript (if it's a string)
+        if (typeof m.transcript === 'string' && m.transcript.toLowerCase().includes(query)) return true;
+
+        // Search in summary (if it's an object with string fields)
+        if (m.summary && typeof m.summary === 'object') {
+          const summaryText = [
+            m.summary.executiveSummary,
+            m.summary.keyDecisions,
+            m.summary.nextSteps,
+            ...(m.summary.keyTopics || []),
+            ...(m.summary.actionItems || []).map(item => item.task)
+          ].filter(Boolean).join(' ').toLowerCase();
+
+          if (summaryText.includes(query)) return true;
+        }
+
+        return false;
+      });
     }
 
     // Sort by date (newest first)
@@ -228,7 +244,7 @@ const MeetingsPage = () => {
               classNames={{
                 tabList: 'w-full relative rounded-none p-0 px-4',
                 cursor: 'w-full bg-primary',
-                tab: 'h-12',
+                tab: 'h-12 hover:opacity-80 transition-opacity duration-200',
                 tabContent: 'group-data-[selected=true]:text-primary'
               }}
             >
@@ -237,9 +253,9 @@ const MeetingsPage = () => {
                 title={
                   <div className="flex items-center gap-2">
                     <span>All</span>
-                    <Chip size="sm" variant="flat">
+                    <span className="text-sm font-medium text-default-500">
                       {statusCounts.ALL}
-                    </Chip>
+                    </span>
                   </div>
                 }
               />
@@ -248,9 +264,9 @@ const MeetingsPage = () => {
                 title={
                   <div className="flex items-center gap-2">
                     <span>Completed</span>
-                    <Chip size="sm" variant="flat" color="success">
+                    <span className="text-sm font-medium text-success">
                       {statusCounts.COMPLETED}
-                    </Chip>
+                    </span>
                   </div>
                 }
               />
@@ -259,9 +275,9 @@ const MeetingsPage = () => {
                 title={
                   <div className="flex items-center gap-2">
                     <span>Processing</span>
-                    <Chip size="sm" variant="flat" color="warning">
+                    <span className="text-sm font-medium text-warning">
                       {statusCounts.PROCESSING}
-                    </Chip>
+                    </span>
                   </div>
                 }
               />
@@ -270,9 +286,9 @@ const MeetingsPage = () => {
                 title={
                   <div className="flex items-center gap-2">
                     <span>Failed</span>
-                    <Chip size="sm" variant="flat" color="danger">
+                    <span className="text-sm font-medium text-danger">
                       {statusCounts.FAILED}
-                    </Chip>
+                    </span>
                   </div>
                 }
               />
@@ -372,14 +388,16 @@ const MeetingsPage = () => {
                   : 'Start by recording your first meeting to see it here'}
               </p>
               {searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL' ? (
-                <Button
-                  variant="flat"
-                  onPress={handleClearFilters}
-                  size="lg"
-                  className="font-semibold rounded-3xl hover:bg-primary/10 transition-all duration-300 hover:scale-105"
-                >
-                  Clear Filters
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    variant="flat"
+                    onPress={handleClearFilters}
+                    size="lg"
+                    className="font-semibold rounded-3xl hover:bg-primary/10 transition-all duration-300"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
               ) : (
                 <div className="relative inline-block group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>

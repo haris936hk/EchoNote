@@ -24,11 +24,12 @@ import MeetingList from '../components/meeting/MeetingList';
 import CategoryFilter from '../components/meeting/CategoryFilter';
 import SearchBar from '../components/meeting/SearchBar';
 import { PageLoader } from '../components/common/Loader';
+import EditMeetingModal from '../components/meeting/EditMeetingModal';
 import useDebounce from '../hooks/useDebounce';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { meetings, fetchMeetings, deleteMeeting, loading } = useMeeting();
+  const { meetings, fetchMeetings, deleteMeeting, updateMeeting, loading } = useMeeting();
   const { showNavbar } = useScrollContext();
 
   // Debug: Log showNavbar changes
@@ -40,6 +41,8 @@ const DashboardPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -104,13 +107,34 @@ const DashboardPage = () => {
     const confirmed = window.confirm(
       'Are you sure you want to delete this meeting? This action cannot be undone.'
     );
-    
+
     if (confirmed) {
       const result = await deleteMeeting(id);
       if (result.success) {
         // Could add toast notification here
       }
     }
+  };
+
+  const handleEdit = (meeting) => {
+    setSelectedMeeting(meeting);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (updates) => {
+    if (!selectedMeeting) return;
+
+    const result = await updateMeeting(selectedMeeting.id, updates);
+    if (result.success) {
+      setIsEditModalOpen(false);
+      setSelectedMeeting(null);
+      // Could add toast notification here
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedMeeting(null);
   };
 
   const handleNewRecording = () => {
@@ -160,7 +184,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container mx-auto px-4 max-w-7xl pb-6">
         {/* Empty State */}
         {meetings.length === 0 && !loading && (
           <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
@@ -331,6 +355,7 @@ const DashboardPage = () => {
               meetings={filteredMeetings}
               loading={loading}
               onDelete={handleDelete}
+              onEdit={handleEdit}
               itemsPerPage={12}
             />
           </div>
@@ -413,7 +438,7 @@ const DashboardPage = () => {
 
                 <Button
                   variant="flat"
-                  onPress={() => setSelectedCategory('ALL')}
+                  onPress={() => navigate('/meetings')}
                   fullWidth
                   className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
                 >
@@ -428,23 +453,6 @@ const DashboardPage = () => {
                 >
                   Settings
                 </Button>
-              </CardBody>
-            </Card>
-
-            {/* Tips Card */}
-            <Card className="bg-primary/5 border border-primary/20 rounded-3xl hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
-              <CardBody className="gap-3">
-                <div className="flex items-start gap-2">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <FiMic className="text-primary" size={18} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-primary">Pro Tip</p>
-                    <p className="text-xs text-primary/80 mt-1">
-                      Keep your meetings under 3 minutes for best results. Use clear audio and minimize background noise.
-                    </p>
-                  </div>
-                </div>
               </CardBody>
             </Card>
           </div>
@@ -473,6 +481,14 @@ const DashboardPage = () => {
           </Button>
         </div>
       )}
+
+      {/* Edit Meeting Modal */}
+      <EditMeetingModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        meeting={selectedMeeting}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };
