@@ -144,7 +144,7 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
   }, [stream, isActive]);
 
   return (
-    <div className="relative w-full h-32 bg-gradient-to-br from-black/40 to-black/20 rounded-2xl overflow-hidden border border-primary/10 shadow-inner">
+    <div className="relative w-full h-20 bg-gradient-to-br from-black/40 to-black/20 rounded-2xl overflow-hidden border border-primary/10 shadow-inner">
       <canvas
         ref={canvasRef}
         className="w-full h-full"

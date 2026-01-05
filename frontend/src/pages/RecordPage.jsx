@@ -257,17 +257,17 @@ const RecordPage = () => {
       <div className="container mx-auto px-4 max-w-3xl w-full">
         {/* Main Card */}
         <Card className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-default-200 dark:border-primary/20 hover:border-primary/30 transition-all duration-500 max-h-[90vh] overflow-hidden">
-          <CardBody className="gap-6 p-6 overflow-hidden">
+          <CardBody className="gap-4 p-6 overflow-hidden">
             {/* Step 1: Recording */}
             {step === 'record' && (
               <>
                 {/* Timer Display */}
-                <div className="text-center py-8">
-                  <div className="relative mb-8">
+                <div className="text-center py-4">
+                  <div className="relative mb-4">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
-                    <div className={`relative w-32 h-32 ${isRecording ? 'bg-gradient-to-br from-danger/20 to-danger/30' : 'bg-gradient-to-br from-primary/20 to-secondary/20'} rounded-3xl flex items-center justify-center mx-auto shadow-2xl ${isRecording ? 'shadow-danger/25' : 'shadow-primary/25'} backdrop-blur-sm border ${isRecording ? 'border-danger/20' : 'border-primary/20'}`}>
+                    <div className={`relative w-24 h-24 ${isRecording ? 'bg-gradient-to-br from-danger/20 to-danger/30' : 'bg-gradient-to-br from-primary/20 to-secondary/20'} rounded-3xl flex items-center justify-center mx-auto shadow-2xl ${isRecording ? 'shadow-danger/25' : 'shadow-primary/25'} backdrop-blur-sm border ${isRecording ? 'border-danger/20' : 'border-primary/20'}`}>
                       <FiMic
-                        size={64}
+                        size={48}
                         className={isRecording ? 'text-danger animate-pulse' : 'text-primary'}
                       />
                     </div>
@@ -287,7 +287,7 @@ const RecordPage = () => {
 
                 {/* Audio Visualizer - Show when recording */}
                 {isRecording && (
-                  <div className="mb-4">
+                  <div className="mb-2">
                     <AudioVisualizer stream={stream} isActive={isRecording} />
                   </div>
                 )}
@@ -297,7 +297,7 @@ const RecordPage = () => {
                   <Progress
                     value={progress}
                     color={progress > 90 ? 'danger' : 'primary'}
-                    className="mb-4"
+                    className="mb-2"
                   />
                 )}
 
