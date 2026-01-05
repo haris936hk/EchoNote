@@ -3,6 +3,11 @@
 
 const meetingService = require('../services/meeting.service');
 const winston = require('winston');
+const path = require('path');
+const fs = require('fs');
+const archiver = require('archiver');
+const { convertWavToMp3, cleanupTempMp3 } = require('../utils/audioConverter');
+const { generateDownloadFilename, ensureDirectoryExists } = require('../utils/fileUtils');
 
 // Initialize logger
 const logger = winston.createLogger({
@@ -432,10 +437,13 @@ const getSummary = async (req, res) => {
 };
 
 /**
- * Download meeting audio
+ * Download meeting audio (as MP3)
  * GET /api/meetings/:id/download/audio
+ * FR.30: User shall be able to download processed audio file (MP3 format)
+ * FR.33: System shall organize downloaded files with meeting title and timestamp
  */
 const downloadAudio = async (req, res) => {
+  let tempMp3Path = null;
   try {
     const meetingId = req.params.id;
     const userId = req.userId;
@@ -449,11 +457,7 @@ const downloadAudio = async (req, res) => {
       });
     }
 
-    // Stream the audio file directly to the client
-    const fs = require('fs');
-    const path = require('path');
-
-    // Check if file exists
+    // Check if source file exists
     if (!fs.existsSync(audioData.url)) {
       return res.status(404).json({
         success: false,
@@ -461,22 +465,45 @@ const downloadAudio = async (req, res) => {
       });
     }
 
-    // Set headers for file download
+    // Get meeting details for filename
     const meeting = await meetingService.getMeetingById(meetingId, userId);
-    const sanitizedTitle = meeting.title.replace(/[^a-z0-9]/gi, '_');
-    const fileExt = path.extname(audioData.url);
-    const downloadFilename = `${sanitizedTitle}_audio${fileExt}`;
+    const downloadFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'audio', 'mp3');
 
-    res.setHeader('Content-Type', 'audio/wav');
+    // Create temp directory if needed
+    const tempDir = path.join(process.cwd(), 'storage', 'temp');
+    ensureDirectoryExists(tempDir);
+    tempMp3Path = path.join(tempDir, `${meetingId}_audio.mp3`);
+
+    // Convert WAV to MP3
+    logger.info(`🎵 Converting audio to MP3 for meeting ${meetingId}`);
+    const conversionResult = await convertWavToMp3(audioData.url, tempMp3Path);
+
+    if (!conversionResult.success) {
+      logger.error(`MP3 conversion failed: ${conversionResult.error}`);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to convert audio to MP3 format',
+        details: conversionResult.error
+      });
+    }
+
+    // Set headers for MP3 download
+    res.setHeader('Content-Type', 'audio/mpeg');
     res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
-    res.setHeader('Content-Length', audioData.size);
+    res.setHeader('Content-Length', conversionResult.size);
 
-    // Stream the file
-    const fileStream = fs.createReadStream(audioData.url);
+    // Stream the MP3 file
+    const fileStream = fs.createReadStream(tempMp3Path);
     fileStream.pipe(res);
 
+    fileStream.on('close', () => {
+      // Cleanup temp file after streaming completes
+      cleanupTempMp3(tempMp3Path);
+    });
+
     fileStream.on('error', (err) => {
-      logger.error(`Error streaming audio file: ${err.message}`);
+      logger.error(`Error streaming MP3 file: ${err.message}`);
+      cleanupTempMp3(tempMp3Path);
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
@@ -487,6 +514,7 @@ const downloadAudio = async (req, res) => {
 
   } catch (error) {
     logger.error(`Error downloading audio: ${error.message}`);
+    if (tempMp3Path) cleanupTempMp3(tempMp3Path);
     return res.status(500).json({
       success: false,
       error: 'Failed to download audio',
@@ -498,6 +526,8 @@ const downloadAudio = async (req, res) => {
 /**
  * Download meeting transcript (TXT format)
  * GET /api/meetings/:id/download/transcript
+ * FR.31: User shall be able to download transcript (TXT format)
+ * FR.33: System shall organize downloaded files with meeting title and timestamp
  */
 const downloadTranscript = async (req, res) => {
   try {
@@ -515,15 +545,15 @@ const downloadTranscript = async (req, res) => {
     }
 
     const meeting = await meetingService.getMeetingById(meetingId, userId);
-    const filename = `${meeting.title.replace(/[^a-z0-9]/gi, '_')}_transcript`;
+    const filename = generateDownloadFilename(meeting.title, meeting.createdAt, 'transcript', format);
 
     if (format === 'json') {
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(JSON.stringify(transcriptData, null, 2));
     } else {
       res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}.txt"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(transcriptData.text);
     }
 
@@ -540,6 +570,8 @@ const downloadTranscript = async (req, res) => {
 /**
  * Download meeting summary (TXT format)
  * GET /api/meetings/:id/download/summary
+ * FR.32: User shall be able to download summary (TXT format)
+ * FR.33: System shall organize downloaded files with meeting title and timestamp
  */
 const downloadSummary = async (req, res) => {
   try {
@@ -557,11 +589,11 @@ const downloadSummary = async (req, res) => {
     }
 
     const meeting = await meetingService.getMeetingById(meetingId, userId);
-    const filename = `${meeting.title.replace(/[^a-z0-9]/gi, '_')}_summary`;
+    const filename = generateDownloadFilename(meeting.title, meeting.createdAt, 'summary', format);
 
     if (format === 'json') {
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(JSON.stringify(summary, null, 2));
     } else {
       // Format as readable text
@@ -601,7 +633,7 @@ const downloadSummary = async (req, res) => {
       }
 
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}.txt"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(textContent);
     }
 
@@ -789,6 +821,194 @@ const streamAudio = async (req, res) => {
   }
 };
 
+/**
+ * Download all meeting files (audio, transcript, summary) as ZIP
+ * GET /api/meetings/:id/download/all
+ * Creates a ZIP archive with:
+ * - Audio file (MP3)
+ * - Transcript (TXT)
+ * - Summary (TXT)
+ */
+const downloadAll = async (req, res) => {
+  let tempMp3Path = null;
+  let tempZipPath = null;
+
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    // Get meeting details
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+
+    if (!meeting) {
+      return res.status(404).json({
+        success: false,
+        error: 'Meeting not found'
+      });
+    }
+
+    // Ensure meeting is completed
+    if (meeting.status !== 'COMPLETED') {
+      return res.status(400).json({
+        success: false,
+        error: 'Meeting processing is not complete. Please wait for processing to finish.'
+      });
+    }
+
+    logger.info(`📦 Creating ZIP download for meeting ${meetingId}`);
+
+    // Create temp directory
+    const tempDir = path.join(process.cwd(), 'storage', 'temp');
+    ensureDirectoryExists(tempDir);
+
+    // Get filenames with timestamps
+    const audioFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'audio', 'mp3');
+    const transcriptFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'transcript', 'txt');
+    const summaryFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'summary', 'txt');
+    const zipFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'complete', 'zip');
+
+    // Get audio data and convert to MP3
+    const audioData = await meetingService.getAudioDownloadUrl(meetingId, userId);
+    let audioAvailable = false;
+
+    if (audioData && audioData.url && fs.existsSync(audioData.url)) {
+      tempMp3Path = path.join(tempDir, `${meetingId}_audio.mp3`);
+      const conversionResult = await convertWavToMp3(audioData.url, tempMp3Path);
+      audioAvailable = conversionResult.success;
+      if (!audioAvailable) {
+        logger.warn(`MP3 conversion failed for ZIP, skipping audio: ${conversionResult.error}`);
+      }
+    }
+
+    // Get transcript
+    const transcriptData = await meetingService.getTranscript(meetingId, userId);
+
+    // Get summary and format as text
+    const summary = await meetingService.getSummary(meetingId, userId);
+    let summaryText = '';
+    if (summary) {
+      summaryText = `Meeting Summary: ${meeting.title}\n`;
+      summaryText += `Category: ${meeting.category}\n`;
+      summaryText += `Date: ${new Date(meeting.createdAt).toLocaleString()}\n\n`;
+      summaryText += `=== EXECUTIVE SUMMARY ===\n${summary.executiveSummary}\n\n`;
+
+      if (Array.isArray(summary.keyDecisions) && summary.keyDecisions.length > 0) {
+        summaryText += '=== KEY DECISIONS ===\n';
+        summary.keyDecisions.forEach((decision, index) => {
+          summaryText += `${index + 1}. ${decision}\n`;
+        });
+        summaryText += '\n';
+      } else {
+        summaryText += '=== KEY DECISIONS ===\nNo major decisions recorded.\n\n';
+      }
+
+      summaryText += `=== ACTION ITEMS ===\n`;
+      if (summary.actionItems && summary.actionItems.length > 0) {
+        summary.actionItems.forEach((item, index) => {
+          summaryText += `${index + 1}. ${item.task}`;
+          if (item.assignee) summaryText += ` (${item.assignee})`;
+          if (item.deadline) summaryText += ` - Due: ${item.deadline}`;
+          summaryText += `\n`;
+        });
+      } else {
+        summaryText += 'No action items recorded.\n';
+      }
+
+      if (Array.isArray(summary.nextSteps) && summary.nextSteps.length > 0) {
+        summaryText += '\n=== NEXT STEPS ===\n';
+        summary.nextSteps.forEach((step, index) => {
+          summaryText += `${index + 1}. ${step}\n`;
+        });
+      }
+    }
+
+    // Check if we have at least some content
+    if (!audioAvailable && !transcriptData && !summary) {
+      return res.status(404).json({
+        success: false,
+        error: 'No content available for download'
+      });
+    }
+
+    // Create ZIP archive
+    tempZipPath = path.join(tempDir, `${meetingId}_all.zip`);
+
+    await new Promise((resolve, reject) => {
+      const outputStream = fs.createWriteStream(tempZipPath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
+
+      outputStream.on('close', resolve);
+      archive.on('error', reject);
+
+      archive.pipe(outputStream);
+
+      // Add MP3 if available
+      if (audioAvailable && fs.existsSync(tempMp3Path)) {
+        archive.file(tempMp3Path, { name: audioFilename });
+      }
+
+      // Add transcript if available
+      if (transcriptData && transcriptData.text) {
+        archive.append(transcriptData.text, { name: transcriptFilename });
+      }
+
+      // Add summary if available
+      if (summaryText) {
+        archive.append(summaryText, { name: summaryFilename });
+      }
+
+      archive.finalize();
+    });
+
+    // Get ZIP file size
+    const zipStats = fs.statSync(tempZipPath);
+
+    // Set response headers
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
+    res.setHeader('Content-Length', zipStats.size);
+
+    // Stream ZIP file
+    const zipStream = fs.createReadStream(tempZipPath);
+    zipStream.pipe(res);
+
+    zipStream.on('close', () => {
+      // Cleanup temp files
+      if (tempMp3Path) cleanupTempMp3(tempMp3Path);
+      if (tempZipPath && fs.existsSync(tempZipPath)) {
+        fs.unlinkSync(tempZipPath);
+      }
+    });
+
+    zipStream.on('error', (err) => {
+      logger.error(`Error streaming ZIP file: ${err.message}`);
+      if (tempMp3Path) cleanupTempMp3(tempMp3Path);
+      if (tempZipPath && fs.existsSync(tempZipPath)) {
+        fs.unlinkSync(tempZipPath);
+      }
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          error: 'Failed to stream ZIP file'
+        });
+      }
+    });
+
+  } catch (error) {
+    logger.error(`Error creating download all ZIP: ${error.message}`);
+    // Cleanup on error
+    if (tempMp3Path) cleanupTempMp3(tempMp3Path);
+    if (tempZipPath && fs.existsSync(tempZipPath)) {
+      fs.unlinkSync(tempZipPath);
+    }
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to create download package',
+      details: error.message
+    });
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -802,6 +1022,7 @@ module.exports = {
   downloadAudio,
   downloadTranscript,
   downloadSummary,
+  downloadAll,
   searchMeetings,
   getMeetingStats,
   getProcessingStatus,

@@ -26,12 +26,13 @@ const logger = winston.createLogger({
   ]
 });
 
-// Upload configuration
+// Upload configuration - Using unified storage directory
+const STORAGE_BASE = path.join(process.cwd(), 'storage');
 const UPLOAD_CONFIG = {
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 10485760, // 10MB
-  uploadDir: process.env.UPLOAD_DIR || './src/uploads',
-  rawDir: './src/uploads/raw',
-  processedDir: './src/uploads/processed',
+  uploadDir: path.join(STORAGE_BASE, 'temp'),  // Unified: use storage/temp
+  rawDir: path.join(STORAGE_BASE, 'temp'),      // Raw uploads go to temp
+  processedDir: path.join(STORAGE_BASE, 'processed'),
   allowedFormats: (process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg').split(','),
   maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 180 // 3 minutes in seconds
 };
@@ -39,9 +40,10 @@ const UPLOAD_CONFIG = {
 // Ensure upload directories exist
 const ensureUploadDirs = () => {
   const dirs = [
+    STORAGE_BASE,
     UPLOAD_CONFIG.uploadDir,
-    UPLOAD_CONFIG.rawDir,
-    UPLOAD_CONFIG.processedDir
+    UPLOAD_CONFIG.processedDir,
+    path.join(STORAGE_BASE, 'audio')  // Also ensure audio dir exists
   ];
 
   dirs.forEach(dir => {
@@ -99,7 +101,7 @@ const fileFilter = (req, file, cb) => {
   // Check file extension
   const ext = path.extname(file.originalname).toLowerCase();
   const allowedExtensions = ['.mp3', '.wav', '.webm', '.ogg', '.m4a', '.mpeg'];
-  
+
   if (!allowedExtensions.includes(ext)) {
     logger.warn(`❌ Invalid file extension: ${ext}`);
     return cb(
@@ -152,7 +154,7 @@ const validateAudioFile = async (req, res, next) => {
     if (file.size > UPLOAD_CONFIG.maxFileSize) {
       // Delete the file
       fs.unlinkSync(file.path);
-      
+
       return next(
         new AppError(
           `File too large. Maximum size is ${UPLOAD_CONFIG.maxFileSize / 1024 / 1024}MB`,
@@ -192,12 +194,12 @@ const validateAudioFile = async (req, res, next) => {
 
   } catch (error) {
     logger.error(`Error validating file: ${error.message}`);
-    
+
     // Clean up file if it exists
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    
+
     next(new AppError('File validation failed', 500, 'VALIDATION_ERROR'));
   }
 };
@@ -305,8 +307,8 @@ const validateAudioDuration = async (req, res, next) => {
  * Use this if you prefer express-fileupload over multer
  */
 const expressFileUploadConfig = {
-  limits: { 
-    fileSize: UPLOAD_CONFIG.maxFileSize 
+  limits: {
+    fileSize: UPLOAD_CONFIG.maxFileSize
   },
   abortOnLimit: true,
   responseOnLimit: 'File size limit exceeded',
@@ -355,7 +357,7 @@ const validateExpressFileUpload = async (req, res, next) => {
     // Validate extension
     const ext = path.extname(audioFile.name).toLowerCase();
     const allowedExtensions = ['.mp3', '.wav', '.webm', '.ogg', '.m4a', '.mpeg'];
-    
+
     if (!allowedExtensions.includes(ext)) {
       return next(
         new AppError(

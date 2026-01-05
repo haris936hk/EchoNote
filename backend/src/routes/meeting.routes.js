@@ -278,6 +278,21 @@ router.get(
 );
 
 /**
+ * @route   GET /api/meetings/:id/download/all
+ * @desc    Download all meeting files (audio MP3, transcript TXT, summary TXT) as ZIP
+ * @access  Private (owner only)
+ * @returns ZIP file containing all meeting files
+ */
+router.get(
+  '/:id/download/all',
+  authenticate,
+  validateUUIDParam('id'),
+  authorize('meeting'),
+  requireCompletedMeeting,
+  meetingController.downloadAll
+);
+
+/**
  * @route   POST /api/meetings/:id/reprocess
  * @desc    Reprocess meeting (regenerate summary/transcript)
  * @access  Private (owner only)

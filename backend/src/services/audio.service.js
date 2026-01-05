@@ -228,7 +228,7 @@ const getAudioMetadata = (filePath) => {
       }
 
       const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
-      
+
       resolve({
         duration: parseFloat(metadata.format.duration),
         fileSize: parseInt(metadata.format.size),
@@ -460,15 +460,14 @@ const cleanupAudioFiles = (filePaths) => {
 
 /**
  * Simple wrapper for processAudioPipeline - used by meeting service
- * Automatically determines output directory from input path
+ * Uses unified storage/processed directory for output
  * @param {string} inputPath - Path to input audio file
  * @returns {Object} Processing result with simplified structure
  */
 const processAudioFile = async (inputPath) => {
   try {
-    // Determine output directory (processed folder next to raw folder)
-    const inputDir = path.dirname(inputPath);
-    const outputDir = inputDir.replace('/raw', '/processed').replace('\\raw', '\\processed');
+    // Use unified storage/processed directory for output
+    const outputDir = path.join(process.cwd(), 'storage', 'processed');
 
     // Ensure output directory exists
     if (!fs.existsSync(outputDir)) {

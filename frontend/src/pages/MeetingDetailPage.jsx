@@ -25,7 +25,8 @@ import {
   FiFileText,
   FiList,
   FiAlertCircle,
-  FiMic
+  FiMic,
+  FiPackage
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import SummaryViewer from '../components/meeting/SummaryViewer';
@@ -41,6 +42,7 @@ const MeetingDetailPage = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [deleting, setDeleting] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [downloadingAll, setDownloadingAll] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -101,7 +103,7 @@ const MeetingDetailPage = () => {
       // Get filename from Content-Disposition header
       const contentDisposition = response.headers.get('Content-Disposition');
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
-      const filename = filenameMatch ? filenameMatch[1] : `${currentMeeting.title}_audio.wav`;
+      const filename = filenameMatch ? filenameMatch[1] : `${currentMeeting.title}_audio.mp3`;
 
       // Create blob and download
       const blob = await response.blob();
@@ -116,6 +118,46 @@ const MeetingDetailPage = () => {
     } catch (error) {
       console.error('Error downloading audio:', error);
       window.alert('Failed to download audio file. Please try again.');
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    if (!id || currentMeeting?.status !== 'COMPLETED') return;
+
+    try {
+      setDownloadingAll(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/${id}/download/all`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download files');
+      }
+
+      // Get filename from Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+      const filename = filenameMatch ? filenameMatch[1] : `${currentMeeting.title}_complete.zip`;
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading all files:', error);
+      window.alert('Failed to download files. Please try again.');
+    } finally {
+      setDownloadingAll(false);
     }
   };
 
@@ -223,6 +265,16 @@ const MeetingDetailPage = () => {
                       title: "font-medium text-sm",
                     }}
                   >
+                    {currentMeeting.status === 'COMPLETED' && (
+                      <DropdownItem
+                        key="download-all"
+                        startContent={<FiPackage size={16} className="text-primary" />}
+                        onPress={handleDownloadAll}
+                        isDisabled={deleting || downloadingAll}
+                      >
+                        {downloadingAll ? 'Downloading...' : 'Download All (ZIP)'}
+                      </DropdownItem>
+                    )}
                     <DropdownItem
                       key="edit"
                       startContent={<FiEdit size={16} className="text-default-500" />}
@@ -359,6 +411,7 @@ const MeetingDetailPage = () => {
                     <SummaryViewer
                       summary={currentMeeting.summary}
                       title="AI-Generated Summary"
+                      meetingId={currentMeeting.id}
                     />
                   </div>
                 </Tab>
@@ -378,6 +431,7 @@ const MeetingDetailPage = () => {
                       transcript={currentMeeting.transcript}
                       title="Full Transcript"
                       meetingTitle={currentMeeting.title}
+                      meetingId={currentMeeting.id}
                     />
                   </div>
                 </Tab>

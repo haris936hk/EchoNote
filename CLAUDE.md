@@ -297,10 +297,10 @@ try {
 
 ## File Storage Rules
 
-### Temporary (Auto-delete)
-- Raw audio files: `backend/src/uploads/raw/`
-- Processed audio files: `backend/src/uploads/processed/`
-- Retention: Delete after successful processing or 24 hours
+### Unified Storage Directory (`backend/storage/`)
+- `temp/` - Temporary uploads and conversion files (auto-delete after processing or 1 hour)
+- `processed/` - Processed audio intermediates (auto-delete after meeting completion)
+- `audio/` - Permanent processed audio files (WAV format for Whisper)
 
 ### Permanent (Database)
 - Processed audio URL: Supabase Storage (optional)

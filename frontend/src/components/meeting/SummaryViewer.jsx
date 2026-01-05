@@ -15,7 +15,8 @@ import {
   FiCheck,
   FiUser,
   FiCalendar,
-  FiTag
+  FiTag,
+  FiDownload
 } from 'react-icons/fi';
 import { useState } from 'react';
 
@@ -31,9 +32,10 @@ const TOPIC_COLORS = [
   { bg: 'bg-indigo-500/15', border: 'border-indigo-500/30', text: 'text-indigo-400' },
 ];
 
-const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
+const SummaryViewer = ({ summary, title = 'Meeting Summary', meetingId }) => {
   const [copiedSection, setCopiedSection] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
+  const [downloading, setDownloading] = useState(false);
 
   if (!summary) {
     return (
@@ -73,6 +75,46 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
       setTimeout(() => setCopiedSection(null), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!meetingId) return;
+
+    try {
+      setDownloading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/meetings/${meetingId}/download/summary?format=txt`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'summary.txt';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match) filename = match[1];
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Failed to download summary:', err);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -179,15 +221,30 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary' }) => {
             {sentimentConfig.label}
           </Chip>
         </div>
-        <Button
-          size="sm"
-          variant="flat"
-          className="rounded-xl"
-          startContent={copiedSection === 'all' ? <FiCheck size={14} className="text-success" /> : <FiCopy size={14} />}
-          onPress={() => copyToClipboard(JSON.stringify(summary, null, 2), 'all')}
-        >
-          {copiedSection === 'all' ? 'Copied!' : 'Copy All'}
-        </Button>
+        <div className="flex gap-2">
+          {meetingId && (
+            <Button
+              size="sm"
+              variant="flat"
+              className="rounded-xl"
+              startContent={<FiDownload size={14} />}
+              onPress={handleDownload}
+              isLoading={downloading}
+              isDisabled={downloading}
+            >
+              {downloading ? 'Downloading...' : 'Download TXT'}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="flat"
+            className="rounded-xl"
+            startContent={copiedSection === 'all' ? <FiCheck size={14} className="text-success" /> : <FiCopy size={14} />}
+            onPress={() => copyToClipboard(JSON.stringify(summary, null, 2), 'all')}
+          >
+            {copiedSection === 'all' ? 'Copied!' : 'Copy All'}
+          </Button>
+        </div>
       </div>
 
       {/* Executive Summary */}

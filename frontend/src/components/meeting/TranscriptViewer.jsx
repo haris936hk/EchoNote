@@ -1,29 +1,31 @@
-import { 
-  Card, 
-  CardBody, 
+import {
+  Card,
+  CardBody,
   CardHeader,
   Button,
   Input,
   Divider,
   Chip
 } from '@heroui/react';
-import { 
-  FiFileText, 
-  FiCopy, 
-  FiDownload, 
+import {
+  FiFileText,
+  FiCopy,
+  FiDownload,
   FiSearch,
   FiCheck,
   FiX
 } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 
-const TranscriptViewer = ({ 
-  transcript, 
+const TranscriptViewer = ({
+  transcript,
   title = 'Meeting Transcript',
-  meetingTitle = 'Meeting'
+  meetingTitle = 'Meeting',
+  meetingId
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [highlightedText, setHighlightedText] = useState('');
   const transcriptRef = useRef(null);
 
@@ -66,16 +68,56 @@ const TranscriptViewer = ({
     }
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([transcript], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${meetingTitle.replace(/[^a-z0-9]/gi, '_')}-transcript.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownload = async () => {
+    if (!meetingId) {
+      // Fallback to client-side download if no meetingId
+      const blob = new Blob([transcript], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${meetingTitle.replace(/[^a-z0-9]/gi, '_')}-transcript.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    try {
+      setDownloading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/meetings/${meetingId}/download/transcript?format=txt`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'transcript.txt';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match) filename = match[1];
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Failed to download transcript:', err);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const clearSearch = () => {
@@ -87,8 +129,8 @@ const TranscriptViewer = ({
   const estimatedReadTime = Math.ceil(wordCount / 200); // Average reading speed
 
   // Count search matches
-  const matchCount = searchQuery 
-    ? (transcript.match(new RegExp(searchQuery, 'gi')) || []).length 
+  const matchCount = searchQuery
+    ? (transcript.match(new RegExp(searchQuery, 'gi')) || []).length
     : 0;
 
   return (
@@ -100,23 +142,27 @@ const TranscriptViewer = ({
             <FiFileText className="text-primary" />
             {title}
           </h2>
-          
+
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="flat"
-              startContent={copied ? <FiCheck size={16} /> : <FiCopy size={16} />}
-              onPress={handleCopy}
+              className="rounded-xl"
+              startContent={<FiDownload size={14} />}
+              onPress={handleDownload}
+              isLoading={downloading}
+              isDisabled={downloading}
             >
-              {copied ? 'Copied!' : 'Copy'}
+              {downloading ? 'Downloading...' : 'Download TXT'}
             </Button>
             <Button
               size="sm"
               variant="flat"
-              startContent={<FiDownload size={16} />}
-              onPress={handleDownload}
+              className="rounded-xl"
+              startContent={copied ? <FiCheck size={14} className="text-success" /> : <FiCopy size={14} />}
+              onPress={handleCopy}
             >
-              Download
+              {copied ? 'Copied!' : 'Copy All'}
             </Button>
           </div>
         </div>
@@ -161,7 +207,7 @@ const TranscriptViewer = ({
 
         {searchQuery && (
           <p className="text-xs text-default-500">
-            {matchCount > 0 
+            {matchCount > 0
               ? `Found ${matchCount} match${matchCount !== 1 ? 'es' : ''}`
               : 'No matches found'
             }
@@ -172,7 +218,7 @@ const TranscriptViewer = ({
       <Divider />
 
       <CardBody className="p-6 overflow-auto">
-        <div 
+        <div
           ref={transcriptRef}
           className="bg-default-50 rounded-lg p-4 font-mono text-sm text-default-700 leading-relaxed whitespace-pre-wrap"
           dangerouslySetInnerHTML={{ __html: highlightedText }}
@@ -208,7 +254,7 @@ export const CompactTranscriptViewer = ({ transcript }) => {
             {expanded ? 'Show Less' : 'Show More'}
           </Button>
         </div>
-        
+
         <div className="bg-default-50 rounded-lg p-3 text-xs font-mono text-default-700">
           <pre className="whitespace-pre-wrap">
             {expanded ? transcript : preview}
@@ -239,7 +285,7 @@ export const TranscriptWithLineNumbers = ({ transcript }) => {
           {/* Line Numbers */}
           <div className="bg-default-100 px-4 py-4 border-r border-divider">
             {lines.map((_, index) => (
-              <div 
+              <div
                 key={index}
                 className="font-mono text-xs text-default-400 leading-relaxed text-right"
               >
@@ -251,7 +297,7 @@ export const TranscriptWithLineNumbers = ({ transcript }) => {
           {/* Content */}
           <div className="flex-1 px-4 py-4">
             {lines.map((line, index) => (
-              <div 
+              <div
                 key={index}
                 className="font-mono text-sm text-default-700 leading-relaxed"
               >
