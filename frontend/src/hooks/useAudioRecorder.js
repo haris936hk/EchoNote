@@ -7,6 +7,7 @@ const useAudioRecorder = () => {
   const [audioBlob, setAudioBlob] = useState(null);
   const [error, setError] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [stream, setStream] = useState(null);
 
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -46,18 +47,19 @@ const useAudioRecorder = () => {
       }
 
       // Request microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
           sampleRate: 16000
-        } 
+        }
       });
-      streamRef.current = stream;
+      streamRef.current = mediaStream;
+      setStream(mediaStream);
 
       // Create recorder
-      const recorder = new RecordRTC(stream, {
+      const recorder = new RecordRTC(mediaStream, {
         type: 'audio',
         mimeType: 'audio/webm',
         recorderType: RecordRTC.StereoAudioRecorder,
@@ -132,6 +134,7 @@ const useAudioRecorder = () => {
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
           streamRef.current = null;
+          setStream(null);
         }
 
         setIsRecording(false);
@@ -207,6 +210,7 @@ const useAudioRecorder = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+      setStream(null);
     }
 
     setIsRecording(false);
@@ -248,6 +252,7 @@ const useAudioRecorder = () => {
       }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+        setStream(null);
       }
       if (recorderRef.current) {
         try {
@@ -267,7 +272,8 @@ const useAudioRecorder = () => {
     audioBlob,
     error,
     isPaused,
-    
+    stream,
+
     // Actions
     startRecording,
     stopRecording,
@@ -275,7 +281,7 @@ const useAudioRecorder = () => {
     resumeRecording,
     cancelRecording,
     reset,
-    
+
     // Utilities
     getStats,
     checkCompatibility,

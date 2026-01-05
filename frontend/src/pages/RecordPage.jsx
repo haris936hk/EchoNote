@@ -24,6 +24,7 @@ import {
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import useAudioRecorder from '../hooks/useAudioRecorder';
+import AudioVisualizer from '../components/AudioVisualizer';
 
 const CATEGORIES = [
   { value: 'SALES', label: 'Sales' },
@@ -43,6 +44,7 @@ const RecordPage = () => {
     recordingTimeFormatted,
     audioBlob,
     error: recordingError,
+    stream,
     startRecording,
     stopRecording,
     reset: resetRecorder
@@ -283,6 +285,13 @@ const RecordPage = () => {
                   </div>
                 </div>
 
+                {/* Audio Visualizer - Show when recording */}
+                {isRecording && (
+                  <div className="mb-4">
+                    <AudioVisualizer stream={stream} isActive={isRecording} />
+                  </div>
+                )}
+
                 {/* Progress Bar */}
                 {isRecording && (
                   <Progress
@@ -388,20 +397,22 @@ const RecordPage = () => {
                   )}
                 </div>
 
-                {/* Tips */}
-                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg rounded-3xl hover:border-primary/30 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300">
-                  <CardBody className="gap-2">
-                    <p className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      💡 Tips for better results:
-                    </p>
-                    <ul className="text-xs text-default-600 space-y-1 ml-4">
-                      <li>• Speak clearly and minimize background noise</li>
-                      <li>• Keep the meeting under 3 minutes</li>
-                      <li>• Use a good quality microphone if available</li>
-                      <li>• Avoid overlapping speech</li>
-                    </ul>
-                  </CardBody>
-                </Card>
+                {/* Tips - Only show when not recording */}
+                {!isRecording && (
+                  <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg rounded-3xl hover:border-primary/30 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300">
+                    <CardBody className="gap-2">
+                      <p className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        💡 Tips for better results:
+                      </p>
+                      <ul className="text-xs text-default-600 space-y-1 ml-4">
+                        <li>• Speak clearly and minimize background noise</li>
+                        <li>• Keep the meeting under 3 minutes</li>
+                        <li>• Use a good quality microphone if available</li>
+                        <li>• Avoid overlapping speech</li>
+                      </ul>
+                    </CardBody>
+                  </Card>
+                )}
               </>
             )}
 
