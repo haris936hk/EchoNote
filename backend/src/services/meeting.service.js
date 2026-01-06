@@ -1332,6 +1332,7 @@ module.exports = {
   getProcessingStatus,
   getMeetingStatistics,
   getUserMeetingStats: getMeetingStatistics, // Export as getUserMeetingStats to match controller
+  updateMeetingStatus, // Needed by queue service
 
   // Advanced features
   regenerateSummary

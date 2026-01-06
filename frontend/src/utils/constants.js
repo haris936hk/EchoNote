@@ -98,22 +98,34 @@ export const CATEGORIES_LIST = [
 // ============================================
 
 export const MEETING_STATUS = {
-  PENDING: 'PENDING',
-  PROCESSING: 'PROCESSING',
+  UPLOADING: 'UPLOADING',
+  PENDING: 'PENDING',           // NEW: Queued for processing
+  PROCESSING_AUDIO: 'PROCESSING_AUDIO',
+  TRANSCRIBING: 'TRANSCRIBING',
+  PROCESSING_NLP: 'PROCESSING_NLP',
+  SUMMARIZING: 'SUMMARIZING',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED'
 };
 
 export const STATUS_LABELS = {
-  [MEETING_STATUS.PENDING]: 'Pending',
-  [MEETING_STATUS.PROCESSING]: 'Processing',
+  [MEETING_STATUS.UPLOADING]: 'Uploading',
+  [MEETING_STATUS.PENDING]: 'Queued',       // NEW: Queued for processing
+  [MEETING_STATUS.PROCESSING_AUDIO]: 'Processing Audio',
+  [MEETING_STATUS.TRANSCRIBING]: 'Transcribing',
+  [MEETING_STATUS.PROCESSING_NLP]: 'Processing NLP',
+  [MEETING_STATUS.SUMMARIZING]: 'Summarizing',
   [MEETING_STATUS.COMPLETED]: 'Completed',
   [MEETING_STATUS.FAILED]: 'Failed'
 };
 
 export const STATUS_COLORS = {
-  [MEETING_STATUS.PENDING]: 'default',
-  [MEETING_STATUS.PROCESSING]: 'warning',
+  [MEETING_STATUS.UPLOADING]: 'default',
+  [MEETING_STATUS.PENDING]: 'default',      // NEW: Queued for processing
+  [MEETING_STATUS.PROCESSING_AUDIO]: 'warning',
+  [MEETING_STATUS.TRANSCRIBING]: 'warning',
+  [MEETING_STATUS.PROCESSING_NLP]: 'warning',
+  [MEETING_STATUS.SUMMARIZING]: 'warning',
   [MEETING_STATUS.COMPLETED]: 'success',
   [MEETING_STATUS.FAILED]: 'danger'
 };

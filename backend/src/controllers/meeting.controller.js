@@ -792,21 +792,59 @@ const streamAudio = async (req, res) => {
     const fs = require('fs');
     const path = require('path');
 
-    // Check if file exists
-    if (!fs.existsSync(audioData.url)) {
-      return res.status(404).json({
-        success: false,
-        error: 'Audio file not found on server'
-      });
+    let audioFilePath = audioData.url;
+    let tempFile = null;
+
+    // Check if it's a Supabase URL - need to download first
+    if (audioData.isRemote || audioData.url.startsWith('http')) {
+      logger.info(`📥 Downloading audio from Supabase for streaming: ${meetingId}`);
+
+      // Create temp file path
+      const tempDir = path.join(process.cwd(), 'storage', 'temp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      tempFile = path.join(tempDir, `stream_${meetingId}_${Date.now()}.wav`);
+
+      // Download from Supabase
+      const downloadResult = await supabaseStorage.downloadAudioFromSupabase(audioData.url, tempFile);
+
+      if (!downloadResult.success) {
+        logger.error(`Failed to download audio from Supabase: ${downloadResult.error}`);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to retrieve audio from storage',
+          details: downloadResult.error
+        });
+      }
+
+      audioFilePath = tempFile;
+    } else {
+      // Local file - check if exists
+      if (!fs.existsSync(audioData.url)) {
+        return res.status(404).json({
+          success: false,
+          error: 'Audio file not found on server'
+        });
+      }
     }
 
-    const stat = fs.statSync(audioData.url);
+    const stat = fs.statSync(audioFilePath);
     const fileSize = stat.size;
     const range = req.headers.range;
 
     // Set content type
     res.setHeader('Content-Type', 'audio/wav');
     res.setHeader('Accept-Ranges', 'bytes');
+
+    // Cleanup function for temp file
+    const cleanupTemp = () => {
+      if (tempFile && fs.existsSync(tempFile)) {
+        fs.unlink(tempFile, (err) => {
+          if (err) logger.warn(`Failed to cleanup temp stream file: ${err.message}`);
+        });
+      }
+    };
 
     if (range) {
       // Parse range header
@@ -821,27 +859,33 @@ const streamAudio = async (req, res) => {
       res.setHeader('Content-Length', chunkSize);
 
       // Stream the requested range
-      const fileStream = fs.createReadStream(audioData.url, { start, end });
+      const fileStream = fs.createReadStream(audioFilePath, { start, end });
       fileStream.pipe(res);
 
       fileStream.on('error', (err) => {
         logger.error(`Error streaming audio range: ${err.message}`);
+        cleanupTemp();
         if (!res.headersSent) {
           res.status(500).end();
         }
       });
+
+      fileStream.on('close', cleanupTemp);
     } else {
       // Stream entire file
       res.setHeader('Content-Length', fileSize);
-      const fileStream = fs.createReadStream(audioData.url);
+      const fileStream = fs.createReadStream(audioFilePath);
       fileStream.pipe(res);
 
       fileStream.on('error', (err) => {
         logger.error(`Error streaming audio: ${err.message}`);
+        cleanupTemp();
         if (!res.headersSent) {
           res.status(500).end();
         }
       });
+
+      fileStream.on('close', cleanupTemp);
     }
 
   } catch (error) {

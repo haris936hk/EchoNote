@@ -121,10 +121,12 @@ const MeetingsPage = () => {
   }, [meetings, statusFilter, selectedCategory, debouncedSearch]);
 
   // Calculate counts for status tabs
+  const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
   const statusCounts = {
     ALL: meetings.length,
+    PENDING: meetings.filter(m => m.status === 'PENDING').length,
+    PROCESSING: meetings.filter(m => processingStatuses.includes(m.status)).length,
     COMPLETED: meetings.filter(m => m.status === 'COMPLETED').length,
-    PROCESSING: meetings.filter(m => m.status === 'PROCESSING').length,
     FAILED: meetings.filter(m => m.status === 'FAILED').length
   };
 
@@ -270,6 +272,17 @@ const MeetingsPage = () => {
                     <span>All</span>
                     <span className="text-sm font-medium text-default-500">
                       {statusCounts.ALL}
+                    </span>
+                  </div>
+                }
+              />
+              <Tab
+                key="PENDING"
+                title={
+                  <div className="flex items-center gap-2">
+                    <span>Queued</span>
+                    <span className="text-sm font-medium text-default-500">
+                      {statusCounts.PENDING}
                     </span>
                   </div>
                 }

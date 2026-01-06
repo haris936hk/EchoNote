@@ -15,6 +15,7 @@ const { prisma } = require('./config/database');
 // Import services
 const storageService = require('./services/storage.service');
 const emailService = require('./services/email.service');
+const queueService = require('./services/queue.service');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -186,12 +187,16 @@ async function gracefulShutdown(signal) {
   // Close server
   server.close(async () => {
     console.log('✅ HTTP server closed');
-    
+
     try {
+      // Stop queue worker
+      queueService.stopWorker();
+      console.log('✅ Queue worker stopped');
+
       // Disconnect from database
       await prisma.$disconnect();
       console.log('✅ Database connection closed');
-      
+
       console.log('👋 Graceful shutdown complete');
       process.exit(0);
     } catch (error) {
@@ -312,8 +317,12 @@ initializeServer().then((initialized) => {
     console.log('   GET    /api/storage/stats');
     console.log('='.repeat(60) + '\n');
     console.log('🎯 Server ready to accept requests!\n');
+
+    // Start queue worker
+    queueService.startWorker();
+    console.log('⚙️  Meeting processing queue worker started\n');
   });
-  
+
   // Handle server errors
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
