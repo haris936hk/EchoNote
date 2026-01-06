@@ -5,8 +5,7 @@ import {
   CardBody,
   CardHeader,
   Button,
-  Divider,
-  Chip
+  Divider
 } from '@heroui/react';
 import {
   FiMic,
@@ -16,7 +15,8 @@ import {
   FiTrendingUp,
   FiPlus,
   FiArrowUp,
-  FiGrid
+  FiGrid,
+  FiLayers
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import { useScrollContext } from '../components/layout/MainLayout';
@@ -137,9 +137,10 @@ const DashboardPage = () => {
   }, [meetings, selectedCategory, debouncedSearch]);
 
   // Calculate statistics
-  // Backend statuses: UPLOADING, PROCESSING_AUDIO, TRANSCRIBING, PROCESSING_NLP, SUMMARIZING, COMPLETED, FAILED
+  // Backend statuses: PENDING, UPLOADING, PROCESSING_AUDIO, TRANSCRIBING, PROCESSING_NLP, SUMMARIZING, COMPLETED, FAILED
   const stats = {
     total: meetings.length,
+    pending: meetings.filter(m => m.status === 'PENDING').length,
     completed: meetings.filter(m => m.status === 'COMPLETED').length,
     processing: meetings.filter(m =>
       ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'].includes(m.status)
@@ -293,7 +294,7 @@ const DashboardPage = () => {
 
         {/* Statistics Cards - Only show when there are meetings */}
         {meetings.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
               <CardBody className="gap-2">
                 <div className="flex items-center justify-between">
@@ -308,17 +309,17 @@ const DashboardPage = () => {
               </CardBody>
             </Card>
 
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-default/40 hover:shadow-xl hover:shadow-default/20 transition-all duration-300 group">
               <CardBody className="gap-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-default-500">Completed</p>
-                    <p className="text-3xl font-bold text-success mt-1 group-hover:scale-105 transition-transform duration-300">
-                      {stats.completed}
+                    <p className="text-sm text-default-500">Pending</p>
+                    <p className="text-3xl font-bold text-default-600 mt-1 group-hover:scale-105 transition-transform duration-300">
+                      {stats.pending}
                     </p>
                   </div>
-                  <div className="p-3 bg-success/10 rounded-2xl group-hover:bg-success/20 transition-colors duration-300 shadow-lg">
-                    <FiCheckCircle className="text-success group-hover:scale-110 transition-transform duration-300" size={24} />
+                  <div className="p-3 bg-default-100 rounded-2xl group-hover:bg-default-200 transition-colors duration-300 shadow-lg">
+                    <FiLayers className="text-default-600 group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
                 </div>
               </CardBody>
@@ -335,6 +336,22 @@ const DashboardPage = () => {
                   </div>
                   <div className="p-3 bg-warning/10 rounded-2xl group-hover:bg-warning/20 transition-colors duration-300 shadow-lg">
                     <FiClock className="text-warning group-hover:scale-110 transition-transform duration-300" size={24} />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
+              <CardBody className="gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-default-500">Completed</p>
+                    <p className="text-3xl font-bold text-success mt-1 group-hover:scale-105 transition-transform duration-300">
+                      {stats.completed}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-success/10 rounded-2xl group-hover:bg-success/20 transition-colors duration-300 shadow-lg">
+                    <FiCheckCircle className="text-success group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
                 </div>
               </CardBody>
@@ -377,11 +394,11 @@ const DashboardPage = () => {
           </Card>
         )}
 
-        {/* Main Content Grid */}
+        {/* Main Content */}
         {meetings.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
-            {/* Meetings List - Left Column (3/4) */}
-            <div className="lg:col-span-3 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4">
+            {/* Left Column - Meetings (4/5) */}
+            <div className="lg:col-span-4 space-y-6">
               {/* Search and Filters */}
               <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
                 <CardBody className="gap-4">
@@ -410,63 +427,8 @@ const DashboardPage = () => {
               />
             </div>
 
-            {/* Sidebar - Right Column (1/4) */}
+            {/* Right Column - Quick Actions (1/5) */}
             <div className="space-y-6">
-              {/* Category Breakdown */}
-              <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Categories</h3>
-                </CardHeader>
-                <Divider />
-                <CardBody className="gap-3 max-h-80 overflow-y-auto">
-                  {Object.entries(categoryCounts).length > 0 ? (
-                    <>
-                      <div
-                        className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${selectedCategory === 'ALL'
-                          ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
-                          : 'hover:bg-default-100 hover:shadow-md'
-                          }`}
-                        onClick={() => setSelectedCategory('ALL')}
-                      >
-                        <span className="text-sm font-medium">All Categories</span>
-                        <Chip
-                          size="sm"
-                          variant="flat"
-                          color={selectedCategory === 'ALL' ? 'primary' : 'default'}
-                          className="rounded-xl"
-                        >
-                          {stats.total}
-                        </Chip>
-                      </div>
-                      {Object.entries(categoryCounts).map(([category, count]) => (
-                        <div
-                          key={category}
-                          className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${selectedCategory === category
-                            ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
-                            : 'hover:bg-default-100 hover:shadow-md'
-                            }`}
-                          onClick={() => setSelectedCategory(category)}
-                        >
-                          <span className="text-sm font-medium">{category}</span>
-                          <Chip
-                            size="sm"
-                            variant="flat"
-                            color={selectedCategory === category ? 'primary' : 'default'}
-                            className="rounded-xl"
-                          >
-                            {count}
-                          </Chip>
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <p className="text-center text-default-500 text-sm py-4">
-                      No meetings yet
-                    </p>
-                  )}
-                </CardBody>
-              </Card>
-
               {/* Quick Actions */}
               <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
                 <CardHeader>

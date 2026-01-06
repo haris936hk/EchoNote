@@ -1,4 +1,4 @@
-const prisma = require('../config/database');
+const { prisma } = require('../config/database');
 const logger = require('../utils/logger');
 const meetingService = require('./meeting.service');
 

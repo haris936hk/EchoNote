@@ -9,30 +9,12 @@ import {
 import {
   FiUser,
   FiMail,
-  FiShield,
-  FiLogOut,
-  FiTrash2
+  FiShield
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const ProfileSettings = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/login');
-    }
-  };
-
-  const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone and all your meetings will be permanently deleted.')) {
-      // Call delete account API
-      console.log('Delete account');
-    }
-  };
+  const { user } = useAuth();
 
   if (!user) {
     return (
@@ -157,35 +139,6 @@ const ProfileSettings = () => {
               </p>
             </div>
           </div>
-        </CardBody>
-      </Card>
-
-      {/* Account Actions */}
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Account Actions</h2>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-3 items-start">
-          <Button
-            color="primary"
-            variant="flat"
-            startContent={<FiLogOut size={18} />}
-            onPress={handleLogout}
-            radius="full"
-          >
-            Logout
-          </Button>
-
-          <Button
-            color="danger"
-            variant="flat"
-            startContent={<FiTrash2 size={18} />}
-            onPress={handleDeleteAccount}
-            radius="full"
-          >
-            Delete Account
-          </Button>
         </CardBody>
       </Card>
     </div>

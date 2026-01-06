@@ -280,7 +280,7 @@ const MeetingsPage = () => {
                 key="PENDING"
                 title={
                   <div className="flex items-center gap-2">
-                    <span>Queued</span>
+                    <span>Pending</span>
                     <span className="text-sm font-medium text-default-500">
                       {statusCounts.PENDING}
                     </span>

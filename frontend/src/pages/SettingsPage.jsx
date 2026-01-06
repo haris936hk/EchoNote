@@ -19,10 +19,15 @@ import {
   FiHelpCircle,
   FiCheck,
   FiDownload,
-  FiTrash2
+  FiTrash2,
+  FiLogOut
 } from 'react-icons/fi';
 import ProfileSettings from '../components/user/ProfileSettings';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { userAPI } from '../services/api';
+import { showToast } from '../components/common/Toast';
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -341,8 +346,60 @@ const PreferencesContent = () => {
 
 // Privacy Content Component
 const PrivacyContent = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout();
+      navigate('/login');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your account?\n\n' +
+      'This action cannot be undone and will permanently delete:\n' +
+      '• All your meetings\n' +
+      '• All transcripts and summaries\n' +
+      '• All audio files\n' +
+      '• Your account data\n\n' +
+      'Type "DELETE" in the next prompt to confirm.'
+    );
+
+    if (!confirmed) return;
+
+    const finalConfirmation = window.prompt(
+      'Please type "DELETE" to confirm account deletion:'
+    );
+
+    if (finalConfirmation !== 'DELETE') {
+      showToast('Account deletion cancelled', 'warning');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const result = await userAPI.deleteAccount();
+
+      if (result.success) {
+        showToast('Account deleted successfully', 'success');
+        // Clear all local data and logout
+        logout();
+        navigate('/login');
+      } else {
+        showToast(result.error || 'Failed to delete account', 'error');
+      }
+    } catch (error) {
+      console.error('Delete account error:', error);
+      showToast('Failed to delete account. Please try again.', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Fetch real statistics from backend
   useEffect(() => {
@@ -501,6 +558,29 @@ const PrivacyContent = () => {
         </CardBody>
       </Card>
 
+      {/* Logout */}
+      <Card>
+        <CardBody>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Logout</p>
+              <p className="text-xs text-default-500">
+                Sign out of your account
+              </p>
+            </div>
+            <Button
+              color="primary"
+              variant="flat"
+              startContent={<FiLogOut size={16} />}
+              radius="full"
+              onPress={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+
       {/* Delete All Data */}
       <Card className="border-danger/20">
         <CardBody>
@@ -511,8 +591,16 @@ const PrivacyContent = () => {
                 Permanently delete all your meetings and account data
               </p>
             </div>
-            <Button color="danger" variant="flat" startContent={<FiTrash2 size={16} />} radius="full">
-              Delete
+            <Button
+              color="danger"
+              variant="flat"
+              startContent={!isDeleting && <FiTrash2 size={16} />}
+              radius="full"
+              onPress={handleDeleteAccount}
+              isLoading={isDeleting}
+              isDisabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
         </CardBody>
