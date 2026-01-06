@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Card,
   CardBody,
   Tabs,
-  Tab
+  Tab,
+  Spinner
 } from '@heroui/react';
 import {
   FiPlus,
@@ -21,6 +22,7 @@ import SearchBar from '../components/meeting/SearchBar';
 import { PageLoader } from '../components/common/Loader';
 import useDebounce from '../hooks/useDebounce';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
+import { showToast } from '../components/common/Toast';
 
 const MeetingsPage = () => {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ const MeetingsPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -181,9 +184,52 @@ const MeetingsPage = () => {
     navigate('/record');
   };
 
-  const handleExportAll = () => {
-    // Export all meetings as CSV or JSON
-    console.log('Export all meetings');
+  const handleExportAll = async () => {
+    // Check if there are completed meetings to export
+    const completedCount = meetings.filter(m => m.status === 'COMPLETED').length;
+    if (completedCount === 0) {
+      showToast('No completed meetings to export', 'error');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/export`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to export meetings');
+      }
+
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+      const filename = filenameMatch ? filenameMatch[1] : `EchoNote_Export_${new Date().toISOString().slice(0, 10)}.zip`;
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showToast(`✅ Exported ${completedCount} meeting(s) successfully!`, 'success');
+    } catch (error) {
+      console.error('Error exporting meetings:', error);
+      showToast(error.message || 'Failed to export meetings', 'error');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleClearFilters = () => {
@@ -201,8 +247,8 @@ const MeetingsPage = () => {
       {/* Page Header - Slides down when navbar slides up */}
       <div
         className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${!showHeader
-            ? 'translate-y-0 opacity-100'
-            : '-translate-y-full opacity-0 pointer-events-none'
+          ? 'translate-y-0 opacity-100'
+          : '-translate-y-full opacity-0 pointer-events-none'
           }`}
         style={{
           willChange: 'transform, opacity'
@@ -226,10 +272,12 @@ const MeetingsPage = () => {
             {/* Export Button */}
             <button
               onClick={handleExportAll}
-              className="flex items-center gap-2 text-sm font-medium text-default-500 hover:text-primary transition-colors"
+              disabled={isExporting}
+              className={`flex items-center gap-2 text-sm font-medium transition-colors ${isExporting ? 'text-default-400 cursor-not-allowed' : 'text-default-500 hover:text-primary'
+                }`}
             >
-              <FiDownload size={16} />
-              Export
+              {isExporting ? <Spinner size="sm" /> : <FiDownload size={16} />}
+              {isExporting ? 'Exporting...' : 'Export'}
             </button>
 
             {/* Divider */}

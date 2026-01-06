@@ -57,6 +57,18 @@ router.get(
 );
 
 /**
+ * @route   GET /api/meetings/export
+ * @desc    Export all meetings as ZIP archive
+ * @access  Private
+ * @returns ZIP file with meeting folders containing audio.mp3, transcript.txt, summary.txt
+ */
+router.get(
+  '/export',
+  authenticate,
+  meetingController.exportAllMeetings
+);
+
+/**
  * @route   GET /api/meetings
  * @desc    Get all meetings for authenticated user
  * @access  Private
