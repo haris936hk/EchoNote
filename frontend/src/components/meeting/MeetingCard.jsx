@@ -25,12 +25,40 @@ import { CategoryBadge } from './CategoryFilter';
 const STATUS_CONFIG = {
   PENDING: {
     label: 'Pending',
-    color: 'warning',
-    bgColor: 'bg-warning/10',
-    borderColor: 'border-warning/20',
-    textColor: 'text-warning'
+    color: 'default',
+    bgColor: 'bg-default-100',
+    borderColor: 'border-default-200',
+    textColor: 'text-default-600'
   },
-  PROCESSING: {
+  UPLOADING: {
+    label: 'Processing',
+    color: 'primary',
+    bgColor: 'bg-primary/10',
+    borderColor: 'border-primary/20',
+    textColor: 'text-primary'
+  },
+  PROCESSING_AUDIO: {
+    label: 'Processing',
+    color: 'primary',
+    bgColor: 'bg-primary/10',
+    borderColor: 'border-primary/20',
+    textColor: 'text-primary'
+  },
+  TRANSCRIBING: {
+    label: 'Processing',
+    color: 'primary',
+    bgColor: 'bg-primary/10',
+    borderColor: 'border-primary/20',
+    textColor: 'text-primary'
+  },
+  PROCESSING_NLP: {
+    label: 'Processing',
+    color: 'primary',
+    bgColor: 'bg-primary/10',
+    borderColor: 'border-primary/20',
+    textColor: 'text-primary'
+  },
+  SUMMARIZING: {
     label: 'Processing',
     color: 'primary',
     bgColor: 'bg-primary/10',
@@ -98,9 +126,11 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Determine status configuration
+  const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
   const statusConfig = STATUS_CONFIG[meeting.status] || STATUS_CONFIG.PENDING;
   const isCompleted = meeting.status === 'COMPLETED';
-  const isProcessing = meeting.status === 'PROCESSING';
+  const isProcessing = processingStatuses.includes(meeting.status);
   const isFailed = meeting.status === 'FAILED';
 
   return (
