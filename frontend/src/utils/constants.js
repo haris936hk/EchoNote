@@ -17,9 +17,9 @@ export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/a
 // RECORDING LIMITS
 // ============================================
 
-export const MAX_RECORDING_TIME = 180; // 3 minutes in seconds
+export const MAX_RECORDING_TIME = 600; // 10 minutes in seconds (updated from 180)
 export const MAX_RECORDING_TIME_MS = MAX_RECORDING_TIME * 1000;
-export const MAX_AUDIO_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+export const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes (updated from 10MB)
 
 export const RECORDING_CONFIG = {
   mimeType: 'audio/webm;codecs=opus',
@@ -217,8 +217,8 @@ export const ERROR_MESSAGES = {
   DELETE_FAILED: 'Failed to delete meeting. Please try again.',
   RECORDING_FAILED: 'Failed to start recording. Please check microphone permissions.',
   AUDIO_NOT_SUPPORTED: 'Audio recording is not supported in your browser.',
-  MAX_DURATION_EXCEEDED: 'Recording duration exceeded 3 minutes.',
-  FILE_TOO_LARGE: 'File size exceeds 10MB limit.',
+  MAX_DURATION_EXCEEDED: 'Audio duration exceeds 10-minute limit.',
+  FILE_TOO_LARGE: 'File size exceeds 50MB limit.',
   INVALID_FILE_TYPE: 'Invalid file type. Please upload an audio file.',
   TITLE_REQUIRED: 'Meeting title is required.',
   TITLE_TOO_SHORT: 'Title must be at least 3 characters.',
@@ -291,7 +291,9 @@ export const SUPPORTED_AUDIO_TYPES = [
   'audio/mpeg',
   'audio/wav',
   'audio/ogg',
-  'audio/m4a'
+  'audio/m4a',      // M4A format
+  'audio/x-m4a',    // M4A variant
+  'audio/mp4'       // M4A uses MP4 container
 ];
 
 export const SUPPORTED_AUDIO_EXTENSIONS = [

@@ -2,7 +2,6 @@
  * Custom Model Inference Service
  *
  * Calls the fine-tuned EchoNote model API (exposed via NGROK)
- * Replaces Groq API for meeting summarization with custom-trained model
  *
  * Pipeline Integration:
  * Whisper → SpaCy NLP → [THIS SERVICE] → Formatted Summary

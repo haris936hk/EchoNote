@@ -21,7 +21,10 @@
       "Bash(findstr:*)",
       "Bash(timeout 15 npm run dev:*)",
       "Bash(cat:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(node scripts/test-gmail-transport.js:*)",
+      "Bash(node scripts/test-email-send.js:*)",
+      "Bash(node scripts/test-meeting-emails.js:*)"
     ],
     "deny": [],
     "ask": []

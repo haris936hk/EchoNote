@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -26,6 +26,7 @@ import SearchBar from '../components/meeting/SearchBar';
 import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
 import useDebounce from '../hooks/useDebounce';
+import { showToast } from '../components/common/Toast';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -50,6 +51,53 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
+
+  // Auto-refresh: Poll only while there are processing meetings
+  const processingIdsRef = useRef(new Set());
+
+  // Detect when meetings complete and show toast
+  useEffect(() => {
+    const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
+    const currentlyProcessing = meetings.filter(m => processingStatuses.includes(m.status));
+    const currentIds = new Set(currentlyProcessing.map(m => m.id));
+    const prevIds = processingIdsRef.current;
+
+    // Check if any previously processing meetings have completed
+    if (prevIds.size > 0) {
+      const completedIds = [...prevIds].filter(id => !currentIds.has(id));
+      completedIds.forEach(id => {
+        const meeting = meetings.find(m => m.id === id);
+        if (meeting) {
+          if (meeting.status === 'COMPLETED') {
+            showToast(`✅ "${meeting.title}" is ready!`, 'success', 6000);
+          } else if (meeting.status === 'FAILED') {
+            showToast(`❌ "${meeting.title}" failed to process`, 'error', 8000);
+          }
+        }
+      });
+    }
+
+    // Update tracking ref
+    processingIdsRef.current = currentIds;
+  }, [meetings]);
+
+  // Polling effect - separate from detection
+  useEffect(() => {
+    const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
+    const hasProcessingMeetings = meetings.some(m => processingStatuses.includes(m.status));
+
+    if (hasProcessingMeetings) {
+      console.log('📊 Polling active: meetings being processed');
+      const interval = setInterval(() => {
+        fetchMeetings();
+      }, 20000); // Poll every 20 seconds
+
+      return () => {
+        console.log('📊 Polling stopped');
+        clearInterval(interval);
+      };
+    }
+  }, [meetings, fetchMeetings]);
 
   // Handle scroll for scroll-to-top button
   useEffect(() => {
@@ -89,10 +137,13 @@ const DashboardPage = () => {
   }, [meetings, selectedCategory, debouncedSearch]);
 
   // Calculate statistics
+  // Backend statuses: UPLOADING, PROCESSING_AUDIO, TRANSCRIBING, PROCESSING_NLP, SUMMARIZING, COMPLETED, FAILED
   const stats = {
     total: meetings.length,
     completed: meetings.filter(m => m.status === 'COMPLETED').length,
-    processing: meetings.filter(m => m.status === 'PROCESSING').length,
+    processing: meetings.filter(m =>
+      ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'].includes(m.status)
+    ).length,
     failed: meetings.filter(m => m.status === 'FAILED').length,
     totalDuration: meetings.reduce((sum, m) => sum + (m.duration || 0), 0)
   };
@@ -149,11 +200,10 @@ const DashboardPage = () => {
     <div className="-mx-4">
       {/* Page Header - Slides down when navbar slides up */}
       <div
-        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${
-          !showNavbar
-            ? 'translate-y-0 opacity-100'
-            : '-translate-y-full opacity-0 pointer-events-none'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${!showNavbar
+          ? 'translate-y-0 opacity-100'
+          : '-translate-y-full opacity-0 pointer-events-none'
+          }`}
         style={{
           willChange: 'transform, opacity'
         }}
@@ -244,68 +294,68 @@ const DashboardPage = () => {
         {/* Statistics Cards - Only show when there are meetings */}
         {meetings.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
-            <CardBody className="gap-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-default-500">Total Meetings</p>
-                  <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{stats.total}</p>
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
+              <CardBody className="gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-default-500">Total Meetings</p>
+                    <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{stats.total}</p>
+                  </div>
+                  <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
+                    <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
+                  </div>
                 </div>
-                <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
-                  <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
 
-          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
-            <CardBody className="gap-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-default-500">Completed</p>
-                  <p className="text-3xl font-bold text-success mt-1 group-hover:scale-105 transition-transform duration-300">
-                    {stats.completed}
-                  </p>
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
+              <CardBody className="gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-default-500">Completed</p>
+                    <p className="text-3xl font-bold text-success mt-1 group-hover:scale-105 transition-transform duration-300">
+                      {stats.completed}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-success/10 rounded-2xl group-hover:bg-success/20 transition-colors duration-300 shadow-lg">
+                    <FiCheckCircle className="text-success group-hover:scale-110 transition-transform duration-300" size={24} />
+                  </div>
                 </div>
-                <div className="p-3 bg-success/10 rounded-2xl group-hover:bg-success/20 transition-colors duration-300 shadow-lg">
-                  <FiCheckCircle className="text-success group-hover:scale-110 transition-transform duration-300" size={24} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
 
-          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-warning/40 hover:shadow-xl hover:shadow-warning/20 transition-all duration-300 group">
-            <CardBody className="gap-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-default-500">Processing</p>
-                  <p className="text-3xl font-bold text-warning mt-1 group-hover:scale-105 transition-transform duration-300">
-                    {stats.processing}
-                  </p>
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-warning/40 hover:shadow-xl hover:shadow-warning/20 transition-all duration-300 group">
+              <CardBody className="gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-default-500">Processing</p>
+                    <p className="text-3xl font-bold text-warning mt-1 group-hover:scale-105 transition-transform duration-300">
+                      {stats.processing}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-warning/10 rounded-2xl group-hover:bg-warning/20 transition-colors duration-300 shadow-lg">
+                    <FiClock className="text-warning group-hover:scale-110 transition-transform duration-300" size={24} />
+                  </div>
                 </div>
-                <div className="p-3 bg-warning/10 rounded-2xl group-hover:bg-warning/20 transition-colors duration-300 shadow-lg">
-                  <FiClock className="text-warning group-hover:scale-110 transition-transform duration-300" size={24} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
 
-          <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 group">
-            <CardBody className="gap-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-default-500">Total Time</p>
-                  <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    {Math.floor(stats.totalDuration / 60)}m
-                  </p>
+            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 group">
+              <CardBody className="gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-default-500">Total Time</p>
+                    <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      {Math.floor(stats.totalDuration / 60)}m
+                    </p>
+                  </div>
+                  <div className="p-3 bg-secondary/10 rounded-2xl group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
+                    <FiTrendingUp className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
+                  </div>
                 </div>
-                <div className="p-3 bg-secondary/10 rounded-2xl group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
-                  <FiTrendingUp className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+              </CardBody>
+            </Card>
+          </div>
         )}
 
         {/* Failed Meetings Alert */}
@@ -330,133 +380,131 @@ const DashboardPage = () => {
         {/* Main Content Grid */}
         {meetings.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
-          {/* Meetings List - Left Column (3/4) */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Search and Filters */}
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
-              <CardBody className="gap-4">
-                <SearchBar
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Search by title or description..."
-                />
+            {/* Meetings List - Left Column (3/4) */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Search and Filters */}
+              <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
+                <CardBody className="gap-4">
+                  <SearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Search by title or description..."
+                  />
 
-                <CategoryFilter
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                  showCount={true}
-                  counts={categoryCounts}
-                />
-              </CardBody>
-            </Card>
+                  <CategoryFilter
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                    showCount={true}
+                    counts={categoryCounts}
+                  />
+                </CardBody>
+              </Card>
 
-            {/* Meetings List */}
-            <MeetingList
-              meetings={filteredMeetings}
-              loading={loading}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-              itemsPerPage={12}
-            />
-          </div>
+              {/* Meetings List */}
+              <MeetingList
+                meetings={filteredMeetings}
+                loading={loading}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                itemsPerPage={12}
+              />
+            </div>
 
-          {/* Sidebar - Right Column (1/4) */}
-          <div className="space-y-6">
-            {/* Category Breakdown */}
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
-              <CardHeader>
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Categories</h3>
-              </CardHeader>
-              <Divider />
-              <CardBody className="gap-3 max-h-80 overflow-y-auto">
-                {Object.entries(categoryCounts).length > 0 ? (
-                  <>
-                    <div
-                      className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${
-                        selectedCategory === 'ALL'
+            {/* Sidebar - Right Column (1/4) */}
+            <div className="space-y-6">
+              {/* Category Breakdown */}
+              <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Categories</h3>
+                </CardHeader>
+                <Divider />
+                <CardBody className="gap-3 max-h-80 overflow-y-auto">
+                  {Object.entries(categoryCounts).length > 0 ? (
+                    <>
+                      <div
+                        className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${selectedCategory === 'ALL'
                           ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
                           : 'hover:bg-default-100 hover:shadow-md'
-                      }`}
-                      onClick={() => setSelectedCategory('ALL')}
-                    >
-                      <span className="text-sm font-medium">All Categories</span>
-                      <Chip
-                        size="sm"
-                        variant="flat"
-                        color={selectedCategory === 'ALL' ? 'primary' : 'default'}
-                        className="rounded-xl"
+                          }`}
+                        onClick={() => setSelectedCategory('ALL')}
                       >
-                        {stats.total}
-                      </Chip>
-                    </div>
-                    {Object.entries(categoryCounts).map(([category, count]) => (
-                      <div
-                        key={category}
-                        className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${
-                          selectedCategory === category
-                            ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
-                            : 'hover:bg-default-100 hover:shadow-md'
-                        }`}
-                        onClick={() => setSelectedCategory(category)}
-                      >
-                        <span className="text-sm font-medium">{category}</span>
+                        <span className="text-sm font-medium">All Categories</span>
                         <Chip
                           size="sm"
                           variant="flat"
-                          color={selectedCategory === category ? 'primary' : 'default'}
+                          color={selectedCategory === 'ALL' ? 'primary' : 'default'}
                           className="rounded-xl"
                         >
-                          {count}
+                          {stats.total}
                         </Chip>
                       </div>
-                    ))}
-                  </>
-                ) : (
-                  <p className="text-center text-default-500 text-sm py-4">
-                    No meetings yet
-                  </p>
-                )}
-              </CardBody>
-            </Card>
+                      {Object.entries(categoryCounts).map(([category, count]) => (
+                        <div
+                          key={category}
+                          className={`flex items-center justify-between p-2 rounded-2xl cursor-pointer transition-all duration-300 ${selectedCategory === category
+                            ? 'bg-primary/10 border border-primary/20 shadow-lg shadow-primary/20'
+                            : 'hover:bg-default-100 hover:shadow-md'
+                            }`}
+                          onClick={() => setSelectedCategory(category)}
+                        >
+                          <span className="text-sm font-medium">{category}</span>
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            color={selectedCategory === category ? 'primary' : 'default'}
+                            className="rounded-xl"
+                          >
+                            {count}
+                          </Chip>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-center text-default-500 text-sm py-4">
+                      No meetings yet
+                    </p>
+                  )}
+                </CardBody>
+              </Card>
 
-            {/* Quick Actions */}
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
-              <CardHeader>
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Quick Actions</h3>
-              </CardHeader>
-              <Divider />
-              <CardBody className="gap-2">
-                <Button
-                  variant="flat"
-                  onPress={handleNewRecording}
-                  startContent={<FiPlus size={16} />}
-                  fullWidth
-                  className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                >
-                  New Recording
-                </Button>
+              {/* Quick Actions */}
+              <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Quick Actions</h3>
+                </CardHeader>
+                <Divider />
+                <CardBody className="gap-2">
+                  <Button
+                    variant="flat"
+                    onPress={handleNewRecording}
+                    startContent={<FiPlus size={16} />}
+                    fullWidth
+                    className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
+                  >
+                    New Recording
+                  </Button>
 
-                <Button
-                  variant="flat"
-                  onPress={() => navigate('/meetings')}
-                  fullWidth
-                  className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                >
-                  View All Meetings
-                </Button>
+                  <Button
+                    variant="flat"
+                    onPress={() => navigate('/meetings')}
+                    fullWidth
+                    className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
+                  >
+                    View All Meetings
+                  </Button>
 
-                <Button
-                  variant="flat"
-                  onPress={() => navigate('/settings')}
-                  fullWidth
-                  className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                >
-                  Settings
-                </Button>
-              </CardBody>
-            </Card>
+                  <Button
+                    variant="flat"
+                    onPress={() => navigate('/settings')}
+                    fullWidth
+                    className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
+                  >
+                    Settings
+                  </Button>
+                </CardBody>
+              </Card>
+            </div>
           </div>
-        </div>
         )}
       </div>
 
@@ -471,9 +519,8 @@ const DashboardPage = () => {
             isIconOnly
             color="primary"
             variant="shadow"
-            className={`relative w-14 h-14 shadow-2xl shadow-primary/50 hover:shadow-3xl hover:shadow-primary/60 transition-all duration-300 ${
-              showScrollTop ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-            }`}
+            className={`relative w-14 h-14 shadow-2xl shadow-primary/50 hover:shadow-3xl hover:shadow-primary/60 transition-all duration-300 ${showScrollTop ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+              }`}
             radius="full"
             onPress={scrollToTop}
           >

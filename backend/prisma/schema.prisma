@@ -20,7 +20,7 @@ model User {
   refreshToken  String?   @db.Text // For future calendar integration
   
   // Settings
-  autoDeleteDays Int      @default(30) // Auto-delete audio after X days
+  autoDeleteDays Int?     // Auto-delete audio after X days (null = never delete)
   emailNotifications Boolean @default(true)
   
   // Timestamps

@@ -1,7 +1,9 @@
-# CLAUDE.md - EchoNote Development Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-EchoNote is an AI-powered meeting transcription and summarization platform that solves the critical problem of meeting information loss (90% of content forgotten within a week). This is an MVP focusing on accuracy-first architecture with a 3-minute recording limit.
+EchoNote is an AI-powered meeting transcription and summarization platform that solves the critical problem of meeting information loss (90% of content forgotten within a week). This is an MVP focusing on accuracy-first architecture with a 10-minute recording limit.
 
 ## Tech Stack
 
@@ -23,7 +25,8 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 - **ORM**: Prisma
 - **Authentication**: Google OAuth + JWT
 - **File Handling**: Multer
-- **Email**: Resend API
+- **Storage**: Supabase Storage (audio files)
+- **Email**: Gmail OAuth2 with nodemailer
 - **Python Integration**: python-shell (subprocess)
 - **Logging**: Winston
 
@@ -40,11 +43,58 @@ EchoNote is an AI-powered meeting transcription and summarization platform that 
 - If NLP doesn't extract features (e.g., no action items), AI still generates summary with empty arrays
 - Format matches echonote_dataset.json exactly
 
+## Project Structure
+
+### Backend (`/backend`)
+```
+backend/
+├── src/
+│   ├── config/           # Configuration (auth, database, email)
+│   ├── controllers/      # Request handlers (auth, meeting, user)
+│   ├── middleware/       # Auth, validation, upload, error handling
+│   ├── routes/           # API route definitions
+│   ├── services/         # Business logic (audio, transcription, NLP, summarization, storage)
+│   ├── python_scripts/   # Audio processing, Whisper, SpaCy NLP
+│   ├── utils/            # Helpers (logger, emailTransport, fileUtils)
+│   └── server.js         # Express app entry point
+├── prisma/
+│   └── schema.prisma     # Database schema
+├── storage/              # Local file storage (temp, processed, audio)
+├── scripts/              # Test scripts (email testing)
+└── logs/                 # Winston logs
+
+Key Services:
+- audio.service.js: Calls Python audio processor
+- transcription.service.js: Calls Python Whisper script
+- nlp.service.js: Calls Python SpaCy script
+- customModelService.js: Calls NGROK-hosted Qwen2.5-7B model
+- supabase-storage.service.js: Uploads audio to Supabase bucket
+- meeting.service.js: Orchestrates full pipeline
+```
+
+### Frontend (`/frontend`)
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── auth/         # Login components
+│   │   ├── common/       # Reusable UI components
+│   │   ├── layout/       # Layout components (Navbar, Footer)
+│   │   ├── meeting/      # Meeting-related components
+│   │   └── user/         # User profile components
+│   ├── contexts/         # React Context (Auth, Meeting, Theme)
+│   ├── hooks/            # Custom React hooks
+│   ├── pages/            # Page components (Login, Dashboard, Record, Meetings, etc.)
+│   ├── services/         # API client (axios)
+│   ├── styles/           # Global styles, Tailwind config
+│   └── utils/            # Helpers (validators, constants)
+```
+
 ## Core Architecture Principles
 
 ### 1. Sequential Processing Pipeline (NEVER PARALLEL)
 ```
-Audio Capture (3-min max)
+Audio Capture (10-min max)
   → Audio Optimization (16kHz mono PCM)
     → Transcription (Whisper)
       → NLP Processing (SpaCy)
@@ -64,12 +114,12 @@ Audio Capture (3-min max)
 
 **Error Handling**: All async operations wrapped in try/catch, return `{success: true/false, data/error}`
 
-**Status Updates**: Database status updated at each pipeline stage: UPLOADING → PROCESSING → TRANSCRIBING → ANALYZING → SUMMARIZING → COMPLETED → FAILED
+**Status Updates**: Database status updated at each pipeline stage: UPLOADING → PROCESSING_AUDIO → TRANSCRIBING → PROCESSING_NLP → SUMMARIZING → COMPLETED → FAILED
 
 ## Critical Constraints & Requirements
 
 ### Hard Limits
-- ✅ **3-minute audio recording limit** (non-negotiable)
+- ✅ **10-minute audio recording limit** (non-negotiable)
 - ✅ **Post-meeting processing only** (no real-time transcription)
 - ✅ **Google OAuth authentication only** (no password system)
 - ✅ **16kHz mono PCM** audio format for Whisper
@@ -114,13 +164,31 @@ When there's a conflict between accuracy and speed, **ALWAYS choose accuracy**. 
 ## Database Schema (Prisma)
 
 ### Core Models
-1. **User**: id, email, name, googleId, picture, refreshToken, createdAt, updatedAt
-2. **Meeting**: id, userId, title, category (enum), audioUrl, transcriptText, summary, status (enum), duration, createdAt, updatedAt
-3. **Category**: SALES, PLANNING, STANDUP, ONE_ON_ONE, OTHER
 
-### Relations
-- User → Meeting (one-to-many)
-- Meeting status tracking at each pipeline stage
+**User**:
+- Basic: id, email, name, googleId, picture, refreshToken
+- Settings: autoDeleteDays, emailNotifications
+- Timestamps: createdAt, updatedAt, lastLoginAt
+- Relations: meetings (one-to-many)
+
+**Meeting**:
+- Basic: id, userId, title, description, category, status
+- Audio: audioUrl, audioSize, audioDuration (max 600s), audioFormat
+- Transcript: transcriptText, transcriptWordCount
+- NLP Features: nlpEntities, nlpKeyPhrases, nlpActionPatterns, nlpSentiment, nlpSentimentScore, nlpTopics
+- AI Summary: summaryExecutive, summaryKeyDecisions, summaryActionItems, summaryNextSteps, summaryKeyTopics, summarySentiment
+- Processing: processingError, processingStartedAt, processingCompletedAt, processingDuration
+- Deletion: audioDeletedAt, shouldDeleteAudioAt
+- Email: emailSent, emailSentAt
+- Timestamps: createdAt, updatedAt
+
+**ProcessingLog**: id, meetingId, stage, status, details, duration, createdAt
+
+**UserActivity**: id, userId, action, metadata, createdAt
+
+### Enums
+- **MeetingStatus**: UPLOADING, PROCESSING_AUDIO, TRANSCRIBING, PROCESSING_NLP, SUMMARIZING, COMPLETED, FAILED
+- **MeetingCategory**: SALES, PLANNING, STANDUP, ONE_ON_ONE, OTHER
 
 ## API Routes Structure
 
@@ -182,7 +250,7 @@ When there's a conflict between accuracy and speed, **ALWAYS choose accuracy**. 
 ### Pages
 - `LoginPage` - Google OAuth login
 - `DashboardPage` - Overview of recent meetings
-- `RecordPage` - Audio recording interface (3-min timer)
+- `RecordPage` - Audio recording interface (10-min timer)
 - `MeetingsPage` - List/search/filter meetings
 - `MeetingDetailPage` - View transcript, summary, download
 - `SettingsPage` - User preferences
@@ -193,7 +261,7 @@ When there's a conflict between accuracy and speed, **ALWAYS choose accuracy**. 
 - `ThemeContext` - Dark theme enforcement
 
 ### Key Components
-- `AudioRecorder` - RecordRTC integration, 3-min countdown, upload on stop
+- `AudioRecorder` - RecordRTC integration, 10-min countdown, upload on stop
 - `TranscriptViewer` - Display formatted transcript
 - `SummaryViewer` - Display structured summary
 - `MeetingCard` - Meeting preview with status badge
@@ -241,19 +309,44 @@ When there's a conflict between accuracy and speed, **ALWAYS choose accuracy**. 
 ## Environment Variables
 
 ### Backend (.env)
-```
+```bash
+# Server
+NODE_ENV=development
+PORT=5000
+FRONTEND_URL=http://localhost:3000
+
+# Database (Supabase PostgreSQL)
 DATABASE_URL=postgresql://...
-JWT_SECRET=...
-JWT_REFRESH_SECRET=...
+
+# Google OAuth
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
+
+# JWT
+JWT_SECRET=...
+JWT_EXPIRE=7d
+JWT_REFRESH_EXPIRE=30d
+
+# Supabase Storage (audio files)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_KEY=...
+SUPABASE_BUCKET_NAME=meeting-audio
+
+# Custom Model API (NGROK tunnel - UPDATE ON EVERY RESTART!)
 CUSTOM_MODEL_API_URL=https://your-domain.ngrok-free.app
 CUSTOM_MODEL_API_KEY=echonote-secret-api-key-2025
 CUSTOM_MODEL_TIMEOUT=70000
-RESEND_API_KEY=...
-FRONTEND_URL=http://localhost:3000
-PORT=5000
-NODE_ENV=development
+
+# Email (Gmail OAuth2)
+GMAIL_USER=your-email@gmail.com
+GMAIL_REFRESH_TOKEN=... # Get from OAuth Playground
+EMAIL_FROM=EchoNote <your-email@gmail.com>
+
+# Audio Processing
+MAX_AUDIO_DURATION=600
+AUDIO_SAMPLE_RATE=16000
+PYTHON_PATH=python3
 ```
 
 ### Frontend (.env)
@@ -297,22 +390,36 @@ try {
 
 ## File Storage Rules
 
-### Unified Storage Directory (`backend/storage/`)
+### Local Storage (`backend/storage/`)
 - `temp/` - Temporary uploads and conversion files (auto-delete after processing or 1 hour)
 - `processed/` - Processed audio intermediates (auto-delete after meeting completion)
-- `audio/` - Permanent processed audio files (WAV format for Whisper)
+- `audio/` - Local processed audio files (WAV format for Whisper)
 
-### Permanent (Database)
-- Processed audio URL: Supabase Storage (optional)
-- Transcript text: PostgreSQL (meetings.transcriptText)
-- Summary: PostgreSQL (meetings.summary)
+### Supabase Storage
+- **Bucket**: `meeting-audio`
+- **Purpose**: Permanent storage for processed audio files
+- **URL stored in**: `Meeting.audioUrl` field
+- **Service**: `supabase-storage.service.js`
+
+### Database Storage (PostgreSQL)
+- Transcript text: `Meeting.transcriptText`
+- NLP features: `Meeting.nlp*` fields
+- AI summary: `Meeting.summary*` fields
+- Processing logs: `ProcessingLog` table
+- User activity: `UserActivity` table
+
+### Deletion Strategy
+- **Local files**: Auto-delete after successful upload to Supabase
+- **Supabase audio**: Auto-delete based on user settings (`autoDeleteDays`)
+- **Transcripts & summaries**: Keep permanently in database
+- **Processing logs**: Keep for debugging (can be pruned periodically)
 
 ## Supabase Free Tier Limits
 - Database: 500MB
 - Storage: 1GB
 - Bandwidth: 5GB/month
 
-**Strategy**: Delete audio files after processing, keep only transcripts and summaries in database.
+**Strategy**: Rely on database for transcripts/summaries, use Supabase Storage sparingly for audio playback.
 
 ## Priority Development Phases
 
@@ -330,8 +437,8 @@ try {
 - Meeting list + detail pages
 
 ### Week 3: Integration + Polish
-- Groq API integration (summarization)
-- Email notifications (Resend)
+- Custom Model API integration (Qwen2.5-7B via NGROK)
+- Email notifications (Gmail OAuth2)
 - Error handling + status updates
 - Search + filtering
 
@@ -402,18 +509,71 @@ For production, migrate from NGROK to:
 - **RunPod** (dedicated GPU instances)
 - **Self-hosted** (AWS/GCP with GPU + NGINX)
 
+## Email Configuration (Gmail OAuth2)
+
+### Architecture
+- **Service**: Gmail via nodemailer with OAuth2 authentication
+- **Transport**: `backend/src/utils/emailTransport.js`
+- **Purpose**: Send meeting completion notifications with summary
+- **Authentication**: OAuth2 refresh token (never expires, can be revoked)
+
+### Setup Instructions
+
+1. **Enable Gmail API** in Google Cloud Console:
+   - Go to: https://console.cloud.google.com/apis/library
+   - Search for "Gmail API" and enable it
+
+2. **Get OAuth2 Refresh Token** using OAuth Playground:
+   - Go to: https://developers.google.com/oauthplayground/
+   - Click Settings (⚙️) → Check "Use your own OAuth credentials"
+   - Enter `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+   - Select scope: `https://mail.google.com/`
+   - Click "Authorize APIs" and sign in with Gmail account
+   - Click "Exchange authorization code for tokens"
+   - Copy the `refresh_token` to `.env` as `GMAIL_REFRESH_TOKEN`
+
+3. **Update `.env`**:
+   ```bash
+   GMAIL_USER=your-email@gmail.com
+   GMAIL_REFRESH_TOKEN=1//04... (from OAuth Playground)
+   EMAIL_FROM=EchoNote <your-email@gmail.com>
+   ```
+
+4. **Test Email Setup**:
+   ```bash
+   # Test transport connection
+   node backend/scripts/test-gmail-transport.js
+
+   # Test basic email send
+   node backend/scripts/test-email-send.js
+
+   # Test meeting notification template
+   node backend/scripts/test-meeting-emails.js
+   ```
+
+### Email Templates
+- **Meeting Completion**: Sent when summary is ready
+- **Contains**: Executive summary, key decisions, action items, next steps
+- **Format**: HTML email with structured sections
+
+### Error Handling
+- If email fails, meeting still completes successfully
+- Error logged to console and `Meeting.processingError`
+- `Meeting.emailSent` remains `false`
+- User can retry email send from UI (future feature)
+
 ## Status Codes & Database Enums
 
 ### Meeting Status
 ```typescript
 enum MeetingStatus {
-  UPLOADING    // File upload in progress
-  PROCESSING   // Audio optimization
-  TRANSCRIBING // Whisper ASR
-  ANALYZING    // SpaCy NLP
-  SUMMARIZING  // Custom Qwen2.5-7B
-  COMPLETED    // Ready for viewing
-  FAILED       // Error occurred
+  UPLOADING         // File upload in progress
+  PROCESSING_AUDIO  // Audio optimization (Python librosa)
+  TRANSCRIBING      // Whisper ASR
+  PROCESSING_NLP    // SpaCy NLP extraction
+  SUMMARIZING       // Custom Qwen2.5-7B
+  COMPLETED         // Ready for viewing
+  FAILED            // Error occurred
 }
 ```
 
@@ -443,21 +603,23 @@ enum MeetingCategory {
 
 ### Technical Metrics
 - ✅ Transcription accuracy >88%
-- ✅ End-to-end processing <90 seconds
-- ✅ Audio recording exactly 3 minutes max
+- ✅ End-to-end processing time scales with audio length
+- ✅ Audio recording exactly 10 minutes max
 - ✅ Zero audio files stored permanently
 - ✅ All errors logged and handled gracefully
 
 ### User Experience
 - ✅ One-click Google login
-- ✅ Seamless audio recording with countdown
+- ✅ Seamless 10-minute audio recording with countdown
 - ✅ Email notification on completion
 - ✅ Easy search and filtering
 - ✅ Clean, dark-themed interface
 
 ## Quick Reference Commands
 
-### Backend Setup
+### Initial Setup
+
+**Backend**:
 ```bash
 cd backend
 npm install
@@ -468,28 +630,83 @@ python -m spacy download en_core_web_lg
 npm run dev
 ```
 
-### Frontend Setup
+**Frontend**:
 ```bash
 cd frontend
 npm install
 npm start
 ```
 
-### Testing Python Scripts Individually
+### Development Commands
+
+**Database**:
+```bash
+# Generate Prisma client after schema changes
+npx prisma generate
+
+# Create and apply new migration
+npx prisma migrate dev --name description_of_change
+
+# Reset database (WARNING: deletes all data)
+npx prisma migrate reset
+
+# Push schema without migration (for prototyping)
+npx prisma db push
+
+# Open Prisma Studio (visual database editor)
+npx prisma studio
+```
+
+**Email Testing** (backend/scripts/):
+```bash
+# Test Gmail OAuth2 connection
+node scripts/test-gmail-transport.js
+
+# Test basic email sending
+node scripts/test-email-send.js
+
+# Test meeting completion email template
+node scripts/test-meeting-emails.js
+```
+
+**NGROK URL Update** (when model notebook restarts):
+```bash
+# 1. Start notebook and copy NGROK URL
+# 2. Update backend/.env:
+CUSTOM_MODEL_API_URL=https://new-url.ngrok-free.app
+
+# 3. Restart backend
+npm run dev
+```
+
+### Testing Python Scripts
+
+**Individual Testing**:
 ```bash
 cd backend/src/python_scripts
+
+# Audio processing
 python audio_processor.py '{"input_path": "test.wav", "output_path": "out.wav"}'
+
+# Transcription
 python transcribe.py '{"audio_path": "out.wav", "language": "en"}'
+
+# NLP extraction
 python nlp_processor.py '{"text": "Sample meeting transcript"}'
 ```
 
-### Test API Endpoints
+### API Testing
+
+**Authentication**:
 ```bash
-# Login
+# Google OAuth login
 curl -X POST http://localhost:5000/api/auth/google \
   -H "Content-Type: application/json" \
   -d '{"token": "google_id_token"}'
+```
 
+**Meetings**:
+```bash
 # Upload meeting
 curl -X POST http://localhost:5000/api/meetings \
   -H "Authorization: Bearer jwt_token" \
@@ -497,10 +714,80 @@ curl -X POST http://localhost:5000/api/meetings \
   -F "title=Team Standup" \
   -F "category=STANDUP"
 
-# Get meetings
+# List meetings
 curl -X GET http://localhost:5000/api/meetings \
   -H "Authorization: Bearer jwt_token"
+
+# Get meeting details
+curl -X GET http://localhost:5000/api/meetings/:id \
+  -H "Authorization: Bearer jwt_token"
+
+# Delete meeting
+curl -X DELETE http://localhost:5000/api/meetings/:id \
+  -H "Authorization: Bearer jwt_token"
 ```
+
+## Common Troubleshooting
+
+### NGROK Model API Issues
+**Problem**: `AI summarization service is currently unavailable`
+
+**Solutions**:
+1. Check if notebook is running in Google Colab
+2. Verify NGROK URL in `.env` matches notebook output
+3. Test API health: `curl <NGROK_URL>/health`
+4. Check API key matches between `.env` and notebook
+5. Restart backend after updating `.env`
+
+### Email Sending Fails
+**Problem**: `Error sending email` in logs
+
+**Solutions**:
+1. Test transport: `node backend/scripts/test-gmail-transport.js`
+2. Verify Gmail API is enabled in Google Cloud Console
+3. Check refresh token is valid (regenerate if expired)
+4. Ensure `GMAIL_USER` matches the OAuth-authorized account
+5. Check firewall/antivirus blocking SMTP connections
+
+### Database Connection Issues
+**Problem**: `PrismaClientInitializationError`
+
+**Solutions**:
+1. Verify `DATABASE_URL` in `.env` is correct
+2. Test connection: `npx prisma db pull`
+3. Check Supabase project is active (not paused)
+4. Regenerate Prisma client: `npx prisma generate`
+5. Check firewall allows connection to Supabase
+
+### Python Scripts Fail
+**Problem**: Python scripts return `{"success": false}`
+
+**Solutions**:
+1. Verify Python path: `which python3` (or `python`)
+2. Check dependencies: `pip list | grep -E "librosa|whisper|spacy"`
+3. Verify SpaCy model: `python -m spacy validate`
+4. Test individual scripts (see Testing Python Scripts section)
+5. Check audio file exists and is readable
+
+### Audio Upload Issues
+**Problem**: Upload fails or audio not processed
+
+**Solutions**:
+1. Check file size < 10MB (`MAX_FILE_SIZE` in `.env`)
+2. Verify audio format is supported (webm, wav, mp3, ogg)
+3. Check `backend/storage/temp/` directory exists and is writable
+4. Review upload middleware logs
+5. Test with smaller audio file (30 seconds)
+
+### Supabase Storage Upload Fails
+**Problem**: Audio URL is null after processing
+
+**Solutions**:
+1. Verify Supabase credentials in `.env`
+2. Check bucket `meeting-audio` exists in Supabase dashboard
+3. Verify bucket policies allow authenticated uploads
+4. Test service: Check `supabase-storage.service.js` logs
+5. Ensure `SUPABASE_SERVICE_KEY` has storage permissions
 
 ---
 

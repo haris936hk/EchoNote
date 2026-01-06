@@ -1,7 +1,8 @@
 // backend/src/config/email.js
-// Email configuration using Resend API
+// Email configuration using Gmail OAuth2
 
-const { Resend } = require('resend');
+const { getGmailTransport } = require('../utils/emailTransport');
+const { prisma } = require('./database');
 const winston = require('winston');
 
 // Initialize logger
@@ -21,50 +22,84 @@ const logger = winston.createLogger({
   ]
 });
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Email configuration
 const EMAIL_CONFIG = {
-  from: process.env.EMAIL_FROM || 'EchoNote <noreply@echonote.app>',
-  replyTo: process.env.EMAIL_REPLY_TO || 'support@echonote.app',
+  from: process.env.EMAIL_FROM || 'EchoNote <hariskhan936.hk@gmail.com>',
+  replyTo: process.env.EMAIL_REPLY_TO || 'hariskhan936.hk@gmail.com',
   skipSend: process.env.SKIP_EMAIL_SEND === 'true',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
 };
 
 /**
- * Send email via Resend
+ * Check if user has email notifications enabled
+ * @param {string} email - User email address
+ * @returns {Promise<boolean>} - True if enabled or user not found
+ */
+async function isEmailNotificationsEnabled(email) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { emailNotifications: true }
+    });
+
+    // If user not found, return true (fail open for system emails)
+    if (!user) return true;
+
+    return user.emailNotifications !== false; // Default true if null
+  } catch (error) {
+    logger.error('Error checking email preferences:', error);
+    return true; // Fail open on error
+  }
+}
+
+/**
+ * Send email via Gmail OAuth2 SMTP
  * @param {Object} options - Email options
+ * @param {string} options.to - Recipient email address
+ * @param {string} options.subject - Email subject
+ * @param {string} options.html - HTML email content
+ * @param {string} [options.text] - Plain text email content
+ * @param {boolean} [options.skipPreferenceCheck=false] - Skip user preference check for critical emails
  * @returns {Object} Send result
  */
 const sendEmail = async (options) => {
+  const { to, subject, html, text, skipPreferenceCheck = false } = options;
+
   try {
-    // Skip sending in development if configured
-    if (EMAIL_CONFIG.skipSend) {
-      logger.info('📧 Email sending skipped (SKIP_EMAIL_SEND=true)');
-      logger.info(`Would have sent to: ${options.to}`);
-      logger.info(`Subject: ${options.subject}`);
-      return { skipped: true };
+    // Check user preference (unless bypassed for critical emails like welcome email)
+    if (!skipPreferenceCheck) {
+      const notificationsEnabled = await isEmailNotificationsEnabled(to);
+      if (!notificationsEnabled) {
+        logger.info(`📧 Email skipped for ${to} - notifications disabled`);
+        return { success: true, skipped: true, reason: 'User preference' };
+      }
     }
 
-    const emailData = {
-      from: options.from || EMAIL_CONFIG.from,
-      to: Array.isArray(options.to) ? options.to : [options.to],
-      subject: options.subject,
-      html: options.html,
-      text: options.text,
-      reply_to: options.replyTo || EMAIL_CONFIG.replyTo,
-      ...(options.attachments && { attachments: options.attachments })
-    };
+    // Development mode - log but don't send
+    if (EMAIL_CONFIG.skipSend) {
+      logger.info('📧 [DEV MODE] Email would be sent:', { to, subject });
+      return { success: true, dev: true };
+    }
 
-    const result = await resend.emails.send(emailData);
-    
-    logger.info(`✅ Email sent successfully to ${options.to}`);
-    return result;
-    
+    // Get Gmail transport
+    const transporter = await getGmailTransport();
+
+    // Send email via Gmail OAuth2 SMTP
+    const info = await transporter.sendMail({
+      from: options.from || EMAIL_CONFIG.from,
+      to,
+      subject,
+      html,
+      text,
+      replyTo: options.replyTo || EMAIL_CONFIG.replyTo
+    });
+
+    logger.info(`✅ Email sent to ${to}: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+
   } catch (error) {
-    logger.error(`❌ Email send failed: ${error.message}`);
-    throw new Error(`Failed to send email: ${error.message}`);
+    logger.error('❌ Email send failed:', error);
+    return { success: false, error: error.message };
   }
 };
 
@@ -74,201 +109,252 @@ const sendEmail = async (options) => {
  */
 const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
   const subject = `✅ Your meeting "${meeting.title}" is ready`;
-  
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Meeting Ready</title>
-      <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-          background-color: #f5f5f5;
-        }
-        .container {
-          background-color: white;
-          border-radius: 8px;
-          padding: 30px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-        .logo {
-          font-size: 32px;
-          font-weight: bold;
-          color: #2563eb;
-          margin-bottom: 10px;
-        }
-        h1 {
-          color: #1f2937;
-          font-size: 24px;
-          margin-bottom: 20px;
-        }
-        .meeting-info {
-          background-color: #f9fafb;
-          border-left: 4px solid #2563eb;
-          padding: 15px;
-          margin: 20px 0;
-          border-radius: 4px;
-        }
-        .meeting-title {
-          font-weight: bold;
-          font-size: 18px;
-          color: #1f2937;
-          margin-bottom: 8px;
-        }
-        .meeting-meta {
-          color: #6b7280;
-          font-size: 14px;
-        }
-        .stats {
-          display: flex;
-          justify-content: space-around;
-          margin: 20px 0;
-          padding: 15px;
-          background-color: #f9fafb;
-          border-radius: 8px;
-        }
-        .stat {
-          text-align: center;
-        }
-        .stat-value {
-          font-size: 24px;
-          font-weight: bold;
-          color: #2563eb;
-        }
-        .stat-label {
-          font-size: 12px;
-          color: #6b7280;
-          text-transform: uppercase;
-        }
-        .button {
-          display: inline-block;
-          background-color: #2563eb;
-          color: white;
-          padding: 12px 30px;
-          text-decoration: none;
-          border-radius: 6px;
-          font-weight: 500;
-          margin: 20px 0;
-        }
-        .button:hover {
-          background-color: #1d4ed8;
-        }
-        .summary-section {
-          margin: 20px 0;
-          padding: 15px;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-        }
-        .summary-title {
-          font-weight: bold;
-          color: #1f2937;
-          margin-bottom: 10px;
-        }
-        .action-items {
-          list-style: none;
-          padding: 0;
-        }
-        .action-item {
-          padding: 8px 0;
-          border-bottom: 1px solid #e5e7eb;
-        }
-        .action-item:last-child {
-          border-bottom: none;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e5e7eb;
-          color: #6b7280;
-          font-size: 14px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <div class="logo">🎙️ EchoNote</div>
-        </div>
-        
-        <h1>Hi ${userName || 'there'},</h1>
-        
-        <p>Great news! Your meeting has been processed and is ready to view.</p>
-        
-        <div class="meeting-info">
-          <div class="meeting-title">${meeting.title}</div>
-          <div class="meeting-meta">
-            Category: ${meeting.category} • 
-            Processed: ${new Date(meeting.processingCompletedAt).toLocaleString()}
-          </div>
-        </div>
-        
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-value">${Math.round(meeting.audioDuration / 60)}m</div>
-            <div class="stat-label">Duration</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${meeting.transcriptWordCount || 0}</div>
-            <div class="stat-label">Words</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${Math.round(meeting.processingDuration || 0)}s</div>
-            <div class="stat-label">Processed in</div>
-          </div>
-        </div>
-        
-        ${meeting.summaryExecutive ? `
-        <div class="summary-section">
-          <div class="summary-title">📋 Executive Summary</div>
-          <p>${meeting.summaryExecutive.substring(0, 200)}${meeting.summaryExecutive.length > 200 ? '...' : ''}</p>
-        </div>
-        ` : ''}
-        
-        ${meeting.summaryActionItems && meeting.summaryActionItems.length > 0 ? `
-        <div class="summary-section">
-          <div class="summary-title">✅ Action Items (${meeting.summaryActionItems.length})</div>
-          <ul class="action-items">
-            ${meeting.summaryActionItems.slice(0, 3).map(item => `
-              <li class="action-item">
-                ${item.task}
-                ${item.assignee ? `<span style="color: #6b7280;"> • ${item.assignee}</span>` : ''}
-              </li>
-            `).join('')}
-            ${meeting.summaryActionItems.length > 3 ? `<li class="action-item"><em>+${meeting.summaryActionItems.length - 3} more...</em></li>` : ''}
-          </ul>
-        </div>
-        ` : ''}
-        
-        <center>
-          <a href="${EMAIL_CONFIG.frontendUrl}/meetings/${meeting.id}" class="button">
-            View Full Meeting Details
-          </a>
-        </center>
-        
-        <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-          💡 <strong>Tip:</strong> Your audio file will be automatically deleted after ${meeting.user?.autoDeleteDays || 30} days, but transcripts and summaries are kept permanently.
-        </p>
-        
-        <div class="footer">
-          <p>This is an automated notification from EchoNote.</p>
-          <p>If you have any questions, reply to this email or contact <a href="mailto:support@echonote.app">support@echonote.app</a></p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meeting Ready</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+          <!-- Header with gradient -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size: 48px; line-height: 1;">🎙️</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 28px; font-weight: bold; color: #ffffff; padding-top: 12px; letter-spacing: -0.5px;">EchoNote</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 16px; color: rgba(255,255,255,0.9); padding-top: 8px;">Your meeting is ready!</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+
+              <!-- Greeting -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size: 20px; font-weight: 600; color: #111827; padding-bottom: 12px;">
+                    Hi ${userName || 'there'} 👋
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 16px; color: #4b5563; line-height: 1.6; padding-bottom: 24px;">
+                    Great news! Your meeting has been processed and is ready to view.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Meeting info card -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9fafb; border-left: 4px solid #667eea; border-radius: 8px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size: 18px; font-weight: 600; color: #111827; padding-bottom: 8px;">
+                          ${meeting.title}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 14px; color: #6b7280;">
+                          ${meeting.category} • ${new Date(meeting.processingCompletedAt || meeting.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Stats -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9fafb; border-radius: 8px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="33%" align="center" style="padding: 0 10px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td align="center" style="font-size: 28px; font-weight: bold; color: #667eea; padding-bottom: 4px;">
+                                ${Math.round(meeting.audioDuration / 60)}m
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Duration
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td width="33%" align="center" style="padding: 0 10px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td align="center" style="font-size: 28px; font-weight: bold; color: #667eea; padding-bottom: 4px;">
+                                ${meeting.transcriptWordCount || 0}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Words
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td width="33%" align="center" style="padding: 0 10px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td align="center" style="font-size: 28px; font-weight: bold; color: #667eea; padding-bottom: 4px;">
+                                ${Math.round(meeting.processingDuration || 0)}s
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Processed
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              ${meeting.summaryExecutive ? `
+              <!-- Executive Summary -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 12px;">
+                          📋 Executive Summary
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 15px; color: #374151; line-height: 1.6;">
+                          ${meeting.summaryExecutive.substring(0, 250)}${meeting.summaryExecutive.length > 250 ? '...' : ''}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              ${meeting.summaryActionItems && meeting.summaryActionItems.length > 0 ? `
+              <!-- Action Items -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 16px;">
+                          ✅ Action Items (${meeting.summaryActionItems.length})
+                        </td>
+                      </tr>
+                      ${meeting.summaryActionItems.slice(0, 3).map((item, index) => `
+                      <tr>
+                        <td style="padding: 12px 0; border-top: ${index > 0 ? '1px solid #f3f4f6' : 'none'};">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="font-size: 15px; color: #111827; line-height: 1.5;">
+                                ${item.task}
+                              </td>
+                            </tr>
+                            ${item.assignee ? `
+                            <tr>
+                              <td style="font-size: 13px; color: #6b7280; padding-top: 4px;">
+                                👤 ${item.assignee}${item.deadline ? ` • 📅 ${item.deadline}` : ''}
+                              </td>
+                            </tr>
+                            ` : ''}
+                          </table>
+                        </td>
+                      </tr>
+                      `).join('')}
+                      ${meeting.summaryActionItems.length > 3 ? `
+                      <tr>
+                        <td style="padding: 12px 0; border-top: 1px solid #f3f4f6;">
+                          <span style="font-size: 14px; color: #6b7280; font-style: italic;">
+                            +${meeting.summaryActionItems.length - 3} more action items...
+                          </span>
+                        </td>
+                      </tr>
+                      ` : ''}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 12px 0 32px 0;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px;">
+                          <a href="${EMAIL_CONFIG.frontendUrl}/meetings/${meeting.id}" style="display: inline-block; padding: 14px 32px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; letter-spacing: 0.3px;">
+                            View Full Meeting Details →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Tip -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size: 14px; color: #92400e; line-height: 1.5;">
+                          <strong>💡 Tip:</strong> Your audio file will be automatically deleted after ${meeting.user?.autoDeleteDays || 30} days, but transcripts and summaries are kept permanently.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="font-size: 13px; color: #6b7280; line-height: 1.6;">
+                    This is an automated notification from EchoNote.<br>
+                    Questions? Reply to this email or contact <a href="mailto:${process.env.EMAIL_REPLY_TO || 'hariskhan936.hk@gmail.com'}" style="color: #667eea; text-decoration: none;">support</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   
   const text = `
 Hi ${userName || 'there'},
@@ -399,74 +485,246 @@ For support, contact: support@echonote.app
  */
 const sendWelcomeEmail = async ({ to, userName }) => {
   const subject = '🎉 Welcome to EchoNote!';
-  
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .container {
-          background-color: white;
-          border-radius: 8px;
-          padding: 30px;
-        }
-        .logo {
-          font-size: 48px;
-          text-align: center;
-          margin-bottom: 20px;
-        }
-        .button {
-          display: inline-block;
-          background-color: #2563eb;
-          color: white;
-          padding: 12px 30px;
-          text-decoration: none;
-          border-radius: 6px;
-          margin: 20px 0;
-        }
-        .feature {
-          margin: 15px 0;
-          padding-left: 30px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="logo">🎙️</div>
-        <h1>Welcome to EchoNote, ${userName || 'there'}! 👋</h1>
-        
-        <p>We're excited to help you transform your meetings into actionable insights.</p>
-        
-        <h3>What you can do with EchoNote:</h3>
-        <div class="feature">✅ Record meetings up to 3 minutes</div>
-        <div class="feature">📝 Get accurate AI transcriptions</div>
-        <div class="feature">🤖 Receive intelligent summaries</div>
-        <div class="feature">🎯 Extract action items automatically</div>
-        <div class="feature">🔍 Search through all your meetings</div>
-        <div class="feature">📅 Sync with Google Calendar</div>
-        
-        <center>
-          <a href="${EMAIL_CONFIG.frontendUrl}/dashboard" class="button">
-            Start Your First Meeting
-          </a>
-        </center>
-        
-        <p style="margin-top: 30px; color: #6b7280;">
-          Need help getting started? Check out our <a href="${EMAIL_CONFIG.frontendUrl}/help">Help Center</a> or reply to this email.
-        </p>
-      </div>
-    </body>
-    </html>
-  `;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to EchoNote</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+          <!-- Header with gradient -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 30px; text-align: center;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size: 64px; line-height: 1; padding-bottom: 16px;">🎙️</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 32px; font-weight: bold; color: #ffffff; padding-bottom: 8px; letter-spacing: -0.5px;">EchoNote</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 18px; color: rgba(255,255,255,0.95); font-weight: 500;">Transform your meetings into insights</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+
+              <!-- Welcome message -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size: 24px; font-weight: 600; color: #111827; padding-bottom: 8px; text-align: center;">
+                    Welcome, ${userName || 'there'}! 👋
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 16px; color: #4b5563; line-height: 1.6; padding-bottom: 32px; text-align: center;">
+                    We're excited to help you capture and organize your meeting insights with AI-powered transcription and summaries.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Features section -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+                <tr>
+                  <td style="font-size: 18px; font-weight: 600; color: #111827; padding-bottom: 20px;">
+                    What you can do with EchoNote:
+                  </td>
+                </tr>
+
+                <!-- Feature 1 -->
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="40" valign="top" style="font-size: 24px; line-height: 1;">🎤</td>
+                        <td style="padding-left: 12px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 4px;">
+                                Record meetings up to 10 minutes
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="font-size: 14px; color: #6b7280; line-height: 1.5;">
+                                Capture your meetings with high-quality audio recording
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Feature 2 -->
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="40" valign="top" style="font-size: 24px; line-height: 1;">📝</td>
+                        <td style="padding-left: 12px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 4px;">
+                                Accurate AI transcriptions
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="font-size: 14px; color: #6b7280; line-height: 1.5;">
+                                Powered by Whisper AI for industry-leading accuracy
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Feature 3 -->
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="40" valign="top" style="font-size: 24px; line-height: 1;">🤖</td>
+                        <td style="padding-left: 12px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 4px;">
+                                Intelligent summaries
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="font-size: 14px; color: #6b7280; line-height: 1.5;">
+                                Get executive summaries, key decisions, and next steps
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Feature 4 -->
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="40" valign="top" style="font-size: 24px; line-height: 1;">✅</td>
+                        <td style="padding-left: 12px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 4px;">
+                                Automatic action item extraction
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="font-size: 14px; color: #6b7280; line-height: 1.5;">
+                                Never miss a task with AI-detected action items and assignees
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Feature 5 -->
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="40" valign="top" style="font-size: 24px; line-height: 1;">🔍</td>
+                        <td style="padding-left: 12px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="font-size: 16px; font-weight: 600; color: #111827; padding-bottom: 4px;">
+                                Search & organize
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="font-size: 14px; color: #6b7280; line-height: 1.5;">
+                                Find any meeting instantly with powerful search and filters
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 24px 0 32px 0;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px;">
+                          <a href="${EMAIL_CONFIG.frontendUrl}/record" style="display: inline-block; padding: 16px 40px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; letter-spacing: 0.3px;">
+                            Record Your First Meeting →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Help section -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #eff6ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size: 14px; color: #1e40af; line-height: 1.6;">
+                          <strong>💬 Need help?</strong><br>
+                          We're here to help you get started! Reply to this email or check out our help center for tips and guides.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="font-size: 13px; color: #6b7280; line-height: 1.6;">
+                    Welcome aboard! We can't wait to see what you build.<br>
+                    Questions? Contact us at <a href="mailto:${process.env.EMAIL_REPLY_TO || 'hariskhan936.hk@gmail.com'}" style="color: #667eea; text-decoration: none;">support</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   
   const text = `
 Welcome to EchoNote, ${userName || 'there'}!
@@ -503,7 +761,6 @@ const testEmailConfig = async (to) => {
 };
 
 module.exports = {
-  resend,
   EMAIL_CONFIG,
   sendEmail,
   sendMeetingCompletedEmail,

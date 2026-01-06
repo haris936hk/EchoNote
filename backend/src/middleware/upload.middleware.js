@@ -29,12 +29,12 @@ const logger = winston.createLogger({
 // Upload configuration - Using unified storage directory
 const STORAGE_BASE = path.join(process.cwd(), 'storage');
 const UPLOAD_CONFIG = {
-  maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 10485760, // 10MB
+  maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 52428800, // 50MB (updated from 10MB)
   uploadDir: path.join(STORAGE_BASE, 'temp'),  // Unified: use storage/temp
   rawDir: path.join(STORAGE_BASE, 'temp'),      // Raw uploads go to temp
   processedDir: path.join(STORAGE_BASE, 'processed'),
-  allowedFormats: (process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg').split(','),
-  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 180 // 3 minutes in seconds
+  allowedFormats: (process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg,audio/m4a,audio/x-m4a,audio/mp4').split(','),
+  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 600 // 10 minutes in seconds (updated from 180)
 };
 
 // Ensure upload directories exist
@@ -217,7 +217,7 @@ const validateAudioDuration = async (req, res, next) => {
     }
 
     const filePath = req.uploadedFile.path;
-    const maxDuration = UPLOAD_CONFIG.maxDuration; // 180 seconds (3 minutes)
+    const maxDuration = UPLOAD_CONFIG.maxDuration; // 600 seconds (10 minutes)
 
     logger.info(`🎵 Checking audio duration for: ${req.uploadedFile.filename}`);
 

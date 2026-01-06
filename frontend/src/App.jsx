@@ -9,6 +9,7 @@ import { MeetingProvider } from './contexts/MeetingContext';
 
 // Components
 import ErrorBoundary from './components/common/ErrorBoundary';
+import { ToastContainer, useToast } from './components/common/Toast';
 
 // Routes
 import AppRoutes from './routes';
@@ -18,6 +19,17 @@ import { GOOGLE_CLIENT_ID } from './utils/constants';
 
 // Styles
 import './styles/globals.css';
+
+// Toast wrapper component
+const ToastWrapper = ({ children }) => {
+  const { toasts, removeToast } = useToast();
+  return (
+    <>
+      {children}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
+    </>
+  );
+};
 
 function App() {
   console.log('[App] Google Client ID:', GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : 'NOT SET');
@@ -34,7 +46,9 @@ function App() {
             <AuthProvider>
               <MeetingProvider>
                 <Router>
-                  <AppRoutes />
+                  <ToastWrapper>
+                    <AppRoutes />
+                  </ToastWrapper>
                 </Router>
               </MeetingProvider>
             </AuthProvider>

@@ -3,7 +3,7 @@
  * Functions for validating user input, forms, and data
  */
 
-import { VALIDATION, REGEX_PATTERNS, SUPPORTED_AUDIO_TYPES, MAX_AUDIO_FILE_SIZE } from './constants';
+import { VALIDATION, REGEX_PATTERNS, SUPPORTED_AUDIO_TYPES, MAX_AUDIO_FILE_SIZE, MAX_RECORDING_TIME } from './constants';
 
 // ============================================
 // MEETING VALIDATION
@@ -189,6 +189,60 @@ export const validateAudioFile = (file) => {
   }
 
   return { isValid: true };
+};
+
+/**
+ * Validate audio file duration using HTML5 Audio API
+ * @param {File} file - The audio file to validate
+ * @returns {Promise<{isValid: boolean, error?: string, duration?: number}>}
+ */
+export const validateAudioFileDuration = (file) => {
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    const objectUrl = URL.createObjectURL(file);
+
+    audio.addEventListener('loadedmetadata', () => {
+      const duration = audio.duration;
+      URL.revokeObjectURL(objectUrl);
+
+      if (!duration || duration === 0 || isNaN(duration)) {
+        resolve({
+          isValid: false,
+          error: 'Could not determine audio duration'
+        });
+        return;
+      }
+
+      // Check duration against max limit (now 10 minutes for both recording and upload)
+      if (duration > MAX_RECORDING_TIME) {
+        const durationMinutes = Math.floor(duration / 60);
+        const durationSeconds = Math.floor(duration % 60);
+        const maxMinutes = Math.floor(MAX_RECORDING_TIME / 60);
+
+        resolve({
+          isValid: false,
+          error: `Audio duration (${durationMinutes}m ${durationSeconds}s) exceeds ${maxMinutes}-minute limit`,
+          duration: duration
+        });
+        return;
+      }
+
+      resolve({
+        isValid: true,
+        duration: duration
+      });
+    });
+
+    audio.addEventListener('error', () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve({
+        isValid: false,
+        error: 'Could not load audio file. The file may be corrupted or in an unsupported format.'
+      });
+    });
+
+    audio.src = objectUrl;
+  });
 };
 
 // ============================================
@@ -700,6 +754,7 @@ const validators = {
   validateAudioFileType,
   validateAudioFileSize,
   validateAudioFile,
+  validateAudioFileDuration,
 
   // User input validation
   validateEmail,

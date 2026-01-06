@@ -2,6 +2,7 @@
 // Meeting controller - handles HTTP requests for meetings
 
 const meetingService = require('../services/meeting.service');
+const supabaseStorage = require('../services/supabase-storage.service');
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
@@ -168,8 +169,8 @@ const uploadAudio = async (req, res) => {
 
     const audioFile = req.uploadedFile || req.file;
 
-    // Validate file size (10MB max)
-    const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 10485760; // 10MB
+    // Validate file size (50MB max)
+    const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 52428800; // 50MB
     if (audioFile.size > maxSize) {
       return res.status(400).json({
         success: false,
@@ -444,6 +445,7 @@ const getSummary = async (req, res) => {
  */
 const downloadAudio = async (req, res) => {
   let tempMp3Path = null;
+  let tempWavPath = null;
   try {
     const meetingId = req.params.id;
     const userId = req.userId;
@@ -457,35 +459,62 @@ const downloadAudio = async (req, res) => {
       });
     }
 
-    // Check if source file exists
-    if (!fs.existsSync(audioData.url)) {
-      return res.status(404).json({
-        success: false,
-        error: 'Audio file not found on server'
-      });
+    // Create temp directory if needed
+    const tempDir = path.join(process.cwd(), 'storage', 'temp');
+    ensureDirectoryExists(tempDir);
+
+    let sourceWavPath;
+
+    // Check if it's a Supabase URL or local file
+    if (audioData.isRemote || audioData.url.startsWith('http')) {
+      // Supabase URL - download to temp first
+      logger.info(`📥 Downloading audio from Supabase for meeting ${meetingId}`);
+      tempWavPath = path.join(tempDir, `${meetingId}_source.wav`);
+
+      const downloadResult = await supabaseStorage.downloadAudioFromSupabase(audioData.url, tempWavPath);
+
+      if (!downloadResult.success) {
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to download audio from storage',
+          details: downloadResult.error
+        });
+      }
+
+      sourceWavPath = tempWavPath;
+    } else {
+      // Local file - check if exists
+      if (!fs.existsSync(audioData.url)) {
+        return res.status(404).json({
+          success: false,
+          error: 'Audio file not found on server'
+        });
+      }
+      sourceWavPath = audioData.url;
     }
 
     // Get meeting details for filename
     const meeting = await meetingService.getMeetingById(meetingId, userId);
     const downloadFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'audio', 'mp3');
 
-    // Create temp directory if needed
-    const tempDir = path.join(process.cwd(), 'storage', 'temp');
-    ensureDirectoryExists(tempDir);
     tempMp3Path = path.join(tempDir, `${meetingId}_audio.mp3`);
 
     // Convert WAV to MP3
     logger.info(`🎵 Converting audio to MP3 for meeting ${meetingId}`);
-    const conversionResult = await convertWavToMp3(audioData.url, tempMp3Path);
+    const conversionResult = await convertWavToMp3(sourceWavPath, tempMp3Path);
 
     if (!conversionResult.success) {
       logger.error(`MP3 conversion failed: ${conversionResult.error}`);
+      if (tempWavPath) cleanupTempMp3(tempWavPath);
       return res.status(500).json({
         success: false,
         error: 'Failed to convert audio to MP3 format',
         details: conversionResult.error
       });
     }
+
+    // Cleanup temp WAV if downloaded from Supabase
+    if (tempWavPath) cleanupTempMp3(tempWavPath);
 
     // Set headers for MP3 download
     res.setHeader('Content-Type', 'audio/mpeg');
@@ -514,6 +543,7 @@ const downloadAudio = async (req, res) => {
 
   } catch (error) {
     logger.error(`Error downloading audio: ${error.message}`);
+    if (tempWavPath) cleanupTempMp3(tempWavPath);
     if (tempMp3Path) cleanupTempMp3(tempMp3Path);
     return res.status(500).json({
       success: false,

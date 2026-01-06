@@ -83,7 +83,7 @@ const updateUserProfile = async (req, res) => {
 
     // Build update object
     const updateData = {};
-    
+
     if (name !== undefined) {
       if (name.trim().length < 2 || name.trim().length > 100) {
         return res.status(400).json({
@@ -203,30 +203,53 @@ const updateUserSettings = async (req, res) => {
 
     const updateData = {};
 
+    // Handle autoDeleteDays - can be a number (1-365) or null (never delete)
     if (autoDeleteDays !== undefined) {
-      const days = parseInt(autoDeleteDays);
-      if (isNaN(days) || days < 1 || days > 365) {
-        return res.status(400).json({
-          success: false,
-          error: 'Auto-delete days must be between 1 and 365'
-        });
-      }
-      updateData.autoDeleteDays = days;
+      if (autoDeleteDays === null) {
+        // User is disabling auto-delete (never delete)
+        updateData.autoDeleteDays = null;
 
-      // Update shouldDeleteAudioAt for all existing meetings
-      const newDate = new Date();
-      newDate.setDate(newDate.getDate() + days);
-      
-      await prisma.meeting.updateMany({
-        where: {
-          userId: userId,
-          audioDeletedAt: null,
-          audioUrl: { not: null }
-        },
-        data: {
-          shouldDeleteAudioAt: newDate
+        // Clear shouldDeleteAudioAt for all existing meetings
+        await prisma.meeting.updateMany({
+          where: {
+            userId: userId,
+            audioDeletedAt: null,
+            audioUrl: { not: null }
+          },
+          data: {
+            shouldDeleteAudioAt: null
+          }
+        });
+
+        logger.info(`⚙️ Auto-delete disabled for user: ${userId}`);
+      } else {
+        // User is setting a retention period
+        const days = parseInt(autoDeleteDays);
+        if (isNaN(days) || days < 1 || days > 365) {
+          return res.status(400).json({
+            success: false,
+            error: 'Auto-delete days must be between 1 and 365, or null to disable'
+          });
         }
-      });
+        updateData.autoDeleteDays = days;
+
+        // Update shouldDeleteAudioAt for all existing meetings
+        const newDate = new Date();
+        newDate.setDate(newDate.getDate() + days);
+
+        await prisma.meeting.updateMany({
+          where: {
+            userId: userId,
+            audioDeletedAt: null,
+            audioUrl: { not: null }
+          },
+          data: {
+            shouldDeleteAudioAt: newDate
+          }
+        });
+
+        logger.info(`⚙️ Auto-delete set to ${days} days for user: ${userId}`);
+      }
     }
 
     if (emailNotifications !== undefined) {
@@ -297,52 +320,52 @@ const getUserStats = async (req, res) => {
       prisma.meeting.count({
         where: { userId }
       }),
-      
+
       // Completed meetings
       prisma.meeting.count({
         where: { userId, status: 'COMPLETED' }
       }),
-      
+
       // Processing meetings
       prisma.meeting.count({
-        where: { 
-          userId, 
-          status: { 
-            in: ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'] 
+        where: {
+          userId,
+          status: {
+            in: ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING']
           }
         }
       }),
-      
+
       // Failed meetings
       prisma.meeting.count({
         where: { userId, status: 'FAILED' }
       }),
-      
+
       // Meetings by category
       prisma.meeting.groupBy({
         by: ['category'],
         where: { userId },
         _count: true
       }),
-      
+
       // Total duration
       prisma.meeting.aggregate({
         where: { userId, status: 'COMPLETED' },
         _sum: { audioDuration: true }
       }),
-      
+
       // Total words
       prisma.meeting.aggregate({
         where: { userId, status: 'COMPLETED' },
         _sum: { transcriptWordCount: true }
       }),
-      
+
       // Storage used
       prisma.meeting.aggregate({
         where: { userId, audioUrl: { not: null } },
         _sum: { audioSize: true }
       }),
-      
+
       // Recent meetings (last 7 days)
       prisma.meeting.count({
         where: {
@@ -361,7 +384,7 @@ const getUserStats = async (req, res) => {
     });
 
     // Calculate averages
-    const avgDuration = completedMeetings > 0 
+    const avgDuration = completedMeetings > 0
       ? Math.round((totalDuration._sum.audioDuration || 0) / completedMeetings)
       : 0;
 
@@ -519,18 +542,18 @@ const exportUserData = async (req, res) => {
       prisma.user.findUnique({
         where: { id: userId }
       }),
-      
+
       prisma.meeting.findMany({
         where: { userId },
         include: {
           _count: {
-            select: { 
+            select: {
               // Add related counts if needed
             }
           }
         }
       }),
-      
+
       prisma.userActivity.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' }

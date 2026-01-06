@@ -44,11 +44,47 @@ const MeetingDetailPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
 
+  // Initial fetch
   useEffect(() => {
     if (id) {
       fetchMeeting(id);
     }
   }, [id, fetchMeeting]);
+
+  // Poll for status updates when meeting is processing
+  useEffect(() => {
+    if (!currentMeeting || !id) return;
+
+    // Processing states that require polling
+    const processingStates = [
+      'UPLOADING',
+      'PROCESSING_AUDIO',
+      'TRANSCRIBING',
+      'PROCESSING_NLP',
+      'SUMMARIZING'
+    ];
+
+    // Check if meeting is in a processing state
+    const isProcessing = processingStates.includes(currentMeeting.status);
+
+    if (!isProcessing) {
+      return; // Don't poll if already completed or failed
+    }
+
+    console.log(`[MeetingDetail] Starting status polling for meeting ${id} (current status: ${currentMeeting.status})`);
+
+    // Poll every 5 seconds
+    const pollInterval = setInterval(() => {
+      console.log(`[MeetingDetail] Polling for status update...`);
+      fetchMeeting(id);
+    }, 5000);
+
+    // Cleanup interval on unmount or when meeting changes
+    return () => {
+      console.log(`[MeetingDetail] Stopping status polling`);
+      clearInterval(pollInterval);
+    };
+  }, [currentMeeting, id, fetchMeeting]);
 
   const handleBack = () => {
     navigate('/dashboard');

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -20,11 +20,15 @@ import {
   FiArrowLeft,
   FiCheck,
   FiAlertCircle,
-  FiArrowUp
+  FiArrowUp,
+  FiPause,
+  FiPlay
 } from 'react-icons/fi';
 import { useMeeting } from '../contexts/MeetingContext';
 import useAudioRecorder from '../hooks/useAudioRecorder';
 import AudioVisualizer from '../components/AudioVisualizer';
+import { validateAudioFileDuration } from '../utils/validators';
+import { SUPPORTED_AUDIO_TYPES } from '../utils/constants';
 
 const CATEGORIES = [
   { value: 'SALES', label: 'Sales' },
@@ -45,8 +49,11 @@ const RecordPage = () => {
     audioBlob,
     error: recordingError,
     stream,
+    isPaused,
     startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
     reset: resetRecorder
   } = useAudioRecorder();
 
@@ -63,7 +70,12 @@ const RecordPage = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const MAX_RECORDING_TIME = 180; // 3 minutes
+  // File upload state
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [fileValidating, setFileValidating] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const MAX_RECORDING_TIME = 600; // 10 minutes (updated from 180)
   const progress = (recordingTime / MAX_RECORDING_TIME) * 100;
 
   // Handle scroll to show/hide header and scroll-to-top button
@@ -108,6 +120,91 @@ const RecordPage = () => {
     }
   };
 
+  const handlePauseRecording = () => {
+    pauseRecording();
+  };
+
+  const handleResumeRecording = () => {
+    resumeRecording();
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    setFileValidating(true);
+
+    try {
+      console.log('📁 File selected:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+
+      // Validate file type
+      if (!SUPPORTED_AUDIO_TYPES.includes(file.type)) {
+        setUploadError('Invalid file type. Supported formats: MP3, WAV, M4A, WEBM, OGG');
+        setFileValidating(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      // Validate file size (50MB)
+      const maxSize = 50 * 1024 * 1024;
+      if (file.size > maxSize) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        setUploadError(`File size (${fileSizeMB}MB) exceeds 50MB limit`);
+        setFileValidating(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      if (file.size === 0) {
+        setUploadError('File is empty');
+        setFileValidating(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      // Validate duration
+      const durationValidation = await validateAudioFileDuration(file);
+
+      if (!durationValidation.isValid) {
+        setUploadError(durationValidation.error);
+        setFileValidating(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      console.log('✅ File validation passed. Duration:', `${Math.floor(durationValidation.duration / 60)}m ${Math.floor(durationValidation.duration % 60)}s`);
+
+      // Store uploaded file with duration info
+      setUploadedFile({
+        file,
+        duration: durationValidation.duration,
+        durationFormatted: `${Math.floor(durationValidation.duration / 60)}:${String(Math.floor(durationValidation.duration % 60)).padStart(2, '0')}`
+      });
+      setFileValidating(false);
+
+    } catch (error) {
+      console.error('❌ File validation error:', error);
+      setUploadError('Failed to validate file. Please try again.');
+      setFileValidating(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleFormChange = (field, value) => {
     // Prevent unnecessary updates if value hasn't changed
     setFormData(prev => {
@@ -141,15 +238,19 @@ const RecordPage = () => {
     console.log('🔵 Upload button clicked');
     console.log('📋 Form data:', formData);
     console.log('🎤 Audio blob:', audioBlob);
+    console.log('📁 Uploaded file:', uploadedFile);
 
     if (!validateForm()) {
       console.log('❌ Form validation failed');
       return;
     }
 
-    if (!audioBlob) {
-      console.log('❌ No audio blob found');
-      setUploadError('No audio recorded. Please record audio first.');
+    // Use uploaded file if available, otherwise use recorded audio blob
+    const audioSource = uploadedFile?.file || audioBlob;
+
+    if (!audioSource) {
+      console.log('❌ No audio source found');
+      setUploadError('No audio available. Please record or upload audio first.');
       return;
     }
 
@@ -162,7 +263,7 @@ const RecordPage = () => {
         title: formData.title,
         description: formData.description,
         category: formData.category,
-        audioFile: audioBlob
+        audioFile: audioSource
       });
 
       console.log('📬 Upload result:', result);
@@ -191,13 +292,20 @@ const RecordPage = () => {
     setFormData({ title: '', description: '', category: '' });
     setFormErrors({});
     setUploadError(null);
+    setUploadedFile(null);
+    setFileValidating(false);
     setStep('record');
+
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleBack = () => {
-    if (step === 'details' && audioBlob) {
+    if (step === 'details' && (audioBlob || uploadedFile)) {
       const confirmed = window.confirm(
-        'Going back will discard your recording. Are you sure?'
+        'Going back will discard your audio. Are you sure?'
       );
       if (confirmed) {
         handleReset();
@@ -226,12 +334,12 @@ const RecordPage = () => {
           <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-md backdrop-saturate-150 shadow-lg">
             {/* Title with icon (changes based on step) */}
             <div className="flex items-center gap-2 text-default-foreground">
-              {step === 'record' && <FiMic size={20} />}
+              {step === 'record' && (isPaused ? <FiPause size={20} className="text-warning" /> : <FiMic size={20} />)}
               {step === 'details' && <FiUpload size={20} />}
               {step === 'uploading' && <FiUpload size={20} className="animate-bounce" />}
               {step === 'success' && <FiCheck size={20} />}
               <span className="font-semibold text-sm">
-                {step === 'record' && 'Record Meeting'}
+                {step === 'record' && (isPaused ? 'Recording Paused' : 'Record Meeting')}
                 {step === 'details' && 'Meeting Details'}
                 {step === 'uploading' && 'Uploading...'}
                 {step === 'success' && 'Success!'}
@@ -264,11 +372,11 @@ const RecordPage = () => {
                 {/* Timer Display */}
                 <div className="text-center py-4">
                   <div className="relative mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
-                    <div className={`relative w-24 h-24 ${isRecording ? 'bg-gradient-to-br from-danger/20 to-danger/30' : 'bg-gradient-to-br from-primary/20 to-secondary/20'} rounded-3xl flex items-center justify-center mx-auto shadow-2xl ${isRecording ? 'shadow-danger/25' : 'shadow-primary/25'} backdrop-blur-sm border ${isRecording ? 'border-danger/20' : 'border-primary/20'}`}>
+                    <div className={`absolute inset-0 bg-gradient-to-r ${isRecording && !isPaused ? 'from-danger/20 to-danger/30' : 'from-primary/20 to-secondary/20'} rounded-full blur-3xl ${isRecording && !isPaused ? 'animate-pulse' : ''}`}></div>
+                    <div className={`relative w-24 h-24 ${isRecording && !isPaused ? 'bg-gradient-to-br from-danger/20 to-danger/30' : isPaused ? 'bg-gradient-to-br from-warning/20 to-warning/30' : 'bg-gradient-to-br from-primary/20 to-secondary/20'} rounded-3xl flex items-center justify-center mx-auto shadow-2xl ${isRecording && !isPaused ? 'shadow-danger/25' : isPaused ? 'shadow-warning/25' : 'shadow-primary/25'} backdrop-blur-sm border ${isRecording && !isPaused ? 'border-danger/20' : isPaused ? 'border-warning/20' : 'border-primary/20'}`}>
                       <FiMic
                         size={48}
-                        className={isRecording ? 'text-danger animate-pulse' : 'text-primary'}
+                        className={isRecording && !isPaused ? 'text-danger animate-pulse' : isPaused ? 'text-warning' : 'text-primary'}
                       />
                     </div>
                   </div>
@@ -278,15 +386,17 @@ const RecordPage = () => {
                       {recordingTimeFormatted}
                     </p>
                     <p className="text-sm text-default-500">
-                      {isRecording
+                      {isRecording && isPaused
+                        ? 'Recording paused'
+                        : isRecording
                         ? `${Math.floor((MAX_RECORDING_TIME - recordingTime) / 60)}:${String((MAX_RECORDING_TIME - recordingTime) % 60).padStart(2, '0')} remaining`
                         : 'Ready to record'}
                     </p>
                   </div>
                 </div>
 
-                {/* Audio Visualizer - Show when recording */}
-                {isRecording && (
+                {/* Audio Visualizer - Show when recording and not paused */}
+                {isRecording && !isPaused && (
                   <div className="mb-2">
                     <AudioVisualizer stream={stream} isActive={isRecording} />
                   </div>
@@ -315,33 +425,101 @@ const RecordPage = () => {
 
                 {/* Recording Controls */}
                 <div className="flex flex-col items-center gap-4">
-                  {!isRecording && !audioBlob && (
-                    <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
-                      <Button
-                        color="primary"
-                        size="lg"
-                        startContent={<FiMic size={24} />}
-                        onPress={handleStartRecording}
-                        className="relative min-w-[200px] font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
-                      >
-                        Start Recording
-                      </Button>
-                    </div>
+                  {!isRecording && !audioBlob && !uploadedFile && (
+                    <>
+                      {/* START RECORDING BUTTON */}
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+                        <Button
+                          color="primary"
+                          size="lg"
+                          startContent={<FiMic size={24} />}
+                          onPress={handleStartRecording}
+                          isDisabled={fileValidating}
+                          className="relative min-w-[240px] font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
+                        >
+                          Start Recording
+                        </Button>
+                      </div>
+
+                      {/* DIVIDER */}
+                      <div className="flex items-center gap-3 w-full max-w-xs">
+                        <Divider className="flex-1" />
+                        <span className="text-sm text-default-400 font-medium">OR</span>
+                        <Divider className="flex-1" />
+                      </div>
+
+                      {/* UPLOAD FILE BUTTON */}
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+                        <Button
+                          color="secondary"
+                          size="lg"
+                          startContent={<FiUpload size={24} />}
+                          onPress={handleUploadClick}
+                          isLoading={fileValidating}
+                          isDisabled={fileValidating}
+                          className="relative min-w-[240px] font-semibold shadow-md shadow-secondary/10 hover:shadow-lg hover:shadow-secondary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
+                        >
+                          {fileValidating ? 'Validating...' : 'Upload Audio File'}
+                        </Button>
+                      </div>
+
+                      {/* Hidden File Input */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".mp3,.wav,.m4a,.webm,.ogg,audio/mpeg,audio/wav,audio/mp3,audio/m4a,audio/x-m4a,audio/mp4,audio/webm,audio/ogg"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </>
                   )}
 
                   {isRecording && (
-                    <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-danger to-danger opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
-                      <Button
-                        color="danger"
-                        size="lg"
-                        startContent={<FiSquare size={24} />}
-                        onPress={handleStopRecording}
-                        className="relative min-w-[200px] font-semibold shadow-md shadow-danger/10 hover:shadow-lg hover:shadow-danger/15 hover:scale-105 transition-all duration-300 rounded-3xl"
-                      >
-                        Stop Recording
-                      </Button>
+                    <div className="flex gap-3">
+                      {/* Pause/Resume Button */}
+                      {!isPaused ? (
+                        <div className="relative group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-warning to-warning opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+                          <Button
+                            color="warning"
+                            size="lg"
+                            startContent={<FiPause size={24} />}
+                            onPress={handlePauseRecording}
+                            className="relative min-w-[180px] font-semibold shadow-md shadow-warning/10 hover:shadow-lg hover:shadow-warning/15 hover:scale-105 transition-all duration-300 rounded-3xl"
+                          >
+                            Pause
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="relative group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-success to-success opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+                          <Button
+                            color="success"
+                            size="lg"
+                            startContent={<FiPlay size={24} />}
+                            onPress={handleResumeRecording}
+                            className="relative min-w-[180px] font-semibold shadow-md shadow-success/10 hover:shadow-lg hover:shadow-success/15 hover:scale-105 transition-all duration-300 rounded-3xl"
+                          >
+                            Resume
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Stop Button */}
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-danger to-danger opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+                        <Button
+                          color="danger"
+                          size="lg"
+                          startContent={<FiSquare size={24} />}
+                          onPress={handleStopRecording}
+                          className="relative min-w-[180px] font-semibold shadow-md shadow-danger/10 hover:shadow-lg hover:shadow-danger/15 hover:scale-105 transition-all duration-300 rounded-3xl"
+                        >
+                          Stop
+                        </Button>
+                      </div>
                     </div>
                   )}
 
@@ -393,20 +571,70 @@ const RecordPage = () => {
                       </div>
                     </>
                   )}
+
+                  {/* Uploaded File Preview */}
+                  {uploadedFile && !isRecording && (
+                    <>
+                      <div className="w-full space-y-4">
+                        <Card className="border-success/20 bg-success/5 rounded-3xl hover:border-success/40 transition-all duration-300">
+                          <CardBody>
+                            <div className="flex items-center gap-3">
+                              <FiCheck className="text-success" size={20} />
+                              <div className="flex-1">
+                                <p className="font-semibold text-success">
+                                  File Uploaded Successfully
+                                </p>
+                                <p className="text-xs text-success/80">
+                                  {uploadedFile.file.name} | Duration: {uploadedFile.durationFormatted} | Size: {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                          </CardBody>
+                        </Card>
+
+                        {/* Audio Playback */}
+                        <audio
+                          src={URL.createObjectURL(uploadedFile.file)}
+                          controls
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="flex justify-between items-center w-full">
+                        <Button
+                          variant="bordered"
+                          onPress={handleReset}
+                          className="font-semibold rounded-3xl border-default-300 hover:bg-default-100 hover:border-default-400 hover:scale-105 transition-all duration-300"
+                        >
+                          Choose Different File
+                        </Button>
+                        <div className="relative group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-10 blur-lg transition-opacity duration-300 rounded-3xl"></div>
+                          <Button
+                            color="primary"
+                            onPress={() => setStep('details')}
+                            className="relative font-semibold shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/15 hover:scale-105 transition-all duration-300 rounded-3xl"
+                          >
+                            Continue
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Tips - Only show when not recording and no audio recorded */}
-                {!isRecording && !audioBlob && (
+                {!isRecording && !audioBlob && !uploadedFile && (
                   <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 border border-primary/20 shadow-lg rounded-3xl hover:border-primary/30 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300">
                     <CardBody className="gap-2">
                       <p className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                         💡 Tips for better results:
                       </p>
                       <ul className="text-xs text-default-600 space-y-1 ml-4">
-                        <li>• Speak clearly and minimize background noise</li>
-                        <li>• Keep the meeting under 3 minutes</li>
-                        <li>• Use a good quality microphone if available</li>
-                        <li>• Avoid overlapping speech</li>
+                        <li>• <strong>Live Recording or File Upload:</strong> Up to 10 minutes, 50MB max</li>
+                        <li>• <strong>Supported formats:</strong> MP3, WAV, M4A, WEBM, OGG</li>
+                        <li>• Use a good quality microphone for recordings</li>
+                        <li>• Avoid overlapping speech for better transcription</li>
                       </ul>
                     </CardBody>
                   </Card>

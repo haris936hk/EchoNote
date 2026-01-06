@@ -4,6 +4,7 @@ const transcriptionService = require('./transcription.service');
 const nlpService = require('./nlp.service');
 const summarizationService = require('./summarization.service');
 const emailService = require('./email.service');
+const supabaseStorage = require('./supabase-storage.service');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -333,7 +334,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
  */
 async function createAndProcessMeeting({ userId, title, category, audioPath, originalFilename }) {
   let meeting = null;
-  
+
   try {
     console.log(`\n🎬 Starting meeting processing pipeline for: ${title}`);
     console.log(`📁 Audio file: ${originalFilename}`);
@@ -360,7 +361,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     // Step 3: Process audio (noise reduction + optimization)
     console.log(`\n🔊 Step 1/4: Processing audio...`);
     const audioResult = await audioService.processAudioFile(audioPath);
-    
+
     if (!audioResult.success) {
       throw new Error(`Audio processing failed: ${audioResult.error}`);
     }
@@ -388,7 +389,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     await updateMeetingStatus(meeting.id, 'PROCESSING_NLP');
     console.log(`\n🧠 Step 3/4: Processing NLP...`);
     const nlpResult = await nlpService.processMeetingTranscript(transcript);
-    
+
     if (!nlpResult.success) {
       console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
       // Continue without NLP data (not critical)
@@ -559,13 +560,13 @@ function transformMeetingForFrontend(meeting) {
     // Combine summary fields into single object - deserialize JSON strings back to arrays
     summary: (meeting.summaryExecutive || meeting.summaryKeyDecisions || meeting.summaryActionItems || meeting.summaryNextSteps)
       ? {
-          executiveSummary: meeting.summaryExecutive,
-          keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
-          actionItems: meeting.summaryActionItems,
-          nextSteps: deserializeArrayField(meeting.summaryNextSteps),
-          keyTopics: meeting.summaryKeyTopics,
-          sentiment: meeting.summarySentiment
-        }
+        executiveSummary: meeting.summaryExecutive,
+        keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
+        actionItems: meeting.summaryActionItems,
+        nextSteps: deserializeArrayField(meeting.summaryNextSteps),
+        keyTopics: meeting.summaryKeyTopics,
+        sentiment: meeting.summarySentiment
+      }
       : null
   };
 }
@@ -780,8 +781,20 @@ async function deleteMeeting(meetingId, userId) {
     // Delete audio file if exists
     if (meeting.audioUrl) {
       try {
-        await fs.unlink(meeting.audioUrl);
-        console.log(`✅ Deleted audio file: ${meeting.audioUrl}`);
+        // Check if it's a Supabase URL or local path
+        if (meeting.audioUrl.startsWith('http')) {
+          // Supabase URL - delete from cloud storage
+          const result = await supabaseStorage.deleteAudioFromSupabase(meeting.audioUrl);
+          if (result.success) {
+            console.log(`✅ Deleted audio from Supabase: ${meeting.audioUrl}`);
+          } else {
+            console.warn(`⚠️ Could not delete from Supabase: ${result.error}`);
+          }
+        } else {
+          // Local file path - delete from filesystem
+          await fs.unlink(meeting.audioUrl);
+          console.log(`✅ Deleted local audio file: ${meeting.audioUrl}`);
+        }
       } catch (error) {
         console.warn(`⚠️ Could not delete audio file: ${error.message}`);
       }
@@ -1093,7 +1106,8 @@ async function getAudioDownloadUrl(meetingId, userId) {
       },
       select: {
         audioUrl: true,
-        title: true
+        title: true,
+        audioSize: true
       }
     });
 
@@ -1101,19 +1115,32 @@ async function getAudioDownloadUrl(meetingId, userId) {
       return null;
     }
 
-    // Check if file exists
-    try {
-      const stats = await fs.stat(meeting.audioUrl);
-
+    // Check if it's a Supabase URL or local path
+    if (meeting.audioUrl.startsWith('http')) {
+      // Supabase URL - return directly or get signed URL
       return {
         url: meeting.audioUrl,
-        filename: path.basename(meeting.audioUrl),
-        size: stats.size,
-        expiresAt: null // Local file, no expiration
+        filename: `${meetingId}.wav`,
+        size: meeting.audioSize || null,
+        isRemote: true,
+        expiresAt: null // Public URL, no expiration
       };
-    } catch (error) {
-      console.warn('Audio file not found:', meeting.audioUrl);
-      return null;
+    } else {
+      // Local file - check if exists
+      try {
+        const stats = await fs.stat(meeting.audioUrl);
+
+        return {
+          url: meeting.audioUrl,
+          filename: path.basename(meeting.audioUrl),
+          size: stats.size,
+          isRemote: false,
+          expiresAt: null // Local file, no expiration
+        };
+      } catch (error) {
+        console.warn('Audio file not found:', meeting.audioUrl);
+        return null;
+      }
     }
   } catch (error) {
     console.error('Get audio download URL error:', error.message);
@@ -1230,10 +1257,25 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
 }
 
 /**
- * Store audio file in permanent location
+ * Store audio file in permanent location (Supabase or local fallback)
  */
 async function storeAudioFile(tempPath, meetingId) {
   try {
+    // Try uploading to Supabase Storage first
+    if (supabaseStorage.isSupabaseConfigured()) {
+      console.log('📤 Uploading audio to Supabase Storage...');
+      const result = await supabaseStorage.uploadAudioToSupabase(tempPath, meetingId);
+
+      if (result.success) {
+        console.log(`✅ Audio uploaded to Supabase: ${result.url}`);
+        return result.url; // Return Supabase public URL
+      } else {
+        console.warn(`⚠️ Supabase upload failed: ${result.error}. Falling back to local storage.`);
+      }
+    }
+
+    // Fallback to local storage
+    console.log('📁 Using local storage for audio file...');
     const storageDir = path.join(process.cwd(), 'storage', 'audio');
     await fs.mkdir(storageDir, { recursive: true });
 
@@ -1243,7 +1285,7 @@ async function storeAudioFile(tempPath, meetingId) {
 
     await fs.copyFile(tempPath, storagePath);
 
-    console.log(`✅ Audio file stored: ${storagePath}`);
+    console.log(`✅ Audio file stored locally: ${storagePath}`);
 
     return storagePath;
   } catch (error) {

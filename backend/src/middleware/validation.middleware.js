@@ -366,7 +366,8 @@ const validateUpdateProfile = (req, res, next) => {
 const validateUpdateSettings = (req, res, next) => {
   const validator = new Validator(req.body);
 
-  if (req.body.autoDeleteDays !== undefined) {
+  // autoDeleteDays can be null (disable) or a number between 1-365
+  if (req.body.autoDeleteDays !== undefined && req.body.autoDeleteDays !== null) {
     validator
       .isNumber('autoDeleteDays')
       .min('autoDeleteDays', 1, 'Auto-delete days must be at least 1')
@@ -570,13 +571,13 @@ const validateDownloadFormat = (req, res, next) => {
  */
 const sanitizeString = (str) => {
   if (typeof str !== 'string') return str;
-  
+
   // Remove null bytes
   str = str.replace(/\0/g, '');
-  
+
   // Trim whitespace
   str = str.trim();
-  
+
   return str;
 };
 
@@ -611,7 +612,7 @@ const sanitizeQuery = (req, res, next) => {
 /**
  * Extend AppError to support validation details
  */
-AppError.prototype.setDetails = function(details) {
+AppError.prototype.setDetails = function (details) {
   this.details = details;
   return this;
 };

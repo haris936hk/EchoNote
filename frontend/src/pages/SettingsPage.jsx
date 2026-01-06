@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardBody,
@@ -127,29 +127,69 @@ const PreferencesContent = () => {
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load settings from backend on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/users/settings', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setEmailNotifications(data.data.emailNotifications ?? true);
+            // autoDeleteDays: if set (not null), enable auto-delete
+            if (data.data.autoDeleteDays !== null && data.data.autoDeleteDays !== undefined) {
+              setAutoDelete(true);
+              setRetentionDays(String(data.data.autoDeleteDays));
+            } else {
+              setAutoDelete(false);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   const handleSavePreferences = async () => {
     setIsSaving(true);
     try {
-      // TODO: Add API call to save preferences
-      // Example:
-      // await api.patch('/api/user/settings', {
-      //   emailNotifications,
-      //   autoDelete,
-      //   retentionDays: autoDelete ? retentionDays : null
-      // });
+      const token = localStorage.getItem('token');
 
-      // For now, just simulate a save with a timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Show success message (you can add a toast notification here)
-      console.log('Preferences saved:', {
+      // Build request body - send null for autoDeleteDays when disabled (never delete)
+      const requestBody = {
         emailNotifications,
-        autoDelete,
-        retentionDays: autoDelete ? retentionDays : null
+        autoDeleteDays: autoDelete ? parseInt(retentionDays) : null
+      };
+
+      const response = await fetch('/api/users/settings', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
       });
 
-      alert('Preferences saved successfully!');
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Preferences saved successfully!');
+      } else {
+        alert(data.error || 'Failed to save preferences. Please try again.');
+      }
     } catch (error) {
       console.error('Failed to save preferences:', error);
       alert('Failed to save preferences. Please try again.');
@@ -157,6 +197,14 @@ const PreferencesContent = () => {
       setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -179,14 +227,12 @@ const PreferencesContent = () => {
             </div>
             <button
               onClick={toggleTheme}
-              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                isDark ? 'bg-primary hover:bg-primary/90' : 'bg-default-300 hover:bg-default-400'
-              }`}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${isDark ? 'bg-primary hover:bg-primary/90' : 'bg-default-300 hover:bg-default-400'
+                }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                  isDark ? 'translate-x-6' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${isDark ? 'translate-x-6' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -203,14 +249,12 @@ const PreferencesContent = () => {
             </div>
             <button
               onClick={() => setEmailNotifications(!emailNotifications)}
-              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                emailNotifications ? 'bg-success hover:bg-success/90' : 'bg-default-300 hover:bg-default-400'
-              }`}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${emailNotifications ? 'bg-success hover:bg-success/90' : 'bg-default-300 hover:bg-default-400'
+                }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                  emailNotifications ? 'translate-x-6' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${emailNotifications ? 'translate-x-6' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -228,14 +272,12 @@ const PreferencesContent = () => {
               </div>
               <button
                 onClick={() => setAutoDelete(!autoDelete)}
-                className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                  autoDelete ? 'bg-warning hover:bg-warning/90' : 'bg-default-300 hover:bg-default-400'
-                }`}
+                className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${autoDelete ? 'bg-warning hover:bg-warning/90' : 'bg-default-300 hover:bg-default-400'
+                  }`}
               >
                 <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-                    autoDelete ? 'translate-x-6' : 'translate-x-0'
-                  }`}
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${autoDelete ? 'translate-x-6' : 'translate-x-0'
+                    }`}
                 />
               </button>
             </div>
@@ -299,6 +341,44 @@ const PreferencesContent = () => {
 
 // Privacy Content Component
 const PrivacyContent = () => {
+  const [stats, setStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch real statistics from backend
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/users/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setStats(data.data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
+
+  // Helper to format bytes to readable size
+  const formatBytes = (bytes) => {
+    if (!bytes || bytes === 0) return '0 MB';
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${mb.toFixed(1)} MB`;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -316,27 +396,41 @@ const PrivacyContent = () => {
         <Divider />
         <CardBody className="gap-4">
           <p className="text-sm text-default-600 leading-relaxed">
-            Your meeting recordings and transcripts are stored securely on our servers. 
-            Audio files are stored temporarily and can be automatically deleted based on 
-            your retention settings. Transcripts and summaries are retained until you 
+            Your meeting recordings and transcripts are stored securely on our servers.
+            Audio files are stored temporarily and can be automatically deleted based on
+            your retention settings. Transcripts and summaries are retained until you
             manually delete them.
           </p>
 
           <div className="bg-default-100 rounded-lg p-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-default-600">Total Meetings:</span>
-                <span className="font-semibold">24</span>
+            {isLoading ? (
+              <div className="flex justify-center py-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-default-600">Storage Used:</span>
-                <span className="font-semibold">142 MB</span>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-default-600">Total Meetings:</span>
+                  <span className="font-semibold">{stats?.overview?.totalMeetings ?? 0}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-default-600">Completed:</span>
+                  <span className="font-semibold">{stats?.overview?.completedMeetings ?? 0}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-default-600">Storage Used:</span>
+                  <span className="font-semibold">{formatBytes(stats?.metrics?.storageUsedBytes)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-default-600">Total Duration:</span>
+                  <span className="font-semibold">
+                    {stats?.metrics?.totalDuration
+                      ? `${Math.floor(stats.metrics.totalDuration / 60)}m ${Math.floor(stats.metrics.totalDuration % 60)}s`
+                      : '0m 0s'}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-default-600">Audio Files:</span>
-                <span className="font-semibold">18 active</span>
-              </div>
-            </div>
+            )}
           </div>
         </CardBody>
       </Card>
@@ -381,8 +475,8 @@ const PrivacyContent = () => {
                 Your Privacy Matters
               </p>
               <p className="text-sm text-primary/80 leading-relaxed">
-                We never share your meeting data with third parties. All processing 
-                is done on our secure servers. You have full control over your data 
+                We never share your meeting data with third parties. All processing
+                is done on our secure servers. You have full control over your data
                 and can delete it at any time.
               </p>
             </div>

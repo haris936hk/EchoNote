@@ -69,6 +69,19 @@ async function authenticateWithGoogle(googleToken) {
         }
       });
       console.log(`✅ New user created: ${user.email}`);
+
+      // Send welcome email (non-blocking)
+      const emailService = require('../config/email');
+      try {
+        await emailService.sendWelcomeEmail({
+          to: user.email,
+          userName: user.name
+        });
+        console.log(`📧 Welcome email sent to ${user.email}`);
+      } catch (error) {
+        // Don't fail auth if email fails
+        console.error('Failed to send welcome email:', error.message);
+      }
     }
 
     // Step 3: Generate JWT tokens
