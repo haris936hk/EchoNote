@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -21,7 +21,6 @@ import SearchBar from '../components/meeting/SearchBar';
 import { PageLoader } from '../components/common/Loader';
 import useDebounce from '../hooks/useDebounce';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
-import { showToast } from '../components/common/Toast';
 
 const MeetingsPage = () => {
   const navigate = useNavigate();
@@ -44,49 +43,6 @@ const MeetingsPage = () => {
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
-
-  // Auto-refresh: Poll only while there are processing meetings
-  const processingIdsRef = useRef(new Set());
-
-  // Detect when meetings complete and show toast
-  useEffect(() => {
-    const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
-    const currentlyProcessing = meetings.filter(m => processingStatuses.includes(m.status));
-    const currentIds = new Set(currentlyProcessing.map(m => m.id));
-    const prevIds = processingIdsRef.current;
-
-    // Check if any previously processing meetings have completed
-    if (prevIds.size > 0) {
-      const completedIds = [...prevIds].filter(id => !currentIds.has(id));
-      completedIds.forEach(id => {
-        const meeting = meetings.find(m => m.id === id);
-        if (meeting) {
-          if (meeting.status === 'COMPLETED') {
-            showToast(`✅ "${meeting.title}" is ready!`, 'success', 6000);
-          } else if (meeting.status === 'FAILED') {
-            showToast(`❌ "${meeting.title}" failed to process`, 'error', 8000);
-          }
-        }
-      });
-    }
-
-    // Update tracking ref
-    processingIdsRef.current = currentIds;
-  }, [meetings]);
-
-  // Polling effect - separate from detection
-  useEffect(() => {
-    const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
-    const hasProcessingMeetings = meetings.some(m => processingStatuses.includes(m.status));
-
-    if (hasProcessingMeetings) {
-      const interval = setInterval(() => {
-        fetchMeetings();
-      }, 20000); // Poll every 20 seconds
-
-      return () => clearInterval(interval);
-    }
-  }, [meetings, fetchMeetings]);
 
   // Handle scroll to show/hide header and scroll-to-top button
   useEffect(() => {
@@ -122,13 +78,7 @@ const MeetingsPage = () => {
 
     // Filter by status
     if (statusFilter !== 'ALL') {
-      if (statusFilter === 'PROCESSING') {
-        // PROCESSING tab shows all in-progress statuses
-        const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
-        result = result.filter(m => processingStatuses.includes(m.status));
-      } else {
-        result = result.filter(m => m.status === statusFilter);
-      }
+      result = result.filter(m => m.status === statusFilter);
     }
 
     // Filter by category
@@ -171,12 +121,10 @@ const MeetingsPage = () => {
   }, [meetings, statusFilter, selectedCategory, debouncedSearch]);
 
   // Calculate counts for status tabs
-  // Backend statuses: UPLOADING, PROCESSING_AUDIO, TRANSCRIBING, PROCESSING_NLP, SUMMARIZING, COMPLETED, FAILED
-  const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
   const statusCounts = {
     ALL: meetings.length,
     COMPLETED: meetings.filter(m => m.status === 'COMPLETED').length,
-    PROCESSING: meetings.filter(m => processingStatuses.includes(m.status)).length,
+    PROCESSING: meetings.filter(m => m.status === 'PROCESSING').length,
     FAILED: meetings.filter(m => m.status === 'FAILED').length
   };
 
@@ -251,8 +199,8 @@ const MeetingsPage = () => {
       {/* Page Header - Slides down when navbar slides up */}
       <div
         className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${!showHeader
-          ? 'translate-y-0 opacity-100'
-          : '-translate-y-full opacity-0 pointer-events-none'
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-full opacity-0 pointer-events-none'
           }`}
         style={{
           willChange: 'transform, opacity'

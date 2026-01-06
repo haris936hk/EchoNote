@@ -39,6 +39,7 @@ model User {
 // Meeting status enum
 enum MeetingStatus {
   UPLOADING
+  PENDING           // Queued, waiting for worker
   PROCESSING_AUDIO
   TRANSCRIBING
   PROCESSING_NLP
@@ -95,7 +96,12 @@ model Meeting {
   processingStartedAt DateTime?
   processingCompletedAt DateTime?
   processingDuration Float?     // Total processing time in seconds
-  
+
+  // Queue tracking
+  retryCount    Int         @default(0) // Number of retry attempts
+  queuedAt      DateTime?   // When added to queue
+  lastRetryAt   DateTime?   // Last retry attempt timestamp
+
   // Audio deletion tracking
   audioDeletedAt DateTime?      // When audio was auto-deleted
   shouldDeleteAudioAt DateTime? // Scheduled deletion date
@@ -117,6 +123,7 @@ model Meeting {
   @@index([category])
   @@index([createdAt])
   @@index([shouldDeleteAudioAt]) // For cron job cleanup
+  @@index([status, queuedAt]) // For queue processing
   @@map("meetings")
 }
 

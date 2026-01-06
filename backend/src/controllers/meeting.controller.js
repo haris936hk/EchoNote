@@ -2,6 +2,7 @@
 // Meeting controller - handles HTTP requests for meetings
 
 const meetingService = require('../services/meeting.service');
+const queueService = require('../services/queue.service');
 const supabaseStorage = require('../services/supabase-storage.service');
 const winston = require('winston');
 const path = require('path');
@@ -80,20 +81,24 @@ const createMeetingWithAudio = async (req, res) => {
     // Use uploadedFile if available (after validation), otherwise use req.file
     const fileToProcess = req.uploadedFile || req.file;
 
-    // Start audio processing pipeline in the background
-    // We don't await this to allow the response to return quickly
-    meetingService.uploadAndProcessAudio(meeting.id, userId, fileToProcess)
-      .then(() => {
-        logger.info(`✅ Audio processing completed for meeting ${meeting.id}`);
-      })
-      .catch((error) => {
-        logger.error(`❌ Audio processing failed for meeting ${meeting.id}: ${error.message}`);
+    // Add to queue for processing
+    const queueResult = await queueService.addToQueue(meeting.id, userId, fileToProcess);
+
+    if (!queueResult.success) {
+      logger.error(`Failed to queue meeting ${meeting.id}: ${queueResult.error}`);
+      await meetingService.updateMeetingStatus(meeting.id, 'FAILED', queueResult.error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to queue meeting for processing'
       });
+    }
+
+    logger.info(`✅ Meeting ${meeting.id} queued for processing (position: ${queueResult.queuePosition})`);
 
     return res.status(201).json({
       success: true,
-      data: meeting,
-      message: 'Meeting created and audio processing started'
+      data: { ...meeting, status: 'PENDING' },
+      message: `Meeting created and queued for processing (position: ${queueResult.queuePosition})`
     });
 
   } catch (error) {

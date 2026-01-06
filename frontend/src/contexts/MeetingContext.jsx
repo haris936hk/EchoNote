@@ -116,7 +116,7 @@ export const MeetingProvider = ({ children }) => {
 
       recorderRef.current.stopRecording(() => {
         const blob = recorderRef.current.getBlob();
-        
+
         // Stop timer
         if (timerRef.current) {
           clearInterval(timerRef.current);
