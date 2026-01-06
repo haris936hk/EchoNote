@@ -20,7 +20,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
   
   const [error, setError] = useState(null);
 
-  const MAX_RECORDING_TIME = 180; // 3 minutes in seconds
+  const MAX_RECORDING_TIME = 600; // 10 minutes in seconds
 
   const handleStartRecording = async () => {
     setError(null);
@@ -172,10 +172,10 @@ const AudioRecorder = ({ onRecordingComplete }) => {
             <div className="flex-1">
               <p className="text-sm text-primary font-medium">Recording Tips</p>
               <ul className="text-xs text-primary/80 mt-2 space-y-1 list-disc list-inside">
-                <li>Maximum recording time is 3 minutes</li>
+                <li>Maximum recording time is 10 minutes</li>
                 <li>Ensure your microphone is connected and permissions are granted</li>
                 <li>Speak clearly and minimize background noise</li>
-                <li>Recording will automatically stop at 3 minutes</li>
+                <li>Recording will automatically stop at 10 minutes</li>
               </ul>
             </div>
           </div>

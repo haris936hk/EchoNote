@@ -122,6 +122,14 @@ const MeetingList = ({
             showControls
             color="primary"
             size="lg"
+            radius="full"
+            classNames={{
+              wrapper: "gap-2 bg-content1/50 backdrop-blur-sm border-2 border-divider/50 rounded-full p-2 shadow-lg",
+              item: "rounded-full min-w-10 h-10 bg-transparent border-0 hover:bg-primary/10 transition-all duration-300",
+              cursor: "rounded-full bg-gradient-to-br from-primary to-secondary text-white shadow-lg shadow-primary/50 font-semibold",
+              prev: "rounded-full bg-transparent hover:bg-primary/10 transition-all duration-300",
+              next: "rounded-full bg-transparent hover:bg-primary/10 transition-all duration-300"
+            }}
           />
         </div>
       )}

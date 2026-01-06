@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
-import { FiMic, FiCheckCircle, FiZap, FiLock } from 'react-icons/fi';
+import { FiMic, FiCheckCircle, FiZap, FiLock, FiTarget, FiTrendingUp, FiList } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import LoginButton from '../components/auth/LoginButton';
 
@@ -18,19 +18,19 @@ const LoginPage = () => {
 
   const features = [
     {
-      icon: FiMic,
-      title: 'AI-Powered Transcription',
-      description: 'Accurate speech-to-text using Whisper ASR technology'
+      icon: FiTarget,
+      title: 'Smart Action Items',
+      description: 'AI extracts tasks with assignees, deadlines, and priorities automatically'
     },
     {
       icon: FiZap,
-      title: 'Instant Summaries',
-      description: 'Get key decisions and action items automatically extracted'
+      title: 'Executive Summaries',
+      description: 'Custom AI model generates structured summaries with key decisions and next steps'
     },
     {
-      icon: FiCheckCircle,
-      title: 'Easy to Use',
-      description: 'Record, process, and access your meetings in minutes'
+      icon: FiTrendingUp,
+      title: 'Sentiment & Topics',
+      description: 'Automatic sentiment analysis and key topic extraction from every meeting'
     },
     {
       icon: FiLock,
@@ -65,10 +65,10 @@ const LoginPage = () => {
               </h1>
             </div>
             <p className="text-xl text-default-600">
-              Transform your meetings into actionable insights
+              Transform meetings into structured action items
             </p>
             <p className="text-default-500 mt-2">
-              AI-powered transcription and summarization for modern teams
+              Custom AI model extracts decisions, tasks, and next steps automatically
             </p>
           </div>
 
@@ -102,7 +102,7 @@ const LoginPage = () => {
               <p className="text-xs text-default-500">Accuracy</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-primary">3 min</p>
+              <p className="text-2xl font-bold text-primary">10 min</p>
               <p className="text-xs text-default-500">Max Recording</p>
             </div>
             <div>
@@ -161,10 +161,10 @@ const LoginPage = () => {
               </p>
               <ul className="space-y-2">
                 {[
-                  'Unlimited meeting recordings (3 min each)',
-                  'AI-powered transcription and summaries',
-                  'Searchable meeting archive',
-                  'Secure cloud storage'
+                  'Smart action items with assignees & deadlines',
+                  'Executive summaries with key decisions',
+                  'Automatic topic & sentiment analysis',
+                  'Structured next steps for every meeting'
                 ].map((benefit, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
                     <FiCheckCircle className="text-success mt-0.5 flex-shrink-0" size={16} />
@@ -180,7 +180,7 @@ const LoginPage = () => {
       {/* Footer */}
       <div className="absolute bottom-4 left-0 right-0 text-center">
         <p className="text-xs text-default-400">
-          © 2025 EchoNote. Made by Haris Khan.
+          © 2025 EchoNote. Made with ❤️ by Riphah Students
         </p>
       </div>
     </div>

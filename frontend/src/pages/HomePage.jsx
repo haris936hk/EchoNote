@@ -34,14 +34,14 @@ const HomePage = () => {
     },
     {
       icon: FiFileText,
-      title: 'AI Transcription',
-      description: 'Powered by Whisper ASR with 90%+ accuracy across different accents',
+      title: 'Accurate Transcription',
+      description: 'Whisper ASR delivers 90%+ accuracy across different accents and audio conditions',
       color: 'secondary'
     },
     {
       icon: FiZap,
-      title: 'Instant Summaries',
-      description: 'Get executive summaries, key decisions, and action items automatically',
+      title: 'Custom AI Model',
+      description: 'Fine-tuned Qwen2.5-7B achieves 88% accuracy extracting structured summaries with action items, key decisions, and next steps',
       color: 'success'
     },
     {
@@ -66,12 +66,12 @@ const HomePage = () => {
 
   const benefits = [
     {
-      stat: '90%+',
-      label: 'Transcription Accuracy',
+      stat: '88%+',
+      label: 'Summarization Accuracy',
       icon: FiTrendingUp
     },
     {
-      stat: '3 min',
+      stat: '10 min',
       label: 'Max Recording Time',
       icon: FiClock
     },
@@ -163,7 +163,7 @@ const HomePage = () => {
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300">
               <FiZap size={16} />
-              AI-Powered Meeting Intelligence
+              Custom AI-Powered Meeting Summaries
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold leading-tight animate-fade-in">
@@ -172,8 +172,7 @@ const HomePage = () => {
             </h1>
 
             <p className="text-xl text-default-600 max-w-2xl mx-auto">
-              Record, transcribe, and summarize your meetings automatically with AI. 
-              Never miss important decisions or action items again.
+              Record and transcribe your meetings with Whisper ASR, then let our custom AI model extract structured summaries, action items, and key decisions automatically.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -279,13 +278,13 @@ const HomePage = () => {
               {
                 step: '01',
                 title: 'Record Your Meeting',
-                description: 'Use our web app to record up to 3 minutes of crystal-clear audio with noise reduction',
+                description: 'Use our web app to record up to 10 minutes of crystal-clear audio with noise reduction',
                 icon: FiMic
               },
               {
                 step: '02',
-                title: 'AI Processing',
-                description: 'Our AI transcribes, analyzes, and extracts key information automatically',
+                title: 'Transcribe & Analyze',
+                description: 'Whisper ASR transcribes audio, then our custom AI model extracts structured summaries and action items',
                 icon: FiZap
               },
               {
@@ -345,7 +344,7 @@ const HomePage = () => {
                 </div>
 
                 <p className="text-sm text-default-500 mt-6">
-                  No credit card required • Free to start • 3-minute recordings
+                  No credit card required • Free to start • 10-minute recordings
                 </p>
               </CardBody>
             </Card>
@@ -368,7 +367,7 @@ const HomePage = () => {
                 </span>
               </div>
               <p className="text-sm text-default-600">
-                AI-powered meeting transcription and summarization
+                Whisper ASR transcription with custom AI-powered structured summaries
               </p>
             </div>
 
@@ -403,7 +402,7 @@ const HomePage = () => {
 
           <div className="border-t border-divider mt-12 pt-8 text-center">
             <p className="text-sm text-default-500">
-              © 2025 EchoNote. Made with ❤️ by Riphah Team
+              © 2025 EchoNote. Made with ❤️ by Riphah Students
             </p>
           </div>
         </div>

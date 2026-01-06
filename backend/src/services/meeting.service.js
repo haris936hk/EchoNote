@@ -202,6 +202,17 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     // Step 7: Update meeting with all processed data
     const wordCount = transcript.split(/\s+/).length;
 
+    // Extract audio metadata
+    const audioFormat = path.extname(audioFile.originalname || audioFile.filename)
+      .toLowerCase()
+      .replace('.', '') || 'unknown';
+
+    // Calculate processing duration
+    const processingEndTime = new Date();
+    const processingDurationSeconds = meeting.processingStartedAt
+      ? Math.round((processingEndTime - new Date(meeting.processingStartedAt)) / 1000)
+      : null;
+
     // Format NLP data to match dataset structure
     const nlpEntitiesText = nlpResult.success && nlpResult.entities
       ? nlpResult.entities.map(e => `${e.text} (${e.label})`).join(', ')
@@ -220,6 +231,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       data: {
         audioUrl: audioStoragePath,
         audioDuration,
+        audioSize: audioFile.size,
+        audioFormat: audioFormat,
         transcriptText: transcript,
         transcriptWordCount: wordCount,
 
@@ -243,6 +256,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         summaryKeyTopics: enhancedSummary.keyTopics || null,
         summarySentiment: enhancedSummary.sentiment || null,
 
+        // Processing timestamps
+        processingDuration: processingDurationSeconds,
+        processingCompletedAt: processingEndTime,
         status: 'COMPLETED'
       },
       include: {
@@ -262,25 +278,43 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     await cleanupTempFiles([tempPath, processedAudioPath]);
 
     // Step 9: Send completion email to user
-    console.log(`\n📧 Sending completion email...`);
-    await emailService.sendMeetingCompletedEmail({
-      to: meeting.user.email,
-      userName: meeting.user.name,
-      meeting: {
-        id: updatedMeeting.id,
-        title: updatedMeeting.title,
-        createdAt: updatedMeeting.createdAt,
-        audioDuration: updatedMeeting.audioDuration,
-        category: updatedMeeting.category,
-        summaryExecutive: updatedMeeting.summaryExecutive,
-        summaryKeyDecisions: updatedMeeting.summaryKeyDecisions,
-        summaryActionItems: updatedMeeting.summaryActionItems,
-        summaryNextSteps: updatedMeeting.summaryNextSteps,
-        transcriptText: updatedMeeting.transcriptText
-      }
-    });
+    try {
+      console.log(`\n📧 Sending completion email...`);
+      await emailService.sendMeetingCompletedEmail({
+        to: meeting.user.email,
+        userName: meeting.user.name,
+        meeting: {
+          id: updatedMeeting.id,
+          title: updatedMeeting.title,
+          createdAt: updatedMeeting.createdAt,
+          audioDuration: updatedMeeting.audioDuration,
+          category: updatedMeeting.category,
+          processingDuration: updatedMeeting.processingDuration,
+          summaryExecutive: updatedMeeting.summaryExecutive,
+          summaryKeyDecisions: updatedMeeting.summaryKeyDecisions,
+          summaryActionItems: updatedMeeting.summaryActionItems,
+          summaryNextSteps: updatedMeeting.summaryNextSteps,
+          transcriptText: updatedMeeting.transcriptText
+        }
+      });
 
-    console.log(`✅ Email sent to ${meeting.user.email}`);
+      console.log(`✅ Email sent to ${meeting.user.email}`);
+
+      // Update email tracking fields
+      await prisma.meeting.update({
+        where: { id: meetingId },
+        data: {
+          emailSent: true,
+          emailSentAt: new Date()
+        }
+      });
+
+    } catch (emailError) {
+      console.error(`⚠️ Email send failed:`, emailError.message);
+      // Don't fail the entire processing if email fails
+      // Meeting is still marked as COMPLETED
+    }
+
     console.log(`\n🎉 Meeting processing complete! ID: ${meetingId}\n`);
 
     return updatedMeeting;

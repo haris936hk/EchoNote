@@ -223,7 +223,7 @@ const getMeetings = async (req, res) => {
     const userId = req.userId;
     const {
       page = 1,
-      limit = 10,
+      limit = 100, // Default to 100 to show all meetings (max allowed by validation)
       category,
       search,
       status,

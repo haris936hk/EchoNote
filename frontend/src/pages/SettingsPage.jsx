@@ -614,7 +614,7 @@ const HelpContent = () => {
   const faqs = [
     {
       question: 'How long can my recordings be?',
-      answer: 'Each recording can be up to 3 minutes long. This limit ensures optimal processing speed and accuracy.'
+      answer: 'Each recording can be up to 10 minutes long. This limit ensures optimal processing speed and accuracy.'
     },
     {
       question: 'How accurate is the transcription?',

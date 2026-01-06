@@ -13,7 +13,7 @@ const useAudioRecorder = () => {
   const streamRef = useRef(null);
   const timerRef = useRef(null);
 
-  const MAX_RECORDING_TIME = 180; // 3 minutes in seconds
+  const MAX_RECORDING_TIME = 600; // 10 minutes in seconds
 
   // Check browser compatibility
   const checkCompatibility = useCallback(() => {
@@ -81,7 +81,7 @@ const useAudioRecorder = () => {
         setRecordingTime((prev) => {
           const newTime = prev + 1;
           
-          // Auto-stop at 3 minutes
+          // Auto-stop at 10 minutes
           if (newTime >= MAX_RECORDING_TIME) {
             stopRecording();
             return MAX_RECORDING_TIME;

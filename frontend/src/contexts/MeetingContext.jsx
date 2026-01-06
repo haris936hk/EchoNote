@@ -91,7 +91,7 @@ export const MeetingProvider = ({ children }) => {
       // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
-          if (prev >= 180) { // 3 minutes = 180 seconds
+          if (prev >= 600) { // 10 minutes = 600 seconds
             stopRecording();
             return prev;
           }

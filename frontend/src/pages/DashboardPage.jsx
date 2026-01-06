@@ -249,7 +249,7 @@ const DashboardPage = () => {
                 No meetings yet
               </h3>
               <p className="text-default-700 dark:text-default-600 mb-8 max-w-md mx-auto text-lg">
-                Start by recording your first meeting. Your AI-powered transcription and summary will be ready in minutes.
+                Start recording your first meeting. Our custom AI model will extract action items, key decisions, and structured summaries automatically.
               </p>
               <div className="relative inline-block group">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
@@ -271,21 +271,21 @@ const DashboardPage = () => {
                     <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
                   <p className="text-sm font-semibold mb-1">Quick Recording</p>
-                  <p className="text-xs text-default-500">Up to 3 minutes</p>
+                  <p className="text-xs text-default-500">Up to 10 minutes</p>
                 </div>
                 <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/20 transition-all duration-300 group">
                   <div className="p-3 bg-secondary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
                     <FiCheckCircle className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
-                  <p className="text-sm font-semibold mb-1">AI Transcription</p>
-                  <p className="text-xs text-default-500">90%+ accuracy</p>
+                  <p className="text-sm font-semibold mb-1">Smart Action Items</p>
+                  <p className="text-xs text-default-500">With assignees & deadlines</p>
                 </div>
                 <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
                   <div className="p-3 bg-primary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
                     <FiTrendingUp className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
                   </div>
-                  <p className="text-sm font-semibold mb-1">Smart Summaries</p>
-                  <p className="text-xs text-default-500">Key insights extracted</p>
+                  <p className="text-sm font-semibold mb-1">Structured Summaries</p>
+                  <p className="text-xs text-default-500">Decisions, topics & sentiment</p>
                 </div>
               </div>
             </CardBody>

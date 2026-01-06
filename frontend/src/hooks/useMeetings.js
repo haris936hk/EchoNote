@@ -125,7 +125,7 @@ export const useRecentMeetings = (limit = 5) => {
 export const useCanRecord = () => {
   const { isRecording, recordingSeconds } = useMeetings();
 
-  const MAX_RECORDING_TIME = 180; // 3 minutes
+  const MAX_RECORDING_TIME = 600; // 10 minutes
 
   return {
     canRecord: !isRecording,
