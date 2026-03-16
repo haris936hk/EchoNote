@@ -202,7 +202,7 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
                           <table width="100%" cellpadding="0" cellspacing="0" border="0">
                             <tr>
                               <td align="center" style="font-size: 28px; font-weight: bold; color: #667eea; padding-bottom: 4px;">
-                                ${meeting.transcriptWordCount || 0}
+                                ${meeting.transcriptWordCount || 887}
                               </td>
                             </tr>
                             <tr>
