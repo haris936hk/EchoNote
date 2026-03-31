@@ -2,7 +2,11 @@ const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../config/database');
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  'postmessage'
+);
 
 /**
  * Verify Google OAuth token and extract user profile
@@ -33,28 +37,45 @@ async function verifyGoogleToken(token) {
 
 /**
  * Authenticate user with Google OAuth (create or login)
- * @param {string} googleToken - Google ID token from frontend
+ * @param {string} authCode - Google authorization code from frontend
  * @returns {Promise<Object>} User object with JWT tokens
  */
-async function authenticateWithGoogle(googleToken) {
+async function authenticateWithGoogle(authCode) {
   try {
-    // Step 1: Verify Google token
-    const googleProfile = await verifyGoogleToken(googleToken);
+    // Step 1: Exchange code for Google tokens
+    const { tokens } = await client.getToken(authCode);
 
-    // Step 2: Find or create user
+    if (!tokens.id_token) {
+      throw new Error('No ID token received from Google');
+    }
+
+    // Step 2: Verify Google ID token
+    const googleProfile = await verifyGoogleToken(tokens.id_token);
+
+    // Step 3: Find or create user
     let user = await prisma.user.findUnique({
       where: { email: googleProfile.email },
     });
 
+    const googleTokenExpiry = tokens.expiry_date ? new Date(tokens.expiry_date) : null;
+
     if (user) {
       // Update existing user's info and last login
+      const updates = {
+        name: googleProfile.name,
+        picture: googleProfile.picture,
+        lastLoginAt: new Date(),
+        googleAccessToken: tokens.access_token,
+        googleTokenExpiry,
+      };
+
+      if (tokens.refresh_token) {
+        updates.googleRefreshToken = tokens.refresh_token;
+      }
+
       user = await prisma.user.update({
         where: { id: user.id },
-        data: {
-          name: googleProfile.name,
-          picture: googleProfile.picture,
-          lastLoginAt: new Date(),
-        },
+        data: updates,
       });
       console.log(`✅ User logged in: ${user.email}`);
     } else {
@@ -66,6 +87,9 @@ async function authenticateWithGoogle(googleToken) {
           picture: googleProfile.picture,
           googleId: googleProfile.googleId,
           lastLoginAt: new Date(),
+          googleAccessToken: tokens.access_token,
+          googleRefreshToken: tokens.refresh_token,
+          googleTokenExpiry,
         },
       });
       console.log(`✅ New user created: ${user.email}`);

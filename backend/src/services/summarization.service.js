@@ -1,7 +1,7 @@
 // backend/src/services/summarization.service.js
-// AI summarization service using Custom Fine-Tuned Qwen2.5-7B Model
+// AI summarization service using Groq API (openai/gpt-oss-120b)
 
-const customModelService = require('./customModelService');
+const groqService = require('./groqService');
 const winston = require('winston');
 
 // Initialize logger
@@ -45,8 +45,8 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       nlpFeatures.sentimentPolarity = metadata.sentiment.score;
     }
 
-    // STEP 3: Call custom model with NLP features (FIXED: Now actually passing them!)
-    const result = await customModelService.generateSummary(transcript, nlpFeatures);
+    // STEP 3: Call Groq model with NLP features
+    const result = await groqService.generateSummary(transcript, nlpFeatures);
 
     if (!result.success) {
       throw new Error(result.error || 'Summary generation failed');
@@ -68,7 +68,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       keyTopics: Array.isArray(result.data.keyTopics) ? result.data.keyTopics : [],
       sentiment: result.data.sentiment || 'neutral',
       metadata: {
-        model: 'EchoNote-Custom-Qwen2.5-7B',
+        model: `${process.env.GROQ_MODEL || 'openai/gpt-oss-120b'} (Groq)`,
         duration: parseFloat(duration),
         totalProcessingTime: parseFloat(duration),
       },
@@ -81,7 +81,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
   } catch (error) {
     logger.error(`❌ Summary generation failed: ${error.message}`);
 
-    // User-friendly error messages for NGROK unavailability
+    // User-friendly error messages for Groq API failures
     let userMessage = error.message;
     if (
       error.message.includes('ECONNREFUSED') ||
@@ -91,7 +91,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       error.message.includes('EHOSTUNREACH')
     ) {
       userMessage =
-        'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+        'Groq API is currently unreachable. Please check your internet connection and GROQ_API_KEY.';
     }
 
     throw new Error(userMessage);
@@ -104,12 +104,13 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
  * @param {Object} metadata - Meeting metadata
  * @returns {Object} Executive summary
  */
+// eslint-disable-next-line no-unused-vars
 const generateExecutiveSummary = async (transcript, metadata = {}) => {
   try {
     logger.info(`📋 Generating executive summary`);
     const startTime = Date.now();
 
-    const result = await customModelService.generateSummary(transcript, null);
+    const result = await groqService.generateSummary(transcript, null);
 
     if (!result.success) {
       throw new Error(result.error || 'Executive summary generation failed');
@@ -153,7 +154,7 @@ const extractActions = async (transcript) => {
     const startTime = Date.now();
 
     // Generate full summary and extract action items from it
-    const result = await customModelService.generateSummary(transcript, null);
+    const result = await groqService.generateSummary(transcript, null);
 
     if (!result.success) {
       throw new Error(result.error || 'Action item extraction failed');

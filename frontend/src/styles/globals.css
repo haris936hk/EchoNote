@@ -163,9 +163,10 @@
 
   /* ── Glass Card ── */
   .glass-card {
-    background: rgba(46, 52, 71, 0.4);
+    background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-default);
   }
 
   /* ── Gradient Border Card ── */
@@ -271,20 +272,21 @@
 
   /* ── Input base ── */
   .input-echo {
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--echo-surface);
+    border: 1px solid var(--border-default);
     border-radius: 10px;
-    color: #f8fafc;
+    color: var(--text-primary);
     padding: 0.625rem 0.875rem;
     font-size: 0.875rem;
-    transition: border-color 150ms ease;
+    outline: none;
+    transition: all 0.2s ease;
   }
   .input-echo::placeholder {
-    color: #64748b;
+    color: var(--text-muted);
   }
   .input-echo:focus {
-    border-color: rgba(129, 140, 248, 0.4);
-    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1);
   }
 
   /* ── Badge / Chip ── */
@@ -629,29 +631,6 @@ audio::-webkit-media-controls-panel {
   box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
 }
 
-/* ============================================
-   INPUT UTILITIES
-   ============================================ */
-
-.input-echo {
-  background: var(--echo-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  color: var(--text-primary);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.input-echo::placeholder {
-  color: var(--text-muted);
-}
-
-.input-echo:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1);
-}
 
 /* ============================================
    CARD UTILITIES
@@ -819,16 +798,6 @@ audio::-webkit-media-controls-panel {
   background-color: rgba(167, 139, 250, 0.1);
 }
 
-/* ============================================
-   GLASS-MORPHISM
-   ============================================ */
-
-.glass-card {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-default);
-}
 
 /* ============================================
    AI GLOW ANIMATION

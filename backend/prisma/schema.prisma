@@ -17,7 +17,10 @@ model User {
   name          String?
   picture       String?   // Google profile picture URL
   googleId      String    @unique
-  refreshToken  String?   @db.Text // For future calendar integration
+  googleAccessToken String? @db.Text
+  googleRefreshToken String? @db.Text
+  googleTokenExpiry DateTime?
+  refreshToken  String?   @db.Text // JWT refresh token
   
   // Settings
   autoDeleteDays Int?     // Auto-delete audio after X days (null = never delete)
@@ -64,6 +67,10 @@ model Meeting {
   description   String?         @db.Text
   category      MeetingCategory @default(OTHER)
   status        MeetingStatus   @default(UPLOADING)
+  
+  // Google Calendar Integration
+  googleEventId String?
+  attendees     Json?
   
   // Audio metadata
   audioUrl      String?         // Processed audio URL (Supabase storage)

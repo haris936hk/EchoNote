@@ -1,6 +1,9 @@
+// frontend/src/components/common/ErrorBoundary.jsx
+// Error boundary — Stitch "Luminous Archive" OLED design system
+// Pure Tailwind, no HeroUI Card/Button dependencies
+
 import { Component } from 'react';
-import { Button, Card, CardBody } from '@heroui/react';
-import { FiAlertTriangle, FiRefreshCw } from 'react-icons/fi';
+import { LuAlertTriangle as AlertTriangle, LuRefreshCw as RefreshCw } from 'react-icons/lu';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -12,30 +15,17 @@ class ErrorBoundary extends Component {
     };
   }
 
-  static getDerivedStateFromError(error) {
-    // Update state so next render shows fallback UI
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log error details
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-
-    this.setState({
-      error,
-      errorInfo,
-    });
-
-    // You can also log to an error reporting service here
-    // logErrorToService(error, errorInfo);
+    this.setState({ error, errorInfo });
   }
 
   handleReset = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    });
+    this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
   handleReload = () => {
@@ -45,63 +35,70 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="bg-content1 flex min-h-screen items-center justify-center p-4">
-          <Card className="w-full max-w-2xl">
-            <CardBody className="gap-6 p-8">
-              {/* Error Icon */}
-              <div className="flex justify-center">
-                <div className="bg-danger/10 rounded-full p-4">
-                  <FiAlertTriangle size={48} className="text-danger" />
-                </div>
+        <div className="flex min-h-screen items-center justify-center bg-echo-base p-6">
+          {/* Glass error card */}
+          <div className="w-full max-w-lg rounded-[16px] border border-white/[0.06] bg-echo-surface px-8 py-10 shadow-2xl">
+
+            {/* Icon */}
+            <div className="mb-6 flex justify-center">
+              <div className="flex size-16 items-center justify-center rounded-full border border-[#F87171]/20 bg-[#F87171]/[0.08]">
+                <AlertTriangle size={28} className="text-[#F87171]" />
               </div>
+            </div>
 
-              {/* Error Title */}
-              <div className="text-center">
-                <h1 className="mb-2 text-2xl font-bold">Oops! Something went wrong</h1>
-                <p className="text-default-500">
-                  We're sorry for the inconvenience. An unexpected error has occurred.
-                </p>
-              </div>
-
-              {/* Error Details (only in development) */}
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="bg-default-100 max-h-60 overflow-auto rounded-lg p-4">
-                  <p className="text-danger mb-2 font-mono text-sm">
-                    <strong>Error:</strong> {this.state.error.toString()}
-                  </p>
-                  {this.state.errorInfo && (
-                    <details className="cursor-pointer">
-                      <summary className="mb-2 text-sm font-semibold">Stack Trace</summary>
-                      <pre className="text-default-600 whitespace-pre-wrap text-xs">
-                        {this.state.errorInfo.componentStack}
-                      </pre>
-                    </details>
-                  )}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap justify-center gap-3">
-                <Button
-                  color="primary"
-                  variant="solid"
-                  startContent={<FiRefreshCw size={18} />}
-                  onPress={this.handleReset}
-                >
-                  Try Again
-                </Button>
-
-                <Button color="default" variant="bordered" onPress={this.handleReload}>
-                  Reload Page
-                </Button>
-              </div>
-
-              {/* Help Text */}
-              <p className="text-default-400 text-center text-sm">
-                If the problem persists, please contact support or try again later.
+            {/* Title */}
+            <div className="mb-6 text-center">
+              <h1 className="mb-2 text-xl font-bold tracking-tight text-white">
+                Something went wrong
+              </h1>
+              <p className="text-sm leading-relaxed text-white/50">
+                An unexpected error occurred. You can try again or reload the page.
               </p>
-            </CardBody>
-          </Card>
+            </div>
+
+            {/* Dev-only error details */}
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <div className="mb-6 max-h-56 overflow-auto rounded-[10px] border border-white/[0.06] bg-echo-base p-4">
+                <p className="mb-2 font-mono text-xs text-[#F87171]">
+                  <span className="font-semibold">Error: </span>
+                  {this.state.error.toString()}
+                </p>
+                {this.state.errorInfo && (
+                  <details className="cursor-pointer">
+                    <summary className="mb-2 text-xs font-semibold text-white/60 hover:text-white/80">
+                      Stack trace
+                    </summary>
+                    <pre className="whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-white/40">
+                      {this.state.errorInfo.componentStack}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                onClick={this.handleReset}
+                className="inline-flex items-center gap-2 rounded-[10px] bg-accent-primary px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-accent-primary/90"
+              >
+                <RefreshCw size={15} />
+                Try Again
+              </button>
+
+              <button
+                onClick={this.handleReload}
+                className="inline-flex items-center gap-2 rounded-[10px] border border-white/[0.06] bg-transparent px-5 py-2.5 text-sm font-medium text-white/70 transition-all duration-150 hover:bg-echo-surface-hover hover:text-white"
+              >
+                Reload Page
+              </button>
+            </div>
+
+            {/* Footer note */}
+            <p className="mt-6 text-center text-xs text-white/30">
+              If this keeps happening, please contact support.
+            </p>
+          </div>
         </div>
       );
     }

@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Progress, Select, SelectItem } from '@heroui/react';
-import { LuMic as Mic, LuSquare as Square, LuUpload as Upload, LuArrowLeft as ArrowLeft, LuCheck as Check, LuAlertCircle as AlertCircle, LuPause as Pause, LuPlay as Play } from 'react-icons/lu';
+import {
+  LuMic as Mic,
+  LuSquare as Square,
+  LuUpload as Upload,
+  LuArrowLeft as ArrowLeft,
+  LuCheck as Check,
+  LuAlertCircle as AlertCircle,
+  LuPause as Pause,
+  LuPlay as Play,
+} from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import useAudioRecorder from '../hooks/useAudioRecorder';
 import AudioVisualizer from '../components/AudioVisualizer';
@@ -18,6 +27,8 @@ const CATEGORIES = [
 
 const RecordPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const calendarState = location.state || null;
   const { uploadMeeting, loading: uploadLoading } = useMeeting();
 
   const {
@@ -36,7 +47,7 @@ const RecordPage = () => {
   } = useAudioRecorder();
 
   const [formData, setFormData] = useState({
-    title: '',
+    title: calendarState?.title || '',
     description: '',
     category: '',
   });
@@ -178,6 +189,8 @@ const RecordPage = () => {
         description: formData.description,
         category: formData.category,
         audioFile: audioSource,
+        googleEventId: calendarState?.googleEventId || null,
+        attendees: calendarState?.attendees || null,
       });
 
       if (result.success) {
@@ -394,7 +407,7 @@ const RecordPage = () => {
 
             {/* Audio preview */}
             {(audioBlob || uploadedFile) && (
-              <div className="bg-echo-surface border-echo-border rounded-[16px] border p-4">
+              <div className="rounded-card border border-echo-border bg-echo-surface p-4">
                 <div className="mb-3 flex items-center gap-3">
                   <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10">
                     <Check size={16} className="text-emerald-400" />
@@ -512,7 +525,7 @@ const RecordPage = () => {
             ════════════════════════════════════════════ */}
         {step === 'uploading' && (
           <div className="flex flex-col items-center space-y-6 text-center">
-            <div className="border-accent-primary size-16 animate-spin rounded-full border-2 border-t-transparent"></div>
+            <div className="size-16 animate-spin rounded-full border-2 border-accent-primary border-t-transparent"></div>
             <div>
               <h3 className="mb-2 text-xl font-bold text-white">Uploading your meeting…</h3>
               <p className="text-sm text-slate-400">This may take a few moments</p>

@@ -1,5 +1,10 @@
 import { useEffect, useRef } from 'react';
 
+/**
+ * AudioVisualizer — real-time waveform display
+ * Stitch design: thin vertical bars, indigo/violet color palette, OLED-optimised
+ * All audio stream analysis logic preserved exactly.
+ */
 const AudioVisualizer = ({ stream, isActive = true }) => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -8,7 +13,6 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
 
   useEffect(() => {
     if (!stream || !isActive) {
-      // Cleanup if no stream or not active
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -24,7 +28,6 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
 
     const ctx = canvas.getContext('2d');
 
-    // Set canvas size
     const setCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
@@ -34,7 +37,7 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
     };
     setCanvasSize();
 
-    // Create Web Audio API context
+    // Create Web Audio API context (logic unchanged)
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     audioContextRef.current = audioContext;
 
@@ -44,32 +47,26 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
     const source = audioContext.createMediaStreamSource(stream);
     source.connect(analyser);
 
-    // Configure analyser
     analyser.fftSize = 256;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    // Number of bars to display
-    const barCount = 50;
-    const barWidth = canvas.width / barCount / window.devicePixelRatio;
+    // Stitch spec: clean minimal bars — more bars, thinner gaps
+    const barCount = 48;
     const barGap = 2;
 
-    // Animation function
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
-
       analyser.getByteFrequencyData(dataArray);
 
-      // Clear canvas with fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw bars
       const canvasHeight = canvas.height / window.devicePixelRatio;
       const canvasWidth = canvas.width / window.devicePixelRatio;
+      const barWidth = (canvasWidth - barGap * (barCount - 1)) / barCount;
+
+      // Clear with transparent fill — crisp on OLED
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       for (let i = 0; i < barCount; i++) {
-        // Average multiple frequency bins for each bar
         const binSize = Math.floor(bufferLength / barCount);
         let sum = 0;
         for (let j = 0; j < binSize; j++) {
@@ -77,62 +74,55 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
         }
         const average = sum / binSize;
 
-        // Calculate bar height (normalize to 0-1, then scale to canvas height)
         const normalizedHeight = average / 255;
-        const barHeight = normalizedHeight * canvasHeight * 0.8;
+        // Minimum bar height of 3px so all bars are always visible
+        const barHeight = Math.max(3, normalizedHeight * canvasHeight * 0.85);
 
-        // Calculate x position (centered)
         const x = i * (barWidth + barGap);
-
-        // Calculate y position (centered vertically)
         const y = (canvasHeight - barHeight) / 2;
 
-        // Create gradient for each bar
-        const gradient = ctx.createLinearGradient(0, canvasHeight, 0, 0);
+        // Stitch palette: indigo-400 (#818CF8) → violet-400 (#A78BFA)
+        // High intensity: brighter indigo; low: dimmer violet
+        const gradient = ctx.createLinearGradient(0, y + barHeight, 0, y);
 
-        // Color based on intensity
-        if (normalizedHeight > 0.7) {
-          // High intensity - red to orange
-          gradient.addColorStop(0, 'rgba(239, 68, 68, 0.8)'); // red
-          gradient.addColorStop(1, 'rgba(249, 115, 22, 1)'); // orange
-        } else if (normalizedHeight > 0.4) {
-          // Medium intensity - orange to yellow
-          gradient.addColorStop(0, 'rgba(249, 115, 22, 0.8)'); // orange
-          gradient.addColorStop(1, 'rgba(234, 179, 8, 1)'); // yellow
+        if (normalizedHeight > 0.65) {
+          // High — bright indigo
+          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)');   // indigo-400
+          gradient.addColorStop(1, 'rgba(167, 139, 250, 1)');   // violet-400
+        } else if (normalizedHeight > 0.35) {
+          // Medium — indigo at 80% opacity
+          gradient.addColorStop(0, 'rgba(129, 140, 248, 0.75)');
+          gradient.addColorStop(1, 'rgba(167, 139, 250, 0.85)');
         } else {
-          // Low intensity - blue to cyan
-          gradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)'); // blue
-          gradient.addColorStop(1, 'rgba(6, 182, 212, 1)'); // cyan
+          // Low — subdued violet
+          gradient.addColorStop(0, 'rgba(129, 140, 248, 0.30)');
+          gradient.addColorStop(1, 'rgba(167, 139, 250, 0.45)');
         }
 
         ctx.fillStyle = gradient;
 
-        // Draw rounded rectangle bar
-        const radius = 3;
+        // Thin rounded bars — radius 2px for the slim aesthetic
+        const radius = Math.min(2, barWidth / 2);
         ctx.beginPath();
-        ctx.roundRect(x, y, barWidth - barGap, barHeight, radius);
+        ctx.roundRect(x, y, barWidth, barHeight, radius);
         ctx.fill();
 
-        // Add glow effect for high intensity bars
-        if (normalizedHeight > 0.6) {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor =
-            normalizedHeight > 0.7 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(249, 115, 22, 0.5)';
+        // Subtle glow only on high-intensity bars
+        if (normalizedHeight > 0.65) {
+          ctx.save();
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(129, 140, 248, 0.5)';
           ctx.fill();
-          ctx.shadowBlur = 0;
+          ctx.restore();
         }
       }
     };
 
     draw();
 
-    // Handle window resize
-    const handleResize = () => {
-      setCanvasSize();
-    };
+    const handleResize = () => setCanvasSize();
     window.addEventListener('resize', handleResize);
 
-    // Cleanup function
     return () => {
       window.removeEventListener('resize', handleResize);
       if (animationRef.current) {
@@ -145,11 +135,18 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
   }, [stream, isActive]);
 
   return (
-    <div className="border-primary/10 relative h-20 w-full overflow-hidden rounded-2xl border bg-gradient-to-br from-black/40 to-black/20 shadow-inner">
+    <div className="relative h-16 w-full overflow-hidden rounded-[10px] border border-white/[0.06] bg-echo-surface">
       <canvas ref={canvasRef} className="size-full" style={{ display: 'block' }} />
       {!stream && (
-        <div className="text-default-400 absolute inset-0 flex items-center justify-center text-sm">
-          Waiting for audio...
+        <div className="absolute inset-0 flex items-center justify-center gap-1.5">
+          {/* Static placeholder bars when no stream */}
+          {Array.from({ length: 24 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-[3px] rounded-full bg-accent-primary/20"
+              style={{ height: `${Math.sin(i * 0.5) * 40 + 20}%` }}
+            />
+          ))}
         </div>
       )}
     </div>

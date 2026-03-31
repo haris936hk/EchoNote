@@ -4,6 +4,7 @@
   "description": "EchoNote AI Meeting Transcription Platform",
   "private": true,
   "scripts": {
+    "dev": "concurrently -k \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
     "frontend:lint": "npm run lint --prefix frontend",
     "frontend:format": "npm run format --prefix frontend",
     "backend:lint": "npm run lint --prefix backend",
@@ -13,5 +14,8 @@
   },
   "dependencies": {
     "lucide-react": "^1.7.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

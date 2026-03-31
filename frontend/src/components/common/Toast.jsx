@@ -1,63 +1,104 @@
 // frontend/src/components/common/Toast.jsx
-// Simple toast notification component
+// Toast notification — Stitch "Luminous Archive" OLED design system
+// Glass card style, slides in from top-right, indigo/green/red semantics
 
 import { useEffect, useState } from 'react';
-import { FiCheckCircle, FiXCircle, FiInfo, FiX } from 'react-icons/fi';
+import { LuCheckCircle as CheckCircle, LuXCircle as XCircle, LuInfo as Info, LuX as X } from 'react-icons/lu';
 
 const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
+
+  // Trigger enter animation on mount
+  useEffect(() => {
+    const enter = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(enter);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsVisible(false);
-      setTimeout(() => onClose?.(), 300); // Wait for fade animation
+      setVisible(false);
+      setTimeout(() => onClose?.(), 300);
     }, duration);
-
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const icons = {
-    success: <FiCheckCircle className="text-success" size={20} />,
-    error: <FiXCircle className="text-danger" size={20} />,
-    info: <FiInfo className="text-primary" size={20} />,
+  const handleClose = () => {
+    setVisible(false);
+    setTimeout(() => onClose?.(), 300);
   };
 
-  const bgColors = {
-    success: 'bg-success/10 border-success/30',
-    error: 'bg-danger/10 border-danger/30',
-    info: 'bg-primary/10 border-primary/30',
+  const variants = {
+    success: {
+      icon: <CheckCircle size={18} className="shrink-0 text-[#34D399]" />,
+      bar: 'bg-[#34D399]',
+      border: 'border-[#34D399]/20',
+      bg: 'bg-[#34D399]/[0.06]',
+    },
+    error: {
+      icon: <XCircle size={18} className="shrink-0 text-[#F87171]" />,
+      bar: 'bg-[#F87171]',
+      border: 'border-[#F87171]/20',
+      bg: 'bg-[#F87171]/[0.06]',
+    },
+    info: {
+      icon: <Info size={18} className="shrink-0 text-accent-primary" />,
+      bar: 'bg-accent-primary',
+      border: 'border-accent-primary/20',
+      bg: 'bg-accent-primary/[0.06]',
+    },
   };
+
+  const v = variants[type] ?? variants.info;
 
   return (
     <div
-      className={`
-        fixed bottom-6 right-6 z-[100]
-        flex items-center gap-3 rounded-xl border
-        px-4 py-3 shadow-xl backdrop-blur-md
-        transition-all duration-300
-        ${bgColors[type]}
-        ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
-      `}
+      role="alert"
+      aria-live="assertive"
+      className={[
+        'pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden',
+        'rounded-[12px] border backdrop-blur-xl',
+        'px-4 py-3 shadow-2xl',
+        'transition-all duration-300 ease-out',
+        v.border,
+        v.bg,
+        // Use bg-echo-elevated as base surface
+        'bg-echo-elevated/90',
+        visible
+          ? 'translate-x-0 opacity-100'
+          : 'translate-x-4 opacity-0',
+      ].join(' ')}
     >
-      {icons[type]}
-      <span className="text-sm font-medium">{message}</span>
+      {/* Left accent bar */}
+      <div className={`absolute inset-y-0 left-0 w-[3px] rounded-l-[12px] ${v.bar}`} />
+
+      {/* Icon */}
+      <div className="mt-0.5 pl-2">{v.icon}</div>
+
+      {/* Message */}
+      <span className="flex-1 text-sm font-medium leading-snug text-white/90">
+        {message}
+      </span>
+
+      {/* Close button */}
       <button
-        onClick={() => {
-          setIsVisible(false);
-          setTimeout(() => onClose?.(), 300);
-        }}
-        className="hover:bg-default-200 ml-2 rounded-full p-1 transition-colors"
+        onClick={handleClose}
+        aria-label="Dismiss notification"
+        className="mt-0.5 shrink-0 rounded-[6px] p-1 text-white/40 transition-colors duration-150 hover:bg-white/[0.08] hover:text-white/80"
       >
-        <FiX size={14} />
+        <X size={14} />
       </button>
     </div>
   );
 };
 
-// Toast container to manage multiple toasts
+// ─── Toast Container ──────────────────────────────────────────────────────────
 export const ToastContainer = ({ toasts, removeToast }) => {
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+    <div
+      aria-label="Notifications"
+      className="pointer-events-none fixed right-5 top-5 z-[200] flex flex-col gap-2.5"
+      style={{ width: '360px' }}
+    >
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
@@ -71,7 +112,7 @@ export const ToastContainer = ({ toasts, removeToast }) => {
   );
 };
 
-// Hook to use toast notifications
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 let toastId = 0;
 let listeners = [];
 
@@ -95,7 +136,7 @@ export const useToast = () => {
   return { toasts, removeToast };
 };
 
-// Global toast function
+// ─── Global showToast ─────────────────────────────────────────────────────────
 export const showToast = (message, type = 'success', duration = 5000) => {
   const toast = { id: ++toastId, message, type, duration };
   listeners.forEach((listener) => listener(toast));

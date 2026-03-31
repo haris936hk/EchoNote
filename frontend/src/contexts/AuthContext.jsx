@@ -62,20 +62,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [fetchFreshUserData]);
 
-  // Login with Google ID token (from Google Sign-In button)
-  const loginWithGoogle = useCallback(async (credentialResponse) => {
+  // Login with Google Auth Code (from useGoogleLogin hook)
+  const loginWithGoogle = useCallback(async (codeResponse) => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('[Auth] Starting Google login with credential:', {
-        hasCredential: !!credentialResponse.credential,
-        credentialLength: credentialResponse.credential?.length,
+      console.log('[Auth] Starting Google login with auth code:', {
+        hasCode: !!codeResponse.code,
+        codeLength: codeResponse.code?.length,
       });
 
-      // Send ID token to backend
+      // Send auth code to backend
       const { data } = await api.post('/auth/google', {
-        idToken: credentialResponse.credential,
+        code: codeResponse.code,
       });
 
       console.log('[Auth] Backend response received:', {

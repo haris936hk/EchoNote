@@ -6,20 +6,20 @@ const authService = require('../services/auth.service');
 /**
  * Google OAuth authentication (client-side flow)
  * POST /api/auth/google
- * @body { idToken: string }
+ * @body { code: string }
  */
 const googleAuth = async (req, res) => {
   try {
-    const { idToken } = req.body;
+    const { code } = req.body;
 
-    if (!idToken) {
+    if (!code) {
       return res.status(400).json({
         success: false,
-        error: 'Google ID token is required',
+        error: 'Authorization code is required',
       });
     }
 
-    const result = await authService.authenticateWithGoogle(idToken);
+    const result = await authService.authenticateWithGoogle(code);
 
     if (!result.success) {
       return res.status(401).json(result);

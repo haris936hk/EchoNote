@@ -1,7 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@heroui/react';
-import { LuMic as Mic, LuClock as Clock, LuCheckCircle as CheckCircle, LuAlertCircle as AlertCircle, LuTrendingUp as TrendingUp, LuPlus as Plus, LuArrowUp as ArrowUp, LuSettings as Settings, LuList as List } from 'react-icons/lu';
+import {
+  LuMic as Mic,
+  LuClock as Clock,
+  LuCheckCircle as CheckCircle,
+  LuAlertCircle as AlertCircle,
+  LuTrendingUp as TrendingUp,
+  LuPlus as Plus,
+  LuArrowUp as ArrowUp,
+  LuSettings as Settings,
+  LuList as List,
+  LuCalendar as CalendarIcon,
+} from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,6 +23,7 @@ import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
 import useDebounce from '../hooks/useDebounce';
 import { showToast } from '../components/common/Toast';
+import CalendarSidebar from '../components/dashboard/CalendarSidebar';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -24,6 +36,7 @@ const DashboardPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -193,13 +206,21 @@ const DashboardPage = () => {
             {getGreeting()}, {user?.name?.split(' ')[0] || 'there'}
           </p>
         </div>
-        <button
-          onClick={handleNewRecording}
-          className="btn-cta inline-flex w-fit items-center gap-2 rounded-[10px] px-5 py-2.5 text-sm font-bold transition-all hover:brightness-110"
-        >
-          <Mic size={16} />
-          New Recording
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+            className="btn-secondary inline-flex items-center justify-center rounded-[10px] p-2.5 text-slate-400 transition-all hover:bg-echo-surface hover:text-white lg:hidden"
+          >
+            <CalendarIcon size={20} />
+          </button>
+          <button
+            onClick={handleNewRecording}
+            className="btn-cta inline-flex w-fit items-center gap-2 rounded-[10px] px-5 py-2.5 text-sm font-bold transition-all hover:brightness-110"
+          >
+            <Mic size={16} />
+            <span className="hidden sm:inline">New Recording</span>
+          </button>
+        </div>
       </div>
 
       {/* ── Empty State ── */}
@@ -296,26 +317,25 @@ const DashboardPage = () => {
       )}
 
       {/* ── Main Content ── */}
-      {meetings.length > 0 && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-          {/* Left Column — Meetings (4/5) */}
-          <div className="space-y-5 lg:col-span-4">
-            {/* Search & Filters */}
-            <div className="space-y-4">
-              <SearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search across all your meetings..."
-              />
-              <CategoryFilter
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                showCount={true}
-                counts={categoryCounts}
-              />
-            </div>
+      <div className="flex flex-col gap-6 lg:flex-row">
+        {/* Left Column — Meetings */}
+        <div className="flex-1 space-y-5">
+          {/* Search & Filters */}
+          <div className="space-y-4">
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search across all your meetings..."
+            />
+            <CategoryFilter
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              showCount={true}
+              counts={categoryCounts}
+            />
+          </div>
 
-            {/* Meetings List */}
+          {meetings.length > 0 && (
             <MeetingList
               meetings={filteredMeetings}
               loading={loading}
@@ -323,39 +343,44 @@ const DashboardPage = () => {
               onEdit={handleEdit}
               itemsPerPage={12}
             />
-          </div>
+          )}
+        </div>
 
-          {/* Right Column — Quick Actions (1/5) */}
-          <div className="space-y-4">
-            <div className="rounded-card border border-echo-border bg-echo-surface p-5">
-              <h3 className="mb-4 text-sm font-semibold text-white">Quick Actions</h3>
-              <div className="space-y-1">
-                <button
-                  onClick={handleNewRecording}
-                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
-                >
-                  <Plus size={16} className="text-accent-primary" />
-                  New Recording
-                </button>
-                <button
-                  onClick={() => navigate('/meetings')}
-                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
-                >
-                  <List size={16} className="text-accent-primary" />
-                  View All Meetings
-                </button>
-                <button
-                  onClick={() => navigate('/settings')}
-                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
-                >
-                  <Settings size={16} className="text-accent-primary" />
-                  Settings
-                </button>
-              </div>
+        {/* Right Column — Sidebar */}
+        <div
+          className={`${showMobileSidebar ? 'flex' : 'hidden'} w-full shrink-0 flex-col space-y-6 lg:flex lg:w-[320px]`}
+        >
+          <div className="rounded-card border border-echo-border bg-echo-surface p-5">
+            <CalendarSidebar />
+          </div>
+          <div className="rounded-card border border-echo-border bg-echo-surface p-5">
+            <h3 className="mb-4 text-sm font-semibold text-white">Quick Actions</h3>
+            <div className="space-y-1">
+              <button
+                onClick={handleNewRecording}
+                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+              >
+                <Plus size={16} className="text-accent-primary" />
+                New Recording
+              </button>
+              <button
+                onClick={() => navigate('/meetings')}
+                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+              >
+                <List size={16} className="text-accent-primary" />
+                View All Meetings
+              </button>
+              <button
+                onClick={() => navigate('/settings')}
+                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+              >
+                <Settings size={16} className="text-accent-primary" />
+                Settings
+              </button>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Scroll to Top */}
       {showScrollTop && (

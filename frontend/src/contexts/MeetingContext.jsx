@@ -147,7 +147,7 @@ export const MeetingProvider = ({ children }) => {
       setLoading(true);
 
       // Extract audioFile from meetingData
-      const { audioFile, title, description, category } = meetingData;
+      const { audioFile, title, description, category, googleEventId, attendees } = meetingData;
 
       if (!audioFile) {
         throw new Error('No audio file provided');
@@ -159,6 +159,12 @@ export const MeetingProvider = ({ children }) => {
       formData.append('category', category);
       if (description) {
         formData.append('description', description);
+      }
+      if (googleEventId) {
+        formData.append('googleEventId', googleEventId);
+      }
+      if (attendees) {
+        formData.append('attendees', JSON.stringify(attendees));
       }
 
       console.log('🚀 Uploading meeting to /api/meetings/upload');
