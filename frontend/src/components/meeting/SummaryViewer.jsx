@@ -1,76 +1,59 @@
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Divider,
-  Chip
-} from '@heroui/react';
-import {
-  FiFileText,
-  FiCheckSquare,
-  FiList,
-  FiArrowRight,
-  FiCopy,
-  FiCheck,
-  FiUser,
-  FiCalendar,
-  FiTag,
-  FiDownload
-} from 'react-icons/fi';
 import { useState } from 'react';
+import { LuSparkles as Sparkles, LuCheckCircle as CheckCircle, LuListChecks as ListChecks, LuArrowRight as ArrowRight, LuCopy as Copy, LuCheck as Check, LuUser as User, LuCalendar as Calendar, LuTag as Tag } from 'react-icons/lu';
+import { sentimentColors } from '../../styles/theme';
 
-// Color palette for topic chips
-const TOPIC_COLORS = [
-  { bg: 'bg-blue-500/15', border: 'border-blue-500/30', text: 'text-blue-400' },
-  { bg: 'bg-purple-500/15', border: 'border-purple-500/30', text: 'text-purple-400' },
-  { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400' },
-  { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400' },
-  { bg: 'bg-pink-500/15', border: 'border-pink-500/30', text: 'text-pink-400' },
-  { bg: 'bg-cyan-500/15', border: 'border-cyan-500/30', text: 'text-cyan-400' },
-  { bg: 'bg-orange-500/15', border: 'border-orange-500/30', text: 'text-orange-400' },
-  { bg: 'bg-indigo-500/15', border: 'border-indigo-500/30', text: 'text-indigo-400' },
-];
-
-const SummaryViewer = ({ summary, title = 'Meeting Summary', meetingId }) => {
+const SummaryViewer = ({ summary, meetingId }) => {
   const [copiedSection, setCopiedSection] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
-  const [downloading, setDownloading] = useState(false);
 
   if (!summary) {
     return (
-      <Card className="border border-divider rounded-2xl">
-        <CardBody className="text-center py-16">
-          <div className="w-16 h-16 bg-default-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FiFileText size={32} className="text-default-300" />
-          </div>
-          <p className="text-default-500 text-lg">No summary available</p>
-          <p className="text-default-400 text-sm mt-1">The summary will appear here once processing is complete</p>
-        </CardBody>
-      </Card>
+      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-8 text-center">
+        <Sparkles size={32} className="mx-auto mb-3 text-slate-600" />
+        <p className="text-slate-400">No summary available</p>
+        <p className="mt-1 text-xs text-slate-600">Will appear after processing</p>
+      </div>
     );
   }
 
-  // Handle structured summary object from backend (matching OUTPUT_SCHEMA)
-  const summaryData = typeof summary === 'object' ? {
-    executive: summary.executiveSummary || '',
-    decisions: Array.isArray(summary.keyDecisions) ? summary.keyDecisions : [],
-    actions: Array.isArray(summary.actionItems) ? summary.actionItems : [],
-    nextSteps: Array.isArray(summary.nextSteps) ? summary.nextSteps : [],
-    keyTopics: Array.isArray(summary.keyTopics) ? summary.keyTopics : [],
-    sentiment: summary.sentiment || 'neutral'
-  } : {
-    executive: '',
-    decisions: [],
-    actions: [],
-    nextSteps: [],
-    keyTopics: [],
-    sentiment: 'neutral'
-  };
+  const summaryData =
+    typeof summary === 'object'
+      ? {
+          executive: summary.executiveSummary || '',
+          decisions: Array.isArray(summary.keyDecisions) ? summary.keyDecisions : [],
+          actions: Array.isArray(summary.actionItems) ? summary.actionItems : [],
+          nextSteps: Array.isArray(summary.nextSteps) ? summary.nextSteps : [],
+          keyTopics: Array.isArray(summary.keyTopics) ? summary.keyTopics : [],
+          sentiment: summary.sentiment || 'neutral',
+        }
+      : {
+          executive: '',
+          decisions: [],
+          actions: [],
+          nextSteps: [],
+          keyTopics: [],
+          sentiment: 'neutral',
+        };
 
-  const copyToClipboard = async (text, section) => {
+  const copySection = async (text, section) => {
     try {
-      await navigator.clipboard.writeText(text);
+      let copyText = text;
+      if (Array.isArray(text)) {
+        if (text.length > 0 && typeof text[0] === 'object' && text[0].task) {
+          copyText = text
+            .map((item, i) => {
+              let line = `${i + 1}. ${item.task}`;
+              if (item.assignee) line += ` (${item.assignee})`;
+              if (item.deadline) line += ` [${item.deadline}]`;
+              if (item.priority) line += ` {${item.priority.toUpperCase()}}`;
+              return line;
+            })
+            .join('\n');
+        } else {
+          copyText = text.map((item, i) => `${i + 1}. ${item}`).join('\n');
+        }
+      }
+      await navigator.clipboard.writeText(copyText);
       setCopiedSection(section);
       setTimeout(() => setCopiedSection(null), 2000);
     } catch (err) {
@@ -78,359 +61,205 @@ const SummaryViewer = ({ summary, title = 'Meeting Summary', meetingId }) => {
     }
   };
 
-  const handleDownload = async () => {
-    if (!meetingId) return;
-
-    try {
-      setDownloading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/meetings/${meetingId}/download/summary?format=txt`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Download failed');
-      }
-
-      // Get filename from Content-Disposition header or use default
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = 'summary.txt';
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename="(.+)"/);
-        if (match) filename = match[1];
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error('Failed to download summary:', err);
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const copyEntireSection = (sectionName, content) => {
-    let text = '';
-    if (typeof content === 'string') {
-      text = content;
-    } else if (Array.isArray(content)) {
-      if (content.length > 0 && typeof content[0] === 'object' && content[0].task) {
-        text = content.map((item, i) => {
-          let line = `${i + 1}. ${item.task}`;
-          if (item.assignee) line += ` (Assignee: ${item.assignee})`;
-          if (item.deadline) line += ` (Deadline: ${item.deadline})`;
-          if (item.priority) line += ` [${item.priority.toUpperCase()}]`;
-          return line;
-        }).join('\n');
-      } else {
-        text = content.map((item, i) => `${i + 1}. ${item}`).join('\n');
-      }
-    }
-    copyToClipboard(text, sectionName);
-  };
-
   const toggleActionItem = (index) => {
-    setCheckedItems(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
+    setCheckedItems((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
-  const getSentimentConfig = (sentiment) => {
-    switch (sentiment) {
-      case 'positive':
-        return { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400', label: 'Positive Tone' };
-      case 'negative':
-        return { bg: 'bg-red-500/15', border: 'border-red-500/30', text: 'text-red-400', label: 'Negative Tone' };
-      case 'mixed':
-        return { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400', label: 'Mixed Tone' };
-      default:
-        return { bg: 'bg-default/20', border: 'border-default/30', text: 'text-default-500', label: 'Neutral Tone' };
-    }
-  };
-
-  const getPriorityConfig = (priority) => {
+  const getPriorityClasses = (priority) => {
     switch (priority?.toLowerCase()) {
       case 'high':
-        return { bg: 'bg-red-500/15', border: 'border-red-500/30', text: 'text-red-400' };
+        return 'bg-red-500/15 text-red-400';
       case 'medium':
-        return { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400' };
+        return 'bg-amber-500/15 text-amber-400';
       case 'low':
-        return { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400' };
+        return 'bg-emerald-500/15 text-emerald-400';
       default:
-        return { bg: 'bg-default/20', border: 'border-default/30', text: 'text-default-500' };
+        return 'bg-slate-500/15 text-slate-400';
     }
   };
 
-  const sentimentConfig = getSentimentConfig(summaryData.sentiment);
+  const sentiment = sentimentColors[summaryData.sentiment] || sentimentColors.neutral;
 
-  const CopyButton = ({ section, content, className = '' }) => (
-    <Button
-      size="sm"
-      isIconOnly
-      variant="light"
-      className={`opacity-60 hover:opacity-100 transition-opacity ${className}`}
-      onPress={() => copyEntireSection(section, content)}
+  const CopyBtn = ({ section, content }) => (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        copySection(content, section);
+      }}
+      className="text-slate-600 transition-colors hover:text-white"
     >
       {copiedSection === section ? (
-        <FiCheck size={16} className="text-success" />
+        <Check size={12} className="text-emerald-400" />
       ) : (
-        <FiCopy size={16} />
+        <Copy size={12} />
       )}
-    </Button>
-  );
-
-  const SectionHeader = ({ icon: Icon, title, iconColor, section, content }) => (
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-base font-semibold flex items-center gap-2.5">
-        <div className={`p-1.5 rounded-lg ${iconColor}/10`}>
-          <Icon className={iconColor} size={18} />
-        </div>
-        {title}
-      </h3>
-      <CopyButton section={section} content={content} />
-    </div>
+    </button>
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold flex items-center gap-2.5">
-            <FiFileText className="text-primary" size={22} />
-            {title}
-          </h2>
-          <Chip
-            size="sm"
-            variant="flat"
-            classNames={{
-              base: `${sentimentConfig.bg} ${sentimentConfig.border} border px-2.5`,
-              content: `${sentimentConfig.text} text-xs font-medium`
-            }}
-          >
-            {sentimentConfig.label}
-          </Chip>
+    <div className="space-y-4">
+      {/* ── Executive Summary ── */}
+      {summaryData.executive && (
+        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-accent-primary" />
+              <h4 className="text-sm font-semibold text-white">Executive Summary</h4>
+              <span className="ai-dot"></span>
+            </div>
+            <CopyBtn section="executive" content={summaryData.executive} />
+          </div>
+          <p className="text-sm leading-relaxed text-slate-300">{summaryData.executive}</p>
         </div>
-        <div className="flex gap-2">
-          {meetingId && (
-            <Button
-              size="sm"
-              variant="flat"
-              className="rounded-xl"
-              startContent={<FiDownload size={14} />}
-              onPress={handleDownload}
-              isLoading={downloading}
-              isDisabled={downloading}
-            >
-              {downloading ? 'Downloading...' : 'Download TXT'}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="flat"
-            className="rounded-xl"
-            startContent={copiedSection === 'all' ? <FiCheck size={14} className="text-success" /> : <FiCopy size={14} />}
-            onPress={() => copyToClipboard(JSON.stringify(summary, null, 2), 'all')}
-          >
-            {copiedSection === 'all' ? 'Copied!' : 'Copy All'}
-          </Button>
+      )}
+
+      {/* ── Key Decisions ── */}
+      {summaryData.decisions.length > 0 && (
+        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-emerald-400" />
+              <h4 className="text-sm font-semibold text-white">Key Decisions</h4>
+            </div>
+            <CopyBtn section="decisions" content={summaryData.decisions} />
+          </div>
+          <div className="space-y-2">
+            {summaryData.decisions.map((decision, i) => (
+              <div key={i} className="flex items-start gap-2.5 pl-1">
+                <div className="bg-accent-primary mt-2 size-1 shrink-0 rounded-full"></div>
+                <p className="text-sm leading-relaxed text-slate-300">{decision}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Action Items ── */}
+      {summaryData.actions.length > 0 && (
+        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ListChecks size={14} className="text-amber-400" />
+              <h4 className="text-sm font-semibold text-white">Action Items</h4>
+              <span className="font-mono text-[10px] text-slate-600">
+                {summaryData.actions.length}
+              </span>
+            </div>
+            <CopyBtn section="actions" content={summaryData.actions} />
+          </div>
+          <div className="space-y-2.5">
+            {summaryData.actions.map((action, i) => {
+              const isChecked = checkedItems[i];
+              return (
+                <div
+                  key={i}
+                  className={`bg-echo-base border-echo-border space-y-2 rounded-[10px] border p-3 ${isChecked ? 'opacity-50' : ''}`}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <div
+                      onClick={() => toggleActionItem(i)}
+                      className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded border-2 transition-all ${
+                        isChecked
+                          ? 'border-emerald-500 bg-emerald-500'
+                          : 'border-slate-600 hover:border-emerald-400'
+                      }`}
+                    >
+                      {isChecked && (
+                        <svg
+                          className="size-2.5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <p
+                      className={`text-sm leading-relaxed text-slate-300 ${isChecked ? 'line-through' : ''}`}
+                    >
+                      {action.task}
+                    </p>
+                  </div>
+                  {(action.assignee || action.deadline || action.priority) && (
+                    <div className="flex flex-wrap items-center gap-1.5 pl-6">
+                      {action.assignee && (
+                        <span className="bg-echo-surface-hover inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-slate-400">
+                          <User size={9} /> {action.assignee}
+                        </span>
+                      )}
+                      {action.deadline && (
+                        <span className="bg-echo-surface-hover inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-slate-400">
+                          <Calendar size={9} /> {action.deadline}
+                        </span>
+                      )}
+                      {action.priority && (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${getPriorityClasses(action.priority)}`}
+                        >
+                          {action.priority}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Key Topics ── */}
+      {summaryData.keyTopics.length > 0 && (
+        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Tag size={14} className="text-accent-secondary" />
+              <h4 className="text-sm font-semibold text-white">Key Topics</h4>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {summaryData.keyTopics.map((topic, i) => (
+              <span
+                key={i}
+                className="bg-accent-primary/10 text-accent-primary rounded-full px-2.5 py-1 text-xs font-medium"
+              >
+                {topic}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Sentiment ── */}
+      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-4">
+        <div className="flex items-center gap-2">
+          <span className={`size-2 rounded-full ${sentiment.dot}`}></span>
+          <span className="text-sm font-medium text-slate-300">{sentiment.label}</span>
+          <span className="text-xs text-slate-600">Sentiment</span>
         </div>
       </div>
 
-      {/* Executive Summary */}
-      {summaryData.executive && (
-        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
-          <CardBody className="p-5">
-            <SectionHeader
-              icon={FiFileText}
-              title="Executive Summary"
-              iconColor="text-primary"
-              section="executive"
-              content={summaryData.executive}
-            />
-            <p className="text-default-600 leading-relaxed">
-              {summaryData.executive}
-            </p>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Key Topics */}
-      {summaryData.keyTopics.length > 0 && (
-        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
-          <CardBody className="p-5">
-            <SectionHeader
-              icon={FiTag}
-              title="Key Topics"
-              iconColor="text-secondary"
-              section="keyTopics"
-              content={summaryData.keyTopics}
-            />
-            <div className="flex flex-wrap gap-2.5">
-              {summaryData.keyTopics.map((topic, index) => {
-                const colorConfig = TOPIC_COLORS[index % TOPIC_COLORS.length];
-                return (
-                  <Chip
-                    key={index}
-                    variant="flat"
-                    classNames={{
-                      base: `${colorConfig.bg} ${colorConfig.border} border px-3 py-1`,
-                      content: `${colorConfig.text} text-sm font-medium capitalize`
-                    }}
-                  >
-                    {topic}
-                  </Chip>
-                );
-              })}
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Key Decisions */}
-      {summaryData.decisions.length > 0 && (
-        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
-          <CardBody className="p-5">
-            <SectionHeader
-              icon={FiCheckSquare}
-              title="Key Decisions"
-              iconColor="text-success"
-              section="decisions"
-              content={summaryData.decisions}
-            />
-            <div className="space-y-2">
-              {summaryData.decisions.map((decision, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 bg-success/5 border border-success/10 rounded-xl"
-                >
-                  <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-success text-xs font-semibold">{index + 1}</span>
-                  </div>
-                  <p className="text-default-600 leading-relaxed">{decision}</p>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Action Items */}
-      {summaryData.actions.length > 0 && (
-        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
-          <CardBody className="p-5">
-            <SectionHeader
-              icon={FiCheckSquare}
-              title="Action Items"
-              iconColor="text-warning"
-              section="actions"
-              content={summaryData.actions}
-            />
-            <div className="space-y-3">
-              {summaryData.actions.map((action, index) => {
-                const isChecked = checkedItems[index];
-                const priorityConfig = getPriorityConfig(action.priority);
-
-                return (
-                  <div
-                    key={index}
-                    className={`
-                      group relative rounded-xl p-4 
-                      border border-divider/50 
-                      bg-gradient-to-r from-default-50/50 to-transparent
-                      hover:border-primary/30 hover:shadow-sm
-                      transition-all duration-200
-                      ${isChecked ? 'opacity-60' : ''}
-                    `}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        onClick={() => toggleActionItem(index)}
-                        className={`
-                          w-5 h-5 rounded-md border-2 flex-shrink-0 mt-0.5 cursor-pointer
-                          flex items-center justify-center
-                          transition-all duration-200
-                          ${isChecked
-                            ? 'bg-success border-success'
-                            : 'border-default-300 hover:border-success/50'
-                          }
-                        `}
-                      >
-                        {isChecked && (
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-2.5">
-                        <p className={`text-default-700 font-medium leading-relaxed ${isChecked ? 'line-through' : ''}`}>
-                          {action.task}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {action.assignee && (
-                            <div className="flex items-center gap-1.5 text-xs text-default-500 bg-default-100 px-2.5 py-1 rounded-lg">
-                              <FiUser size={12} />
-                              <span>{action.assignee}</span>
-                            </div>
-                          )}
-                          {action.deadline && (
-                            <div className="flex items-center gap-1.5 text-xs text-default-500 bg-default-100 px-2.5 py-1 rounded-lg">
-                              <FiCalendar size={12} />
-                              <span>{action.deadline}</span>
-                            </div>
-                          )}
-                          {action.priority && (
-                            <div className={`flex items-center gap-1.5 text-xs font-semibold uppercase ${priorityConfig.bg} px-2.5 py-1 rounded-lg`}>
-                              <span className={priorityConfig.text}>{action.priority}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Next Steps */}
+      {/* ── Next Steps ── */}
       {summaryData.nextSteps.length > 0 && (
-        <Card className="border border-divider/50 rounded-2xl bg-content1/50 backdrop-blur-sm">
-          <CardBody className="p-5">
-            <SectionHeader
-              icon={FiArrowRight}
-              title="Next Steps"
-              iconColor="text-emerald-500"
-              section="nextSteps"
-              content={summaryData.nextSteps}
-            />
-            <div className="space-y-2">
-              {summaryData.nextSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 bg-default-50 border border-default-100 rounded-xl"
-                >
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <FiArrowRight size={12} className="text-emerald-500" />
-                  </div>
-                  <p className="text-default-600 leading-relaxed">{step}</p>
-                </div>
-              ))}
+        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ArrowRight size={14} className="text-emerald-400" />
+              <h4 className="text-sm font-semibold text-white">Next Steps</h4>
             </div>
-          </CardBody>
-        </Card>
+            <CopyBtn section="nextSteps" content={summaryData.nextSteps} />
+          </div>
+          <div className="space-y-2">
+            {summaryData.nextSteps.map((step, i) => (
+              <div key={i} className="flex items-start gap-2.5 pl-1">
+                <ArrowRight size={10} className="mt-1.5 shrink-0 text-emerald-400" />
+                <p className="text-sm leading-relaxed text-slate-300">{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

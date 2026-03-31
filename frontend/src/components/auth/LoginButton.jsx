@@ -30,13 +30,13 @@ const LoginButton = ({ size = 'lg', fullWidth = false }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex justify-center relative group">
+      <div className="group relative flex justify-center">
         {/* Glowing background effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 rounded-2xl"></div>
+        <div className="from-primary to-secondary absolute inset-0 rounded-2xl bg-gradient-to-r opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-30"></div>
 
         {/* Button wrapper with glow */}
-        <div className="relative p-[2px] bg-gradient-to-r from-primary via-secondary to-primary bg-200 rounded-3xl shadow-lg hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 animate-gradient">
-          <div className="bg-content1 rounded-3xl overflow-hidden">
+        <div className="from-primary via-secondary to-primary bg-200 hover:shadow-primary/60 animate-gradient relative rounded-3xl bg-gradient-to-r p-[2px] shadow-lg transition-all duration-300 hover:shadow-2xl">
+          <div className="bg-content1 overflow-hidden rounded-3xl">
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={handleError}
@@ -50,9 +50,7 @@ const LoginButton = ({ size = 'lg', fullWidth = false }) => {
         </div>
       </div>
 
-      {error && (
-        <p className="text-danger text-sm text-center">{error}</p>
-      )}
+      {error && <p className="text-danger text-center text-sm">{error}</p>}
     </div>
   );
 };

@@ -1,33 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Divider,
-  Tabs,
-  Tab,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem
-} from '@heroui/react';
-import {
-  FiArrowLeft,
-  FiDownload,
-  FiMoreVertical,
-  FiTrash2,
-  FiEdit,
-  FiCalendar,
-  FiClock,
-  FiFileText,
-  FiList,
-  FiAlertCircle,
-  FiMic,
-  FiPackage
-} from 'react-icons/fi';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
+import { LuArrowLeft as ArrowLeft, LuDownload as Download, LuMoreVertical as MoreVertical, LuTrash2 as Trash2, LuPenLine as Edit3, LuCalendar as Calendar, LuClock as Clock, LuAlertCircle as AlertCircle, LuMic as Mic, LuCheckCircle as CheckCircle } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import SummaryViewer from '../components/meeting/SummaryViewer';
 import TranscriptViewer from '../components/meeting/TranscriptViewer';
@@ -35,113 +9,76 @@ import { CategoryBadge } from '../components/meeting/CategoryFilter';
 import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
 
+const PIPELINE_STEPS = [
+  { key: 'UPLOADING', label: 'Upload' },
+  { key: 'PROCESSING_AUDIO', label: 'Audio Processing' },
+  { key: 'TRANSCRIBING', label: 'Transcribing' },
+  { key: 'PROCESSING_NLP', label: 'NLP' },
+  { key: 'SUMMARIZING', label: 'Summarizing' },
+];
+
 const MeetingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentMeeting, fetchMeeting, deleteMeeting, updateMeeting, loading } = useMeeting();
-  const [activeTab, setActiveTab] = useState('summary');
   const [deleting, setDeleting] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
 
-  // Initial fetch
   useEffect(() => {
-    if (id) {
-      fetchMeeting(id);
-    }
+    if (id) fetchMeeting(id);
   }, [id, fetchMeeting]);
 
-  // Poll for status updates when meeting is processing
+  // Poll for processing status
   useEffect(() => {
     if (!currentMeeting || !id) return;
-
-    // Processing states that require polling
     const processingStates = [
       'UPLOADING',
       'PROCESSING_AUDIO',
       'TRANSCRIBING',
       'PROCESSING_NLP',
-      'SUMMARIZING'
+      'SUMMARIZING',
     ];
-
-    // Check if meeting is in a processing state
-    const isProcessing = processingStates.includes(currentMeeting.status);
-
-    if (!isProcessing) {
-      return; // Don't poll if already completed or failed
-    }
-
-    console.log(`[MeetingDetail] Starting status polling for meeting ${id} (current status: ${currentMeeting.status})`);
-
-    // Poll every 5 seconds
-    const pollInterval = setInterval(() => {
-      console.log(`[MeetingDetail] Polling for status update...`);
-      fetchMeeting(id);
-    }, 5000);
-
-    // Cleanup interval on unmount or when meeting changes
-    return () => {
-      console.log(`[MeetingDetail] Stopping status polling`);
-      clearInterval(pollInterval);
-    };
+    if (!processingStates.includes(currentMeeting.status)) return;
+    const pollInterval = setInterval(() => fetchMeeting(id), 5000);
+    return () => clearInterval(pollInterval);
   }, [currentMeeting, id, fetchMeeting]);
 
-  const handleBack = () => {
-    navigate('/dashboard');
-  };
+  const handleBack = () => navigate('/dashboard');
 
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this meeting? This action cannot be undone.'
-    );
-
-    if (confirmed) {
+    if (
+      window.confirm('Are you sure you want to delete this meeting? This action cannot be undone.')
+    ) {
       setDeleting(true);
       const result = await deleteMeeting(id);
       setDeleting(false);
-
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        window.alert('Failed to delete meeting. Please try again.');
-      }
+      if (result.success) navigate('/dashboard');
+      else window.alert('Failed to delete meeting.');
     }
   };
 
-  const handleEdit = () => {
-    setIsEditModalOpen(true);
-  };
+  const handleEdit = () => setIsEditModalOpen(true);
 
   const handleSaveEdit = async (updates) => {
     const result = await updateMeeting(id, updates);
-    if (result.success) {
-      // Refresh the meeting data
-      fetchMeeting(id);
-    }
+    if (result.success) fetchMeeting(id);
   };
 
   const handleDownloadAudio = async () => {
     if (!currentMeeting?.audioUrl) return;
-
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/${id}/download/audio`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/meetings/${id}/download/audio`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download audio');
-      }
-
-      // Get filename from Content-Disposition header
+      );
+      if (!response.ok) throw new Error('Failed to download audio');
       const contentDisposition = response.headers.get('Content-Disposition');
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
       const filename = filenameMatch ? filenameMatch[1] : `${currentMeeting.title}_audio.mp3`;
-
-      // Create blob and download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -152,34 +89,22 @@ const MeetingDetailPage = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading audio:', error);
-      window.alert('Failed to download audio file. Please try again.');
+      window.alert('Failed to download audio file.');
     }
   };
 
   const handleDownloadAll = async () => {
     if (!id || currentMeeting?.status !== 'COMPLETED') return;
-
     try {
       setDownloadingAll(true);
       const token = localStorage.getItem('token');
       const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/${id}/download/all`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to download files');
-      }
-
-      // Get filename from Content-Disposition header
+      if (!response.ok) throw new Error('Failed to download files');
       const contentDisposition = response.headers.get('Content-Disposition');
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
       const filename = filenameMatch ? filenameMatch[1] : `${currentMeeting.title}_complete.zip`;
-
-      // Create blob and download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -190,321 +115,273 @@ const MeetingDetailPage = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading all files:', error);
-      window.alert('Failed to download files. Please try again.');
+      window.alert('Failed to download files.');
     } finally {
       setDownloadingAll(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Intl.DateTimeFormat('en-US', {
-      weekday: 'long',
+  const formatDate = (dateString) =>
+    new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(new Date(dateString));
-  };
 
   const formatDuration = (seconds) => {
     if (!seconds) return 'N/A';
     const mins = Math.floor(seconds / 60);
     const secs = Math.round(seconds % 60);
-    if (mins === 0) {
-      return `${secs}s`;
-    }
-    return `${mins}m ${secs}s`;
+    return mins === 0 ? `${secs}s` : `${mins}m ${secs}s`;
   };
 
-  if (loading && !currentMeeting) {
-    return <PageLoader label="Loading meeting details..." />;
-  }
+  const getStatusInfo = (status) => {
+    const map = {
+      COMPLETED: {
+        label: 'Completed',
+        color: 'text-emerald-400',
+        bg: 'bg-emerald-500/10',
+        dot: 'bg-emerald-400',
+      },
+      FAILED: { label: 'Failed', color: 'text-red-400', bg: 'bg-red-500/10', dot: 'bg-red-400' },
+    };
+    return (
+      map[status] || {
+        label: 'Processing',
+        color: 'text-amber-400',
+        bg: 'bg-amber-500/10',
+        dot: 'bg-amber-400',
+      }
+    );
+  };
+
+  // Pipeline step progress
+  const getCurrentStepIndex = () => {
+    if (!currentMeeting) return -1;
+    return PIPELINE_STEPS.findIndex((s) => s.key === currentMeeting.status);
+  };
+
+  if (loading && !currentMeeting) return <PageLoader label="Loading meeting details..." />;
 
   if (!currentMeeting) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md rounded-3xl border border-divider shadow-xl">
-          <CardBody className="text-center py-12">
-            <p className="text-xl font-semibold mb-2">Meeting Not Found</p>
-            <p className="text-default-500 mb-6">
-              The meeting you're looking for doesn't exist or has been deleted.
-            </p>
-            <div className="relative group inline-block">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-40 blur-lg transition-opacity duration-300 rounded-3xl"></div>
-              <Button color="primary" onPress={handleBack} className="relative rounded-3xl shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300">
-                Back to Dashboard
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
+      <div className="py-20 text-center">
+        <p className="mb-2 text-xl font-semibold text-white">Meeting Not Found</p>
+        <p className="mb-6 text-slate-400">This meeting doesn't exist or has been deleted.</p>
+        <button
+          onClick={handleBack}
+          className="btn-cta rounded-[10px] px-6 py-2.5 text-sm font-bold"
+        >
+          Back to Dashboard
+        </button>
       </div>
     );
   }
 
+  const isProcessing = [
+    'UPLOADING',
+    'PROCESSING_AUDIO',
+    'TRANSCRIBING',
+    'PROCESSING_NLP',
+    'SUMMARIZING',
+  ].includes(currentMeeting.status);
+  const isFailed = currentMeeting.status === 'FAILED';
+  const isCompleted = currentMeeting.status === 'COMPLETED';
+  const statusInfo = getStatusInfo(currentMeeting.status);
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-4 max-w-6xl space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="light"
-          startContent={<FiArrowLeft size={18} />}
-          onPress={handleBack}
-          className="rounded-3xl hover:bg-default-100 hover:shadow-md transition-all duration-300"
-        >
-          Back to Dashboard
-        </Button>
+    <div className="mx-auto max-w-6xl space-y-6 py-6">
+      {/* ── Back Link ── */}
+      <button
+        onClick={handleBack}
+        className="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-white"
+      >
+        <ArrowLeft size={14} />
+        Back to Dashboard
+      </button>
 
-        {/* Header Card */}
-        <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
-          <CardHeader className="flex-col items-start gap-4 p-6">
-            {/* Title and Actions Row */}
-            <div className="flex items-start justify-between w-full gap-4">
-              <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                  {currentMeeting.title}
-                </h1>
-                {currentMeeting.description && (
-                  <p className="text-default-700 dark:text-default-600">{currentMeeting.description}</p>
-                )}
-              </div>
+      {/* ── Header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-3">
+          <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+            {currentMeeting.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${statusInfo.dot} ${isProcessing ? 'animate-pulse' : ''}`}
+              ></span>
+              {statusInfo.label}
+            </span>
+            <CategoryBadge category={currentMeeting.category} />
+            <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+              <Calendar size={12} />
+              {formatDate(currentMeeting.createdAt)}
+            </span>
+            {currentMeeting.duration && (
+              <span className="inline-flex items-center gap-1 font-mono text-xs text-slate-500">
+                <Clock size={12} />
+                {formatDuration(currentMeeting.duration)}
+              </span>
+            )}
+          </div>
+        </div>
 
-              {/* Actions Dropdown */}
-              <div className="flex gap-2">
-                {currentMeeting.audioUrl && (
-                  <Button
-                    variant="flat"
-                    startContent={<FiDownload size={18} />}
-                    onPress={handleDownloadAudio}
-                    className="rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                  >
-                    Audio
-                  </Button>
-                )}
-
-                <Dropdown
-                  placement="bottom-end"
-                  classNames={{
-                    content: "bg-content1/95 backdrop-blur-xl border border-divider/50 shadow-xl shadow-black/20 rounded-xl min-w-[180px] p-1.5"
-                  }}
-                >
-                  <DropdownTrigger>
-                    <Button isIconOnly variant="flat" isDisabled={deleting} className="rounded-2xl hover:bg-default-100 transition-all duration-300">
-                      <FiMoreVertical size={18} />
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    aria-label="Meeting actions"
-                    itemClasses={{
-                      base: "rounded-lg px-3 py-2.5 gap-3 data-[hover=true]:bg-default-100 transition-colors",
-                      title: "font-medium text-sm",
-                    }}
-                  >
-                    {currentMeeting.status === 'COMPLETED' && (
-                      <DropdownItem
-                        key="download-all"
-                        startContent={<FiPackage size={16} className="text-primary" />}
-                        onPress={handleDownloadAll}
-                        isDisabled={deleting || downloadingAll}
-                      >
-                        {downloadingAll ? 'Downloading...' : 'Download All (ZIP)'}
-                      </DropdownItem>
-                    )}
-                    <DropdownItem
-                      key="edit"
-                      startContent={<FiEdit size={16} className="text-default-500" />}
-                      onPress={handleEdit}
-                      isDisabled={deleting}
-                    >
-                      Edit
-                    </DropdownItem>
-                    <DropdownItem
-                      key="delete"
-                      color="danger"
-                      className="text-danger"
-                      startContent={<FiTrash2 size={16} />}
-                      onPress={handleDelete}
-                      isDisabled={deleting}
-                    >
-                      {deleting ? 'Deleting...' : 'Delete'}
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
-            </div>
-
-            {/* Metadata Row */}
-            <div className="flex flex-wrap items-center gap-3">
-              <CategoryBadge category={currentMeeting.category} />
-
-              <Chip
-                variant="flat"
-                size="sm"
-                startContent={<FiCalendar size={12} />}
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {currentMeeting.audioUrl && (
+            <button
+              onClick={handleDownloadAudio}
+              className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium"
+            >
+              <Download size={14} />
+              Download Audio
+            </button>
+          )}
+          <Dropdown>
+            <DropdownTrigger>
+              <button className="border-echo-border hover:bg-echo-surface-hover flex size-9 items-center justify-center rounded-[10px] border text-slate-400 transition-all hover:text-white">
+                <MoreVertical size={16} />
+              </button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Meeting actions"
+              className="bg-echo-elevated border-echo-border border"
+            >
+              <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
+                Edit Meeting
+              </DropdownItem>
+              <DropdownItem
+                key="download-all"
+                startContent={<Download size={14} />}
+                onPress={handleDownloadAll}
+                isDisabled={!isCompleted || downloadingAll}
               >
-                {formatDate(currentMeeting.createdAt)}
-              </Chip>
-
-              {currentMeeting.duration && (
-                <Chip
-                  variant="flat"
-                  size="sm"
-                  startContent={<FiClock size={12} />}
-                >
-                  {formatDuration(currentMeeting.duration)}
-                </Chip>
-              )}
-
-              <Chip
-                variant="flat"
-                size="sm"
-                classNames={{
-                  base: currentMeeting.status === 'COMPLETED'
-                    ? 'bg-success/15 border-success/30 border px-2.5'
-                    : currentMeeting.status === 'PROCESSING'
-                      ? 'bg-warning/15 border-warning/30 border px-2.5'
-                      : 'bg-danger/15 border-danger/30 border px-2.5',
-                  content: currentMeeting.status === 'COMPLETED'
-                    ? 'text-success text-xs font-medium'
-                    : currentMeeting.status === 'PROCESSING'
-                      ? 'text-warning text-xs font-medium'
-                      : 'text-danger text-xs font-medium'
-                }}
+                {downloadingAll ? 'Downloading...' : 'Download All (ZIP)'}
+              </DropdownItem>
+              <DropdownItem
+                key="delete"
+                startContent={<Trash2 size={14} />}
+                className="text-red-400"
+                onPress={handleDelete}
+                isDisabled={deleting}
               >
-                {currentMeeting.status}
-              </Chip>
-            </div>
-          </CardHeader>
-        </Card>
-
-        {/* Processing State */}
-        {currentMeeting.status === 'PROCESSING' && (
-          <Card className="border-warning/20 bg-warning/5 rounded-3xl hover:border-warning/40 transition-all duration-300">
-            <CardBody>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-warning rounded-full animate-pulse" />
-                <div>
-                  <p className="font-semibold text-warning">Processing</p>
-                  <p className="text-sm text-warning/80">
-                    Your meeting is being transcribed and summarized. This usually takes a few minutes.
-                  </p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Failed State */}
-        {currentMeeting.status === 'FAILED' && (
-          <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300">
-            <CardBody>
-              <div className="flex items-start gap-3">
-                <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
-                <div>
-                  <p className="font-semibold text-danger">Processing Failed</p>
-                  <p className="text-sm text-danger/80 mb-3">
-                    There was an error processing this meeting. Please try uploading the audio again.
-                  </p>
-                  <Button size="sm" color="danger" variant="flat" className="rounded-2xl hover:bg-danger/10 transition-all duration-300">
-                    Retry Processing
-                  </Button>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Content Tabs - Only show if completed */}
-        {currentMeeting.status === 'COMPLETED' && (
-          <Card className="rounded-3xl border border-divider">
-            <CardBody className="p-0">
-              <Tabs
-                aria-label="Meeting content"
-                selectedKey={activeTab}
-                onSelectionChange={setActiveTab}
-                variant="underlined"
-                classNames={{
-                  base: "w-full",
-                  tabList: "w-full relative p-0 gap-0 border-b border-divider bg-transparent",
-                  cursor: "bg-primary h-0.5 bottom-0",
-                  tab: "h-14 px-6 data-[selected=true]:text-primary font-medium",
-                  tabContent: "group-data-[selected=true]:text-primary",
-                  panel: "w-full p-0"
-                }}
-              >
-                {/* Summary Tab */}
-                <Tab
-                  key="summary"
-                  title={
-                    <div className="flex items-center gap-2">
-                      <FiFileText size={16} />
-                      <span>Summary</span>
-                    </div>
-                  }
-                >
-                  <div className="p-6">
-                    <SummaryViewer
-                      summary={currentMeeting.summary}
-                      title="AI-Generated Summary"
-                      meetingId={currentMeeting.id}
-                    />
-                  </div>
-                </Tab>
-
-                {/* Transcript Tab */}
-                <Tab
-                  key="transcript"
-                  title={
-                    <div className="flex items-center gap-2">
-                      <FiList size={16} />
-                      <span>Transcript</span>
-                    </div>
-                  }
-                >
-                  <div className="p-6">
-                    <TranscriptViewer
-                      transcript={currentMeeting.transcript}
-                      title="Full Transcript"
-                      meetingTitle={currentMeeting.title}
-                      meetingId={currentMeeting.id}
-                    />
-                  </div>
-                </Tab>
-              </Tabs>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Audio Player - If available */}
-        {currentMeeting.audioUrl && currentMeeting.status === 'COMPLETED' && (
-          <Card className="rounded-2xl border border-divider/50 bg-content1/50 backdrop-blur-sm">
-            <CardHeader className="px-5 py-4">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-primary/10">
-                  <FiMic className="text-primary" size={18} />
-                </div>
-                <h3 className="text-base font-semibold">Audio Recording</h3>
-              </div>
-            </CardHeader>
-            <Divider />
-            <CardBody className="p-5">
-              <div className="bg-default-50 border border-default-100 rounded-xl p-4">
-                <audio
-                  src={`${process.env.REACT_APP_API_URL}/meetings/${id}/audio?token=${localStorage.getItem('token')}`}
-                  controls
-                  className="w-full"
-                  preload="metadata"
-                >
-                  Your browser does not support the audio element.
-                </audio>
-              </div>
-            </CardBody>
-          </Card>
-        )}
+                {deleting ? 'Deleting...' : 'Delete Meeting'}
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
       </div>
 
-      {/* Edit Meeting Modal */}
+      {/* ── Processing State ── */}
+      {isProcessing && (
+        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="ai-dot"></div>
+            <p className="text-sm font-medium text-white">Your meeting is being processed…</p>
+          </div>
+
+          {/* Pipeline Steps */}
+          <div className="mb-4 flex items-center gap-2">
+            {PIPELINE_STEPS.map((step, index) => {
+              const currentIdx = getCurrentStepIndex();
+              const isComplete = index < currentIdx;
+              const isActive = index === currentIdx;
+              const _isPending = index > currentIdx;
+
+              return (
+                <div key={step.key} className="flex flex-1 items-center gap-2">
+                  <div className="flex flex-1 flex-col items-center gap-1.5">
+                    <div
+                      className={`flex size-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                        isComplete
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : isActive
+                            ? 'bg-accent-primary/20 text-accent-primary animate-ai-glow'
+                            : 'bg-echo-surface-hover text-slate-600'
+                      }`}
+                    >
+                      {isComplete ? <CheckCircle size={14} /> : index + 1}
+                    </div>
+                    <span
+                      className={`text-center text-[10px] font-medium ${
+                        isComplete
+                          ? 'text-emerald-400'
+                          : isActive
+                            ? 'text-accent-primary'
+                            : 'text-slate-600'
+                      }`}
+                    >
+                      {step.label}
+                    </span>
+                  </div>
+                  {index < PIPELINE_STEPS.length - 1 && (
+                    <div
+                      className={`-mt-5 h-px flex-1 ${isComplete ? 'bg-emerald-500/30' : 'bg-echo-border'}`}
+                    ></div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-xs text-slate-500">Estimated ~45 seconds remaining</p>
+        </div>
+      )}
+
+      {/* ── Failed State ── */}
+      {isFailed && (
+        <div className="flex items-center gap-3 rounded-[16px] border border-red-500/10 bg-red-500/5 px-5 py-4">
+          <AlertCircle size={18} className="shrink-0 text-red-400" />
+          <div>
+            <p className="text-sm font-medium text-red-400">Processing Failed</p>
+            <p className="mt-0.5 text-xs text-red-400/70">
+              {currentMeeting.error ||
+                'An error occurred during processing. Please try uploading again.'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Completed State — Split View ── */}
+      {isCompleted && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+          {/* Left Column — Transcript (60%) */}
+          <div className="space-y-4 lg:col-span-3">
+            {/* Audio Player */}
+            {currentMeeting.audioUrl && (
+              <div className="bg-echo-surface border-echo-border rounded-[16px] border p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Mic size={14} className="text-accent-primary" />
+                  <span className="text-xs font-medium text-slate-400">Audio Recording</span>
+                </div>
+                <audio controls src={currentMeeting.audioUrl} className="w-full" />
+              </div>
+            )}
+
+            {/* Transcript */}
+            <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+              <TranscriptViewer
+                transcript={currentMeeting.transcript}
+                nlpData={currentMeeting.nlpAnalysis}
+              />
+            </div>
+          </div>
+
+          {/* Right Column — AI Insights (40%, sticky) */}
+          <div className="lg:col-span-2">
+            <div className="space-y-4 lg:sticky lg:top-[88px]">
+              <SummaryViewer summary={currentMeeting.summary} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
       <EditMeetingModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

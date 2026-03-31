@@ -91,7 +91,8 @@ export const MeetingProvider = ({ children }) => {
       // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
-          if (prev >= 600) { // 10 minutes = 600 seconds
+          if (prev >= 600) {
+            // 10 minutes = 600 seconds
             stopRecording();
             return prev;
           }
@@ -102,7 +103,10 @@ export const MeetingProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Start recording failed:', error);
-      return { success: false, error: 'Failed to start recording. Please check microphone permissions.' };
+      return {
+        success: false,
+        error: 'Failed to start recording. Please check microphone permissions.',
+      };
     }
   };
 
@@ -125,7 +129,7 @@ export const MeetingProvider = ({ children }) => {
 
         // Stop stream
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
         }
 
@@ -158,7 +162,12 @@ export const MeetingProvider = ({ children }) => {
       }
 
       console.log('🚀 Uploading meeting to /api/meetings/upload');
-      console.log('📦 FormData contents:', { title, category, description, audioFileSize: audioFile.size });
+      console.log('📦 FormData contents:', {
+        title,
+        category,
+        description,
+        audioFileSize: audioFile.size,
+      });
 
       const { data } = await api.post('/meetings/upload', formData, {
         headers: {
@@ -182,52 +191,56 @@ export const MeetingProvider = ({ children }) => {
   }, []);
 
   // Update meeting
-  const updateMeeting = useCallback(async (id, updates) => {
-    try {
-      setLoading(true);
-      const { data } = await api.patch(`/meetings/${id}`, updates);
+  const updateMeeting = useCallback(
+    async (id, updates) => {
+      try {
+        setLoading(true);
+        const { data } = await api.patch(`/meetings/${id}`, updates);
 
-      // Update in list
-      setMeetings((prev) =>
-        prev.map((meeting) => (meeting.id === id ? data.data : meeting))
-      );
+        // Update in list
+        setMeetings((prev) => prev.map((meeting) => (meeting.id === id ? data.data : meeting)));
 
-      // Update current if viewing
-      if (currentMeeting?.id === id) {
-        setCurrentMeeting(data.data);
+        // Update current if viewing
+        if (currentMeeting?.id === id) {
+          setCurrentMeeting(data.data);
+        }
+
+        return { success: true, data: data.data };
+      } catch (error) {
+        console.error('Update meeting failed:', error);
+        return { success: false, error: error.response?.data?.error || 'Failed to update meeting' };
+      } finally {
+        setLoading(false);
       }
-
-      return { success: true, data: data.data };
-    } catch (error) {
-      console.error('Update meeting failed:', error);
-      return { success: false, error: error.response?.data?.error || 'Failed to update meeting' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentMeeting]);
+    },
+    [currentMeeting]
+  );
 
   // Delete meeting
-  const deleteMeeting = useCallback(async (id) => {
-    try {
-      setLoading(true);
-      await api.delete(`/meetings/${id}`);
+  const deleteMeeting = useCallback(
+    async (id) => {
+      try {
+        setLoading(true);
+        await api.delete(`/meetings/${id}`);
 
-      // Remove from list
-      setMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
+        // Remove from list
+        setMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
 
-      // Clear current if viewing
-      if (currentMeeting?.id === id) {
-        setCurrentMeeting(null);
+        // Clear current if viewing
+        if (currentMeeting?.id === id) {
+          setCurrentMeeting(null);
+        }
+
+        return { success: true };
+      } catch (error) {
+        console.error('Delete meeting failed:', error);
+        return { success: false, error: error.response?.data?.error || 'Failed to delete meeting' };
+      } finally {
+        setLoading(false);
       }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Delete meeting failed:', error);
-      return { success: false, error: error.response?.data?.error || 'Failed to delete meeting' };
-    } finally {
-      setLoading(false);
-    }
-  }, [currentMeeting]);
+    },
+    [currentMeeting]
+  );
 
   // Format recording time
   const formatTime = (seconds) => {

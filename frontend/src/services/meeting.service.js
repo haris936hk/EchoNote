@@ -18,19 +18,19 @@ export const getAllMeetings = async () => {
 
       return {
         success: true,
-        data: sortedMeetings
+        data: sortedMeetings,
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Failed to fetch meetings'
+      error: result.error || 'Failed to fetch meetings',
     };
   } catch (error) {
     console.error('Get meetings error:', error);
     return {
       success: false,
-      error: 'An unexpected error occurred'
+      error: 'An unexpected error occurred',
     };
   }
 };
@@ -43,7 +43,7 @@ export const getMeetingById = async (id) => {
     if (!id) {
       return {
         success: false,
-        error: 'Meeting ID is required'
+        error: 'Meeting ID is required',
       };
     }
 
@@ -52,19 +52,19 @@ export const getMeetingById = async (id) => {
     if (result.success) {
       return {
         success: true,
-        data: result.data.meeting
+        data: result.data.meeting,
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Meeting not found'
+      error: result.error || 'Meeting not found',
     };
   } catch (error) {
     console.error('Get meeting error:', error);
     return {
       success: false,
-      error: 'Failed to fetch meeting details'
+      error: 'Failed to fetch meeting details',
     };
   }
 };
@@ -79,7 +79,7 @@ export const uploadMeeting = async (meetingData) => {
     if (!validation.valid) {
       return {
         success: false,
-        error: validation.error
+        error: validation.error,
       };
     }
 
@@ -88,7 +88,7 @@ export const uploadMeeting = async (meetingData) => {
     if (!audioValidation.valid) {
       return {
         success: false,
-        error: audioValidation.error
+        error: audioValidation.error,
       };
     }
 
@@ -96,25 +96,25 @@ export const uploadMeeting = async (meetingData) => {
       title: meetingData.title.trim(),
       description: meetingData.description?.trim() || '',
       category: meetingData.category,
-      audioFile: meetingData.audioFile
+      audioFile: meetingData.audioFile,
     });
 
     if (result.success) {
       return {
         success: true,
-        data: result.data.meeting
+        data: result.data.meeting,
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Failed to upload meeting'
+      error: result.error || 'Failed to upload meeting',
     };
   } catch (error) {
     console.error('Upload meeting error:', error);
     return {
       success: false,
-      error: 'An unexpected error occurred during upload'
+      error: 'An unexpected error occurred during upload',
     };
   }
 };
@@ -127,7 +127,7 @@ export const updateMeeting = async (id, updates) => {
     if (!id) {
       return {
         success: false,
-        error: 'Meeting ID is required'
+        error: 'Meeting ID is required',
       };
     }
 
@@ -144,19 +144,19 @@ export const updateMeeting = async (id, updates) => {
     if (result.success) {
       return {
         success: true,
-        data: result.data.meeting
+        data: result.data.meeting,
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Failed to update meeting'
+      error: result.error || 'Failed to update meeting',
     };
   } catch (error) {
     console.error('Update meeting error:', error);
     return {
       success: false,
-      error: 'Failed to update meeting'
+      error: 'Failed to update meeting',
     };
   }
 };
@@ -169,7 +169,7 @@ export const deleteMeeting = async (id) => {
     if (!id) {
       return {
         success: false,
-        error: 'Meeting ID is required'
+        error: 'Meeting ID is required',
       };
     }
 
@@ -178,19 +178,19 @@ export const deleteMeeting = async (id) => {
     if (result.success) {
       return {
         success: true,
-        data: { id }
+        data: { id },
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Failed to delete meeting'
+      error: result.error || 'Failed to delete meeting',
     };
   } catch (error) {
     console.error('Delete meeting error:', error);
     return {
       success: false,
-      error: 'Failed to delete meeting'
+      error: 'Failed to delete meeting',
     };
   }
 };
@@ -203,31 +203,29 @@ export const deleteMeetings = async (ids) => {
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return {
         success: false,
-        error: 'Meeting IDs are required'
+        error: 'Meeting IDs are required',
       };
     }
 
-    const results = await Promise.allSettled(
-      ids.map(id => meetingsAPI.deleteMeeting(id))
-    );
+    const results = await Promise.allSettled(ids.map((id) => meetingsAPI.deleteMeeting(id)));
 
-    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success);
-    const failed = results.filter(r => r.status === 'rejected' || !r.value.success);
+    const successful = results.filter((r) => r.status === 'fulfilled' && r.value.success);
+    const failed = results.filter((r) => r.status === 'rejected' || !r.value.success);
 
     return {
       success: failed.length === 0,
       data: {
         deleted: successful.length,
         failed: failed.length,
-        ids: ids
+        ids: ids,
       },
-      error: failed.length > 0 ? `${failed.length} meeting(s) failed to delete` : null
+      error: failed.length > 0 ? `${failed.length} meeting(s) failed to delete` : null,
     };
   } catch (error) {
     console.error('Delete meetings error:', error);
     return {
       success: false,
-      error: 'Failed to delete meetings'
+      error: 'Failed to delete meetings',
     };
   }
 };
@@ -244,7 +242,7 @@ export const searchMeetings = async (query) => {
     if (!query || query.trim() === '') {
       return {
         success: true,
-        data: []
+        data: [],
       };
     }
 
@@ -253,19 +251,19 @@ export const searchMeetings = async (query) => {
     if (result.success) {
       return {
         success: true,
-        data: result.data.meetings || []
+        data: result.data.meetings || [],
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Search failed'
+      error: result.error || 'Search failed',
     };
   } catch (error) {
     console.error('Search error:', error);
     return {
       success: false,
-      error: 'Search failed'
+      error: 'Search failed',
     };
   }
 };
@@ -278,34 +276,35 @@ export const filterMeetings = (meetings, filters) => {
 
   // Filter by status
   if (filters.status && filters.status !== 'ALL') {
-    filtered = filtered.filter(m => m.status === filters.status);
+    filtered = filtered.filter((m) => m.status === filters.status);
   }
 
   // Filter by category
   if (filters.category && filters.category !== 'ALL') {
-    filtered = filtered.filter(m => m.category === filters.category);
+    filtered = filtered.filter((m) => m.category === filters.category);
   }
 
   // Filter by date range
   if (filters.dateFrom) {
     const fromDate = new Date(filters.dateFrom);
-    filtered = filtered.filter(m => new Date(m.createdAt) >= fromDate);
+    filtered = filtered.filter((m) => new Date(m.createdAt) >= fromDate);
   }
 
   if (filters.dateTo) {
     const toDate = new Date(filters.dateTo);
     toDate.setHours(23, 59, 59, 999); // End of day
-    filtered = filtered.filter(m => new Date(m.createdAt) <= toDate);
+    filtered = filtered.filter((m) => new Date(m.createdAt) <= toDate);
   }
 
   // Filter by search query (client-side)
   if (filters.query) {
     const query = filters.query.toLowerCase();
-    filtered = filtered.filter(m =>
-      m.title.toLowerCase().includes(query) ||
-      m.description?.toLowerCase().includes(query) ||
-      m.transcript?.toLowerCase().includes(query) ||
-      m.summary?.toLowerCase().includes(query)
+    filtered = filtered.filter(
+      (m) =>
+        m.title.toLowerCase().includes(query) ||
+        m.description?.toLowerCase().includes(query) ||
+        m.transcript?.toLowerCase().includes(query) ||
+        m.summary?.toLowerCase().includes(query)
     );
   }
 
@@ -414,13 +413,13 @@ export const calculateMeetingStats = (meetings) => {
     averageDuration: 0,
     byCategory: {},
     byStatus: {},
-    recentCount: 0 // Last 7 days
+    recentCount: 0, // Last 7 days
   };
 
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
-  meetings.forEach(meeting => {
+  meetings.forEach((meeting) => {
     // Count by status
     stats.byStatus[meeting.status] = (stats.byStatus[meeting.status] || 0) + 1;
 
@@ -461,7 +460,7 @@ export const getRecentMeetings = (meetings, limit = 5) => {
  * Get meetings by status
  */
 export const getMeetingsByStatus = (meetings, status) => {
-  return meetings.filter(m => m.status === status);
+  return meetings.filter((m) => m.status === status);
 };
 
 /**
@@ -469,7 +468,7 @@ export const getMeetingsByStatus = (meetings, status) => {
  */
 export const getMeetingsByCategory = (meetings, category) => {
   if (category === 'ALL') return meetings;
-  return meetings.filter(m => m.category === category);
+  return meetings.filter((m) => m.category === category);
 };
 
 // ============================================
@@ -580,7 +579,7 @@ export const getStatusColor = (status) => {
   const colors = {
     COMPLETED: 'success',
     PROCESSING: 'warning',
-    FAILED: 'danger'
+    FAILED: 'danger',
   };
   return colors[status] || 'default';
 };
@@ -594,7 +593,7 @@ export const getCategoryLabel = (category) => {
     PLANNING: 'Planning',
     STANDUP: 'Standup',
     ONE_ON_ONE: 'One-on-One',
-    OTHER: 'Other'
+    OTHER: 'Other',
   };
   return labels[category] || category;
 };
@@ -620,18 +619,18 @@ export const exportMeetingsAsJSON = (meetings) => {
  */
 export const exportMeetingsAsCSV = (meetings) => {
   const headers = ['ID', 'Title', 'Category', 'Status', 'Duration', 'Created At'];
-  const rows = meetings.map(m => [
+  const rows = meetings.map((m) => [
     m.id,
     m.title,
     m.category,
     m.status,
     m.duration || 0,
-    new Date(m.createdAt).toISOString()
+    new Date(m.createdAt).toISOString(),
   ]);
 
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
   ].join('\n');
 
   const dataBlob = new Blob([csvContent], { type: 'text/csv' });
@@ -682,7 +681,7 @@ const meetingService = {
   getStatusColor,
   getCategoryLabel,
   exportMeetingsAsJSON,
-  exportMeetingsAsCSV
+  exportMeetingsAsCSV,
 };
 
 export default meetingService;

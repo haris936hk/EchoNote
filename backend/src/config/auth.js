@@ -16,7 +16,7 @@ const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/calendar.readonly',
-  'https://www.googleapis.com/auth/calendar.events'
+  'https://www.googleapis.com/auth/calendar.events',
 ];
 
 /**
@@ -28,11 +28,11 @@ const verifyGoogleToken = async (token) => {
   try {
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
-    
+
     return {
       googleId: payload.sub,
       email: payload.email,
@@ -41,7 +41,7 @@ const verifyGoogleToken = async (token) => {
       picture: payload.picture,
       givenName: payload.given_name,
       familyName: payload.family_name,
-      locale: payload.locale
+      locale: payload.locale,
     };
   } catch (error) {
     throw new Error(`Google token verification failed: ${error.message}`);
@@ -57,15 +57,15 @@ const exchangeCodeForTokens = async (code) => {
   try {
     const { tokens } = await googleClient.getToken(code);
     googleClient.setCredentials(tokens);
-    
+
     // Get user info
     const ticket = await googleClient.verifyIdToken({
       idToken: tokens.id_token,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
-    
+
     return {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
@@ -75,8 +75,8 @@ const exchangeCodeForTokens = async (code) => {
         googleId: payload.sub,
         email: payload.email,
         name: payload.name,
-        picture: payload.picture
-      }
+        picture: payload.picture,
+      },
     };
   } catch (error) {
     throw new Error(`Token exchange failed: ${error.message}`);
@@ -91,7 +91,7 @@ const getAuthUrl = () => {
   return googleClient.generateAuthUrl({
     access_type: 'offline', // Get refresh token
     prompt: 'consent', // Force consent screen to get refresh token
-    scope: GOOGLE_SCOPES
+    scope: GOOGLE_SCOPES,
   });
 };
 
@@ -103,14 +103,14 @@ const getAuthUrl = () => {
 const refreshGoogleToken = async (refreshToken) => {
   try {
     googleClient.setCredentials({
-      refresh_token: refreshToken
+      refresh_token: refreshToken,
     });
-    
+
     const { credentials } = await googleClient.refreshAccessToken();
-    
+
     return {
       accessToken: credentials.access_token,
-      expiryDate: credentials.expiry_date
+      expiryDate: credentials.expiry_date,
     };
   } catch (error) {
     throw new Error(`Token refresh failed: ${error.message}`);
@@ -123,15 +123,11 @@ const refreshGoogleToken = async (refreshToken) => {
  * @returns {string} JWT token
  */
 const generateAccessToken = (payload) => {
-  return jwt.sign(
-    payload,
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRE || '7d',
-      issuer: 'echonote-api',
-      audience: 'echonote-client'
-    }
-  );
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || '7d',
+    issuer: 'echonote-api',
+    audience: 'echonote-client',
+  });
 };
 
 /**
@@ -140,15 +136,11 @@ const generateAccessToken = (payload) => {
  * @returns {string} JWT refresh token
  */
 const generateRefreshToken = (payload) => {
-  return jwt.sign(
-    payload,
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d',
-      issuer: 'echonote-api',
-      audience: 'echonote-client'
-    }
-  );
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d',
+    issuer: 'echonote-api',
+    audience: 'echonote-client',
+  });
 };
 
 /**
@@ -160,7 +152,7 @@ const verifyToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET, {
       issuer: 'echonote-api',
-      audience: 'echonote-client'
+      audience: 'echonote-client',
     });
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
@@ -190,13 +182,13 @@ const generateTokenPair = (user) => {
   const payload = {
     id: user.id,
     email: user.email,
-    name: user.name
+    name: user.name,
   };
-  
+
   return {
     accessToken: generateAccessToken(payload),
     refreshToken: generateRefreshToken(payload),
-    expiresIn: process.env.JWT_EXPIRE || '7d'
+    expiresIn: process.env.JWT_EXPIRE || '7d',
   };
 };
 
@@ -223,7 +215,7 @@ const isTokenExpired = (token) => {
     if (!decoded || !decoded.exp) {
       return true;
     }
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     return decoded.exp < currentTime;
   } catch (error) {
@@ -258,10 +250,7 @@ const generateRandomToken = (length = 32) => {
  */
 const hashData = (data) => {
   const crypto = require('crypto');
-  return crypto
-    .createHash('sha256')
-    .update(data)
-    .digest('hex');
+  return crypto.createHash('sha256').update(data).digest('hex');
 };
 
 /**
@@ -293,40 +282,40 @@ const createUserOAuthClient = (accessToken, refreshToken) => {
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_REDIRECT_URI
   );
-  
+
   client.setCredentials({
     access_token: accessToken,
-    refresh_token: refreshToken
+    refresh_token: refreshToken,
   });
-  
+
   return client;
 };
 
 module.exports = {
   googleClient,
   GOOGLE_SCOPES,
-  
+
   // Google OAuth functions
   verifyGoogleToken,
   exchangeCodeForTokens,
   getAuthUrl,
   refreshGoogleToken,
   createUserOAuthClient,
-  
+
   // JWT functions
   generateAccessToken,
   generateRefreshToken,
   generateTokenPair,
   verifyToken,
   decodeToken,
-  
+
   // Token utilities
   extractTokenFromHeader,
   isTokenExpired,
   getTokenExpiry,
-  
+
   // General utilities
   isValidEmail,
   generateRandomToken,
-  hashData
+  hashData,
 };

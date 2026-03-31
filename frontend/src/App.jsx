@@ -32,7 +32,10 @@ const ToastWrapper = ({ children }) => {
 };
 
 function App() {
-  console.log('[App] Google Client ID:', GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : 'NOT SET');
+  console.log(
+    '[App] Google Client ID:',
+    GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : 'NOT SET'
+  );
 
   if (!GOOGLE_CLIENT_ID) {
     console.error('[App] GOOGLE_CLIENT_ID is not set! Check your .env file');

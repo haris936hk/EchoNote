@@ -24,7 +24,7 @@ export const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes (updated f
 export const RECORDING_CONFIG = {
   mimeType: 'audio/webm;codecs=opus',
   audioBitsPerSecond: 128000,
-  sampleRate: 16000 // Whisper optimal sample rate
+  sampleRate: 16000, // Whisper optimal sample rate
 };
 
 export const AUDIO_CONSTRAINTS = {
@@ -33,8 +33,8 @@ export const AUDIO_CONSTRAINTS = {
     noiseSuppression: true,
     autoGainControl: true,
     sampleRate: 16000,
-    channelCount: 1 // Mono
-  }
+    channelCount: 1, // Mono
+  },
 };
 
 // ============================================
@@ -46,7 +46,7 @@ export const MEETING_CATEGORIES = {
   PLANNING: 'PLANNING',
   STANDUP: 'STANDUP',
   ONE_ON_ONE: 'ONE_ON_ONE',
-  OTHER: 'OTHER'
+  OTHER: 'OTHER',
 };
 
 export const CATEGORY_LABELS = {
@@ -54,7 +54,7 @@ export const CATEGORY_LABELS = {
   [MEETING_CATEGORIES.PLANNING]: 'Planning',
   [MEETING_CATEGORIES.STANDUP]: 'Standup',
   [MEETING_CATEGORIES.ONE_ON_ONE]: 'One-on-One',
-  [MEETING_CATEGORIES.OTHER]: 'Other'
+  [MEETING_CATEGORIES.OTHER]: 'Other',
 };
 
 export const CATEGORY_DESCRIPTIONS = {
@@ -62,35 +62,35 @@ export const CATEGORY_DESCRIPTIONS = {
   [MEETING_CATEGORIES.PLANNING]: 'Planning sessions, roadmap discussions',
   [MEETING_CATEGORIES.STANDUP]: 'Daily standups and sync meetings',
   [MEETING_CATEGORIES.ONE_ON_ONE]: '1:1 meetings with team members',
-  [MEETING_CATEGORIES.OTHER]: 'Other types of meetings'
+  [MEETING_CATEGORIES.OTHER]: 'Other types of meetings',
 };
 
 export const CATEGORIES_LIST = [
   {
     value: MEETING_CATEGORIES.SALES,
     label: CATEGORY_LABELS[MEETING_CATEGORIES.SALES],
-    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.SALES]
+    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.SALES],
   },
   {
     value: MEETING_CATEGORIES.PLANNING,
     label: CATEGORY_LABELS[MEETING_CATEGORIES.PLANNING],
-    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.PLANNING]
+    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.PLANNING],
   },
   {
     value: MEETING_CATEGORIES.STANDUP,
     label: CATEGORY_LABELS[MEETING_CATEGORIES.STANDUP],
-    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.STANDUP]
+    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.STANDUP],
   },
   {
     value: MEETING_CATEGORIES.ONE_ON_ONE,
     label: CATEGORY_LABELS[MEETING_CATEGORIES.ONE_ON_ONE],
-    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.ONE_ON_ONE]
+    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.ONE_ON_ONE],
   },
   {
     value: MEETING_CATEGORIES.OTHER,
     label: CATEGORY_LABELS[MEETING_CATEGORIES.OTHER],
-    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.OTHER]
-  }
+    description: CATEGORY_DESCRIPTIONS[MEETING_CATEGORIES.OTHER],
+  },
 ];
 
 // ============================================
@@ -99,35 +99,35 @@ export const CATEGORIES_LIST = [
 
 export const MEETING_STATUS = {
   UPLOADING: 'UPLOADING',
-  PENDING: 'PENDING',           // NEW: Queued for processing
+  PENDING: 'PENDING', // NEW: Queued for processing
   PROCESSING_AUDIO: 'PROCESSING_AUDIO',
   TRANSCRIBING: 'TRANSCRIBING',
   PROCESSING_NLP: 'PROCESSING_NLP',
   SUMMARIZING: 'SUMMARIZING',
   COMPLETED: 'COMPLETED',
-  FAILED: 'FAILED'
+  FAILED: 'FAILED',
 };
 
 export const STATUS_LABELS = {
   [MEETING_STATUS.UPLOADING]: 'Uploading',
-  [MEETING_STATUS.PENDING]: 'Queued',       // NEW: Queued for processing
+  [MEETING_STATUS.PENDING]: 'Queued', // NEW: Queued for processing
   [MEETING_STATUS.PROCESSING_AUDIO]: 'Processing Audio',
   [MEETING_STATUS.TRANSCRIBING]: 'Transcribing',
   [MEETING_STATUS.PROCESSING_NLP]: 'Processing NLP',
   [MEETING_STATUS.SUMMARIZING]: 'Summarizing',
   [MEETING_STATUS.COMPLETED]: 'Completed',
-  [MEETING_STATUS.FAILED]: 'Failed'
+  [MEETING_STATUS.FAILED]: 'Failed',
 };
 
 export const STATUS_COLORS = {
   [MEETING_STATUS.UPLOADING]: 'default',
-  [MEETING_STATUS.PENDING]: 'default',      // NEW: Queued for processing
+  [MEETING_STATUS.PENDING]: 'default', // NEW: Queued for processing
   [MEETING_STATUS.PROCESSING_AUDIO]: 'warning',
   [MEETING_STATUS.TRANSCRIBING]: 'warning',
   [MEETING_STATUS.PROCESSING_NLP]: 'warning',
   [MEETING_STATUS.SUMMARIZING]: 'warning',
   [MEETING_STATUS.COMPLETED]: 'success',
-  [MEETING_STATUS.FAILED]: 'danger'
+  [MEETING_STATUS.FAILED]: 'danger',
 };
 
 // ============================================
@@ -138,20 +138,20 @@ export const VALIDATION = {
   MEETING_TITLE: {
     MIN_LENGTH: 3,
     MAX_LENGTH: 100,
-    REQUIRED: true
+    REQUIRED: true,
   },
   MEETING_DESCRIPTION: {
     MIN_LENGTH: 0,
     MAX_LENGTH: 500,
-    REQUIRED: false
+    REQUIRED: false,
   },
   USER_NAME: {
     MIN_LENGTH: 2,
-    MAX_LENGTH: 50
+    MAX_LENGTH: 50,
   },
   EMAIL: {
-    PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  }
+    PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
 };
 
 // ============================================
@@ -165,7 +165,7 @@ export const STORAGE_KEYS = {
   PREFERENCES: 'user_preferences',
   RECENT_MEETINGS: 'recent_meetings',
   FAVORITES: 'favorites',
-  LAST_CATEGORY: 'last_selected_category'
+  LAST_CATEGORY: 'last_selected_category',
 };
 
 // ============================================
@@ -176,19 +176,19 @@ export const API_ENDPOINTS = {
   AUTH: {
     GOOGLE_LOGIN: '/auth/google',
     LOGOUT: '/auth/logout',
-    VERIFY: '/auth/verify'
+    VERIFY: '/auth/verify',
   },
   MEETINGS: {
     BASE: '/meetings',
     BY_ID: (id) => `/meetings/${id}`,
-    SEARCH: '/meetings/search'
+    SEARCH: '/meetings/search',
   },
   USER: {
     PROFILE: '/user/profile',
     PREFERENCES: '/user/preferences',
     DELETE_ACCOUNT: '/user/account',
-    EXPORT_DATA: '/user/export'
-  }
+    EXPORT_DATA: '/user/export',
+  },
 };
 
 // ============================================
@@ -199,7 +199,7 @@ export const PAGINATION = {
   DEFAULT_PAGE: 1,
   DEFAULT_PAGE_SIZE: 12,
   PAGE_SIZE_OPTIONS: [6, 12, 24, 48],
-  MAX_PAGE_SIZE: 100
+  MAX_PAGE_SIZE: 100,
 };
 
 // ============================================
@@ -207,13 +207,13 @@ export const PAGINATION = {
 // ============================================
 
 export const TIMING = {
-  DEBOUNCE_SEARCH: 500,      // ms
-  DEBOUNCE_INPUT: 300,       // ms
-  DEBOUNCE_RESIZE: 200,      // ms
-  THROTTLE_SCROLL: 100,      // ms
-  AUTO_SAVE_DELAY: 2000,     // ms
-  TOAST_DURATION: 3000,      // ms
-  REDIRECT_DELAY: 2000       // ms
+  DEBOUNCE_SEARCH: 500, // ms
+  DEBOUNCE_INPUT: 300, // ms
+  DEBOUNCE_RESIZE: 200, // ms
+  THROTTLE_SCROLL: 100, // ms
+  AUTO_SAVE_DELAY: 2000, // ms
+  TOAST_DURATION: 3000, // ms
+  REDIRECT_DELAY: 2000, // ms
 };
 
 // ============================================
@@ -235,7 +235,7 @@ export const ERROR_MESSAGES = {
   TITLE_REQUIRED: 'Meeting title is required.',
   TITLE_TOO_SHORT: 'Title must be at least 3 characters.',
   TITLE_TOO_LONG: 'Title must be less than 100 characters.',
-  CATEGORY_REQUIRED: 'Please select a category.'
+  CATEGORY_REQUIRED: 'Please select a category.',
 };
 
 // ============================================
@@ -248,7 +248,7 @@ export const SUCCESS_MESSAGES = {
   MEETING_DELETED: 'Meeting deleted successfully!',
   PREFERENCES_SAVED: 'Preferences saved successfully!',
   LOGIN_SUCCESS: 'Welcome back!',
-  LOGOUT_SUCCESS: 'Logged out successfully!'
+  LOGOUT_SUCCESS: 'Logged out successfully!',
 };
 
 // ============================================
@@ -264,7 +264,7 @@ export const ROUTES = {
   MEETING_DETAIL_PATH: (id) => `/meeting/${id}`,
   RECORD: '/record',
   SETTINGS: '/settings',
-  NOT_FOUND: '*'
+  NOT_FOUND: '*',
 };
 
 // ============================================
@@ -277,7 +277,7 @@ export const FEATURES = {
   ENABLE_FAVORITES: true,
   ENABLE_ANALYTICS: false,
   ENABLE_SHARING: false,
-  ENABLE_REAL_TIME: false
+  ENABLE_REAL_TIME: false,
 };
 
 // ============================================
@@ -290,7 +290,7 @@ export const DATE_FORMATS = {
   FULL: 'EEEE, MMMM d, yyyy',
   WITH_TIME: 'MMM d, yyyy h:mm a',
   TIME_ONLY: 'h:mm a',
-  ISO: "yyyy-MM-dd'T'HH:mm:ss"
+  ISO: "yyyy-MM-dd'T'HH:mm:ss",
 };
 
 // ============================================
@@ -303,18 +303,12 @@ export const SUPPORTED_AUDIO_TYPES = [
   'audio/mpeg',
   'audio/wav',
   'audio/ogg',
-  'audio/m4a',      // M4A format
-  'audio/x-m4a',    // M4A variant
-  'audio/mp4'       // M4A uses MP4 container
+  'audio/m4a', // M4A format
+  'audio/x-m4a', // M4A variant
+  'audio/mp4', // M4A uses MP4 container
 ];
 
-export const SUPPORTED_AUDIO_EXTENSIONS = [
-  '.webm',
-  '.mp3',
-  '.wav',
-  '.ogg',
-  '.m4a'
-];
+export const SUPPORTED_AUDIO_EXTENSIONS = ['.webm', '.mp3', '.wav', '.ogg', '.m4a'];
 
 // ============================================
 // ANALYTICS EVENTS
@@ -341,7 +335,7 @@ export const ANALYTICS_EVENTS = {
   // Feature usage
   EXPORT_CLICKED: 'export_clicked',
   THEME_CHANGED: 'theme_changed',
-  FILTER_APPLIED: 'filter_applied'
+  FILTER_APPLIED: 'filter_applied',
 };
 
 // ============================================
@@ -353,7 +347,7 @@ export const KEYBOARD_SHORTCUTS = {
   NEW_MEETING: 'Ctrl+N',
   TOGGLE_THEME: 'Ctrl+Shift+T',
   SETTINGS: 'Ctrl+,',
-  HELP: '?'
+  HELP: '?',
 };
 
 // ============================================
@@ -364,7 +358,7 @@ export const NOTIFICATION_TYPES = {
   SUCCESS: 'success',
   ERROR: 'error',
   WARNING: 'warning',
-  INFO: 'info'
+  INFO: 'info',
 };
 
 // ============================================
@@ -372,10 +366,10 @@ export const NOTIFICATION_TYPES = {
 // ============================================
 
 export const CACHE_DURATION = {
-  SHORT: 5 * 60 * 1000,        // 5 minutes
-  MEDIUM: 15 * 60 * 1000,      // 15 minutes
-  LONG: 60 * 60 * 1000,        // 1 hour
-  DAY: 24 * 60 * 60 * 1000     // 24 hours
+  SHORT: 5 * 60 * 1000, // 5 minutes
+  MEDIUM: 15 * 60 * 1000, // 15 minutes
+  LONG: 60 * 60 * 1000, // 1 hour
+  DAY: 24 * 60 * 60 * 1000, // 24 hours
 };
 
 // ============================================
@@ -387,7 +381,7 @@ export const RETENTION_PERIODS = [
   { value: 30, label: '30 days' },
   { value: 90, label: '90 days' },
   { value: 180, label: '6 months' },
-  { value: 365, label: '1 year' }
+  { value: 365, label: '1 year' },
 ];
 
 // ============================================
@@ -400,7 +394,7 @@ export const EXTERNAL_LINKS = {
   PRIVACY_POLICY: 'https://echonote.com/privacy',
   TERMS_OF_SERVICE: 'https://echonote.com/terms',
   GITHUB: 'https://github.com/echonote',
-  FEEDBACK: 'https://echonote.com/feedback'
+  FEEDBACK: 'https://echonote.com/feedback',
 };
 
 // ============================================
@@ -412,7 +406,7 @@ export const REGEX_PATTERNS = {
   URL: /^https?:\/\/.+/,
   PHONE: /^\+?[\d\s-()]+$/,
   ALPHANUMERIC: /^[a-zA-Z0-9]+$/,
-  SLUG: /^[a-z0-9-]+$/
+  SLUG: /^[a-z0-9-]+$/,
 };
 
 // ============================================
@@ -426,7 +420,7 @@ export const DEFAULTS = {
   PAGE_SIZE: PAGINATION.DEFAULT_PAGE_SIZE,
   RETENTION_DAYS: 30,
   EMAIL_NOTIFICATIONS: true,
-  AUTO_DELETE: false
+  AUTO_DELETE: false,
 };
 
 // ============================================
@@ -440,7 +434,7 @@ export const LIMITS = {
   MAX_DESCRIPTION_LENGTH: VALIDATION.MEETING_DESCRIPTION.MAX_LENGTH,
   MAX_SEARCH_QUERY_LENGTH: 100,
   MAX_RECENT_ITEMS: 10,
-  MAX_FAVORITES: 50
+  MAX_FAVORITES: 50,
 };
 
 // ============================================
@@ -457,7 +451,7 @@ export const HTTP_STATUS = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500,
-  SERVICE_UNAVAILABLE: 503
+  SERVICE_UNAVAILABLE: 503,
 };
 
 // ============================================
@@ -467,7 +461,7 @@ export const HTTP_STATUS = {
 export const ENVIRONMENT = {
   isDevelopment: process.env.NODE_ENV === 'development',
   isProduction: process.env.NODE_ENV === 'production',
-  mode: process.env.NODE_ENV || 'development'
+  mode: process.env.NODE_ENV || 'development',
 };
 
 // ============================================
@@ -516,5 +510,5 @@ export default {
   LIMITS,
   HTTP_STATUS,
   ENVIRONMENT,
-  GOOGLE_CLIENT_ID
+  GOOGLE_CLIENT_ID,
 };

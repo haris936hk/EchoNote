@@ -22,14 +22,13 @@ router.get('/stats', authenticate, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: result.data
+      data: result.data,
     });
-
   } catch (error) {
     console.error('Get storage stats error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to get storage statistics'
+      error: 'Failed to get storage statistics',
     });
   }
 });
@@ -52,14 +51,13 @@ router.post('/cleanup', authenticate, async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Storage cleanup completed',
-      data: stats.success ? stats.data : undefined
+      data: stats.success ? stats.data : undefined,
     });
-
   } catch (error) {
     console.error('Storage cleanup error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Storage cleanup failed'
+      error: 'Storage cleanup failed',
     });
   }
 });
@@ -79,7 +77,7 @@ router.get('/health', async (req, res) => {
       success: true,
       status: result.success ? 'healthy' : 'degraded',
       service: 'storage',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     return res.status(503).json({
@@ -87,7 +85,7 @@ router.get('/health', async (req, res) => {
       status: 'unhealthy',
       service: 'storage',
       timestamp: new Date().toISOString(),
-      error: error.message
+      error: error.message,
     });
   }
 });

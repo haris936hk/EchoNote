@@ -70,19 +70,19 @@ export const AuthProvider = ({ children }) => {
 
       console.log('[Auth] Starting Google login with credential:', {
         hasCredential: !!credentialResponse.credential,
-        credentialLength: credentialResponse.credential?.length
+        credentialLength: credentialResponse.credential?.length,
       });
 
       // Send ID token to backend
       const { data } = await api.post('/auth/google', {
-        idToken: credentialResponse.credential
+        idToken: credentialResponse.credential,
       });
 
       console.log('[Auth] Backend response received:', {
         hasData: !!data,
         hasUser: !!data?.data?.user,
         hasToken: !!data?.data?.accessToken,
-        hasPicture: !!data?.data?.user?.picture
+        hasPicture: !!data?.data?.user?.picture,
       });
 
       console.log('[Auth] Full user object from backend:', data.data.user);
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         user: data.data.user.email,
         picture: data.data.user.picture,
         tokenLength: data.data.accessToken.length,
-        hasRefreshToken: !!data.data.refreshToken
+        hasRefreshToken: !!data.data.refreshToken,
       });
 
       setUser(data.data.user);
@@ -109,9 +109,10 @@ export const AuthProvider = ({ children }) => {
       console.error('[Auth] Error details:', {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
       });
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Login failed';
+      const errorMessage =
+        error.response?.data?.error || error.response?.data?.message || 'Login failed';
       setError(errorMessage);
       setLoading(false);
       return { success: false, error: errorMessage };
@@ -140,7 +141,7 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     logout,
     refreshUserData,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

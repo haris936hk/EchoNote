@@ -121,19 +121,19 @@ export const loginWithGoogle = async (credential) => {
       return {
         success: true,
         user,
-        token
+        token,
       };
     }
 
     return {
       success: false,
-      error: result.error || 'Login failed'
+      error: result.error || 'Login failed',
     };
   } catch (error) {
     console.error('Login error:', error);
     return {
       success: false,
-      error: 'An unexpected error occurred during login'
+      error: 'An unexpected error occurred during login',
     };
   }
 };
@@ -181,7 +181,7 @@ export const verifySession = async () => {
 
       return {
         success: true,
-        user: result.data.user || getUser()
+        user: result.data.user || getUser(),
       };
     }
 
@@ -191,13 +191,13 @@ export const verifySession = async () => {
 
     return {
       success: false,
-      error: 'Session expired'
+      error: 'Session expired',
     };
   } catch (error) {
     console.error('Session verification error:', error);
     return {
       success: false,
-      error: 'Failed to verify session'
+      error: 'Failed to verify session',
     };
   }
 };
@@ -213,14 +213,14 @@ export const refreshAuthState = () => {
     return {
       isAuthenticated: true,
       user,
-      token
+      token,
     };
   }
 
   return {
     isAuthenticated: false,
     user: null,
-    token: null
+    token: null,
   };
 };
 
@@ -279,7 +279,7 @@ export const initializeAuth = async () => {
     if (!authState.isAuthenticated) {
       return {
         success: false,
-        error: 'Not authenticated'
+        error: 'Not authenticated',
       };
     }
 
@@ -289,14 +289,14 @@ export const initializeAuth = async () => {
 
     return {
       success: true,
-      user: authState.user
+      user: authState.user,
     };
   } catch (error) {
     console.error('Auth initialization error:', error);
     clearAuthData();
     return {
       success: false,
-      error: 'Failed to initialize authentication'
+      error: 'Failed to initialize authentication',
     };
   }
 };
@@ -320,7 +320,7 @@ export const initGoogleAuth = () => {
         client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
         callback: () => {}, // Callback handled by component
         auto_select: false,
-        cancel_on_tap_outside: true
+        cancel_on_tap_outside: true,
       });
 
       resolve(true);
@@ -344,16 +344,13 @@ export const promptGoogleOneTap = () => {
  */
 export const renderGoogleButton = (elementId, options = {}) => {
   if (typeof window !== 'undefined' && window.google) {
-    window.google.accounts.id.renderButton(
-      document.getElementById(elementId),
-      {
-        theme: 'outline',
-        size: 'large',
-        text: 'signin_with',
-        shape: 'rectangular',
-        ...options
-      }
-    );
+    window.google.accounts.id.renderButton(document.getElementById(elementId), {
+      theme: 'outline',
+      size: 'large',
+      text: 'signin_with',
+      shape: 'rectangular',
+      ...options,
+    });
   }
 };
 
@@ -386,7 +383,7 @@ const authService = {
   // Google OAuth
   initGoogleAuth,
   promptGoogleOneTap,
-  renderGoogleButton
+  renderGoogleButton,
 };
 
 export default authService;

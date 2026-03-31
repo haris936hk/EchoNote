@@ -7,7 +7,7 @@ import {
   ModalFooter,
   Button,
   Input,
-  Textarea
+  Textarea,
 } from '@heroui/react';
 import { FiEdit, FiX } from 'react-icons/fi';
 
@@ -58,7 +58,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
     try {
       await onSave({
         title: title.trim(),
-        description: description.trim()
+        description: description.trim(),
       });
       onClose();
     } catch (error) {
@@ -86,12 +86,12 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
       backdrop="blur"
       hideCloseButton={true}
       classNames={{
-        wrapper: "z-[999]",
-        backdrop: "bg-black/50 backdrop-blur-sm",
-        base: "border border-divider/50 bg-content1/95 backdrop-blur-xl rounded-3xl",
-        header: "border-b border-divider/50",
-        body: "py-6",
-        footer: "border-t border-divider/50"
+        wrapper: 'z-[999]',
+        backdrop: 'bg-black/50 backdrop-blur-sm',
+        base: 'border border-divider/50 bg-content1/95 backdrop-blur-xl rounded-3xl',
+        header: 'border-b border-divider/50',
+        body: 'py-6',
+        footer: 'border-t border-divider/50',
       }}
     >
       <ModalContent>
@@ -105,7 +105,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
               <div className="space-y-5">
                 {/* Title Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label className="text-foreground text-sm font-medium">
                     Meeting Title <span className="text-danger">*</span>
                   </label>
                   <Input
@@ -115,9 +115,10 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                     errorMessage={titleError}
                     variant="bordered"
                     classNames={{
-                      input: "bg-transparent",
-                      inputWrapper: "rounded-xl border-divider/50 bg-default-100/50 hover:bg-default-200/50 hover:border-primary/30 transition-all duration-200",
-                      errorMessage: "text-xs mt-1"
+                      input: 'bg-transparent',
+                      inputWrapper:
+                        'rounded-xl border-divider/50 bg-default-100/50 hover:bg-default-200/50 hover:border-primary/30 transition-all duration-200',
+                      errorMessage: 'text-xs mt-1',
                     }}
                     autoFocus
                   />
@@ -125,7 +126,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
 
                 {/* Description Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Description</label>
+                  <label className="text-foreground text-sm font-medium">Description</label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -133,8 +134,9 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                     maxRows={6}
                     variant="bordered"
                     classNames={{
-                      input: "bg-transparent",
-                      inputWrapper: "rounded-xl border-divider/50 bg-default-100/50 hover:bg-default-200/50 hover:border-primary/30 transition-all duration-200"
+                      input: 'bg-transparent',
+                      inputWrapper:
+                        'rounded-xl border-divider/50 bg-default-100/50 hover:bg-default-200/50 hover:border-primary/30 transition-all duration-200',
                     }}
                   />
                 </div>
@@ -145,7 +147,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                 variant="flat"
                 onPress={handleClose}
                 isDisabled={isSubmitting}
-                className="rounded-xl hover:bg-default-200 transition-all duration-200"
+                className="hover:bg-default-200 rounded-xl transition-all duration-200"
                 startContent={<FiX size={16} />}
               >
                 Cancel
@@ -154,7 +156,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                 color="primary"
                 onPress={handleSubmit}
                 isLoading={isSubmitting}
-                className="rounded-xl font-medium hover:scale-105 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
+                className="hover:shadow-primary/30 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
               >
                 Save Changes
               </Button>

@@ -178,7 +178,7 @@ export const setItemWithExpiry = (key, value, ttlMs) => {
     const now = new Date();
     const item = {
       value: value,
-      expiry: now.getTime() + ttlMs
+      expiry: now.getTime() + ttlMs,
     };
     localStorage.setItem(key, JSON.stringify(item));
     return { success: true };
@@ -284,8 +284,8 @@ export const clearCache = (key) => {
 export const clearAllCache = () => {
   try {
     const keys = getLocalKeys();
-    const cacheKeys = keys.filter(key => key.startsWith('cache_'));
-    cacheKeys.forEach(key => localStorage.removeItem(key));
+    const cacheKeys = keys.filter((key) => key.startsWith('cache_'));
+    cacheKeys.forEach((key) => localStorage.removeItem(key));
     return { success: true };
   } catch (error) {
     console.error('Clear all cache error:', error);
@@ -331,18 +331,18 @@ export const toggleTheme = () => {
 export const addToRecent = (listKey, item, maxItems = 10) => {
   try {
     let recent = getLocalItem(listKey, []);
-    
+
     // Remove duplicates
-    recent = recent.filter(i => i.id !== item.id);
-    
+    recent = recent.filter((i) => i.id !== item.id);
+
     // Add to beginning
     recent.unshift(item);
-    
+
     // Limit size
     if (recent.length > maxItems) {
       recent = recent.slice(0, maxItems);
     }
-    
+
     setLocalItem(listKey, recent);
     return { success: true };
   } catch (error) {
@@ -376,13 +376,13 @@ export const clearRecent = (listKey) => {
 export const addToFavorites = (item) => {
   try {
     const favorites = getLocalItem('favorites', []);
-    
+
     // Check if already exists
-    const exists = favorites.some(f => f.id === item.id);
+    const exists = favorites.some((f) => f.id === item.id);
     if (exists) {
       return { success: false, error: 'Item already in favorites' };
     }
-    
+
     favorites.push(item);
     setLocalItem('favorites', favorites);
     return { success: true };
@@ -398,7 +398,7 @@ export const addToFavorites = (item) => {
 export const removeFromFavorites = (itemId) => {
   try {
     let favorites = getLocalItem('favorites', []);
-    favorites = favorites.filter(f => f.id !== itemId);
+    favorites = favorites.filter((f) => f.id !== itemId);
     setLocalItem('favorites', favorites);
     return { success: true };
   } catch (error) {
@@ -419,7 +419,7 @@ export const getFavorites = () => {
  */
 export const isFavorite = (itemId) => {
   const favorites = getFavorites();
-  return favorites.some(f => f.id === itemId);
+  return favorites.some((f) => f.id === itemId);
 };
 
 /**
@@ -477,9 +477,7 @@ export const getStorageQuota = async () => {
         quota: estimate.quota || 0,
         usageInMB: ((estimate.usage || 0) / (1024 * 1024)).toFixed(2),
         quotaInMB: ((estimate.quota || 0) / (1024 * 1024)).toFixed(2),
-        percentUsed: estimate.quota
-          ? ((estimate.usage / estimate.quota) * 100).toFixed(2)
-          : 0
+        percentUsed: estimate.quota ? ((estimate.usage / estimate.quota) * 100).toFixed(2) : 0,
       };
     }
     return null;
@@ -519,11 +517,11 @@ export const cleanupExpiredItems = () => {
     const keys = getLocalKeys();
     let cleaned = 0;
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       try {
         const itemStr = localStorage.getItem(key);
         const item = JSON.parse(itemStr);
-        
+
         // Check if item has expiry field
         if (item && item.expiry) {
           const now = new Date().getTime();
@@ -604,7 +602,7 @@ const storageService = {
 
   // Utilities
   migrateData,
-  cleanupExpiredItems
+  cleanupExpiredItems,
 };
 
 export default storageService;

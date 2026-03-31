@@ -3,7 +3,13 @@
  * Functions for validating user input, forms, and data
  */
 
-import { VALIDATION, REGEX_PATTERNS, SUPPORTED_AUDIO_TYPES, MAX_AUDIO_FILE_SIZE, MAX_RECORDING_TIME } from './constants';
+import {
+  VALIDATION,
+  REGEX_PATTERNS,
+  SUPPORTED_AUDIO_TYPES,
+  MAX_AUDIO_FILE_SIZE,
+  MAX_RECORDING_TIME,
+} from './constants';
 
 // ============================================
 // MEETING VALIDATION
@@ -16,7 +22,7 @@ export const validateMeetingTitle = (title) => {
   if (!title || title.trim() === '') {
     return {
       isValid: false,
-      error: 'Meeting title is required'
+      error: 'Meeting title is required',
     };
   }
 
@@ -25,14 +31,14 @@ export const validateMeetingTitle = (title) => {
   if (trimmedTitle.length < VALIDATION.MEETING_TITLE.MIN_LENGTH) {
     return {
       isValid: false,
-      error: `Title must be at least ${VALIDATION.MEETING_TITLE.MIN_LENGTH} characters`
+      error: `Title must be at least ${VALIDATION.MEETING_TITLE.MIN_LENGTH} characters`,
     };
   }
 
   if (trimmedTitle.length > VALIDATION.MEETING_TITLE.MAX_LENGTH) {
     return {
       isValid: false,
-      error: `Title must be less than ${VALIDATION.MEETING_TITLE.MAX_LENGTH} characters`
+      error: `Title must be less than ${VALIDATION.MEETING_TITLE.MAX_LENGTH} characters`,
     };
   }
 
@@ -50,7 +56,7 @@ export const validateMeetingDescription = (description) => {
   if (description.length > VALIDATION.MEETING_DESCRIPTION.MAX_LENGTH) {
     return {
       isValid: false,
-      error: `Description must be less than ${VALIDATION.MEETING_DESCRIPTION.MAX_LENGTH} characters`
+      error: `Description must be less than ${VALIDATION.MEETING_DESCRIPTION.MAX_LENGTH} characters`,
     };
   }
 
@@ -66,14 +72,14 @@ export const validateMeetingCategory = (category) => {
   if (!category) {
     return {
       isValid: false,
-      error: 'Category is required'
+      error: 'Category is required',
     };
   }
 
   if (!validCategories.includes(category)) {
     return {
       isValid: false,
-      error: 'Invalid category selected'
+      error: 'Invalid category selected',
     };
   }
 
@@ -106,7 +112,7 @@ export const validateMeetingData = (data) => {
 
   return {
     isValid: Object.keys(errors).length === 0,
-    errors
+    errors,
   };
 };
 
@@ -121,14 +127,14 @@ export const validateAudioFileType = (file) => {
   if (!file) {
     return {
       isValid: false,
-      error: 'No file provided'
+      error: 'No file provided',
     };
   }
 
   if (!SUPPORTED_AUDIO_TYPES.includes(file.type)) {
     return {
       isValid: false,
-      error: 'Invalid file type. Please upload an audio file (MP3, WAV, WEBM, OGG, M4A)'
+      error: 'Invalid file type. Please upload an audio file (MP3, WAV, WEBM, OGG, M4A)',
     };
   }
 
@@ -142,7 +148,7 @@ export const validateAudioFileSize = (file) => {
   if (!file) {
     return {
       isValid: false,
-      error: 'No file provided'
+      error: 'No file provided',
     };
   }
 
@@ -150,14 +156,14 @@ export const validateAudioFileSize = (file) => {
     const maxSizeMB = (MAX_AUDIO_FILE_SIZE / (1024 * 1024)).toFixed(0);
     return {
       isValid: false,
-      error: `File size exceeds ${maxSizeMB}MB limit`
+      error: `File size exceeds ${maxSizeMB}MB limit`,
     };
   }
 
   if (file.size === 0) {
     return {
       isValid: false,
-      error: 'File is empty'
+      error: 'File is empty',
     };
   }
 
@@ -172,7 +178,7 @@ export const validateAudioFile = (file) => {
   if (!file) {
     return {
       isValid: false,
-      error: 'No audio file provided'
+      error: 'No audio file provided',
     };
   }
 
@@ -208,7 +214,7 @@ export const validateAudioFileDuration = (file) => {
       if (!duration || duration === 0 || isNaN(duration)) {
         resolve({
           isValid: false,
-          error: 'Could not determine audio duration'
+          error: 'Could not determine audio duration',
         });
         return;
       }
@@ -222,14 +228,14 @@ export const validateAudioFileDuration = (file) => {
         resolve({
           isValid: false,
           error: `Audio duration (${durationMinutes}m ${durationSeconds}s) exceeds ${maxMinutes}-minute limit`,
-          duration: duration
+          duration: duration,
         });
         return;
       }
 
       resolve({
         isValid: true,
-        duration: duration
+        duration: duration,
       });
     });
 
@@ -237,7 +243,7 @@ export const validateAudioFileDuration = (file) => {
       URL.revokeObjectURL(objectUrl);
       resolve({
         isValid: false,
-        error: 'Could not load audio file. The file may be corrupted or in an unsupported format.'
+        error: 'Could not load audio file. The file may be corrupted or in an unsupported format.',
       });
     });
 
@@ -256,14 +262,14 @@ export const validateEmail = (email) => {
   if (!email || email.trim() === '') {
     return {
       isValid: false,
-      error: 'Email is required'
+      error: 'Email is required',
     };
   }
 
   if (!REGEX_PATTERNS.EMAIL.test(email)) {
     return {
       isValid: false,
-      error: 'Invalid email format'
+      error: 'Invalid email format',
     };
   }
 
@@ -277,7 +283,7 @@ export const validateName = (name) => {
   if (!name || name.trim() === '') {
     return {
       isValid: false,
-      error: 'Name is required'
+      error: 'Name is required',
     };
   }
 
@@ -286,14 +292,14 @@ export const validateName = (name) => {
   if (trimmedName.length < VALIDATION.USER_NAME.MIN_LENGTH) {
     return {
       isValid: false,
-      error: `Name must be at least ${VALIDATION.USER_NAME.MIN_LENGTH} characters`
+      error: `Name must be at least ${VALIDATION.USER_NAME.MIN_LENGTH} characters`,
     };
   }
 
   if (trimmedName.length > VALIDATION.USER_NAME.MAX_LENGTH) {
     return {
       isValid: false,
-      error: `Name must be less than ${VALIDATION.USER_NAME.MAX_LENGTH} characters`
+      error: `Name must be less than ${VALIDATION.USER_NAME.MAX_LENGTH} characters`,
     };
   }
 
@@ -307,14 +313,14 @@ export const validateURL = (url) => {
   if (!url || url.trim() === '') {
     return {
       isValid: false,
-      error: 'URL is required'
+      error: 'URL is required',
     };
   }
 
   if (!REGEX_PATTERNS.URL.test(url)) {
     return {
       isValid: false,
-      error: 'Invalid URL format'
+      error: 'Invalid URL format',
     };
   }
 
@@ -328,14 +334,14 @@ export const validatePhone = (phone) => {
   if (!phone || phone.trim() === '') {
     return {
       isValid: false,
-      error: 'Phone number is required'
+      error: 'Phone number is required',
     };
   }
 
   if (!REGEX_PATTERNS.PHONE.test(phone)) {
     return {
       isValid: false,
-      error: 'Invalid phone number format'
+      error: 'Invalid phone number format',
     };
   }
 
@@ -354,7 +360,7 @@ export const validatePassword = (password, minLength = 8) => {
     return {
       isValid: false,
       error: 'Password is required',
-      strength: 'none'
+      strength: 'none',
     };
   }
 
@@ -362,7 +368,7 @@ export const validatePassword = (password, minLength = 8) => {
     return {
       isValid: false,
       error: `Password must be at least ${minLength} characters`,
-      strength: 'weak'
+      strength: 'weak',
     };
   }
 
@@ -372,7 +378,7 @@ export const validatePassword = (password, minLength = 8) => {
     hasUpper: /[A-Z]/.test(password),
     hasNumber: /\d/.test(password),
     hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    hasLength: password.length >= 12
+    hasLength: password.length >= 12,
   };
 
   // Calculate strength
@@ -390,7 +396,7 @@ export const validatePassword = (password, minLength = 8) => {
     isValid: strength >= 3,
     error: strength < 3 ? 'Password is too weak' : null,
     strength: strengthLabel,
-    checks
+    checks,
   };
 };
 
@@ -401,14 +407,14 @@ export const validatePasswordConfirmation = (password, confirmation) => {
   if (!confirmation) {
     return {
       isValid: false,
-      error: 'Password confirmation is required'
+      error: 'Password confirmation is required',
     };
   }
 
   if (password !== confirmation) {
     return {
       isValid: false,
-      error: 'Passwords do not match'
+      error: 'Passwords do not match',
     };
   }
 
@@ -426,7 +432,7 @@ export const validateSearchQuery = (query, minLength = 2, maxLength = 100) => {
   if (!query || query.trim() === '') {
     return {
       isValid: false,
-      error: 'Search query is required'
+      error: 'Search query is required',
     };
   }
 
@@ -435,14 +441,14 @@ export const validateSearchQuery = (query, minLength = 2, maxLength = 100) => {
   if (trimmedQuery.length < minLength) {
     return {
       isValid: false,
-      error: `Search query must be at least ${minLength} characters`
+      error: `Search query must be at least ${minLength} characters`,
     };
   }
 
   if (trimmedQuery.length > maxLength) {
     return {
       isValid: false,
-      error: `Search query must be less than ${maxLength} characters`
+      error: `Search query must be less than ${maxLength} characters`,
     };
   }
 
@@ -460,7 +466,7 @@ export const validateNumberRange = (value, min, max) => {
   if (value === null || value === undefined || value === '') {
     return {
       isValid: false,
-      error: 'Value is required'
+      error: 'Value is required',
     };
   }
 
@@ -469,21 +475,21 @@ export const validateNumberRange = (value, min, max) => {
   if (isNaN(num)) {
     return {
       isValid: false,
-      error: 'Value must be a number'
+      error: 'Value must be a number',
     };
   }
 
   if (min !== undefined && num < min) {
     return {
       isValid: false,
-      error: `Value must be at least ${min}`
+      error: `Value must be at least ${min}`,
     };
   }
 
   if (max !== undefined && num > max) {
     return {
       isValid: false,
-      error: `Value must be at most ${max}`
+      error: `Value must be at most ${max}`,
     };
   }
 
@@ -499,14 +505,14 @@ export const validatePositiveNumber = (value) => {
   if (isNaN(num)) {
     return {
       isValid: false,
-      error: 'Value must be a number'
+      error: 'Value must be a number',
     };
   }
 
   if (num <= 0) {
     return {
       isValid: false,
-      error: 'Value must be positive'
+      error: 'Value must be positive',
     };
   }
 
@@ -524,7 +530,7 @@ export const validateDate = (date) => {
   if (!date) {
     return {
       isValid: false,
-      error: 'Date is required'
+      error: 'Date is required',
     };
   }
 
@@ -533,7 +539,7 @@ export const validateDate = (date) => {
   if (isNaN(dateObj.getTime())) {
     return {
       isValid: false,
-      error: 'Invalid date format'
+      error: 'Invalid date format',
     };
   }
 
@@ -548,7 +554,7 @@ export const validateDateRange = (startDate, endDate) => {
   if (!startValidation.isValid) {
     return {
       isValid: false,
-      error: 'Invalid start date'
+      error: 'Invalid start date',
     };
   }
 
@@ -556,7 +562,7 @@ export const validateDateRange = (startDate, endDate) => {
   if (!endValidation.isValid) {
     return {
       isValid: false,
-      error: 'Invalid end date'
+      error: 'Invalid end date',
     };
   }
 
@@ -566,7 +572,7 @@ export const validateDateRange = (startDate, endDate) => {
   if (start > end) {
     return {
       isValid: false,
-      error: 'Start date must be before end date'
+      error: 'Start date must be before end date',
     };
   }
 
@@ -588,7 +594,7 @@ export const validateFutureDate = (date) => {
   if (dateObj <= now) {
     return {
       isValid: false,
-      error: 'Date must be in the future'
+      error: 'Date must be in the future',
     };
   }
 
@@ -606,14 +612,14 @@ export const validateRequired = (value, fieldName = 'Field') => {
   if (value === null || value === undefined || value === '') {
     return {
       isValid: false,
-      error: `${fieldName} is required`
+      error: `${fieldName} is required`,
     };
   }
 
   if (typeof value === 'string' && value.trim() === '') {
     return {
       isValid: false,
-      error: `${fieldName} is required`
+      error: `${fieldName} is required`,
     };
   }
 
@@ -631,7 +637,7 @@ export const validateMinLength = (value, minLength, fieldName = 'Field') => {
   if (value.length < minLength) {
     return {
       isValid: false,
-      error: `${fieldName} must be at least ${minLength} characters`
+      error: `${fieldName} must be at least ${minLength} characters`,
     };
   }
 
@@ -649,7 +655,7 @@ export const validateMaxLength = (value, maxLength, fieldName = 'Field') => {
   if (value.length > maxLength) {
     return {
       isValid: false,
-      error: `${fieldName} must be less than ${maxLength} characters`
+      error: `${fieldName} must be less than ${maxLength} characters`,
     };
   }
 
@@ -667,7 +673,7 @@ export const validatePattern = (value, pattern, errorMessage) => {
   if (!pattern.test(value)) {
     return {
       isValid: false,
-      error: errorMessage || 'Invalid format'
+      error: errorMessage || 'Invalid format',
     };
   }
 
@@ -701,7 +707,7 @@ export const validateForm = (formData, validationRules) => {
   for (const [field, validators] of Object.entries(validationRules)) {
     const value = formData[field];
     const result = runValidators(value, validators);
-    
+
     if (!result.isValid) {
       errors[field] = result.error;
       isValid = false;
@@ -720,7 +726,7 @@ export const validateForm = (formData, validationRules) => {
  */
 export const sanitizeString = (str) => {
   if (!str) return '';
-  
+
   return str
     .trim()
     .replace(/[<>]/g, '') // Remove potential HTML tags
@@ -732,7 +738,7 @@ export const sanitizeString = (str) => {
  */
 export const sanitizeFilename = (filename) => {
   if (!filename) return '';
-  
+
   return filename
     .replace(/[^a-zA-Z0-9._-]/g, '_')
     .replace(/_{2,}/g, '_')
@@ -788,7 +794,7 @@ const validators = {
 
   // Sanitization
   sanitizeString,
-  sanitizeFilename
+  sanitizeFilename,
 };
 
 export default validators;

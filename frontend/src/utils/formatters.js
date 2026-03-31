@@ -12,14 +12,14 @@
  */
 export const formatDate = (date, options = {}) => {
   if (!date) return '';
-  
+
   try {
     const dateObj = new Date(date);
     const defaultOptions = {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-      ...options
+      ...options,
     };
     return dateObj.toLocaleDateString('en-US', defaultOptions);
   } catch (error) {
@@ -33,7 +33,7 @@ export const formatDate = (date, options = {}) => {
  */
 export const formatDateTime = (date, options = {}) => {
   if (!date) return '';
-  
+
   try {
     const dateObj = new Date(date);
     const defaultOptions = {
@@ -42,7 +42,7 @@ export const formatDateTime = (date, options = {}) => {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      ...options
+      ...options,
     };
     return dateObj.toLocaleString('en-US', defaultOptions);
   } catch (error) {
@@ -56,12 +56,12 @@ export const formatDateTime = (date, options = {}) => {
  */
 export const formatTime = (date) => {
   if (!date) return '';
-  
+
   try {
     const dateObj = new Date(date);
     return dateObj.toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   } catch (error) {
     console.error('Time format error:', error);
@@ -74,7 +74,7 @@ export const formatTime = (date) => {
  */
 export const formatRelativeTime = (date) => {
   if (!date) return '';
-  
+
   try {
     const dateObj = new Date(date);
     const now = new Date();
@@ -115,7 +115,7 @@ export const formatRelativeTime = (date) => {
  */
 export const getFriendlyDate = (date) => {
   if (!date) return '';
-  
+
   try {
     const dateObj = new Date(date);
     const today = new Date();
@@ -145,14 +145,14 @@ export const getFriendlyDate = (date) => {
  */
 export const formatISODate = (isoString) => {
   if (!isoString) return '';
-  
+
   try {
     const date = new Date(isoString);
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   } catch (error) {
     console.error('ISO date format error:', error);
@@ -169,7 +169,7 @@ export const formatISODate = (isoString) => {
  */
 export const formatDurationShort = (seconds) => {
   if (!seconds || seconds === 0) return '0:00';
-  
+
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -180,7 +180,7 @@ export const formatDurationShort = (seconds) => {
  */
 export const formatDuration = (seconds) => {
   if (!seconds || seconds === 0) return '0s';
-  
+
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
@@ -198,7 +198,7 @@ export const formatDuration = (seconds) => {
  */
 export const formatDurationLong = (seconds) => {
   if (!seconds || seconds === 0) return '0 seconds';
-  
+
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
@@ -211,7 +211,7 @@ export const formatDurationLong = (seconds) => {
   if (parts.length === 0) return '0 seconds';
   if (parts.length === 1) return parts[0];
   if (parts.length === 2) return parts.join(' and ');
-  
+
   const last = parts.pop();
   return parts.join(', ') + ', and ' + last;
 };
@@ -281,10 +281,10 @@ export const formatPercentage = (value, decimals = 0) => {
  */
 export const formatCurrency = (amount, currency = 'USD') => {
   if (amount === null || amount === undefined) return '$0.00';
-  
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency
+    currency: currency,
   }).format(amount);
 };
 
@@ -293,16 +293,16 @@ export const formatCurrency = (amount, currency = 'USD') => {
  */
 export const formatCompactNumber = (number) => {
   if (!number || number === 0) return '0';
-  
+
   const suffixes = ['', 'K', 'M', 'B', 'T'];
   const tier = Math.floor(Math.log10(Math.abs(number)) / 3);
-  
+
   if (tier === 0) return number.toString();
-  
+
   const suffix = suffixes[tier];
   const scale = Math.pow(10, tier * 3);
   const scaled = number / scale;
-  
+
   return scaled.toFixed(1) + suffix;
 };
 
@@ -316,7 +316,7 @@ export const formatCompactNumber = (number) => {
 export const truncateText = (text, maxLength = 50, suffix = '...') => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
-  
+
   return text.substring(0, maxLength - suffix.length) + suffix;
 };
 
@@ -325,10 +325,10 @@ export const truncateText = (text, maxLength = 50, suffix = '...') => {
  */
 export const truncateWords = (text, maxWords = 10, suffix = '...') => {
   if (!text) return '';
-  
+
   const words = text.split(/\s+/);
   if (words.length <= maxWords) return text;
-  
+
   return words.slice(0, maxWords).join(' ') + suffix;
 };
 
@@ -345,11 +345,11 @@ export const capitalize = (text) => {
  */
 export const titleCase = (text) => {
   if (!text) return '';
-  
+
   return text
     .toLowerCase()
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
 
@@ -358,7 +358,7 @@ export const titleCase = (text) => {
  */
 export const toKebabCase = (text) => {
   if (!text) return '';
-  
+
   return text
     .toLowerCase()
     .replace(/\s+/g, '-')
@@ -370,7 +370,7 @@ export const toKebabCase = (text) => {
  */
 export const toSnakeCase = (text) => {
   if (!text) return '';
-  
+
   return text
     .toLowerCase()
     .replace(/\s+/g, '_')
@@ -382,10 +382,8 @@ export const toSnakeCase = (text) => {
  */
 export const toCamelCase = (text) => {
   if (!text) return '';
-  
-  return text
-    .toLowerCase()
-    .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+
+  return text.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 };
 
 /**
@@ -393,13 +391,13 @@ export const toCamelCase = (text) => {
  */
 export const getInitials = (name, maxLength = 2) => {
   if (!name) return '';
-  
+
   const words = name.trim().split(/\s+/);
   const initials = words
-    .map(word => word.charAt(0).toUpperCase())
+    .map((word) => word.charAt(0).toUpperCase())
     .join('')
     .substring(0, maxLength);
-  
+
   return initials;
 };
 
@@ -420,15 +418,15 @@ export const pluralize = (word, count, suffix = 's') => {
  */
 export const formatCategory = (category) => {
   if (!category) return '';
-  
+
   const categoryMap = {
     SALES: 'Sales',
     PLANNING: 'Planning',
     STANDUP: 'Standup',
     ONE_ON_ONE: 'One-on-One',
-    OTHER: 'Other'
+    OTHER: 'Other',
   };
-  
+
   return categoryMap[category] || capitalize(category);
 };
 
@@ -437,14 +435,14 @@ export const formatCategory = (category) => {
  */
 export const formatStatus = (status) => {
   if (!status) return '';
-  
+
   const statusMap = {
     PENDING: 'Pending',
     PROCESSING: 'Processing',
     COMPLETED: 'Completed',
-    FAILED: 'Failed'
+    FAILED: 'Failed',
   };
-  
+
   return statusMap[status] || capitalize(status);
 };
 
@@ -465,14 +463,15 @@ export const formatURL = (url) => {
  */
 export const maskEmail = (email) => {
   if (!email) return '';
-  
+
   const [username, domain] = email.split('@');
   if (!username || !domain) return email;
-  
-  const maskedUsername = username.charAt(0) + 
-    '*'.repeat(Math.min(username.length - 1, 3)) + 
+
+  const maskedUsername =
+    username.charAt(0) +
+    '*'.repeat(Math.min(username.length - 1, 3)) +
     username.charAt(username.length - 1);
-  
+
   return `${maskedUsername}@${domain}`;
 };
 
@@ -511,7 +510,7 @@ export const formatList = (array, conjunction = 'and') => {
   if (!array || array.length === 0) return '';
   if (array.length === 1) return array[0];
   if (array.length === 2) return array.join(` ${conjunction} `);
-  
+
   const last = array[array.length - 1];
   const rest = array.slice(0, -1);
   return `${rest.join(', ')}, ${conjunction} ${last}`;
@@ -529,24 +528,24 @@ export default {
   formatRelativeTime,
   getFriendlyDate,
   formatISODate,
-  
+
   // Duration
   formatDurationShort,
   formatDuration,
   formatDurationLong,
   msToSeconds,
-  
+
   // File Size
   formatFileSize,
   bytesToKB,
   bytesToMB,
-  
+
   // Numbers
   formatNumber,
   formatPercentage,
   formatCurrency,
   formatCompactNumber,
-  
+
   // Text
   truncateText,
   truncateWords,
@@ -557,19 +556,19 @@ export default {
   toCamelCase,
   getInitials,
   pluralize,
-  
+
   // Category & Status
   formatCategory,
   formatStatus,
-  
+
   // URL & Email
   formatURL,
   maskEmail,
-  
+
   // Validation
   isValidDate,
   isValidEmail,
-  
+
   // Array
-  formatList
+  formatList,
 };

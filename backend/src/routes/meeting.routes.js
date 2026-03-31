@@ -8,7 +8,7 @@ const {
   authenticate,
   authenticateMedia,
   authorize,
-  requireCompletedMeeting
+  requireCompletedMeeting,
 } = require('../middleware/auth.middleware');
 const { uploadLimiter, searchLimiter } = require('../middleware/rateLimit.middleware');
 const {
@@ -19,13 +19,13 @@ const {
   validateUUIDParam,
   validateDownloadFormat,
   sanitizeBody,
-  sanitizeQuery
+  sanitizeQuery,
 } = require('../middleware/validation.middleware');
 const {
   uploadAudio,
   validateAudioFile,
   validateAudioDuration,
-  handleMulterError
+  handleMulterError,
 } = require('../middleware/upload.middleware');
 
 /**
@@ -34,11 +34,7 @@ const {
  * @access  Private
  * @returns { success, data: { overview, byCategory, metrics } }
  */
-router.get(
-  '/stats',
-  authenticate,
-  meetingController.getMeetingStats
-);
+router.get('/stats', authenticate, meetingController.getMeetingStats);
 
 /**
  * @route   GET /api/meetings/search
@@ -62,11 +58,7 @@ router.get(
  * @access  Private
  * @returns ZIP file with meeting folders containing audio.mp3, transcript.txt, summary.txt
  */
-router.get(
-  '/export',
-  authenticate,
-  meetingController.exportAllMeetings
-);
+router.get('/export', authenticate, meetingController.exportAllMeetings);
 
 /**
  * @route   GET /api/meetings
@@ -75,13 +67,7 @@ router.get(
  * @query   page=<number>&limit=<number>&category=<category>&status=<status>&search=<query>&sortBy=<field>&sortOrder=<asc|desc>
  * @returns { success, data: [meetings], pagination }
  */
-router.get(
-  '/',
-  authenticate,
-  sanitizeQuery,
-  validatePagination,
-  meetingController.getMeetings
-);
+router.get('/', authenticate, sanitizeQuery, validatePagination, meetingController.getMeetings);
 
 /**
  * @route   POST /api/meetings/upload
@@ -322,7 +308,7 @@ router.post(
     res.status(501).json({
       success: false,
       error: 'Reprocessing feature not yet implemented',
-      code: 'NOT_IMPLEMENTED'
+      code: 'NOT_IMPLEMENTED',
     });
   }
 );
@@ -344,7 +330,7 @@ router.post(
     res.status(501).json({
       success: false,
       error: 'Sharing feature not yet implemented',
-      code: 'NOT_IMPLEMENTED'
+      code: 'NOT_IMPLEMENTED',
     });
   }
 );
@@ -366,7 +352,7 @@ router.get(
     res.status(501).json({
       success: false,
       error: 'Analytics feature not yet implemented',
-      code: 'NOT_IMPLEMENTED'
+      code: 'NOT_IMPLEMENTED',
     });
   }
 );
@@ -378,19 +364,14 @@ router.get(
  * @body    { meetingIds: [id1, id2, ...] }
  * @returns { success, data: { deleted, failed }, message }
  */
-router.post(
-  '/batch-delete',
-  authenticate,
-  sanitizeBody,
-  (req, res) => {
-    // Future feature - batch operations
-    res.status(501).json({
-      success: false,
-      error: 'Batch delete not yet implemented',
-      code: 'NOT_IMPLEMENTED'
-    });
-  }
-);
+router.post('/batch-delete', authenticate, sanitizeBody, (req, res) => {
+  // Future feature - batch operations
+  res.status(501).json({
+    success: false,
+    error: 'Batch delete not yet implemented',
+    code: 'NOT_IMPLEMENTED',
+  });
+});
 
 /**
  * @route   GET /api/meetings/categories
@@ -398,15 +379,12 @@ router.post(
  * @access  Public
  * @returns { success, data: [categories] }
  */
-router.get(
-  '/categories',
-  (req, res) => {
-    res.status(200).json({
-      success: true,
-      data: ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'],
-      message: 'Available meeting categories'
-    });
-  }
-);
+router.get('/categories', (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'],
+    message: 'Available meeting categories',
+  });
+});
 
 module.exports = router;

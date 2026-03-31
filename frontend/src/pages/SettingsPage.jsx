@@ -1,160 +1,115 @@
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Tabs,
-  Tab,
-  Divider,
-  Select,
-  SelectItem,
-  Button,
-  Accordion,
-  AccordionItem
-} from '@heroui/react';
-import {
-  FiUser,
-  FiSettings,
-  FiShield,
-  FiHelpCircle,
-  FiCheck,
-  FiDownload,
-  FiTrash2,
-  FiLogOut
-} from 'react-icons/fi';
-import ProfileSettings from '../components/user/ProfileSettings';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Select, SelectItem, Accordion, AccordionItem } from '@heroui/react';
+import { LuUser as User, LuSettings as Settings, LuShield as Shield, LuHelpCircle as HelpCircle, LuCheck as Check, LuDownload as Download, LuTrash2 as Trash2, LuLogOut as LogOut, LuBookOpen as BookOpen, LuMessageSquare as MessageSquare, LuBug as Bug, LuLightbulb as Lightbulb, LuChevronRight as ChevronRight } from 'react-icons/lu';
+import ProfileSettings from '../components/user/ProfileSettings';
+import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 import { showToast } from '../components/common/Toast';
+
+const TABS = [
+  { key: 'profile', label: 'Profile', icon: User },
+  { key: 'preferences', label: 'Preferences', icon: Settings },
+  { key: 'privacy', label: 'Privacy & Data', icon: Shield },
+  { key: 'help', label: 'Help & FAQ', icon: HelpCircle },
+];
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'profile':
+        return <ProfileSettings />;
+      case 'preferences':
+        return <PreferencesContent />;
+      case 'privacy':
+        return <PrivacyContent />;
+      case 'help':
+        return <HelpContent />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Settings</h1>
-          <p className="text-default-500">
-            Manage your account, preferences, and privacy settings
-          </p>
+    <div className="py-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Settings</h1>
+        <p className="mt-1 text-sm text-slate-400">Manage your account and preferences</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Sidebar Nav */}
+        <div className="lg:col-span-1">
+          <div className="bg-echo-surface border-echo-border sticky top-[88px] rounded-[16px] border p-3">
+            <nav className="space-y-1">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-all ${
+                      activeTab === tab.key
+                        ? 'bg-accent-primary/10 text-accent-primary'
+                        : 'hover:bg-echo-surface-hover text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
         </div>
 
-        {/* Settings Tabs */}
-        <Card className="rounded-xl">
-          <CardBody className="p-0">
-            <Tabs
-              aria-label="Settings tabs"
-              selectedKey={activeTab}
-              onSelectionChange={setActiveTab}
-              variant="underlined"
-              classNames={{
-                tabList: 'w-full relative rounded-t-xl p-0 border-b border-divider',
-                cursor: 'w-full bg-primary',
-                tab: 'max-w-fit px-6 h-14',
-                tabContent: 'group-data-[selected=true]:text-primary'
-              }}
-            >
-              {/* Profile Tab */}
-              <Tab
-                key="profile"
-                title={
-                  <div className="flex items-center gap-2">
-                    <FiUser size={18} />
-                    <span>Profile</span>
-                  </div>
-                }
-              >
-                <div className="p-6">
-                  <ProfileSettings />
-                </div>
-              </Tab>
-
-              {/* Preferences Tab */}
-              <Tab
-                key="preferences"
-                title={
-                  <div className="flex items-center gap-2">
-                    <FiSettings size={18} />
-                    <span>Preferences</span>
-                  </div>
-                }
-              >
-                <div className="p-6">
-                  <PreferencesContent />
-                </div>
-              </Tab>
-
-              {/* Privacy Tab */}
-              <Tab
-                key="privacy"
-                title={
-                  <div className="flex items-center gap-2">
-                    <FiShield size={18} />
-                    <span>Privacy & Data</span>
-                  </div>
-                }
-              >
-                <div className="p-6">
-                  <PrivacyContent />
-                </div>
-              </Tab>
-
-              {/* Help Tab */}
-              <Tab
-                key="help"
-                title={
-                  <div className="flex items-center gap-2">
-                    <FiHelpCircle size={18} />
-                    <span>Help</span>
-                  </div>
-                }
-              >
-                <div className="p-6">
-                  <HelpContent />
-                </div>
-              </Tab>
-            </Tabs>
-          </CardBody>
-        </Card>
+        {/* Content */}
+        <div className="lg:col-span-3">{renderContent()}</div>
       </div>
     </div>
   );
 };
 
-// Preferences Content Component
+// ─── Toggle Component ───
+const Toggle = ({ enabled, onToggle, color = 'bg-accent-primary' }) => (
+  <button
+    onClick={onToggle}
+    className={`relative h-6 w-11 rounded-full transition-all duration-200 ${
+      enabled ? color : 'bg-slate-600'
+    }`}
+  >
+    <span
+      className={`absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
+        enabled ? 'translate-x-5' : 'translate-x-0'
+      }`}
+    />
+  </button>
+);
+
+// ─── Preferences ───
 const PreferencesContent = () => {
-  const { isDark, toggleTheme } = useTheme();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load settings from backend on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch('/api/users/settings', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
             setEmailNotifications(data.data.emailNotifications ?? true);
-            // autoDeleteDays: if set (not null), enable auto-delete
             if (data.data.autoDeleteDays !== null && data.data.autoDeleteDays !== undefined) {
               setAutoDelete(true);
               setRetentionDays(String(data.data.autoDeleteDays));
-            } else {
-              setAutoDelete(false);
             }
           }
         }
@@ -164,7 +119,6 @@ const PreferencesContent = () => {
         setIsLoading(false);
       }
     };
-
     loadSettings();
   }, []);
 
@@ -172,32 +126,22 @@ const PreferencesContent = () => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('token');
-
-      // Build request body - send null for autoDeleteDays when disabled (never delete)
-      const requestBody = {
-        emailNotifications,
-        autoDeleteDays: autoDelete ? parseInt(retentionDays) : null
-      };
-
       const response = await fetch('/api/users/settings', {
         method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailNotifications,
+          autoDeleteDays: autoDelete ? parseInt(retentionDays) : null,
+        }),
       });
-
       const data = await response.json();
-
       if (response.ok && data.success) {
-        alert('Preferences saved successfully!');
+        showToast('Preferences saved successfully!', 'success');
       } else {
-        alert(data.error || 'Failed to save preferences. Please try again.');
+        showToast(data.error || 'Failed to save preferences', 'error');
       }
     } catch (error) {
-      console.error('Failed to save preferences:', error);
-      alert('Failed to save preferences. Please try again.');
+      showToast('Failed to save preferences.', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -205,146 +149,98 @@ const PreferencesContent = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex justify-center py-12">
+        <div className="border-accent-primary size-6 animate-spin rounded-full border-2 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-4">App Preferences</h2>
-        <p className="text-sm text-default-500 mb-6">
-          Customize your EchoNote experience
-        </p>
+    <div className="space-y-4">
+      <div className="bg-echo-surface border-echo-border space-y-5 rounded-[16px] border p-6">
+        <h2 className="text-lg font-semibold text-white">App Preferences</h2>
+
+        {/* Dark Mode — Always on */}
+        <div className="border-echo-border flex items-center justify-between border-b py-3">
+          <div>
+            <p className="text-sm font-medium text-white">Dark Mode</p>
+            <p className="text-xs text-slate-500">Always enabled for optimal viewing</p>
+          </div>
+          <Toggle enabled={true} onToggle={() => {}} />
+        </div>
+
+        {/* Email Notifications */}
+        <div className="border-echo-border flex items-center justify-between border-b py-3">
+          <div>
+            <p className="text-sm font-medium text-white">Email Notifications</p>
+            <p className="text-xs text-slate-500">Receive email when processing completes</p>
+          </div>
+          <Toggle
+            enabled={emailNotifications}
+            onToggle={() => setEmailNotifications(!emailNotifications)}
+            color="bg-emerald-500"
+          />
+        </div>
+
+        {/* Auto Delete */}
+        <div className="py-3">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-white">Auto-delete Recordings</p>
+              <p className="text-xs text-slate-500">Delete audio after retention period</p>
+            </div>
+            <Toggle
+              enabled={autoDelete}
+              onToggle={() => setAutoDelete(!autoDelete)}
+              color="bg-amber-500"
+            />
+          </div>
+          {autoDelete && (
+            <div className="mt-3">
+              <p className="mb-1.5 text-xs text-slate-400">Retention Period</p>
+              <Select
+                placeholder="Select"
+                selectedKeys={new Set([retentionDays])}
+                onSelectionChange={(keys) => {
+                  const s = Array.from(keys)[0];
+                  if (s) setRetentionDays(s);
+                }}
+                size="sm"
+                classNames={{
+                  trigger: 'bg-echo-base border border-echo-border rounded-[10px] max-w-[160px]',
+                  popoverContent: 'bg-echo-elevated border border-echo-border',
+                }}
+              >
+                <SelectItem key="7">7 days</SelectItem>
+                <SelectItem key="30">30 days</SelectItem>
+                <SelectItem key="90">90 days</SelectItem>
+                <SelectItem key="180">6 months</SelectItem>
+                <SelectItem key="365">1 year</SelectItem>
+              </Select>
+            </div>
+          )}
+        </div>
       </div>
 
-      <Card>
-        <CardBody className="gap-4">
-          {/* Dark Mode */}
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm font-medium">Dark Mode</p>
-              <p className="text-xs text-default-500">
-                Switch between light and dark theme
-              </p>
-            </div>
-            <button
-              onClick={toggleTheme}
-              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${isDark ? 'bg-primary hover:bg-primary/90' : 'bg-default-300 hover:bg-default-400'
-                }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${isDark ? 'translate-x-6' : 'translate-x-0'
-                  }`}
-              />
-            </button>
-          </div>
-
-          <Divider />
-
-          {/* Email Notifications */}
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm font-medium">Email Notifications</p>
-              <p className="text-xs text-default-500">
-                Receive email when meeting processing is complete
-              </p>
-            </div>
-            <button
-              onClick={() => setEmailNotifications(!emailNotifications)}
-              className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${emailNotifications ? 'bg-success hover:bg-success/90' : 'bg-default-300 hover:bg-default-400'
-                }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${emailNotifications ? 'translate-x-6' : 'translate-x-0'
-                  }`}
-              />
-            </button>
-          </div>
-
-          <Divider />
-
-          {/* Auto Delete */}
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <p className="text-sm font-medium">Auto-delete Recordings</p>
-                <p className="text-xs text-default-500">
-                  Automatically delete audio files after retention period
-                </p>
-              </div>
-              <button
-                onClick={() => setAutoDelete(!autoDelete)}
-                className={`relative w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${autoDelete ? 'bg-warning hover:bg-warning/90' : 'bg-default-300 hover:bg-default-400'
-                  }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${autoDelete ? 'translate-x-6' : 'translate-x-0'
-                    }`}
-                />
-              </button>
-            </div>
-
-            {autoDelete && (
-              <div className="pl-0 w-full">
-                <p className="text-sm font-medium mb-2">Retention Period</p>
-                <Select
-                  placeholder="Select retention period"
-                  selectedKeys={new Set([retentionDays])}
-                  onSelectionChange={(keys) => {
-                    const selected = Array.from(keys)[0];
-                    if (selected) setRetentionDays(selected);
-                  }}
-                  size="sm"
-                  variant="bordered"
-                  className="max-w-[140px]"
-                  classNames={{
-                    trigger: "h-9 rounded-lg bg-default-100 px-2.5",
-                    value: "text-sm",
-                    innerWrapper: "pr-5",
-                    selectorIcon: "right-1.5",
-                    popoverContent: "rounded-lg bg-content1 shadow-lg border border-default-200 w-[140px]",
-                    listboxWrapper: "rounded-lg",
-                    listbox: "p-2",
-                  }}
-                  listboxProps={{
-                    itemClasses: {
-                      base: "rounded-md px-3 py-1.5 mb-0.5 data-[hover=true]:bg-default-200 data-[selectable=true]:focus:bg-default-200 data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground transition-colors",
-                      title: "text-sm font-medium",
-                    },
-                  }}
-                  radius="lg"
-                >
-                  <SelectItem key="7" value="7">7 days</SelectItem>
-                  <SelectItem key="30" value="30">30 days</SelectItem>
-                  <SelectItem key="90" value="90">90 days</SelectItem>
-                  <SelectItem key="180" value="180">6 months</SelectItem>
-                  <SelectItem key="365" value="365">1 year</SelectItem>
-                </Select>
-              </div>
-            )}
-          </div>
-        </CardBody>
-      </Card>
-
       <div className="flex justify-end">
-        <Button
-          color="primary"
-          radius="full"
+        <button
           onClick={handleSavePreferences}
-          isLoading={isSaving}
-          startContent={!isSaving && <FiCheck size={16} />}
+          disabled={isSaving}
+          className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 text-sm font-bold disabled:opacity-50"
         >
+          {isSaving ? (
+            <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+          ) : (
+            <Check size={14} />
+          )}
           {isSaving ? 'Saving...' : 'Save Preferences'}
-        </Button>
+        </button>
       </div>
     </div>
   );
 };
 
-// Privacy Content Component
+// ─── Privacy & Data ───
 const PrivacyContent = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -361,62 +257,41 @@ const PrivacyContent = () => {
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(
-      'Are you sure you want to delete your account?\n\n' +
-      'This action cannot be undone and will permanently delete:\n' +
-      '• All your meetings\n' +
-      '• All transcripts and summaries\n' +
-      '• All audio files\n' +
-      '• Your account data\n\n' +
-      'Type "DELETE" in the next prompt to confirm.'
+      'Are you sure you want to delete your account?\n\nThis will permanently delete all meetings, transcripts, summaries, audio files, and account data.\n\nType "DELETE" in the next prompt to confirm.'
     );
-
     if (!confirmed) return;
-
-    const finalConfirmation = window.prompt(
-      'Please type "DELETE" to confirm account deletion:'
-    );
-
+    const finalConfirmation = window.prompt('Type "DELETE" to confirm:');
     if (finalConfirmation !== 'DELETE') {
       showToast('Account deletion cancelled', 'warning');
       return;
     }
-
     setIsDeleting(true);
     try {
       const result = await userAPI.deleteAccount();
-
       if (result.success) {
         showToast('Account deleted successfully', 'success');
-        // Clear all local data and logout
         logout();
         navigate('/login');
       } else {
         showToast(result.error || 'Failed to delete account', 'error');
       }
     } catch (error) {
-      console.error('Delete account error:', error);
-      showToast('Failed to delete account. Please try again.', 'error');
+      showToast('Failed to delete account.', 'error');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Fetch real statistics from backend
   useEffect(() => {
     const loadStats = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch('/api/users/stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         if (response.ok) {
           const data = await response.json();
-          if (data.success) {
-            setStats(data.data);
-          }
+          if (data.success) setStats(data.data);
         }
       } catch (error) {
         console.error('Failed to load stats:', error);
@@ -424,276 +299,209 @@ const PrivacyContent = () => {
         setIsLoading(false);
       }
     };
-
     loadStats();
   }, []);
 
-  // Helper to format bytes to readable size
   const formatBytes = (bytes) => {
     if (!bytes || bytes === 0) return '0 MB';
     const mb = bytes / (1024 * 1024);
-    if (mb < 1) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${mb.toFixed(1)} MB`;
+    return mb < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mb.toFixed(1)} MB`;
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Privacy & Data</h2>
-        <p className="text-sm text-default-500 mb-6">
-          Understand how we handle your data
-        </p>
+    <div className="space-y-4">
+      {/* Storage Stats */}
+      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Storage & Usage</h2>
+        {isLoading ? (
+          <div className="flex justify-center py-4">
+            <div className="border-accent-primary size-5 animate-spin rounded-full border-2 border-t-transparent"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {[
+              { label: 'Total Meetings', value: stats?.overview?.totalMeetings ?? 0 },
+              { label: 'Completed', value: stats?.overview?.completedMeetings ?? 0 },
+              { label: 'Storage', value: formatBytes(stats?.metrics?.storageUsedBytes) },
+              {
+                label: 'Duration',
+                value: stats?.metrics?.totalDuration
+                  ? `${Math.floor(stats.metrics.totalDuration / 60)}m`
+                  : '0m',
+              },
+            ].map((s, i) => (
+              <div key={i} className="bg-echo-base rounded-[10px] p-3">
+                <p className="mb-1 text-xs text-slate-500">{s.label}</p>
+                <p className="font-mono text-lg font-bold text-white">{s.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Data Storage */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Data Storage</h3>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-4">
-          <p className="text-sm text-default-600 leading-relaxed">
-            Your meeting recordings and transcripts are stored securely on our servers.
-            Audio files are stored temporarily and can be automatically deleted based on
-            your retention settings. Transcripts and summaries are retained until you
-            manually delete them.
-          </p>
-
-          <div className="bg-default-100 rounded-lg p-4">
-            {isLoading ? (
-              <div className="flex justify-center py-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
+      {/* AI Models */}
+      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">AI Processing Pipeline</h2>
+        <div className="space-y-3">
+          {[
+            { name: 'Qwen2.5-7B', desc: 'Fine-tuned LLM for meeting summarization' },
+            { name: 'Whisper base.en', desc: 'Speech-to-text transcription' },
+            { name: 'SpaCy en_core_web_lg', desc: 'NLP entity extraction' },
+          ].map((model, i) => (
+            <div key={i} className="bg-echo-base flex items-center gap-3 rounded-[10px] p-3">
+              <Check size={14} className="shrink-0 text-emerald-400" />
+              <div>
+                <p className="text-sm font-medium text-white">{model.name}</p>
+                <p className="text-xs text-slate-500">{model.desc}</p>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-600">Total Meetings:</span>
-                  <span className="font-semibold">{stats?.overview?.totalMeetings ?? 0}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-600">Completed:</span>
-                  <span className="font-semibold">{stats?.overview?.completedMeetings ?? 0}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-600">Storage Used:</span>
-                  <span className="font-semibold">{formatBytes(stats?.metrics?.storageUsedBytes)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-600">Total Duration:</span>
-                  <span className="font-semibold">
-                    {stats?.metrics?.totalDuration
-                      ? `${Math.floor(stats.metrics.totalDuration / 60)}m ${Math.floor(stats.metrics.totalDuration % 60)}s`
-                      : '0m 0s'}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Data Processing */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Data Processing</h3>
-        </CardHeader>
-        <Divider />
-        <CardBody>
-          <p className="text-sm text-default-600 leading-relaxed mb-4">
-            Audio is processed using the following AI models:
-          </p>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-start gap-2">
-              <FiCheck className="text-success mt-0.5 flex-shrink-0" size={16} />
-              <span><strong>Whisper ASR:</strong> Speech-to-text transcription</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <FiCheck className="text-success mt-0.5 flex-shrink-0" size={16} />
-              <span><strong>SpaCy:</strong> Natural language processing and entity extraction</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <FiCheck className="text-success mt-0.5 flex-shrink-0" size={16} />
-              <span><strong>EchoNote Custom AI Model:</strong> Fine-tuned for meeting summarization</span>
-            </li>
-          </ul>
-          <p className="text-xs text-default-500 mt-4">
-            All processing happens server-side with encryption in transit and at rest.
-          </p>
-        </CardBody>
-      </Card>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Privacy Notice */}
-      <Card className="border-primary/20 bg-primary/5 rounded-xl">
-        <CardBody>
-          <div className="flex items-start gap-3">
-            <FiShield className="text-primary mt-0.5 flex-shrink-0" size={20} />
-            <div>
-              <p className="text-sm font-semibold text-primary mb-2">
-                Your Privacy Matters
-              </p>
-              <p className="text-sm text-primary/80 leading-relaxed">
-                We never share your meeting data with third parties. All processing
-                is done on our secure servers. You have full control over your data
-                and can delete it at any time.
-              </p>
-            </div>
+      <div className="bg-accent-primary/5 border-accent-primary/10 rounded-[16px] border p-5">
+        <div className="flex items-start gap-3">
+          <Shield size={18} className="text-accent-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="text-accent-primary mb-1 text-sm font-semibold">Your Privacy Matters</p>
+            <p className="text-accent-primary/70 text-xs leading-relaxed">
+              We never share your meeting data. All processing is done on secure servers. You have
+              full control and can delete data at any time.
+            </p>
           </div>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
 
-      {/* Export Data */}
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Export Your Data</p>
-              <p className="text-xs text-default-500">
-                Download all your meetings, transcripts, and summaries
-              </p>
-            </div>
-            <Button color="primary" variant="flat" startContent={<FiDownload size={16} />} radius="full">
-              Export
-            </Button>
+      {/* Action Buttons */}
+      <div className="space-y-3">
+        <div className="bg-echo-surface border-echo-border flex items-center justify-between rounded-[16px] border p-4">
+          <div>
+            <p className="text-sm font-medium text-white">Export Your Data</p>
+            <p className="text-xs text-slate-500">Download meetings, transcripts, and summaries</p>
           </div>
-        </CardBody>
-      </Card>
+          <button className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium">
+            <Download size={14} /> Export
+          </button>
+        </div>
 
-      {/* Logout */}
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Logout</p>
-              <p className="text-xs text-default-500">
-                Sign out of your account
-              </p>
-            </div>
-            <Button
-              color="primary"
-              variant="flat"
-              startContent={<FiLogOut size={16} />}
-              radius="full"
-              onPress={handleLogout}
-            >
-              Logout
-            </Button>
+        <div className="bg-echo-surface border-echo-border flex items-center justify-between rounded-[16px] border p-4">
+          <div>
+            <p className="text-sm font-medium text-white">Logout</p>
+            <p className="text-xs text-slate-500">Sign out of your account</p>
           </div>
-        </CardBody>
-      </Card>
+          <button
+            onClick={handleLogout}
+            className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium"
+          >
+            <LogOut size={14} /> Logout
+          </button>
+        </div>
 
-      {/* Delete All Data */}
-      <Card className="border-danger/20">
-        <CardBody>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-danger">Delete All Data</p>
-              <p className="text-xs text-default-500">
-                Permanently delete all your meetings and account data
-              </p>
-            </div>
-            <Button
-              color="danger"
-              variant="flat"
-              startContent={!isDeleting && <FiTrash2 size={16} />}
-              radius="full"
-              onPress={handleDeleteAccount}
-              isLoading={isDeleting}
-              isDisabled={isDeleting}
-            >
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </Button>
+        <div className="flex items-center justify-between rounded-[16px] border border-red-500/10 bg-red-500/5 p-4">
+          <div>
+            <p className="text-sm font-medium text-red-400">Delete Account</p>
+            <p className="text-xs text-red-400/60">Permanently delete all data</p>
           </div>
-        </CardBody>
-      </Card>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+            className="inline-flex items-center gap-2 rounded-[10px] bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50"
+          >
+            <Trash2 size={14} />
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
 
-// Help Content Component
+// ─── Help & FAQ ───
 const HelpContent = () => {
   const faqs = [
     {
       question: 'How long can my recordings be?',
-      answer: 'Each recording can be up to 10 minutes long. This limit ensures optimal processing speed and accuracy.'
+      answer:
+        'Each recording can be up to 10 minutes long. This ensures optimal processing speed and accuracy.',
     },
     {
       question: 'How accurate is the transcription?',
-      answer: 'Our Whisper ASR model achieves 90%+ accuracy for clear English speech. Accuracy may vary based on audio quality, accents, and background noise.'
+      answer:
+        'Our Whisper ASR model achieves 90%+ accuracy for clear English speech. Accuracy varies based on audio quality, accents, and background noise.',
     },
     {
       question: 'Can I edit transcripts?',
-      answer: 'Currently, transcripts are read-only. We recommend re-recording if major corrections are needed.'
+      answer: 'Currently, transcripts are read-only. Re-record if major corrections are needed.',
     },
     {
       question: 'How is my data secured?',
-      answer: 'All data is encrypted in transit (HTTPS) and at rest. We use industry-standard security practices to protect your information.'
+      answer:
+        'All data is encrypted in transit (HTTPS) and at rest. We use industry-standard security practices.',
     },
     {
       question: 'Can I delete my meetings?',
-      answer: 'Yes, you can delete individual meetings or all your data at any time from the settings page.'
-    }
+      answer: 'Yes, you can delete individual meetings or all your data at any time from Settings.',
+    },
+  ];
+
+  const quickLinks = [
+    { icon: BookOpen, label: 'Documentation' },
+    { icon: MessageSquare, label: 'Contact Support' },
+    { icon: Bug, label: 'Report a Bug' },
+    { icon: Lightbulb, label: 'Request a Feature' },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Help & Support</h2>
-        <p className="text-sm text-default-500 mb-6">
-          Find answers to common questions
-        </p>
+    <div className="space-y-4">
+      {/* Quick Links */}
+      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Quick Links</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {quickLinks.map((link, i) => {
+            const Icon = link.icon;
+            return (
+              <button
+                key={i}
+                className="bg-echo-base hover:bg-echo-surface-hover flex items-center gap-3 rounded-[10px] p-3 text-left transition-colors"
+              >
+                <Icon size={16} className="text-accent-primary shrink-0" />
+                <span className="flex-1 text-sm font-medium text-white">{link.label}</span>
+                <ChevronRight size={14} className="text-slate-600" />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Quick Links */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Quick Links</h3>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-2">
-          <Button variant="flat" className="justify-start" radius="full">
-            📚 Documentation
-          </Button>
-          <Button variant="flat" className="justify-start" radius="full">
-            💬 Contact Support
-          </Button>
-          <Button variant="flat" className="justify-start" radius="full">
-            🐛 Report a Bug
-          </Button>
-          <Button variant="flat" className="justify-start" radius="full">
-            💡 Request a Feature
-          </Button>
-        </CardBody>
-      </Card>
-
       {/* FAQs */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Frequently Asked Questions</h3>
-        <Accordion variant="splitted">
+      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Frequently Asked Questions</h2>
+        <Accordion variant="splitted" className="px-0">
           {faqs.map((faq, index) => (
             <AccordionItem
               key={index}
-              title={<span className="text-sm font-medium">{faq.question}</span>}
+              title={<span className="text-sm font-medium text-white">{faq.question}</span>}
+              classNames={{
+                base: 'bg-echo-base border border-echo-border rounded-[10px] mb-2',
+                trigger: 'px-4 py-3',
+                content: 'px-4 pb-4',
+              }}
             >
-              <p className="text-sm text-default-600 pb-4">{faq.answer}</p>
+              <p className="text-sm leading-relaxed text-slate-400">{faq.answer}</p>
             </AccordionItem>
           ))}
         </Accordion>
       </div>
 
-      {/* Contact Card */}
-      <Card className="bg-primary/5 border border-primary/20 rounded-xl">
-        <CardBody className="text-center gap-3">
-          <p className="text-sm font-semibold text-primary">
-            Still need help?
-          </p>
-          <p className="text-sm text-default-600">
-            Our support team is here to assist you
-          </p>
-          <Button color="primary" variant="flat" radius="full">
-            Contact Support
-          </Button>
-        </CardBody>
-      </Card>
+      {/* Support CTA */}
+      <div className="bg-accent-primary/5 border-accent-primary/10 rounded-[16px] border p-6 text-center">
+        <p className="text-accent-primary mb-1 text-sm font-semibold">Still need help?</p>
+        <p className="mb-4 text-xs text-slate-400">Our support team is here to assist you</p>
+        <button className="btn-primary rounded-[10px] px-5 py-2 text-sm font-bold">
+          Contact Support
+        </button>
+      </div>
     </div>
   );
 };

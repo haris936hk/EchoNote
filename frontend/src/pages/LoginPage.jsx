@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
-import { FiMic, FiCheckCircle, FiZap, FiLock, FiTarget, FiTrendingUp, FiList } from 'react-icons/fi';
+import { LuMic as Mic, LuLock as Lock } from 'react-icons/lu';
 import { useAuth } from '../contexts/AuthContext';
 import LoginButton from '../components/auth/LoginButton';
 
+/**
+ * LoginPage — Google OAuth sign-in
+ * Matches Stitch sign_in_echonote_fixed design
+ */
 const LoginPage = () => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
@@ -16,172 +19,65 @@ const LoginPage = () => {
     }
   }, [isAuthenticated, loading, navigate]);
 
-  const features = [
-    {
-      icon: FiTarget,
-      title: 'Smart Action Items',
-      description: 'AI extracts tasks with assignees, deadlines, and priorities automatically'
-    },
-    {
-      icon: FiZap,
-      title: 'Executive Summaries',
-      description: 'Custom AI model generates structured summaries with key decisions and next steps'
-    },
-    {
-      icon: FiTrendingUp,
-      title: 'Sentiment & Topics',
-      description: 'Automatic sentiment analysis and key topic extraction from every meeting'
-    },
-    {
-      icon: FiLock,
-      title: 'Privacy First',
-      description: 'Your data is encrypted and you control retention policies'
-    }
-  ];
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{ backgroundColor: '#020617' }}
+      >
         <div className="animate-pulse">
-          <FiMic size={48} className="text-primary" />
+          <Mic size={48} className="text-accent-primary" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative">
-        {/* Left Column - Branding & Features */}
-        <div className="space-y-8 text-center lg:text-left">
-          {/* Logo & Tagline */}
-          <div className="animate-fade-in">
-            <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
-              <div className="p-3 bg-primary rounded-3xl shadow-lg shadow-primary/50 hover:shadow-primary/80 transition-all duration-300 hover:scale-105">
-                <FiMic size={32} className="text-white" />
-              </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                EchoNote
-              </h1>
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden p-4"
+      style={{ backgroundColor: '#020617' }}
+    >
+      {/* Background gradient blob */}
+      <div className="bg-accent-primary/[0.08] absolute bottom-0 left-0 size-[600px] -translate-x-1/3 translate-y-1/3 rounded-full blur-[128px]"></div>
+      <div className="bg-accent-secondary/[0.05] absolute right-0 top-0 size-[400px] -translate-y-1/4 translate-x-1/4 rounded-full blur-[100px]"></div>
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="glass-card rounded-2xl border border-[rgba(255,255,255,0.06)] p-8 md:p-10">
+          {/* Logo */}
+          <div className="mb-8 flex flex-col items-center">
+            <div className="bg-accent-primary/15 mb-5 flex size-14 items-center justify-center rounded-2xl">
+              <Mic size={28} className="text-accent-primary" />
             </div>
-            <p className="text-xl text-default-600">
-              Transform meetings into structured action items
-            </p>
-            <p className="text-default-500 mt-2">
-              Custom AI model extracts decisions, tasks, and next steps automatically
-            </p>
+            <h2 className="mb-2 text-2xl font-bold text-white">Sign in to EchoNote</h2>
+            <p className="text-center text-sm text-slate-400">Your meeting intelligence awaits</p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-4 bg-content1 rounded-2xl border border-divider hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 cursor-pointer group"
-                >
-                  <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0 group-hover:bg-primary/20 transition-colors duration-300">
-                    <Icon className="text-primary group-hover:scale-110 transition-transform duration-300" size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm">{feature.title}</h3>
-                    <p className="text-xs text-default-500 mt-1">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Google Login Button */}
+          <div className="mb-6">
+            <LoginButton size="lg" fullWidth />
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center justify-center lg:justify-start gap-8 pt-4">
-            <div>
-              <p className="text-2xl font-bold text-primary">90%+</p>
-              <p className="text-xs text-default-500">Accuracy</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-primary">10 min</p>
-              <p className="text-xs text-default-500">Max Recording</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-primary">Free</p>
-              <p className="text-xs text-default-500">To Start</p>
-            </div>
+          {/* Terms */}
+          <p className="mb-6 text-center text-xs text-slate-500">
+            By continuing, you agree to our{' '}
+            <span className="text-accent-primary cursor-pointer hover:underline">Terms</span> and{' '}
+            <span className="text-accent-primary cursor-pointer hover:underline">
+              Privacy Policy
+            </span>
+          </p>
+
+          {/* Divider */}
+          <div className="my-6 border-t border-[rgba(255,255,255,0.06)]"></div>
+
+          {/* Security badge */}
+          <div className="flex items-center justify-center gap-2 text-slate-500">
+            <Lock size={14} />
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Secured with Google OAuth
+            </span>
           </div>
         </div>
-
-        {/* Right Column - Login Card */}
-        <Card className="w-full max-w-md mx-auto lg:mx-0 rounded-3xl shadow-2xl border-2 border-primary/20 hover:border-primary/40 transition-all duration-500 backdrop-blur-sm bg-content1/95">
-          <CardHeader className="flex flex-col items-center gap-2 pb-4">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Welcome Back
-            </h2>
-            <p className="text-sm text-default-500 text-center">
-              Sign in to access your meetings and continue where you left off
-            </p>
-          </CardHeader>
-
-          <Divider />
-
-          <CardBody className="gap-6 py-8">
-            {/* Login Button */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 blur-2xl opacity-50 rounded-3xl"></div>
-              <LoginButton size="lg" fullWidth />
-            </div>
-
-            {/* Privacy Notice */}
-            <div className="space-y-3">
-              <p className="text-xs text-center text-default-400">
-                By signing in, you agree to our Terms of Service and Privacy Policy
-              </p>
-
-              <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-2xl border border-primary/20 hover:border-primary/40 transition-all duration-300">
-                <FiLock className="text-primary mt-0.5 flex-shrink-0" size={16} />
-                <p className="text-xs text-default-600">
-                  <strong className="text-primary">Secure & Private:</strong> We use Google OAuth for authentication. Your meeting data is encrypted and never shared with third parties.
-                </p>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <Divider />
-              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-content1 px-3 text-xs text-default-400">
-                New to EchoNote?
-              </span>
-            </div>
-
-            {/* Benefits List */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-center">
-                What you'll get:
-              </p>
-              <ul className="space-y-2">
-                {[
-                  'Smart action items with assignees & deadlines',
-                  'Executive summaries with key decisions',
-                  'Automatic topic & sentiment analysis',
-                  'Structured next steps for every meeting'
-                ].map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <FiCheckCircle className="text-success mt-0.5 flex-shrink-0" size={16} />
-                    <span className="text-default-600">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Footer */}
-      <div className="absolute bottom-4 left-0 right-0 text-center">
-        <p className="text-xs text-default-400">
-          © 2025 EchoNote. Made with ❤️ by Riphah Students
-        </p>
       </div>
     </div>
   );

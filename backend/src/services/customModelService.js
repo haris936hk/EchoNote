@@ -35,7 +35,7 @@ class CustomModelService {
     try {
       logger.info('[CustomModel] Starting summary generation', {
         transcriptLength: transcript.length,
-        hasNlpFeatures: !!nlpFeatures
+        hasNlpFeatures: !!nlpFeatures,
       });
 
       // Enhance transcript with NLP features if available
@@ -49,23 +49,22 @@ class CustomModelService {
 
       logger.info('[CustomModel] Summary generation successful', {
         hasActionItems: formattedSummary.actionItems?.length > 0,
-        sentiment: formattedSummary.sentiment
+        sentiment: formattedSummary.sentiment,
       });
 
       return {
         success: true,
-        data: formattedSummary
+        data: formattedSummary,
       };
-
     } catch (error) {
       logger.error('[CustomModel] Summary generation failed', {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -79,9 +78,9 @@ class CustomModelService {
     try {
       const response = await axios.get(`${this.apiUrl}/health`, {
         headers: {
-          'ngrok-skip-browser-warning': 'true'
+          'ngrok-skip-browser-warning': 'true',
         },
-        timeout: 5000
+        timeout: 5000,
       });
 
       return {
@@ -89,18 +88,17 @@ class CustomModelService {
         data: {
           status: response.data.status,
           model: response.data.model,
-          uptime: response.data.uptime_seconds
-        }
+          uptime: response.data.uptime_seconds,
+        },
       };
-
     } catch (error) {
       logger.error('[CustomModel] Health check failed', {
-        error: error.message
+        error: error.message,
       });
 
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -157,18 +155,18 @@ class CustomModelService {
 
     // Sentiment - FIXED: Format with polarity score to match training
     if (nlpFeatures.sentiment) {
-      const sentimentLabel = typeof nlpFeatures.sentiment === 'string'
-        ? nlpFeatures.sentiment
-        : nlpFeatures.sentiment.label || nlpFeatures.sentiment;
+      const sentimentLabel =
+        typeof nlpFeatures.sentiment === 'string'
+          ? nlpFeatures.sentiment
+          : nlpFeatures.sentiment.label || nlpFeatures.sentiment;
 
       // Capitalize first letter to match training format
       const capitalizedSentiment = sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1);
 
       // Add polarity if available (format: "Positive (polarity: 0.174)")
       const polarity = nlpFeatures.sentimentPolarity || nlpFeatures.sentiment?.score || '';
-      const sentimentText = polarity !== ''
-        ? `${capitalizedSentiment} (polarity: ${polarity})`
-        : capitalizedSentiment;
+      const sentimentText =
+        polarity !== '' ? `${capitalizedSentiment} (polarity: ${polarity})` : capitalizedSentiment;
 
       enhancedPrompt += `Sentiment: ${sentimentText}`;
     } else {
@@ -179,7 +177,10 @@ class CustomModelService {
     // The training notebooks never included this field, so we don't add it
 
     // TEMPORARY TESTING: Log enhanced prompt format
-    console.log('📝 Enhanced transcript format:', enhancedPrompt.split('\n\n').pop().substring(0, 500));
+    console.log(
+      '📝 Enhanced transcript format:',
+      enhancedPrompt.split('\n\n').pop().substring(0, 500)
+    );
 
     return enhancedPrompt;
   }
@@ -196,19 +197,18 @@ class CustomModelService {
           headers: {
             'X-API-Key': this.apiKey,
             'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
+            'ngrok-skip-browser-warning': 'true',
           },
-          timeout: this.timeout
+          timeout: this.timeout,
         }
       );
 
       // Extract summary from response
       return response.data.summary;
-
     } catch (error) {
       logger.warn(`[CustomModel] API call failed (attempt ${attempt}/${this.maxRetries})`, {
         error: error.message,
-        status: error.response?.status
+        status: error.response?.status,
       });
 
       // Retry logic
@@ -216,12 +216,14 @@ class CustomModelService {
         const delay = this.retryDelay * Math.pow(2, attempt - 1); // Exponential backoff
         logger.info(`[CustomModel] Retrying in ${delay}ms...`);
 
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return this._callAPIWithRetry(transcript, attempt + 1);
       }
 
       // Max retries exceeded
-      throw new Error(`Custom model API failed after ${this.maxRetries} attempts: ${error.message}`);
+      throw new Error(
+        `Custom model API failed after ${this.maxRetries} attempts: ${error.message}`
+      );
     }
   }
 
@@ -232,12 +234,19 @@ class CustomModelService {
    */
   _validateAndFormatSummary(summary) {
     // Validate required fields
-    const requiredFields = ['executiveSummary', 'keyDecisions', 'actionItems', 'nextSteps', 'keyTopics', 'sentiment'];
-    const missingFields = requiredFields.filter(field => !(field in summary));
+    const requiredFields = [
+      'executiveSummary',
+      'keyDecisions',
+      'actionItems',
+      'nextSteps',
+      'keyTopics',
+      'sentiment',
+    ];
+    const missingFields = requiredFields.filter((field) => !(field in summary));
 
     if (missingFields.length > 0) {
       logger.warn('[CustomModel] Summary missing fields, applying defaults', {
-        missingFields
+        missingFields,
       });
     }
 
@@ -246,31 +255,33 @@ class CustomModelService {
       executiveSummary: summary.executiveSummary || 'No summary available.',
       keyDecisions: Array.isArray(summary.keyDecisions)
         ? summary.keyDecisions
-        : (summary.keyDecisions ? [summary.keyDecisions] : []),
+        : summary.keyDecisions
+          ? [summary.keyDecisions]
+          : [],
       actionItems: Array.isArray(summary.actionItems)
-        ? summary.actionItems.map(item => ({
+        ? summary.actionItems.map((item) => ({
             task: item.task || 'Unspecified task',
             assignee: item.assignee || null,
             deadline: item.deadline || null,
-            priority: item.priority || 'medium'
+            priority: item.priority || 'medium',
           }))
         : [],
       nextSteps: Array.isArray(summary.nextSteps)
         ? summary.nextSteps
-        : (summary.nextSteps ? [summary.nextSteps] : []),
-      keyTopics: Array.isArray(summary.keyTopics)
-        ? summary.keyTopics
-        : [],
+        : summary.nextSteps
+          ? [summary.nextSteps]
+          : [],
+      keyTopics: Array.isArray(summary.keyTopics) ? summary.keyTopics : [],
       // FIXED: Remove "mixed" - model only trained on positive, neutral, negative
       sentiment: ['positive', 'neutral', 'negative'].includes(summary.sentiment)
         ? summary.sentiment
-        : 'neutral'
+        : 'neutral',
     };
 
     // Validate executive summary length (should be substantial)
     if (formatted.executiveSummary.length < 150) {
       logger.warn('[CustomModel] Executive summary too short', {
-        length: formatted.executiveSummary.length
+        length: formatted.executiveSummary.length,
       });
     }
 

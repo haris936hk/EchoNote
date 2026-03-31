@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-fixed": "#6bff8f",
+            "inverse-on-surface": "#2a3043",
+            "on-secondary-fixed-variant": "#4f319c",
+            "primary": "#bdc2ff",
+            "on-primary": "#131e8c",
+            "primary-container": "#818cf8",
+            "outline-variant": "#454653",
+            "on-primary-fixed": "#000767",
+            "surface": "#0c1324",
+            "error-container": "#93000a",
+            "error": "#ffb4ab",
+            "surface-container-high": "#23293c",
+            "on-tertiary-fixed-variant": "#005321",
+            "surface-container-highest": "#2e3447",
+            "on-primary-fixed-variant": "#2f3aa3",
+            "outline": "#908f9e",
+            "inverse-primary": "#4953bc",
+            "on-tertiary-fixed": "#002109",
+            "surface-container": "#191f31",
+            "surface-dim": "#0c1324",
+            "on-secondary-fixed": "#21005e",
+            "surface-bright": "#33394c",
+            "secondary-container": "#4f319c",
+            "on-background": "#dce1fb",
+            "tertiary-container": "#00ac4e",
+            "surface-container-lowest": "#070d1f",
+            "surface-variant": "#2e3447",
+            "primary-fixed": "#e0e0ff",
+            "tertiary": "#4ae176",
+            "on-tertiary-container": "#003613",
+            "inverse-surface": "#dce1fb",
+            "primary-fixed-dim": "#bdc2ff",
+            "on-error": "#690005",
+            "on-error-container": "#ffdad6",
+            "on-secondary-container": "#bea8ff",
+            "on-surface-variant": "#c6c5d5",
+            "on-secondary": "#381385",
+            "surface-container-low": "#151b2d",
+            "secondary-fixed-dim": "#cebdff",
+            "secondary-fixed": "#e8ddff",
+            "on-primary-container": "#101b8a",
+            "tertiary-fixed-dim": "#4ae176",
+            "surface-tint": "#bdc2ff",
+            "on-tertiary": "#003915",
+            "secondary": "#cebdff",
+            "on-surface": "#dce1fb",
+            "background": "#0c1324"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Plus Jakarta Sans"],
+            "label": ["Plus Jakarta Sans"],
+            "mono": ["JetBrains Mono"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #020617;
+      color: #dce1fb;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-card {
+      background: rgba(46, 52, 71, 0.4);
+      backdrop-filter: blur(24px);
+    }
+    .no-line-rule {
+      border: none !important;
+    }
+    .tonal-transition {
+      background: linear-gradient(180deg, rgba(12, 19, 36, 0.8) 0%, rgba(12, 19, 36, 0) 100%);
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .ai-pulse {
+      box-shadow: 0 0 12px #cebdff;
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-primary/30">
+<!-- Shared Component: TopAppBar -->
+<header class="fixed top-0 w-full flex justify-between items-center px-6 py-4 z-50 tonal-transition">
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold tracking-tighter text-[#bdc2ff]">EchoNote</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-8"><a class="text-[#454653] hover:text-[#bdc2ff] transition-colors font-medium" href="#">Dashboard</a><a class="text-[#bdc2ff] font-semibold transition-colors" href="#">Record</a><a class="text-[#454653] hover:text-[#bdc2ff] transition-colors font-medium" href="#">Meetings</a></div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest border border-outline-variant/20">
+<img alt="User profile" data-alt="close-up portrait of a professional man with neutral lighting and blurred corporate background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq1ioD67WhgRniin1s-T66Xe2rxz1ogmu3RuTKI63BMNsnA89KzB4Vdyzr3Z6339c020qST_jTvC-FSVZ6070PFh7ts54t3RcsLTH92tXdnSsYY8EQexfUWI1l7-eQmEL3vxvPgN1KAFYjs7-eO-1HnK8P7QqO9pDLOj6YijWU_VY-L0VGHN9md54u14vWPrctOYknRn8f9BxS2IlcTZdUKkR6zB5EKtzGMEp3Pfsj7FzeFHX7I944LRRT_3Js3B_8MKrI1caVNck"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative pt-32 pb-20 px-6 max-w-5xl mx-auto min-h-screen">
+<!-- Hero Header Section -->
+<div class="mb-12 space-y-2">
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface">Finalize Meeting Details</h1>
+<p class="text-on-surface-variant max-w-xl text-lg">Your audio has been successfully captured. Refine the metadata below to optimize the AI-driven transcription and insights generation.</p>
+</div>
+<!-- Step 2: Details Form Container -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Main Form Area -->
+<div class="">
+<div class="glass-card rounded-2xl p-8 shadow-[0_0_40px_rgba(189,194,255,0.05)] border border-outline-variant/10">
+<form class="space-y-8">
+<!-- Title Input -->
+<div class="space-y-2">
+<label class="block font-mono text-xs text-outline tracking-wider uppercase" for="title">Session Title</label>
+<input class="w-full bg-surface-container-lowest/50 border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 text-xl font-medium px-0 py-3 transition-all placeholder:text-outline-variant text-on-surface" id="title" placeholder="Enter meeting title..." type="text" value="Q1 Planning Session"/>
+</div>
+<!-- Category & Participants Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block font-mono text-xs text-outline tracking-wider uppercase" for="category">Category</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg py-3 px-4 appearance-none focus:ring-1 focus:ring-primary focus:border-primary text-on-surface" id="category">
+<option>Planning</option>
+<option>Sales</option>
+<option>Standup</option>
+<option>Workshop</option>
+<option>User Interview</option>
+</select>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline-variant">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Description -->
+<div class="space-y-2">
+<label class="block font-mono text-xs text-outline tracking-wider uppercase" for="desc">Brief Description</label>
+<textarea class="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg p-4 focus:ring-1 focus:ring-primary focus:border-primary text-on-surface placeholder:text-outline-variant" id="desc" placeholder="What was the core objective of this meeting?" rows="4"></textarea>
+</div>
+<!-- Audio Preview Bar -->
+<div class="pt-4">
+<div class="bg-surface-container-highest/50 rounded-xl p-4 flex items-center gap-4 border border-outline-variant/10">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-on-primary hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between text-[10px] font-mono text-outline uppercase tracking-tighter">
+<span>Recording_Final_01.wav</span>
+<span>42:15</span>
+</div>
+<div class="relative h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="absolute inset-0 bg-primary/20"></div>
+<div class="absolute top-0 left-0 bottom-0 bg-primary w-1/3 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</form>
+</div>
+<!-- Actions -->
+<div class="mt-8 flex items-center justify-between">
+<button class="flex items-center gap-2 px-6 py-3 rounded-lg text-outline font-medium hover:text-on-surface transition-colors group">
+<span class="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
+            Back to Recording
+          </button>
+<button class="px-8 py-3.5 bg-[#22C55E] hover:bg-[#1da850] text-white font-bold rounded-lg shadow-[0_4px_20px_rgba(34,197,94,0.3)] transition-all flex items-center gap-2 active:scale-95">
+<span>Upload &amp; Process</span>
+<span class="material-symbols-outlined">auto_awesome</span>
+</button>
+</div>
+</div>
+<!-- Secondary Info / Stats -->
+</div>
+</main>
+<!-- Side Navigation Bar (Hidden on Mobile) -->
+<!-- Decorative Background elements -->
+<div class="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-[-5%] left-[10%] w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+</body></html>

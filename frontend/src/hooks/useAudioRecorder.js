@@ -20,7 +20,8 @@ const useAudioRecorder = () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return {
         supported: false,
-        error: 'Audio recording is not supported in your browser. Please use a modern browser like Chrome, Firefox, or Edge.'
+        error:
+          'Audio recording is not supported in your browser. Please use a modern browser like Chrome, Firefox, or Edge.',
       };
     }
     return { supported: true };
@@ -52,8 +53,8 @@ const useAudioRecorder = () => {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 16000
-        }
+          sampleRate: 16000,
+        },
       });
       streamRef.current = mediaStream;
       setStream(mediaStream);
@@ -68,7 +69,7 @@ const useAudioRecorder = () => {
         timeSlice: 1000,
         ondataavailable: (blob) => {
           // Optional: handle data chunks
-        }
+        },
       });
 
       recorder.startRecording();
@@ -80,13 +81,13 @@ const useAudioRecorder = () => {
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
           const newTime = prev + 1;
-          
+
           // Auto-stop at 10 minutes
           if (newTime >= MAX_RECORDING_TIME) {
             stopRecording();
             return MAX_RECORDING_TIME;
           }
-          
+
           return newTime;
         });
       }, 1000);
@@ -97,7 +98,8 @@ const useAudioRecorder = () => {
 
       let errorMessage = 'Failed to start recording. ';
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        errorMessage += 'Microphone permission was denied. Please allow microphone access in your browser settings.';
+        errorMessage +=
+          'Microphone permission was denied. Please allow microphone access in your browser settings.';
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         errorMessage += 'No microphone found. Please connect a microphone and try again.';
       } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
@@ -109,7 +111,7 @@ const useAudioRecorder = () => {
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkCompatibility]);
 
   // Stop recording
@@ -132,7 +134,7 @@ const useAudioRecorder = () => {
 
         // Stop stream
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
           setStream(null);
         }
@@ -208,7 +210,7 @@ const useAudioRecorder = () => {
 
     // Stop stream
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
       setStream(null);
     }
@@ -240,7 +242,7 @@ const useAudioRecorder = () => {
       remainingTimeFormatted: formatTime(MAX_RECORDING_TIME - recordingTime),
       progress: (recordingTime / MAX_RECORDING_TIME) * 100,
       blobSize: audioBlob ? audioBlob.size : 0,
-      blobSizeKB: audioBlob ? (audioBlob.size / 1024).toFixed(2) : 0
+      blobSizeKB: audioBlob ? (audioBlob.size / 1024).toFixed(2) : 0,
     };
   }, [recordingTime, audioBlob, formatTime]);
 
@@ -251,7 +253,7 @@ const useAudioRecorder = () => {
         clearInterval(timerRef.current);
       }
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
         setStream(null);
       }
       if (recorderRef.current) {
@@ -285,7 +287,7 @@ const useAudioRecorder = () => {
     // Utilities
     getStats,
     checkCompatibility,
-    formatTime
+    formatTime,
   };
 };
 

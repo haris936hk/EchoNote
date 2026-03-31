@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Luminous Archive | Capture Room</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#6bff8f",
+              "inverse-on-surface": "#2a3043",
+              "on-secondary-fixed-variant": "#4f319c",
+              "primary": "#bdc2ff",
+              "on-primary": "#131e8c",
+              "primary-container": "#818cf8",
+              "outline-variant": "#454653",
+              "on-primary-fixed": "#000767",
+              "surface": "#0c1324",
+              "error-container": "#93000a",
+              "error": "#ffb4ab",
+              "surface-container-high": "#23293c",
+              "on-tertiary-fixed-variant": "#005321",
+              "surface-container-highest": "#2e3447",
+              "on-primary-fixed-variant": "#2f3aa3",
+              "outline": "#908f9e",
+              "inverse-primary": "#4953bc",
+              "on-tertiary-fixed": "#002109",
+              "surface-container": "#191f31",
+              "surface-dim": "#0c1324",
+              "on-secondary-fixed": "#21005e",
+              "surface-bright": "#33394c",
+              "secondary-container": "#4f319c",
+              "on-background": "#dce1fb",
+              "tertiary-container": "#00ac4e",
+              "surface-container-lowest": "#070d1f",
+              "surface-variant": "#2e3447",
+              "primary-fixed": "#e0e0ff",
+              "tertiary": "#4ae176",
+              "on-tertiary-container": "#003613",
+              "inverse-surface": "#dce1fb",
+              "primary-fixed-dim": "#bdc2ff",
+              "on-error": "#690005",
+              "on-error-container": "#ffdad6",
+              "on-secondary-container": "#bea8ff",
+              "on-surface-variant": "#c6c5d5",
+              "on-secondary": "#381385",
+              "surface-container-low": "#151b2d",
+              "secondary-fixed-dim": "#cebdff",
+              "secondary-fixed": "#e8ddff",
+              "on-primary-container": "#101b8a",
+              "tertiary-fixed-dim": "#4ae176",
+              "surface-tint": "#bdc2ff",
+              "on-tertiary": "#003915",
+              "secondary": "#cebdff",
+              "on-surface": "#dce1fb",
+              "background": "#0c1324"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"],
+              "mono": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #020617; /* Specific deep OLED black requested */
+            color: #dce1fb;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .recording-halo {
+            position: relative;
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020617;
+        }
+        .recording-halo::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, #bdc2ff, #cebdff);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        .glow-soft {
+            box-shadow: 0 0 40px rgba(189, 194, 255, 0.1);
+        }
+        .text-jetbrains {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+<!-- Close/Exit Button (Task-focused Suppression of Nav) -->
+<button class="fixed top-8 left-8 p-3 rounded-full hover:bg-surface-container-low transition-all duration-300 group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">close</span>
+</button>
+<!-- Main Immersive Capture Content -->
+<main class="flex flex-col items-center justify-center space-y-12 max-w-lg w-full">
+<!-- Status Header -->
+<div class="text-center space-y-2">
+<h1 class="text-on-surface font-headline font-semibold text-sm tracking-[0.2em] uppercase">Capture Room</h1>
+<div class="flex items-center justify-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<p class="text-on-surface-variant font-medium text-xs">Ready to index audio</p>
+</div>
+</div>
+<!-- Recording Visualizer Halo -->
+<div class="relative">
+<!-- Subtle background ambient glow -->
+<div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full"></div>
+<div class="recording-halo glow-soft z-10">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="mic">mic</span>
+</div>
+<!-- Orbiting metadata (Editorial Asymmetry) -->
+<div class="absolute -top-4 -right-24 bg-surface-container-high/40 backdrop-blur-md px-3 py-1.5 rounded-lg border border-outline-variant/10">
+<p class="text-jetbrains text-[10px] text-primary tracking-tighter">48kHz / 24-bit</p>
+</div>
+</div>
+<!-- Timer Display -->
+<div class="text-center">
+<h2 class="text-jetbrains text-7xl font-medium tracking-tighter text-on-surface">00:00</h2>
+<p class="text-on-surface-variant/50 text-xs mt-4 tracking-widest font-label uppercase">Recording Time</p>
+</div>
+<!-- Action Buttons Cluster -->
+<div class="flex flex-col items-center space-y-6 w-full pt-8">
+<button class="w-full max-w-xs py-4 px-8 rounded-xl bg-[#22C55E] text-white font-headline font-bold text-sm tracking-tight flex items-center justify-center space-x-3 hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] shadow-[0_8px_30px_rgb(34,197,94,0.2)]">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+<span>Start Recording</span>
+</button>
+<button class="w-full max-w-xs py-4 px-8 rounded-xl border border-outline-variant/30 text-on-surface font-headline font-medium text-sm tracking-tight flex items-center justify-center space-x-3 hover:bg-surface-container-low transition-all duration-300">
+<span class="material-symbols-outlined text-lg">upload_file</span>
+<span>Upload File</span>
+</button>
+</div>
+<!-- System Limitations & Info -->
+<div class="grid grid-cols-1 gap-4 w-full pt-12 border-t border-outline-variant/10">
+<div class="flex flex-col items-center space-y-4">
+<div class="flex items-center space-x-6">
+<div class="flex flex-col items-center">
+<span class="text-jetbrains text-[10px] text-on-surface-variant/60 uppercase">Duration</span>
+<span class="text-sm font-medium text-on-surface">10m max</span>
+</div>
+<div class="h-6 w-px bg-outline-variant/20"></div>
+<div class="flex flex-col items-center">
+<span class="text-jetbrains text-[10px] text-on-surface-variant/60 uppercase">Formats</span>
+<span class="text-sm font-medium text-on-surface">MP3, WAV, M4A</span>
+</div>
+<div class="h-6 w-px bg-outline-variant/20"></div>
+<div class="flex flex-col items-center">
+<span class="text-jetbrains text-[10px] text-on-surface-variant/60 uppercase">Storage</span>
+<span class="text-sm font-medium text-on-surface">50MB max</span>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant/40 max-w-[280px] text-center leading-relaxed">
+                    Audio is encrypted locally before being processed by the Luminous Archive neural engine.
+                </p>
+</div>
+</div>
+</main>
+<!-- Visual Polish: Corner Metadata -->
+<div class="fixed bottom-8 left-8 flex items-center space-x-3">
+<div class="w-8 h-[1px] bg-outline-variant/30"></div>
+<span class="text-jetbrains text-[10px] text-on-surface-variant/40 tracking-[0.3em] uppercase">Session.ID: LUM-882-REC</span>
+</div>
+<div class="fixed bottom-8 right-8 flex items-center space-x-2">
+<div class="flex space-x-1">
+<div class="w-1 h-1 bg-tertiary rounded-full animate-pulse"></div>
+<div class="w-1 h-1 bg-tertiary/40 rounded-full"></div>
+<div class="w-1 h-1 bg-tertiary/20 rounded-full"></div>
+</div>
+<span class="text-jetbrains text-[10px] text-tertiary tracking-widest uppercase">Network Ready</span>
+</div>
+<!-- Background Decorative Textures -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1] opacity-20">
+<div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px]"></div>
+</div>
+</body></html>

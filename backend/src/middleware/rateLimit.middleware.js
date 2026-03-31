@@ -5,23 +5,17 @@ const rateLimit = require('express-rate-limit');
 const winston = require('winston');
 
 // Import the helper for proper IPv6 handling
-const  { ipKeyGenerator } = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 /**
@@ -34,7 +28,7 @@ const apiLimiter = rateLimit({
   message: {
     success: false,
     error: 'Too many requests from this user/IP. Please try again later.',
-    code: 'RATE_LIMIT_EXCEEDED'
+    code: 'RATE_LIMIT_EXCEEDED',
   },
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
@@ -48,9 +42,9 @@ const apiLimiter = rateLimit({
       success: false,
       error: 'Too many requests. You have exceeded the rate limit of 100 requests per hour.',
       code: 'RATE_LIMIT_EXCEEDED',
-      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000)
+      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000),
     });
-  }
+  },
 });
 
 /**
@@ -63,7 +57,7 @@ const authLimiter = rateLimit({
   message: {
     success: false,
     error: 'Too many authentication attempts. Please try again later.',
-    code: 'AUTH_RATE_LIMIT_EXCEEDED'
+    code: 'AUTH_RATE_LIMIT_EXCEEDED',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -77,9 +71,9 @@ const authLimiter = rateLimit({
       success: false,
       error: 'Too many authentication attempts. Please try again in 15 minutes.',
       code: 'AUTH_RATE_LIMIT_EXCEEDED',
-      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000)
+      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000),
     });
-  }
+  },
 });
 
 /**
@@ -92,7 +86,7 @@ const uploadLimiter = rateLimit({
   message: {
     success: false,
     error: 'Too many upload attempts. Please wait before uploading again.',
-    code: 'UPLOAD_RATE_LIMIT_EXCEEDED'
+    code: 'UPLOAD_RATE_LIMIT_EXCEEDED',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -106,9 +100,9 @@ const uploadLimiter = rateLimit({
       success: false,
       error: 'Too many upload attempts. You can upload up to 5 files per minute.',
       code: 'UPLOAD_RATE_LIMIT_EXCEEDED',
-      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000)
+      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000),
     });
-  }
+  },
 });
 
 /**
@@ -121,7 +115,7 @@ const searchLimiter = rateLimit({
   message: {
     success: false,
     error: 'Too many search requests. Please slow down.',
-    code: 'SEARCH_RATE_LIMIT_EXCEEDED'
+    code: 'SEARCH_RATE_LIMIT_EXCEEDED',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -135,14 +129,14 @@ const searchLimiter = rateLimit({
       success: false,
       error: 'Too many search requests. Please wait before searching again.',
       code: 'SEARCH_RATE_LIMIT_EXCEEDED',
-      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000)
+      retryAfter: Math.ceil(req.rateLimit.resetTime.getTime() / 1000),
     });
-  }
+  },
 });
 
 module.exports = {
   apiLimiter,
   authLimiter,
   uploadLimiter,
-  searchLimiter
+  searchLimiter,
 };

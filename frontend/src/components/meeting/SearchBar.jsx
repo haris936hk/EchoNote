@@ -1,13 +1,12 @@
-import { Input, Button } from '@heroui/react';
-import { FiSearch, FiX } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
+import { LuSearch as Search, LuX as X } from 'react-icons/lu';
 
-const SearchBar = ({ 
-  value = '', 
-  onChange, 
-  placeholder = 'Search meetings...', 
+const SearchBar = ({
+  value = '',
+  onChange,
+  placeholder = 'Search meetings...',
   debounceMs = 300,
-  className = ''
+  className = '',
 }) => {
   const [localValue, setLocalValue] = useState(value);
 
@@ -19,143 +18,51 @@ const SearchBar = ({
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (onChange) {
-        onChange(localValue);
-      }
+      if (onChange) onChange(localValue);
     }, debounceMs);
-
     return () => clearTimeout(timer);
   }, [localValue, debounceMs, onChange]);
 
   const handleClear = () => {
     setLocalValue('');
-    if (onChange) {
-      onChange('');
-    }
+    if (onChange) onChange('');
   };
 
   return (
-    <Input
-      value={localValue}
-      onChange={(e) => setLocalValue(e.target.value)}
-      placeholder={placeholder}
-      startContent={
-        <FiSearch className="text-default-400 flex-shrink-0 mr-2" size={20} />
-      }
-      endContent={
-        localValue && (
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            onPress={handleClear}
-            aria-label="Clear search"
-            className="hover:bg-danger/10 hover:text-danger transition-all duration-200"
-            radius="full"
-          >
-            <FiX size={18} />
-          </Button>
-        )
-      }
-      classNames={{
-        base: `${className} w-full`,
-        input: "text-sm md:text-base",
-        inputWrapper: "h-12 md:h-14 bg-default-100 data-[hover=true]:bg-default-200 data-[focus=true]:bg-default-100 shadow-sm data-[hover=true]:shadow-md transition-all duration-300 rounded-3xl"
-      }}
-      isClearable={false}
-      size="lg"
-      radius="full"
-      variant="flat"
-    />
-  );
-};
-
-// Compact search bar
-export const CompactSearchBar = ({ value, onChange, placeholder }) => {
-  return (
-    <Input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder || 'Search...'}
-      startContent={<FiSearch className="text-default-400" size={16} />}
-      classNames={{
-        input: "text-sm",
-        inputWrapper: "h-10"
-      }}
-      size="sm"
-    />
-  );
-};
-
-// Search bar with suggestions
-export const SearchBarWithSuggestions = ({ 
-  value, 
-  onChange, 
-  suggestions = [],
-  onSuggestionClick 
-}) => {
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [localValue, setLocalValue] = useState(value);
-
-  const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    setLocalValue(newValue);
-    setShowSuggestions(newValue.length > 0);
-    if (onChange) {
-      onChange(newValue);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    setLocalValue(suggestion);
-    setShowSuggestions(false);
-    if (onSuggestionClick) {
-      onSuggestionClick(suggestion);
-    }
-    if (onChange) {
-      onChange(suggestion);
-    }
-  };
-
-  const filteredSuggestions = suggestions.filter(s => 
-    s.toLowerCase().includes(localValue.toLowerCase())
-  );
-
-  return (
-    <div className="relative">
-      <Input
+    <div className={`relative ${className}`}>
+      <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+      <input
+        type="text"
         value={localValue}
-        onChange={handleInputChange}
-        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-        onFocus={() => localValue && setShowSuggestions(true)}
-        placeholder="Search meetings..."
-        startContent={<FiSearch className="text-default-400" size={20} />}
-        classNames={{
-          input: "text-sm",
-          inputWrapper: "h-12 bg-default-100"
-        }}
-        size="lg"
+        onChange={(e) => setLocalValue(e.target.value)}
+        placeholder={placeholder}
+        className="input-echo w-full px-10 py-2.5 text-sm"
       />
-
-      {/* Suggestions Dropdown */}
-      {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-content1 border border-divider rounded-lg shadow-lg z-50 max-h-64 overflow-auto">
-          {filteredSuggestions.map((suggestion, index) => (
-            <button
-              key={index}
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full text-left px-4 py-3 hover:bg-default-100 transition-colors text-sm"
-            >
-              <div className="flex items-center gap-2">
-                <FiSearch size={14} className="text-default-400" />
-                <span>{suggestion}</span>
-              </div>
-            </button>
-          ))}
-        </div>
+      {localValue && (
+        <button
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-white"
+          aria-label="Clear search"
+        >
+          <X size={14} />
+        </button>
       )}
     </div>
   );
 };
+
+// Compact search bar
+export const CompactSearchBar = ({ value, onChange, placeholder }) => (
+  <div className="relative">
+    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder || 'Search...'}
+      className="input-echo w-full py-2 pl-9 pr-3 text-xs"
+    />
+  </div>
+);
 
 export default SearchBar;

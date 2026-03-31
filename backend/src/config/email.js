@@ -8,18 +8,12 @@ const winston = require('winston');
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 // Email configuration
@@ -27,7 +21,7 @@ const EMAIL_CONFIG = {
   from: process.env.EMAIL_FROM || 'EchoNote <hariskhan936.hk@gmail.com>',
   replyTo: process.env.EMAIL_REPLY_TO || 'hariskhan936.hk@gmail.com',
   skipSend: process.env.SKIP_EMAIL_SEND === 'true',
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 };
 
 /**
@@ -39,7 +33,7 @@ async function isEmailNotificationsEnabled(email) {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { emailNotifications: true }
+      select: { emailNotifications: true },
     });
 
     // If user not found, return true (fail open for system emails)
@@ -91,12 +85,11 @@ const sendEmail = async (options) => {
       subject,
       html,
       text,
-      replyTo: options.replyTo || EMAIL_CONFIG.replyTo
+      replyTo: options.replyTo || EMAIL_CONFIG.replyTo,
     });
 
     logger.info(`✅ Email sent to ${to}: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
-
   } catch (error) {
     logger.error('❌ Email send failed:', error);
     return { success: false, error: error.message };
@@ -232,7 +225,9 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
                 </tr>
               </table>
 
-              ${meeting.summaryExecutive ? `
+              ${
+                meeting.summaryExecutive
+                  ? `
               <!-- Executive Summary -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 24px;">
                 <tr>
@@ -252,9 +247,13 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
                   </td>
                 </tr>
               </table>
-              ` : ''}
+              `
+                  : ''
+              }
 
-              ${meeting.summaryActionItems && meeting.summaryActionItems.length > 0 ? `
+              ${
+                meeting.summaryActionItems && meeting.summaryActionItems.length > 0
+                  ? `
               <!-- Action Items -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 32px;">
                 <tr>
@@ -265,7 +264,10 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
                           ✅ Action Items (${meeting.summaryActionItems.length})
                         </td>
                       </tr>
-                      ${meeting.summaryActionItems.slice(0, 3).map((item, index) => `
+                      ${meeting.summaryActionItems
+                        .slice(0, 3)
+                        .map(
+                          (item, index) => `
                       <tr>
                         <td style="padding: 12px 0; border-top: ${index > 0 ? '1px solid #f3f4f6' : 'none'};">
                           <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -274,18 +276,26 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
                                 ${item.task}
                               </td>
                             </tr>
-                            ${item.assignee ? `
+                            ${
+                              item.assignee
+                                ? `
                             <tr>
                               <td style="font-size: 13px; color: #6b7280; padding-top: 4px;">
                                 👤 ${item.assignee}${item.deadline ? ` • 📅 ${item.deadline}` : ''}
                               </td>
                             </tr>
-                            ` : ''}
+                            `
+                                : ''
+                            }
                           </table>
                         </td>
                       </tr>
-                      `).join('')}
-                      ${meeting.summaryActionItems.length > 3 ? `
+                      `
+                        )
+                        .join('')}
+                      ${
+                        meeting.summaryActionItems.length > 3
+                          ? `
                       <tr>
                         <td style="padding: 12px 0; border-top: 1px solid #f3f4f6;">
                           <span style="font-size: 14px; color: #6b7280; font-style: italic;">
@@ -293,12 +303,16 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
                           </span>
                         </td>
                       </tr>
-                      ` : ''}
+                      `
+                          : ''
+                      }
                     </table>
                   </td>
                 </tr>
               </table>
-              ` : ''}
+              `
+                  : ''
+              }
 
               <!-- CTA Button -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -355,7 +369,7 @@ const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
   </table>
 </body>
 </html>`;
-  
+
   const text = `
 Hi ${userName || 'there'},
 
@@ -369,7 +383,7 @@ Meeting Details:
 
 ${meeting.summaryExecutive ? `Executive Summary:\n${meeting.summaryExecutive}\n\n` : ''}
 
-${meeting.summaryActionItems && meeting.summaryActionItems.length > 0 ? `Action Items:\n${meeting.summaryActionItems.map(item => `- ${item.task}${item.assignee ? ` (${item.assignee})` : ''}`).join('\n')}\n\n` : ''}
+${meeting.summaryActionItems && meeting.summaryActionItems.length > 0 ? `Action Items:\n${meeting.summaryActionItems.map((item) => `- ${item.task}${item.assignee ? ` (${item.assignee})` : ''}`).join('\n')}\n\n` : ''}
 
 View full details: ${EMAIL_CONFIG.frontendUrl}/meetings/${meeting.id}
 
@@ -377,7 +391,7 @@ View full details: ${EMAIL_CONFIG.frontendUrl}/meetings/${meeting.id}
 This is an automated notification from EchoNote.
 For support, contact: support@echonote.app
   `;
-  
+
   return sendEmail({ to, subject, html, text });
 };
 
@@ -387,7 +401,7 @@ For support, contact: support@echonote.app
  */
 const sendMeetingFailedEmail = async ({ to, userName, meeting, error }) => {
   const subject = `❌ Processing failed for "${meeting.title}"`;
-  
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -458,7 +472,7 @@ const sendMeetingFailedEmail = async ({ to, userName, meeting, error }) => {
     </body>
     </html>
   `;
-  
+
   const text = `
 Hi ${userName || 'there'},
 
@@ -475,7 +489,7 @@ View details: ${EMAIL_CONFIG.frontendUrl}/meetings/${meeting.id}
 
 For support, contact: support@echonote.app
   `;
-  
+
   return sendEmail({ to, subject, html, text });
 };
 
@@ -725,7 +739,7 @@ const sendWelcomeEmail = async ({ to, userName }) => {
   </table>
 </body>
 </html>`;
-  
+
   const text = `
 Welcome to EchoNote, ${userName || 'there'}!
 
@@ -743,7 +757,7 @@ Get started: ${EMAIL_CONFIG.frontendUrl}/dashboard
 
 Need help? Reply to this email or visit our Help Center.
   `;
-  
+
   return sendEmail({ to, subject, html, text });
 };
 
@@ -756,7 +770,7 @@ const testEmailConfig = async (to) => {
     to,
     subject: '🧪 EchoNote Email Test',
     html: '<h1>Email Configuration Test</h1><p>If you received this, your email configuration is working correctly!</p>',
-    text: 'Email Configuration Test\n\nIf you received this, your email configuration is working correctly!'
+    text: 'Email Configuration Test\n\nIf you received this, your email configuration is working correctly!',
   });
 };
 
@@ -766,5 +780,5 @@ module.exports = {
   sendMeetingCompletedEmail,
   sendMeetingFailedEmail,
   sendWelcomeEmail,
-  testEmailConfig
+  testEmailConfig,
 };

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Meetings Directory | EchoNote</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0c1324; /* surface-dim */
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for premium feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0c1324; }
+        ::-webkit-scrollbar-thumb { background: #2e3447; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "inverse-primary": "#4953bc",
+                "surface": "#0c1324",
+                "secondary-container": "#4f319c",
+                "tertiary-fixed": "#6bff8f",
+                "on-tertiary": "#003915",
+                "on-secondary-fixed-variant": "#4f319c",
+                "secondary": "#cebdff",
+                "surface-container-high": "#23293c",
+                "primary-fixed": "#e0e0ff",
+                "on-tertiary-container": "#003613",
+                "on-secondary-fixed": "#21005e",
+                "error": "#ffb4ab",
+                "surface-dim": "#0c1324",
+                "surface-variant": "#2e3447",
+                "surface-bright": "#33394c",
+                "error-container": "#93000a",
+                "on-secondary-container": "#bea8ff",
+                "on-background": "#dce1fb",
+                "primary": "#bdc2ff",
+                "outline": "#908f9e",
+                "on-tertiary-fixed": "#002109",
+                "tertiary-fixed-dim": "#4ae176",
+                "surface-container-highest": "#2e3447",
+                "secondary-fixed-dim": "#cebdff",
+                "on-surface": "#dce1fb",
+                "on-error": "#690005",
+                "inverse-surface": "#dce1fb",
+                "surface-tint": "#bdc2ff",
+                "on-primary": "#131e8c",
+                "on-primary-container": "#101b8a",
+                "primary-container": "#818cf8",
+                "primary-fixed-dim": "#bdc2ff",
+                "outline-variant": "#454653",
+                "on-surface-variant": "#c6c5d5",
+                "on-primary-fixed-variant": "#2f3aa3",
+                "surface-container-low": "#151b2d",
+                "on-tertiary-fixed-variant": "#005321",
+                "background": "#0c1324",
+                "tertiary-container": "#00ac4e",
+                "tertiary": "#4ae176",
+                "surface-container-lowest": "#070d1f",
+                "surface-container": "#191f31",
+                "secondary-fixed": "#e8ddff",
+                "on-secondary": "#381385",
+                "inverse-on-surface": "#2a3043",
+                "on-primary-fixed": "#000767",
+                "on-error-container": "#ffdad6"
+              },
+              fontFamily: {
+                "headline": ["Plus Jakarta Sans"],
+                "body": ["Plus Jakarta Sans"],
+                "label": ["Plus Jakarta Sans"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+</head>
+<body class="text-on-surface bg-surface-dim selection:bg-primary/30 min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0c1324]/80 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(189,194,255,0.08)]">
+<div class="flex justify-between items-center w-full px-8 h-16 relative">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] bg-clip-text text-transparent font-['Plus_Jakarta_Sans'] tracking-tight">EchoNote</span>
+<nav class="hidden md:flex gap-6"><a class="text-[#94a3b8] hover:text-[#bdc2ff] transition-colors font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Dashboard</a><a class="text-[#94a3b8] hover:text-[#bdc2ff] transition-colors font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Record</a><a class="text-[#bdc2ff] border-b-2 border-[#818cf8] pb-1 font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Meetings</a></nav>
+</div>
+<div class="flex items-center gap-4"><img alt="User profile avatar" class="w-8 h-8 rounded-full border border-outline-variant/30 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF_E29AcjHBS2sdXFLlBC6dBDT8ELS9VZy9N7K7AnSHuRQKbja1G0rsm4enF7ck521qZkpm11BiJ8hEDpp7uo8GPbZoCxemogiQX3F7nATJ0QT0CKmV-Hnq7WFRzS1ymgRRZw71380NFwwabV4cMYTCV9z_9Ynq8w4sq3ZdopinQzky0O2zK09QiydGIVxTcwShxEKHNZrB6jSzrnaNI30S-hwSu50CAb81Otk-0bC_TeXpA8vojOGc1LH3trbIT-lyzAu2RrQ2vM"/></div>
+<!-- Separation Line -->
+<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-transparent via-[#454653]/15 to-transparent h-[1px]"></div>
+</div>
+</header>
+<main class="pt-24 pb-12 px-8 max-w-[1600px] mx-auto">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-10">
+<div>
+<h1 class="text-4xl font-extrabold tracking-tight flex items-center gap-3">
+                    Meetings
+                    <span class="mono text-lg font-normal text-on-surface-variant bg-surface-container px-3 py-1 rounded-full border border-outline-variant/10">23</span>
+</h1>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-5 py-2.5 text-on-surface-variant hover:text-on-surface bg-surface-container-low hover:bg-surface-container rounded-lg transition-all border border-outline-variant/15 active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="ios_share">ios_share</span>
+<span class="font-semibold text-sm">Export All</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-tertiary-container to-tertiary text-on-tertiary-container rounded-lg font-bold text-sm shadow-[0_4px_20px_-4px_rgba(0,172,78,0.4)] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="mic" data-weight="fill" style="font-variation-settings: 'FILL' 1;">mic</span>
+                    New Recording
+                </button>
+</div>
+</div>
+<!-- Filter Toolbar -->
+<div class="flex items-center justify-between bg-surface-container-lowest/50 backdrop-blur-md p-2 rounded-xl border border-outline-variant/10 mb-8">
+<div class="flex items-center px-4 w-1/4">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-on-surface w-full ml-2" placeholder="Filter by keyword..." type="text"/>
+</div>
+<div class="flex bg-surface-dim p-1 rounded-lg border border-outline-variant/10"><button class="px-4 py-1.5 rounded-md text-sm font-semibold bg-surface-container text-primary shadow-sm">All</button><button class="px-4 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Sales</button><button class="px-4 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Planning</button><button class="px-4 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Standup</button><button class="px-4 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">One-on-One</button><button class="px-4 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Other</button></div>
+<div class="flex items-center gap-4 px-4 w-1/4 justify-end">
+<div class="relative group">
+<button class="flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-variant/20 transition-all">
+                        Category
+                        <span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Meeting Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1: Completed Positive Sentiment -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden hover:bg-surface-container transition-all duration-300 border-l-4 border-tertiary/60">
+<div class="p-6"><div class="flex justify-between items-start mb-4"><span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-bold tracking-widest uppercase rounded">PLANNING</span><div class="flex items-center gap-2"><span class="mono text-[11px] text-on-surface-variant">42:15</span><div class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#4ae176]"></div></div></div><h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Q3 Roadmap Planning</h3><p class="text-on-surface-variant text-sm line-clamp-2 mb-4 leading-relaxed">Discussion on mobile app priorities, resource allocation for the design system overhaul, and release timelines.</p><div class="flex flex-wrap gap-2 mb-6"><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">UI/UX</span><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Milestones</span><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Q3-Goals</span></div><div class="flex items-center justify-between pt-4 border-t border-outline-variant/10"><span class="mono text-[10px] text-outline">OCT 24, 2023</span></div></div>
+</div>
+<!-- Card 2: Processing -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden hover:bg-surface-container transition-all duration-300 border-l-4 border-primary/40">
+<div class="p-6"><div class="flex justify-between items-start mb-4"><span class="px-2.5 py-1 bg-secondary/10 text-secondary text-[10px] font-bold tracking-widest uppercase rounded">OTHER</span><div class="flex items-center gap-2"><span class="mono text-[11px] text-on-surface-variant">15:02</span><div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#bdc2ff]"></div></div></div><h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">User Interview #12</h3><p class="text-on-surface-variant text-sm line-clamp-2 mb-4 leading-relaxed italic">AI is currently extracting key insights and sentiment analysis from this session...</p><div class="flex items-center justify-between pt-4 border-t border-outline-variant/10"><span class="mono text-[10px] text-outline">OCT 24, 2023</span><span class="text-[10px] font-bold text-primary tracking-widest flex items-center gap-1"><span class="material-symbols-outlined text-[12px] animate-spin" data-icon="sync">sync</span>PROCESSING</span></div></div>
+</div>
+<!-- Card 3: Neutral Sentiment -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden hover:bg-surface-container transition-all duration-300 border-l-4 border-outline-variant/40">
+<div class="p-6"><div class="flex justify-between items-start mb-4"><span class="px-2.5 py-1 bg-on-surface-variant/10 text-on-surface-variant text-[10px] font-bold tracking-widest uppercase rounded">STANDUP</span><div class="flex items-center gap-2"><span class="mono text-[11px] text-on-surface-variant">28:40</span><div class="w-2 h-2 rounded-full bg-outline shadow-[0_0_4px_#908f9e]"></div></div></div><h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Weekly Internal Standup</h3><p class="text-on-surface-variant text-sm line-clamp-2 mb-4 leading-relaxed">Routine updates from all departments. No critical blockers identified this week.</p><div class="flex flex-wrap gap-2 mb-6"><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Logistics</span><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Status-Update</span></div><div class="flex items-center justify-between pt-4 border-t border-outline-variant/10"><span class="mono text-[10px] text-outline">OCT 23, 2023</span></div></div>
+</div>
+<!-- Repeat 9 more for a total of 12 (conceptual) -->
+<!-- Card 4: Failed -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden hover:bg-surface-container transition-all duration-300 border-l-4 border-error/40 opacity-70">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<span class="px-2.5 py-1 bg-error/10 text-error text-[10px] font-bold tracking-widest uppercase rounded">Sales</span>
+<div class="flex items-center gap-2">
+<span class="mono text-[11px] text-error">ERROR</span>
+<div class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_#ffb4ab]"></div>
+</div>
+</div>
+<h3 class="text-xl font-bold mb-2 line-through opacity-50">Enterprise Pitch - Globex Corp</h3>
+<p class="text-error text-xs mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="error_outline">error_outline</span>
+                        Audio corruption detected. Recovery failed.
+                    </p>
+<div class="flex items-center justify-between pt-4 border-t border-outline-variant/10">
+<span class="mono text-[10px] text-outline">OCT 22, 2023</span>
+<button class="text-[10px] font-bold text-on-surface hover:underline">RETRY UPLOAD</button>
+</div>
+</div>
+</div>
+<!-- Card 5: Positive -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden hover:bg-surface-container transition-all duration-300 border-l-4 border-tertiary/60">
+<div class="p-6"><div class="flex justify-between items-start mb-4"><span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-bold tracking-widest uppercase rounded">PLANNING</span><div class="flex items-center gap-2"><span class="mono text-[11px] text-on-surface-variant">58:00</span><div class="w-2 h-2 rounded-full bg-tertiary"></div></div></div><h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Design System Review</h3><p class="text-on-surface-variant text-sm line-clamp-2 mb-4 leading-relaxed">Approving new token architecture and component naming conventions.</p><div class="flex flex-wrap gap-2 mb-6"><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Architecture</span></div><div class="flex items-center justify-between pt-4 border-t border-outline-variant/10"><span class="mono text-[10px] text-outline">OCT 22, 2023</span></div></div>
+</div>
+<!-- Card 6: Positive High Duration -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden hover:bg-surface-container transition-all duration-300 border-l-4 border-tertiary/60">
+<div class="p-6"><div class="flex justify-between items-start mb-4"><span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-bold tracking-widest uppercase rounded">OTHER</span><div class="flex items-center gap-2"><span class="mono text-[11px] text-on-surface-variant">01:45:00</span><div class="w-2 h-2 rounded-full bg-tertiary"></div></div></div><h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">All Hands: Q4 Vision</h3><p class="text-on-surface-variant text-sm line-clamp-2 mb-4 leading-relaxed">The entire company discusses our pivots towards AI-first archival systems.</p><div class="flex flex-wrap gap-2 mb-6"><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Vision</span><span class="text-[10px] mono bg-surface-variant/40 px-2 py-0.5 rounded border border-outline-variant/10">Growth</span></div><div class="flex items-center justify-between pt-4 border-t border-outline-variant/10"><span class="mono text-[10px] text-outline">OCT 21, 2023</span></div></div>
+</div>
+<!-- Generic placeholder cards for layout visibility -->
+</div>
+<!-- Footer Pagination -->
+<footer class="mt-16 flex items-center justify-between border-t border-outline-variant/10 pt-8">
+<span class="text-on-surface-variant text-sm font-medium">Showing <span class="mono text-on-surface">1-12</span> of <span class="mono text-on-surface">23</span> meetings</span>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant/15 text-on-surface-variant hover:bg-surface-variant/20 transition-all opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<div class="flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant/15">
+<button class="w-8 h-8 flex items-center justify-center rounded-md bg-primary text-on-primary text-xs font-bold mono shadow-sm">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md text-on-surface-variant hover:text-on-surface text-xs font-medium mono transition-colors">2</button>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant/15 text-on-surface-variant hover:bg-surface-variant/20 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</footer>
+</main>
+<!-- Contextual Floating Action Button -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] text-on-primary-fixed rounded-full shadow-[0_12px_40px_-8px_rgba(129,140,248,0.5)] flex items-center justify-center group active:scale-90 transition-all z-40">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform duration-300" data-icon="add">add</span>
+</button>
+</body></html>

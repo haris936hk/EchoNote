@@ -18,23 +18,23 @@ async function initializeStorage() {
     await fs.mkdir(AUDIO_DIR, { recursive: true });
     await fs.mkdir(TEMP_DIR, { recursive: true });
     await fs.mkdir(PROCESSED_DIR, { recursive: true });
-    
+
     console.log('✅ Storage directories initialized');
-    
+
     return {
       success: true,
       paths: {
         base: STORAGE_BASE,
         audio: AUDIO_DIR,
         temp: TEMP_DIR,
-        processed: PROCESSED_DIR
-      }
+        processed: PROCESSED_DIR,
+      },
     };
   } catch (error) {
     console.error('❌ Storage initialization error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -64,14 +64,14 @@ async function storeTempAudioFile(file) {
         tempPath,
         originalName: file.originalname,
         size: file.size,
-        mimetype: file.mimetype
-      }
+        mimetype: file.mimetype,
+      },
     };
   } catch (error) {
     console.error('❌ Store temp audio error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -102,14 +102,14 @@ async function storeProcessedAudio(processedPath, meetingId) {
         path: permanentPath,
         filename,
         size: stats.size,
-        url: `/storage/audio/${filename}` // Relative URL for serving
-      }
+        url: `/storage/audio/${filename}`, // Relative URL for serving
+      },
     };
   } catch (error) {
     console.error('❌ Store processed audio error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -123,12 +123,12 @@ async function getAudioFile(meetingId) {
   try {
     // Find audio file with any extension
     const files = await fs.readdir(AUDIO_DIR);
-    const audioFile = files.find(file => file.startsWith(meetingId));
+    const audioFile = files.find((file) => file.startsWith(meetingId));
 
     if (!audioFile) {
       return {
         success: false,
-        error: 'Audio file not found'
+        error: 'Audio file not found',
       };
     }
 
@@ -141,14 +141,14 @@ async function getAudioFile(meetingId) {
         path: filePath,
         filename: audioFile,
         size: stats.size,
-        mimetype: getMimeType(audioFile)
-      }
+        mimetype: getMimeType(audioFile),
+      },
     };
   } catch (error) {
     console.error('❌ Get audio file error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -164,7 +164,7 @@ async function deleteAudioFile(filePath) {
     if (!fsSync.existsSync(filePath)) {
       return {
         success: false,
-        error: 'File not found'
+        error: 'File not found',
       };
     }
 
@@ -173,13 +173,13 @@ async function deleteAudioFile(filePath) {
 
     return {
       success: true,
-      message: 'File deleted successfully'
+      message: 'File deleted successfully',
     };
   } catch (error) {
     console.error('❌ Delete audio file error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -200,13 +200,13 @@ async function deleteTempFile(tempPath) {
 
     return {
       success: true,
-      message: 'Temp file deleted'
+      message: 'Temp file deleted',
     };
   } catch (error) {
     console.error('❌ Delete temp file error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -218,7 +218,7 @@ async function deleteTempFile(tempPath) {
 async function cleanupOldTempFiles() {
   try {
     const files = await fs.readdir(TEMP_DIR);
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
     let deletedCount = 0;
 
     for (const file of files) {
@@ -237,13 +237,13 @@ async function cleanupOldTempFiles() {
 
     return {
       success: true,
-      deletedCount
+      deletedCount,
     };
   } catch (error) {
     console.error('❌ Cleanup temp files error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -269,13 +269,13 @@ async function cleanupProcessedFiles() {
 
     return {
       success: true,
-      deletedCount
+      deletedCount,
     };
   } catch (error) {
     console.error('❌ Cleanup processed files error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -289,7 +289,7 @@ async function getStorageStats() {
     const [audioFiles, tempFiles, processedFiles] = await Promise.all([
       fs.readdir(AUDIO_DIR),
       fs.readdir(TEMP_DIR),
-      fs.readdir(PROCESSED_DIR)
+      fs.readdir(PROCESSED_DIR),
     ]);
 
     // Calculate total sizes
@@ -318,30 +318,30 @@ async function getStorageStats() {
         audio: {
           count: audioFiles.length,
           size: audioSize,
-          sizeFormatted: formatFileSize(audioSize)
+          sizeFormatted: formatFileSize(audioSize),
         },
         temp: {
           count: tempFiles.length,
           size: tempSize,
-          sizeFormatted: formatFileSize(tempSize)
+          sizeFormatted: formatFileSize(tempSize),
         },
         processed: {
           count: processedFiles.length,
           size: processedSize,
-          sizeFormatted: formatFileSize(processedSize)
+          sizeFormatted: formatFileSize(processedSize),
         },
         total: {
           count: audioFiles.length + tempFiles.length + processedFiles.length,
           size: audioSize + tempSize + processedSize,
-          sizeFormatted: formatFileSize(audioSize + tempSize + processedSize)
-        }
-      }
+          sizeFormatted: formatFileSize(audioSize + tempSize + processedSize),
+        },
+      },
     };
   } catch (error) {
     console.error('❌ Get storage stats error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -363,18 +363,18 @@ function fileExists(filePath) {
 async function getFileSize(filePath) {
   try {
     const stats = await fs.stat(filePath);
-    
+
     return {
       success: true,
       data: {
         bytes: stats.size,
-        formatted: formatFileSize(stats.size)
-      }
+        formatted: formatFileSize(stats.size),
+      },
     };
   } catch (error) {
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -393,7 +393,7 @@ function validateAudioFile(file) {
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `File too large. Maximum size is ${formatFileSize(MAX_FILE_SIZE)}`
+      error: `File too large. Maximum size is ${formatFileSize(MAX_FILE_SIZE)}`,
     };
   }
 
@@ -401,7 +401,7 @@ function validateAudioFile(file) {
   if (!ALLOWED_TYPES.includes(file.mimetype)) {
     return {
       valid: false,
-      error: `Invalid file type. Allowed types: ${ALLOWED_EXTENSIONS.join(', ')}`
+      error: `Invalid file type. Allowed types: ${ALLOWED_EXTENSIONS.join(', ')}`,
     };
   }
 
@@ -410,12 +410,12 @@ function validateAudioFile(file) {
   if (!ALLOWED_EXTENSIONS.includes(extension)) {
     return {
       valid: false,
-      error: `Invalid file extension. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`
+      error: `Invalid file extension. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`,
     };
   }
 
   return {
-    valid: true
+    valid: true,
   };
 }
 
@@ -427,7 +427,7 @@ function validateAudioFile(file) {
 async function createAudioDownloadStream(meetingId) {
   try {
     const fileResult = await getAudioFile(meetingId);
-    
+
     if (!fileResult.success) {
       throw new Error(fileResult.error);
     }
@@ -440,14 +440,14 @@ async function createAudioDownloadStream(meetingId) {
         stream,
         filename: fileResult.data.filename,
         mimetype: fileResult.data.mimetype,
-        size: fileResult.data.size
-      }
+        size: fileResult.data.size,
+      },
     };
   } catch (error) {
     console.error('❌ Create download stream error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -485,7 +485,7 @@ function getMimeType(filename) {
     '.mp3': 'audio/mpeg',
     '.wav': 'audio/wav',
     '.m4a': 'audio/mp4',
-    '.mp4': 'audio/mp4'
+    '.mp4': 'audio/mp4',
   };
 
   return mimeTypes[extension] || 'application/octet-stream';
@@ -499,7 +499,7 @@ function getStoragePaths() {
     base: STORAGE_BASE,
     audio: AUDIO_DIR,
     temp: TEMP_DIR,
-    processed: PROCESSED_DIR
+    processed: PROCESSED_DIR,
   };
 }
 
@@ -517,5 +517,5 @@ module.exports = {
   getFileSize,
   validateAudioFile,
   createAudioDownloadStream,
-  getStoragePaths
+  getStoragePaths,
 };

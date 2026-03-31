@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EchoNote | Sign In</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#6bff8f",
+              "on-error": "#690005",
+              "on-tertiary-container": "#003613",
+              "secondary-fixed": "#e8ddff",
+              "surface-container-highest": "#2e3447",
+              "surface-bright": "#33394c",
+              "on-background": "#dce1fb",
+              "on-tertiary": "#003915",
+              "on-secondary-fixed": "#21005e",
+              "on-primary-fixed": "#000767",
+              "surface-container-lowest": "#070d1f",
+              "surface-container-low": "#151b2d",
+              "surface-container-high": "#23293c",
+              "tertiary-fixed-dim": "#4ae176",
+              "primary-container": "#818cf8",
+              "on-surface-variant": "#c6c5d5",
+              "on-primary-fixed-variant": "#2f3aa3",
+              "tertiary-container": "#00ac4e",
+              "inverse-on-surface": "#2a3043",
+              "surface-variant": "#2e3447",
+              "secondary": "#cebdff",
+              "primary-fixed": "#e0e0ff",
+              "inverse-surface": "#dce1fb",
+              "surface-container": "#191f31",
+              "primary": "#bdc2ff",
+              "surface-tint": "#bdc2ff",
+              "secondary-fixed-dim": "#cebdff",
+              "on-primary": "#131e8c",
+              "on-primary-container": "#101b8a",
+              "on-secondary": "#381385",
+              "error-container": "#93000a",
+              "on-secondary-container": "#bea8ff",
+              "on-error-container": "#ffdad6",
+              "background": "#0c1324",
+              "on-surface": "#dce1fb",
+              "tertiary": "#4ae176",
+              "on-tertiary-fixed": "#002109",
+              "inverse-primary": "#4953bc",
+              "surface-dim": "#0c1324",
+              "error": "#ffb4ab",
+              "surface": "#0c1324",
+              "outline-variant": "#454653",
+              "on-secondary-fixed-variant": "#4f319c",
+              "primary-fixed-dim": "#bdc2ff",
+              "secondary-container": "#4f319c",
+              "outline": "#908f9e",
+              "on-tertiary-fixed-variant": "#005321"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #020617;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(21, 27, 45, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(69, 70, 83, 0.15);
+        }
+        .bg-blob {
+            background: radial-gradient(circle at center, rgba(129, 140, 248, 0.15) 0%, transparent 70%);
+            width: 800px;
+            height: 800px;
+            position: absolute;
+            bottom: -200px;
+            left: -200px;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface min-h-screen flex items-center justify-center relative px-6">
+<!-- Decorative Gradient Blob -->
+<div class="bg-blob"></div>
+<!-- Main Content Container -->
+<main class="relative z-10 w-full max-w-[420px]">
+<!-- Centered Glass Card -->
+<div class="glass-card rounded-[24px] p-10 flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+<!-- 1. EchoNote Logo -->
+<div class="flex flex-col items-center gap-4 mb-8">
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-on-primary text-3xl" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-2xl font-extrabold tracking-tighter text-primary font-headline">EchoNote</span>
+</div>
+</div>
+<!-- 2 & 3. Header & Subtitle -->
+<div class="text-center mb-10">
+<h2 class="text-3xl font-bold tracking-tight text-on-surface mb-2 font-headline">Sign in to EchoNote</h2>
+<p class="text-secondary font-medium tracking-wide">Your meeting intelligence awaits</p>
+</div>
+<!-- 4. Continue with Google Button -->
+<button class="w-full flex items-center justify-center gap-3 py-4 px-6 bg-white text-[#1f2937] font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl hover:shadow-white/10 group">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+<span class="font-headline tracking-tight">Continue with Google</span>
+</button>
+<!-- 5. Caption -->
+<p class="mt-10 text-[11px] text-center text-outline leading-relaxed max-w-[280px]">
+                By continuing, you agree to our 
+                <a class="text-on-surface-variant hover:text-primary underline underline-offset-4 decoration-outline/30 transition-colors" href="#">Terms of Service</a> 
+                and 
+                <a class="text-on-surface-variant hover:text-primary underline underline-offset-4 decoration-outline/30 transition-colors" href="#">Privacy Policy</a>.
+            </p>
+<!-- 6. Privacy Badge -->
+<div class="mt-8 pt-8 border-t border-outline-variant/15 w-full flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="text-[10px] font-medium uppercase tracking-[0.12em] text-outline font-['JetBrains_Mono']">Secured with Google OAuth</span>
+</div>
+</div>
+<!-- Hidden Branding/Status Indicators (Design System Elements) -->
+<div class="mt-12 flex justify-center gap-8 items-center opacity-40">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed shadow-[0_0_8px_rgba(107,255,143,0.5)]"></div>
+<span class="text-[10px] font-medium tracking-[0.1em] text-on-surface-variant font-['JetBrains_Mono'] uppercase">Engine Ready</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(206,189,255,0.5)]"></div>
+<span class="text-[10px] font-medium tracking-[0.1em] text-on-surface-variant font-['JetBrains_Mono'] uppercase">AI Active</span>
+</div>
+</div>
+</main>
+<!-- Visual Texture Layers -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03]" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9vjGdHK2DLbdMeC8xMHS49iNnKvFLjZBYk0eUy8xr-TZSXAJuKZ-3atmv3gTw05AxSGTwzYZu8NoSamSoUEQ5VJVm7pLXjuvl9mXRiADw62i6CJ64ycDaO9O6B2kCidF1kxFiqL4mGcQ_-nwHzDQ3lDO0DZBH3BhBQsjD5Pzx7tBFBmFiNpToyzP7GIbFeYEV2FvoAKFs0obfZWPrzcmEdr4WWYD2tT-HTLG4P2BbNiO9HLavL_G_nDbAJUJrK_83X8gu9_iS2TY');"></div>
+</body></html>

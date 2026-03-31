@@ -116,7 +116,8 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
         // Add glow effect for high intensity bars
         if (normalizedHeight > 0.6) {
           ctx.shadowBlur = 10;
-          ctx.shadowColor = normalizedHeight > 0.7 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(249, 115, 22, 0.5)';
+          ctx.shadowColor =
+            normalizedHeight > 0.7 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(249, 115, 22, 0.5)';
           ctx.fill();
           ctx.shadowBlur = 0;
         }
@@ -144,14 +145,10 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
   }, [stream, isActive]);
 
   return (
-    <div className="relative w-full h-20 bg-gradient-to-br from-black/40 to-black/20 rounded-2xl overflow-hidden border border-primary/10 shadow-inner">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-        style={{ display: 'block' }}
-      />
+    <div className="border-primary/10 relative h-20 w-full overflow-hidden rounded-2xl border bg-gradient-to-br from-black/40 to-black/20 shadow-inner">
+      <canvas ref={canvasRef} className="size-full" style={{ display: 'block' }} />
       {!stream && (
-        <div className="absolute inset-0 flex items-center justify-center text-default-400 text-sm">
+        <div className="text-default-400 absolute inset-0 flex items-center justify-center text-sm">
           Waiting for audio...
         </div>
       )}

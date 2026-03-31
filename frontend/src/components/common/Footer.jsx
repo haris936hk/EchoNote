@@ -1,102 +1,124 @@
 import { Link } from 'react-router-dom';
-import { Divider } from '@heroui/react';
-import { FiGithub, FiMail, FiHeart } from 'react-icons/fi';
 
+/**
+ * Footer — Public marketing page footer (HomePage only)
+ * 4-column grid matching Stitch home_echonote_final design
+ */
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="w-full bg-content1 border-t border-divider">
-      <div className="container mx-auto px-4 py-8">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="text-xl font-bold mb-3">EchoNote</h3>
-            <p className="text-default-500 text-sm mb-4">
-              AI-powered meeting transcription and summarization platform. 
-              Transform your meetings into searchable, actionable knowledge.
-            </p>
-            <div className="flex gap-4">
-              <a
-                href="https://github.com/your-repo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-default-500 hover:text-primary transition-colors"
-                aria-label="GitHub"
-              >
-                <FiGithub size={20} />
-              </a>
-              <a
-                href="mailto:support@echonote.com"
-                className="text-default-500 hover:text-primary transition-colors"
-                aria-label="Email"
-              >
-                <FiMail size={20} />
-              </a>
-            </div>
-          </div>
-
-          {/* Product Links */}
+    <footer
+      className="w-full border-t border-[#454653]/15 py-16"
+      style={{ backgroundColor: '#0c1324' }}
+    >
+      <div className="mx-auto max-w-7xl px-8">
+        {/* 4-Column Grid */}
+        <div className="mb-16 grid grid-cols-2 gap-12 md:grid-cols-4">
           <div>
-            <h4 className="font-semibold mb-3">Product</h4>
-            <ul className="space-y-2 text-sm">
+            <h5 className="mb-6 font-mono text-xs uppercase tracking-widest text-slate-500">
+              Product
+            </h5>
+            <ul className="space-y-4 text-sm font-medium text-slate-400">
               <li>
-                <Link to="/" className="text-default-500 hover:text-primary transition-colors">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/features" className="text-default-500 hover:text-primary transition-colors">
+                <Link to="/features" className="transition-colors hover:text-slate-100">
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/pricing" className="text-default-500 hover:text-primary transition-colors">
+                <Link to="/pricing" className="transition-colors hover:text-slate-100">
+                  Integrations
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="transition-colors hover:text-slate-100">
+                  Enterprise
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="transition-colors hover:text-slate-100">
                   Pricing
                 </Link>
               </li>
             </ul>
           </div>
-
-          {/* Support Links */}
           <div>
-            <h4 className="font-semibold mb-3">Support</h4>
-            <ul className="space-y-2 text-sm">
+            <h5 className="mb-6 font-mono text-xs uppercase tracking-widest text-slate-500">
+              Resources
+            </h5>
+            <ul className="space-y-4 text-sm font-medium text-slate-400">
               <li>
-                <Link to="/help" className="text-default-500 hover:text-primary transition-colors">
-                  Help Center
+                <Link to="/docs" className="transition-colors hover:text-slate-100">
+                  Documentation
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-default-500 hover:text-primary transition-colors">
+                <Link to="/docs" className="transition-colors hover:text-slate-100">
+                  API Reference
+                </Link>
+              </li>
+              <li>
+                <Link to="/help" className="transition-colors hover:text-slate-100">
+                  Community
+                </Link>
+              </li>
+              <li>
+                <Link to="/help" className="transition-colors hover:text-slate-100">
+                  Support
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="mb-6 font-mono text-xs uppercase tracking-widest text-slate-500">
+              Legal
+            </h5>
+            <ul className="space-y-4 text-sm font-medium text-slate-400">
+              <li>
+                <Link to="/privacy" className="transition-colors hover:text-slate-100">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-default-500 hover:text-primary transition-colors">
+                <Link to="/terms" className="transition-colors hover:text-slate-100">
                   Terms of Service
                 </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="transition-colors hover:text-slate-100">
+                  Cookie Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="mb-6 font-mono text-xs uppercase tracking-widest text-slate-500">
+              Connect
+            </h5>
+            <ul className="space-y-4 text-sm font-medium text-slate-400">
+              <li>
+                <span className="cursor-pointer transition-colors hover:text-slate-100">
+                  Twitter
+                </span>
+              </li>
+              <li>
+                <span className="cursor-pointer transition-colors hover:text-slate-100">
+                  LinkedIn
+                </span>
+              </li>
+              <li>
+                <span className="cursor-pointer transition-colors hover:text-slate-100">
+                  GitHub
+                </span>
               </li>
             </ul>
           </div>
         </div>
 
-        <Divider className="mb-6" />
-
-        {/* Bottom Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-default-500">
-          <p>
-            © {currentYear} EchoNote. All rights reserved.
-          </p>
-          
-          <p className="flex items-center gap-1">
-            Made with <FiHeart size={14} className="text-danger" /> by Riphah Team
-          </p>
-          
-          <p className="text-xs">
-            Powered by Whisper ASR, SpaCy & EchoNote AI
-          </p>
+        {/* Bottom Bar */}
+        <div className="flex flex-col items-center justify-between border-t border-[#454653]/10 pt-8 md:flex-row">
+          <div className="mb-4 text-lg font-black text-white md:mb-0">EchoNote</div>
+          <div className="text-sm font-medium text-slate-500">
+            © 2025 EchoNote. Made by Riphah Students
+          </div>
         </div>
       </div>
     </footer>

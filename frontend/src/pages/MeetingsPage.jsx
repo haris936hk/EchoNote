@@ -1,20 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Button,
-  Card,
-  CardBody,
-  Tabs,
-  Tab,
-  Spinner
-} from '@heroui/react';
-import {
-  FiPlus,
-  FiFilter,
-  FiDownload,
-  FiTrash2,
-  FiArrowUp
-} from 'react-icons/fi';
+import { Button, Spinner } from '@heroui/react';
+import { LuPlus as Plus, LuDownload as Download, LuTrash2 as Trash2, LuArrowUp as ArrowUp } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import MeetingList from '../components/meeting/MeetingList';
 import CategoryFilter from '../components/meeting/CategoryFilter';
@@ -33,8 +20,6 @@ const MeetingsPage = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
   const [selectedMeetings, setSelectedMeetings] = useState([]);
-  const [showHeader, setShowHeader] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -42,113 +27,90 @@ const MeetingsPage = () => {
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
-  // Fetch meetings on mount
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  // Handle scroll to show/hide header and scroll-to-top button
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 10) {
-        setShowHeader(true);
-        setShowScrollTop(false);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setShowHeader(false);
-        setShowScrollTop(true);
-      } else if (currentScrollY < lastScrollY) {
-        setShowHeader(true);
-        setShowScrollTop(currentScrollY > 300);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
+    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
-  // Scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Filter meetings based on all filters
+  // Filter meetings
   useEffect(() => {
     let result = meetings;
-
-    // Filter by status
     if (statusFilter !== 'ALL') {
-      result = result.filter(m => m.status === statusFilter);
+      const processingStatuses = [
+        'UPLOADING',
+        'PROCESSING_AUDIO',
+        'TRANSCRIBING',
+        'PROCESSING_NLP',
+        'SUMMARIZING',
+      ];
+      if (statusFilter === 'PROCESSING') {
+        result = result.filter((m) => processingStatuses.includes(m.status));
+      } else {
+        result = result.filter((m) => m.status === statusFilter);
+      }
     }
-
-    // Filter by category
     if (selectedCategory !== 'ALL') {
-      result = result.filter(m => m.category === selectedCategory);
+      result = result.filter((m) => m.category === selectedCategory);
     }
-
-    // Filter by search query
     if (debouncedSearch) {
       const query = debouncedSearch.toLowerCase();
-      result = result.filter(m => {
-        // Search in title and description
+      result = result.filter((m) => {
         if (m.title.toLowerCase().includes(query)) return true;
         if (m.description?.toLowerCase().includes(query)) return true;
-
-        // Search in transcript (if it's a string)
-        if (typeof m.transcript === 'string' && m.transcript.toLowerCase().includes(query)) return true;
-
-        // Search in summary (if it's an object with string fields)
+        if (typeof m.transcript === 'string' && m.transcript.toLowerCase().includes(query))
+          return true;
         if (m.summary && typeof m.summary === 'object') {
           const summaryText = [
             m.summary.executiveSummary,
             m.summary.keyDecisions,
             m.summary.nextSteps,
             ...(m.summary.keyTopics || []),
-            ...(m.summary.actionItems || []).map(item => item.task)
-          ].filter(Boolean).join(' ').toLowerCase();
-
+            ...(m.summary.actionItems || []).map((item) => item.task),
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
           if (summaryText.includes(query)) return true;
         }
-
         return false;
       });
     }
-
-    // Sort by date (newest first)
     result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
     setFilteredMeetings(result);
   }, [meetings, statusFilter, selectedCategory, debouncedSearch]);
 
-  // Calculate counts for status tabs
-  const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
+  // Status counts
+  const processingStatuses = [
+    'UPLOADING',
+    'PROCESSING_AUDIO',
+    'TRANSCRIBING',
+    'PROCESSING_NLP',
+    'SUMMARIZING',
+  ];
   const statusCounts = {
     ALL: meetings.length,
-    PENDING: meetings.filter(m => m.status === 'PENDING').length,
-    PROCESSING: meetings.filter(m => processingStatuses.includes(m.status)).length,
-    COMPLETED: meetings.filter(m => m.status === 'COMPLETED').length,
-    FAILED: meetings.filter(m => m.status === 'FAILED').length
+    PROCESSING: meetings.filter((m) => processingStatuses.includes(m.status)).length,
+    COMPLETED: meetings.filter((m) => m.status === 'COMPLETED').length,
+    FAILED: meetings.filter((m) => m.status === 'FAILED').length,
   };
 
-  // Category counts
   const categoryCounts = meetings.reduce((acc, meeting) => {
     acc[meeting.category] = (acc[meeting.category] || 0) + 1;
     return acc;
   }, {});
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this meeting? This action cannot be undone.'
-    );
-
-    if (confirmed) {
-      const result = await deleteMeeting(id);
-      if (result.success) {
-        // Could add toast notification here
-      }
+    if (
+      window.confirm('Are you sure you want to delete this meeting? This action cannot be undone.')
+    ) {
+      await deleteMeeting(id);
     }
   };
 
@@ -159,60 +121,39 @@ const MeetingsPage = () => {
 
   const handleSaveEdit = async (updates) => {
     const result = await updateMeeting(editingMeeting.id, updates);
-    if (result.success) {
-      // Refresh meetings list
-      fetchMeetings();
-    }
+    if (result.success) fetchMeetings();
   };
 
   const handleBulkDelete = async () => {
     if (selectedMeetings.length === 0) return;
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedMeetings.length} meeting(s)? This action cannot be undone.`
-    );
-
-    if (confirmed) {
-      for (const id of selectedMeetings) {
-        await deleteMeeting(id);
-      }
+    if (window.confirm(`Are you sure you want to delete ${selectedMeetings.length} meeting(s)?`)) {
+      for (const id of selectedMeetings) await deleteMeeting(id);
       setSelectedMeetings([]);
     }
   };
 
-  const handleNewRecording = () => {
-    navigate('/record');
-  };
-
   const handleExportAll = async () => {
-    // Check if there are completed meetings to export
-    const completedCount = meetings.filter(m => m.status === 'COMPLETED').length;
+    const completedCount = meetings.filter((m) => m.status === 'COMPLETED').length;
     if (completedCount === 0) {
       showToast('No completed meetings to export', 'error');
       return;
     }
-
     setIsExporting(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/export`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to export meetings');
       }
-
-      // Get filename from Content-Disposition header or use default
       const contentDisposition = response.headers.get('Content-Disposition');
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
-      const filename = filenameMatch ? filenameMatch[1] : `EchoNote_Export_${new Date().toISOString().slice(0, 10)}.zip`;
-
-      // Create blob and download
+      const filename = filenameMatch
+        ? filenameMatch[1]
+        : `EchoNote_Export_${new Date().toISOString().slice(0, 10)}.zip`;
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -222,10 +163,8 @@ const MeetingsPage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      showToast(`✅ Exported ${completedCount} meeting(s) successfully!`, 'success');
+      showToast(`Exported ${completedCount} meeting(s) successfully!`, 'success');
     } catch (error) {
-      console.error('Error exporting meetings:', error);
       showToast(error.message || 'Failed to export meetings', 'error');
     } finally {
       setIsExporting(false);
@@ -238,281 +177,145 @@ const MeetingsPage = () => {
     setStatusFilter('ALL');
   };
 
+  const hasActiveFilters = statusFilter !== 'ALL' || selectedCategory !== 'ALL' || searchQuery;
+
   if (loading && meetings.length === 0) {
     return <PageLoader label="Loading your meetings..." />;
   }
 
+  const statusTabs = [
+    { key: 'ALL', label: 'All', count: statusCounts.ALL },
+    { key: 'COMPLETED', label: 'Completed', count: statusCounts.COMPLETED },
+    { key: 'PROCESSING', label: 'Processing', count: statusCounts.PROCESSING },
+    { key: 'FAILED', label: 'Failed', count: statusCounts.FAILED },
+  ];
+
   return (
-    <div className="space-y-6 -mx-4 -my-6">
-      {/* Page Header - Slides down when navbar slides up */}
-      <div
-        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${!showHeader
-          ? 'translate-y-0 opacity-100'
-          : '-translate-y-full opacity-0 pointer-events-none'
-          }`}
-        style={{
-          willChange: 'transform, opacity'
-        }}
-      >
-        {/* Centered wrapper */}
-        <div className="max-w-6xl mx-auto flex justify-center">
-          {/* Rounded container with subtle border */}
-          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-md backdrop-saturate-150 shadow-lg">
-            {/* Meetings Title with count */}
-            <div className="flex items-center gap-2 text-default-foreground">
-              <FiFilter size={20} />
-              <span className="font-semibold text-sm">
-                My Meetings ({filteredMeetings.length}/{meetings.length})
-              </span>
-            </div>
-
-            {/* Divider */}
-            <div className="h-6 w-px bg-divider"></div>
-
-            {/* Export Button */}
-            <button
-              onClick={handleExportAll}
-              disabled={isExporting}
-              className={`flex items-center gap-2 text-sm font-medium transition-colors ${isExporting ? 'text-default-400 cursor-not-allowed' : 'text-default-500 hover:text-primary'
-                }`}
-            >
-              {isExporting ? <Spinner size="sm" /> : <FiDownload size={16} />}
-              {isExporting ? 'Exporting...' : 'Export'}
-            </button>
-
-            {/* Divider */}
-            <div className="h-6 w-px bg-divider"></div>
-
-            {/* New Recording Button */}
-            <button
-              onClick={handleNewRecording}
-              className="flex items-center gap-2 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
-            >
-              <FiPlus size={16} />
-              New Recording
-            </button>
-          </nav>
+    <div className="space-y-6 py-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Meetings</h1>
+          <span className="font-mono text-sm text-slate-500">({meetings.length})</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportAll}
+            disabled={isExporting}
+            className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium"
+          >
+            {isExporting ? <Spinner size="sm" /> : <Download size={14} />}
+            {isExporting ? 'Exporting...' : 'Export All'}
+          </button>
+          <button
+            onClick={() => navigate('/record')}
+            className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-5 py-2 text-sm font-bold transition-all hover:brightness-110"
+          >
+            <Plus size={16} />
+            New Recording
+          </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl pt-4 space-y-6">
+      {/* ── Filter Toolbar ── */}
+      <div className="space-y-4">
+        {/* Search */}
+        <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search meetings..." />
 
         {/* Status Tabs */}
-        <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
-          <CardBody className="p-0">
-            <Tabs
-              aria-label="Status filter"
-              selectedKey={statusFilter}
-              onSelectionChange={setStatusFilter}
-              variant="underlined"
-              classNames={{
-                tabList: 'w-full relative rounded-none p-0 px-4',
-                cursor: 'w-full bg-primary',
-                tab: 'h-12 hover:opacity-80 transition-opacity duration-200',
-                tabContent: 'group-data-[selected=true]:text-primary'
-              }}
+        <div className="flex flex-wrap items-center gap-1">
+          {statusTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`rounded-[10px] px-4 py-2 text-sm font-medium transition-all ${
+                statusFilter === tab.key
+                  ? 'bg-accent-primary text-white'
+                  : 'hover:bg-echo-surface-hover text-slate-400 hover:text-white'
+              }`}
             >
-              <Tab
-                key="ALL"
-                title={
-                  <div className="flex items-center gap-2">
-                    <span>All</span>
-                    <span className="text-sm font-medium text-default-500">
-                      {statusCounts.ALL}
-                    </span>
-                  </div>
-                }
-              />
-              <Tab
-                key="PENDING"
-                title={
-                  <div className="flex items-center gap-2">
-                    <span>Pending</span>
-                    <span className="text-sm font-medium text-default-500">
-                      {statusCounts.PENDING}
-                    </span>
-                  </div>
-                }
-              />
-              <Tab
-                key="COMPLETED"
-                title={
-                  <div className="flex items-center gap-2">
-                    <span>Completed</span>
-                    <span className="text-sm font-medium text-success">
-                      {statusCounts.COMPLETED}
-                    </span>
-                  </div>
-                }
-              />
-              <Tab
-                key="PROCESSING"
-                title={
-                  <div className="flex items-center gap-2">
-                    <span>Processing</span>
-                    <span className="text-sm font-medium text-warning">
-                      {statusCounts.PROCESSING}
-                    </span>
-                  </div>
-                }
-              />
-              <Tab
-                key="FAILED"
-                title={
-                  <div className="flex items-center gap-2">
-                    <span>Failed</span>
-                    <span className="text-sm font-medium text-danger">
-                      {statusCounts.FAILED}
-                    </span>
-                  </div>
-                }
-              />
-            </Tabs>
-          </CardBody>
-        </Card>
+              {tab.label}
+              <span
+                className={`ml-1.5 font-mono text-xs ${
+                  statusFilter === tab.key ? 'text-white/70' : 'text-slate-600'
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          ))}
 
-        {/* Search and Filters */}
-        <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
-          <CardBody className="gap-4">
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="flex-1">
-                <SearchBar
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Search by title, description, or content..."
-                />
-              </div>
+          {/* Category filter + clear */}
+          <div className="ml-auto flex items-center gap-2">
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="text-accent-primary text-xs hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
 
-              {(searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL') && (
-                <Button
-                  variant="flat"
-                  onPress={handleClearFilters}
-                  startContent={<FiFilter size={16} />}
-                  className="rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300 h-10 md:h-auto md:min-h-[40px]"
-                >
-                  Clear Filters
-                </Button>
-              )}
-            </div>
-
-            <CategoryFilter
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-              showCount={true}
-              counts={categoryCounts}
-            />
-          </CardBody>
-        </Card>
-
-        {/* Bulk Actions */}
-        {selectedMeetings.length > 0 && (
-          <Card className="border-primary/20 bg-primary/5 rounded-3xl hover:border-primary/30 transition-all duration-300">
-            <CardBody>
-              <div className="flex items-center justify-between">
-                <p className="font-medium">
-                  {selectedMeetings.length} meeting(s) selected
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="flat"
-                    onPress={() => setSelectedMeetings([])}
-                    className="rounded-2xl hover:bg-default-100 transition-all duration-300"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    color="danger"
-                    variant="flat"
-                    startContent={<FiTrash2 size={16} />}
-                    onPress={handleBulkDelete}
-                    className="rounded-2xl hover:bg-danger/10 transition-all duration-300"
-                  >
-                    Delete Selected
-                  </Button>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Meetings List */}
-        {filteredMeetings.length > 0 ? (
-          <MeetingList
-            meetings={filteredMeetings}
-            loading={loading}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-            itemsPerPage={12}
-          />
-        ) : (
-          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
-            <CardBody className="text-center py-20">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="relative w-28 h-28 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/30 backdrop-blur-sm border border-primary/20 hover:scale-110 transition-all duration-300">
-                  <FiFilter size={48} className="text-primary" />
-                </div>
-              </div>
-              <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                No meetings found
-              </h3>
-              <p className="text-default-700 dark:text-default-600 mb-8 max-w-md mx-auto text-lg">
-                {searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL'
-                  ? 'Try adjusting your filters to see more results'
-                  : 'Start by recording your first meeting to see it here'}
-              </p>
-              {searchQuery || selectedCategory !== 'ALL' || statusFilter !== 'ALL' ? (
-                <div className="flex justify-center">
-                  <Button
-                    variant="flat"
-                    onPress={handleClearFilters}
-                    size="lg"
-                    className="font-semibold rounded-3xl hover:bg-primary/10 transition-all duration-300"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
-              ) : (
-                <div className="relative inline-block group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
-                  <Button
-                    color="primary"
-                    onPress={handleNewRecording}
-                    size="lg"
-                    startContent={<FiPlus size={20} />}
-                    className="relative font-semibold px-8 shadow-xl shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 hover:scale-105 rounded-3xl"
-                  >
-                    Record Your First Meeting
-                  </Button>
-                </div>
-              )}
-            </CardBody>
-          </Card>
-        )}
+        {/* Category chips */}
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          showCount={true}
+          counts={categoryCounts}
+        />
       </div>
 
-      {/* Scroll to Top Button */}
-      {showScrollTop && (
-        <Button
-          isIconOnly
-          color="primary"
-          variant="shadow"
-          className={`fixed bottom-8 right-8 z-50 w-14 h-14 shadow-2xl shadow-primary/50 hover:shadow-3xl hover:shadow-primary/60 transition-all duration-300 ${showScrollTop ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-            }`}
-          radius="full"
-          onPress={scrollToTop}
-        >
-          <FiArrowUp size={24} />
-        </Button>
+      {/* ── Meeting Cards ── */}
+      <MeetingList
+        meetings={filteredMeetings}
+        loading={loading}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+        itemsPerPage={12}
+      />
+
+      {/* ── Bulk Actions Bar ── */}
+      {selectedMeetings.length > 0 && (
+        <div className="bg-echo-surface border-echo-border fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border px-6 py-3 shadow-2xl backdrop-blur-xl">
+          <span className="text-sm font-medium text-white">{selectedMeetings.length} selected</span>
+          <button
+            onClick={() => setSelectedMeetings([])}
+            className="text-sm text-slate-400 transition-colors hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            className="inline-flex items-center gap-1.5 rounded-[10px] bg-red-500 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-600"
+          >
+            <Trash2 size={14} />
+            Delete Selected
+          </button>
+        </div>
       )}
 
-      {/* Edit Meeting Modal */}
+      {/* Scroll to Top */}
+      {showScrollTop && (
+        <div className="fixed bottom-8 right-8 z-50">
+          <Button
+            isIconOnly
+            className="bg-accent-primary shadow-accent-primary/30 hover:shadow-accent-primary/40 size-12 rounded-full text-white shadow-lg transition-all hover:shadow-xl"
+            onPress={scrollToTop}
+          >
+            <ArrowUp size={20} />
+          </Button>
+        </div>
+      )}
+
+      {/* Edit Modal */}
       <EditMeetingModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingMeeting(null);
+        }}
         meeting={editingMeeting}
         onSave={handleSaveEdit}
       />

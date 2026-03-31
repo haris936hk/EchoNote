@@ -1,0 +1,17 @@
+{
+  "name": "echonote",
+  "version": "1.0.0",
+  "description": "EchoNote AI Meeting Transcription Platform",
+  "private": true,
+  "scripts": {
+    "frontend:lint": "npm run lint --prefix frontend",
+    "frontend:format": "npm run format --prefix frontend",
+    "backend:lint": "npm run lint --prefix backend",
+    "backend:format": "npm run format --prefix backend",
+    "lint": "npm run frontend:lint && npm run backend:lint",
+    "format": "npm run frontend:format && npm run backend:format"
+  },
+  "dependencies": {
+    "lucide-react": "^1.7.0"
+  }
+}

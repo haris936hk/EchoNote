@@ -14,18 +14,12 @@ const { generateDownloadFilename, ensureDirectoryExists } = require('../utils/fi
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 /**
@@ -41,7 +35,7 @@ const createMeetingWithAudio = async (req, res) => {
     if (!title || !title.trim()) {
       return res.status(400).json({
         success: false,
-        error: 'Title is required'
+        error: 'Title is required',
       });
     }
 
@@ -49,7 +43,7 @@ const createMeetingWithAudio = async (req, res) => {
     if (!req.file && !req.uploadedFile) {
       return res.status(400).json({
         success: false,
-        error: 'No audio file provided'
+        error: 'No audio file provided',
       });
     }
 
@@ -61,19 +55,21 @@ const createMeetingWithAudio = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'Invalid category',
-        validCategories
+        validCategories,
       });
     }
 
     // Note: File validation (size, type) is already done by upload middleware
-    logger.info(`📤 Creating meeting with audio for user ${userId}: ${audioFile.filename || audioFile.originalname}`);
+    logger.info(
+      `📤 Creating meeting with audio for user ${userId}: ${audioFile.filename || audioFile.originalname}`
+    );
 
     // Create meeting first
     const meeting = await meetingService.createMeeting({
       userId,
       title: title.trim(),
       description: description?.trim() || '',
-      category: category || 'OTHER'
+      category: category || 'OTHER',
     });
 
     logger.info(`✅ Meeting created: ${meeting.id}`);
@@ -89,24 +85,25 @@ const createMeetingWithAudio = async (req, res) => {
       await meetingService.updateMeetingStatus(meeting.id, 'FAILED', queueResult.error);
       return res.status(500).json({
         success: false,
-        error: 'Failed to queue meeting for processing'
+        error: 'Failed to queue meeting for processing',
       });
     }
 
-    logger.info(`✅ Meeting ${meeting.id} queued for processing (position: ${queueResult.queuePosition})`);
+    logger.info(
+      `✅ Meeting ${meeting.id} queued for processing (position: ${queueResult.queuePosition})`
+    );
 
     return res.status(201).json({
       success: true,
       data: { ...meeting, status: 'PENDING' },
-      message: `Meeting created and queued for processing (position: ${queueResult.queuePosition})`
+      message: `Meeting created and queued for processing (position: ${queueResult.queuePosition})`,
     });
-
   } catch (error) {
     logger.error(`Error creating meeting with audio: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to create meeting',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -126,7 +123,7 @@ const createMeeting = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'Invalid category',
-        validCategories
+        validCategories,
       });
     }
 
@@ -134,7 +131,7 @@ const createMeeting = async (req, res) => {
       userId,
       title,
       description,
-      category: category || 'OTHER'
+      category: category || 'OTHER',
     });
 
     logger.info(`✅ Meeting created: ${meeting.id} by user ${userId}`);
@@ -142,15 +139,14 @@ const createMeeting = async (req, res) => {
     return res.status(201).json({
       success: true,
       data: meeting,
-      message: 'Meeting created successfully'
+      message: 'Meeting created successfully',
     });
-
   } catch (error) {
     logger.error(`Error creating meeting: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to create meeting',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -168,7 +164,7 @@ const uploadAudio = async (req, res) => {
     if (!req.file && !req.uploadedFile) {
       return res.status(400).json({
         success: false,
-        error: 'No audio file provided'
+        error: 'No audio file provided',
       });
     }
 
@@ -179,17 +175,19 @@ const uploadAudio = async (req, res) => {
     if (audioFile.size > maxSize) {
       return res.status(400).json({
         success: false,
-        error: `File too large. Maximum size is ${maxSize / 1024 / 1024}MB`
+        error: `File too large. Maximum size is ${maxSize / 1024 / 1024}MB`,
       });
     }
 
     // Validate file type
-    const allowedFormats = (process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg').split(',');
+    const allowedFormats = (
+      process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg'
+    ).split(',');
     if (!allowedFormats.includes(audioFile.mimetype)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid audio format',
-        allowedFormats
+        allowedFormats,
       });
     }
 
@@ -201,15 +199,14 @@ const uploadAudio = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: result,
-      message: 'Audio uploaded. Processing started.'
+      message: 'Audio uploaded. Processing started.',
     });
-
   } catch (error) {
     logger.error(`Error uploading audio: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to upload audio',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -228,7 +225,7 @@ const getMeetings = async (req, res) => {
       search,
       status,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
     } = req.query;
 
     const filters = {
@@ -239,7 +236,7 @@ const getMeetings = async (req, res) => {
       search,
       status,
       sortBy,
-      sortOrder
+      sortOrder,
     };
 
     const result = await meetingService.getMeetings(filters);
@@ -251,16 +248,15 @@ const getMeetings = async (req, res) => {
         total: result.total,
         page: result.page,
         limit: result.limit,
-        totalPages: result.totalPages
-      }
+        totalPages: result.totalPages,
+      },
     });
-
   } catch (error) {
     logger.error(`Error getting meetings: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve meetings',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -279,21 +275,20 @@ const getMeetingById = async (req, res) => {
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        error: 'Meeting not found'
+        error: 'Meeting not found',
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: meeting
+      data: meeting,
     });
-
   } catch (error) {
     logger.error(`Error getting meeting: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve meeting',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -315,7 +310,7 @@ const updateMeeting = async (req, res) => {
         return res.status(400).json({
           success: false,
           error: 'Invalid category',
-          validCategories
+          validCategories,
         });
       }
     }
@@ -332,15 +327,14 @@ const updateMeeting = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: meeting,
-      message: 'Meeting updated successfully'
+      message: 'Meeting updated successfully',
     });
-
   } catch (error) {
     logger.error(`Error updating meeting: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to update meeting',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -360,15 +354,14 @@ const deleteMeeting = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Meeting deleted successfully'
+      message: 'Meeting deleted successfully',
     });
-
   } catch (error) {
     logger.error(`Error deleting meeting: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to delete meeting',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -387,7 +380,7 @@ const getTranscript = async (req, res) => {
     if (!transcript) {
       return res.status(404).json({
         success: false,
-        error: 'Transcript not available. Meeting may still be processing.'
+        error: 'Transcript not available. Meeting may still be processing.',
       });
     }
 
@@ -395,16 +388,15 @@ const getTranscript = async (req, res) => {
       success: true,
       data: {
         text: transcript.text,
-        wordCount: transcript.wordCount
-      }
+        wordCount: transcript.wordCount,
+      },
     });
-
   } catch (error) {
     logger.error(`Error getting transcript: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve transcript',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -423,21 +415,20 @@ const getSummary = async (req, res) => {
     if (!summary) {
       return res.status(404).json({
         success: false,
-        error: 'Summary not available. Meeting may still be processing.'
+        error: 'Summary not available. Meeting may still be processing.',
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: summary
+      data: summary,
     });
-
   } catch (error) {
     logger.error(`Error getting summary: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve summary',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -460,7 +451,7 @@ const downloadAudio = async (req, res) => {
     if (!audioData || !audioData.url) {
       return res.status(404).json({
         success: false,
-        error: 'Audio not available. It may have been deleted.'
+        error: 'Audio not available. It may have been deleted.',
       });
     }
 
@@ -476,13 +467,16 @@ const downloadAudio = async (req, res) => {
       logger.info(`📥 Downloading audio from Supabase for meeting ${meetingId}`);
       tempWavPath = path.join(tempDir, `${meetingId}_source.wav`);
 
-      const downloadResult = await supabaseStorage.downloadAudioFromSupabase(audioData.url, tempWavPath);
+      const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
+        audioData.url,
+        tempWavPath
+      );
 
       if (!downloadResult.success) {
         return res.status(500).json({
           success: false,
           error: 'Failed to download audio from storage',
-          details: downloadResult.error
+          details: downloadResult.error,
         });
       }
 
@@ -492,7 +486,7 @@ const downloadAudio = async (req, res) => {
       if (!fs.existsSync(audioData.url)) {
         return res.status(404).json({
           success: false,
-          error: 'Audio file not found on server'
+          error: 'Audio file not found on server',
         });
       }
       sourceWavPath = audioData.url;
@@ -500,7 +494,12 @@ const downloadAudio = async (req, res) => {
 
     // Get meeting details for filename
     const meeting = await meetingService.getMeetingById(meetingId, userId);
-    const downloadFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'audio', 'mp3');
+    const downloadFilename = generateDownloadFilename(
+      meeting.title,
+      meeting.createdAt,
+      'audio',
+      'mp3'
+    );
 
     tempMp3Path = path.join(tempDir, `${meetingId}_audio.mp3`);
 
@@ -514,7 +513,7 @@ const downloadAudio = async (req, res) => {
       return res.status(500).json({
         success: false,
         error: 'Failed to convert audio to MP3 format',
-        details: conversionResult.error
+        details: conversionResult.error,
       });
     }
 
@@ -541,11 +540,10 @@ const downloadAudio = async (req, res) => {
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
-          error: 'Failed to stream audio file'
+          error: 'Failed to stream audio file',
         });
       }
     });
-
   } catch (error) {
     logger.error(`Error downloading audio: ${error.message}`);
     if (tempWavPath) cleanupTempMp3(tempWavPath);
@@ -553,7 +551,7 @@ const downloadAudio = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to download audio',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -575,12 +573,17 @@ const downloadTranscript = async (req, res) => {
     if (!transcriptData) {
       return res.status(404).json({
         success: false,
-        error: 'Transcript not available'
+        error: 'Transcript not available',
       });
     }
 
     const meeting = await meetingService.getMeetingById(meetingId, userId);
-    const filename = generateDownloadFilename(meeting.title, meeting.createdAt, 'transcript', format);
+    const filename = generateDownloadFilename(
+      meeting.title,
+      meeting.createdAt,
+      'transcript',
+      format
+    );
 
     if (format === 'json') {
       res.setHeader('Content-Type', 'application/json');
@@ -591,13 +594,12 @@ const downloadTranscript = async (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(transcriptData.text);
     }
-
   } catch (error) {
     logger.error(`Error downloading transcript: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to download transcript',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -619,7 +621,7 @@ const downloadSummary = async (req, res) => {
     if (!summary) {
       return res.status(404).json({
         success: false,
-        error: 'Summary not available'
+        error: 'Summary not available',
       });
     }
 
@@ -671,13 +673,12 @@ const downloadSummary = async (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(textContent);
     }
-
   } catch (error) {
     logger.error(`Error downloading summary: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to download summary',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -694,27 +695,26 @@ const searchMeetings = async (req, res) => {
     if (!q || q.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        error: 'Search query must be at least 2 characters'
+        error: 'Search query must be at least 2 characters',
       });
     }
 
     const results = await meetingService.searchMeetings(userId, q, {
       category,
-      limit: parseInt(limit)
+      limit: parseInt(limit),
     });
 
     return res.status(200).json({
       success: true,
       data: results,
-      count: results.length
+      count: results.length,
     });
-
   } catch (error) {
     logger.error(`Error searching meetings: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Search failed',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -731,15 +731,14 @@ const getMeetingStats = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: stats
+      data: stats,
     });
-
   } catch (error) {
     logger.error(`Error getting meeting stats: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve statistics',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -757,15 +756,14 @@ const getProcessingStatus = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: status
+      data: status,
     });
-
   } catch (error) {
     logger.error(`Error getting processing status: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve status',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -785,7 +783,7 @@ const streamAudio = async (req, res) => {
     if (!audioData || !audioData.url) {
       return res.status(404).json({
         success: false,
-        error: 'Audio not available'
+        error: 'Audio not available',
       });
     }
 
@@ -807,14 +805,17 @@ const streamAudio = async (req, res) => {
       tempFile = path.join(tempDir, `stream_${meetingId}_${Date.now()}.wav`);
 
       // Download from Supabase
-      const downloadResult = await supabaseStorage.downloadAudioFromSupabase(audioData.url, tempFile);
+      const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
+        audioData.url,
+        tempFile
+      );
 
       if (!downloadResult.success) {
         logger.error(`Failed to download audio from Supabase: ${downloadResult.error}`);
         return res.status(500).json({
           success: false,
           error: 'Failed to retrieve audio from storage',
-          details: downloadResult.error
+          details: downloadResult.error,
         });
       }
 
@@ -824,7 +825,7 @@ const streamAudio = async (req, res) => {
       if (!fs.existsSync(audioData.url)) {
         return res.status(404).json({
           success: false,
-          error: 'Audio file not found on server'
+          error: 'Audio file not found on server',
         });
       }
     }
@@ -851,7 +852,7 @@ const streamAudio = async (req, res) => {
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-      const chunkSize = (end - start) + 1;
+      const chunkSize = end - start + 1;
 
       // Set partial content headers
       res.status(206);
@@ -887,14 +888,13 @@ const streamAudio = async (req, res) => {
 
       fileStream.on('close', cleanupTemp);
     }
-
   } catch (error) {
     logger.error(`Error streaming audio: ${error.message}`);
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
         error: 'Failed to stream audio',
-        details: error.message
+        details: error.message,
       });
     }
   }
@@ -922,7 +922,7 @@ const downloadAll = async (req, res) => {
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        error: 'Meeting not found'
+        error: 'Meeting not found',
       });
     }
 
@@ -930,7 +930,7 @@ const downloadAll = async (req, res) => {
     if (meeting.status !== 'COMPLETED') {
       return res.status(400).json({
         success: false,
-        error: 'Meeting processing is not complete. Please wait for processing to finish.'
+        error: 'Meeting processing is not complete. Please wait for processing to finish.',
       });
     }
 
@@ -941,10 +941,30 @@ const downloadAll = async (req, res) => {
     ensureDirectoryExists(tempDir);
 
     // Get filenames with timestamps
-    const audioFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'audio', 'mp3');
-    const transcriptFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'transcript', 'txt');
-    const summaryFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'summary', 'txt');
-    const zipFilename = generateDownloadFilename(meeting.title, meeting.createdAt, 'complete', 'zip');
+    const audioFilename = generateDownloadFilename(
+      meeting.title,
+      meeting.createdAt,
+      'audio',
+      'mp3'
+    );
+    const transcriptFilename = generateDownloadFilename(
+      meeting.title,
+      meeting.createdAt,
+      'transcript',
+      'txt'
+    );
+    const summaryFilename = generateDownloadFilename(
+      meeting.title,
+      meeting.createdAt,
+      'summary',
+      'txt'
+    );
+    const zipFilename = generateDownloadFilename(
+      meeting.title,
+      meeting.createdAt,
+      'complete',
+      'zip'
+    );
 
     // Get audio data and convert to MP3
     const audioData = await meetingService.getAudioDownloadUrl(meetingId, userId);
@@ -1005,7 +1025,7 @@ const downloadAll = async (req, res) => {
     if (!audioAvailable && !transcriptData && !summary) {
       return res.status(404).json({
         success: false,
-        error: 'No content available for download'
+        error: 'No content available for download',
       });
     }
 
@@ -1068,11 +1088,10 @@ const downloadAll = async (req, res) => {
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
-          error: 'Failed to stream ZIP file'
+          error: 'Failed to stream ZIP file',
         });
       }
     });
-
   } catch (error) {
     logger.error(`Error creating download all ZIP: ${error.message}`);
     // Cleanup on error
@@ -1083,7 +1102,7 @@ const downloadAll = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to create download package',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -1107,13 +1126,13 @@ const exportAllMeetings = async (req, res) => {
     const allMeetings = await meetingService.getMeetings(userId, {
       page: 1,
       limit: 1000, // Get all meetings
-      status: 'COMPLETED'
+      status: 'COMPLETED',
     });
 
     if (!allMeetings || allMeetings.meetings.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'No completed meetings found to export'
+        error: 'No completed meetings found to export',
       });
     }
 
@@ -1157,7 +1176,10 @@ const exportAllMeetings = async (req, res) => {
             // Handle Supabase URLs
             if (audioData.isRemote || audioData.url.startsWith('http')) {
               const tempAudioPath = path.join(tempDir, `export_${meeting.id}_audio.wav`);
-              const downloadResult = await supabaseStorage.downloadAudioFromSupabase(audioData.url, tempAudioPath);
+              const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
+                audioData.url,
+                tempAudioPath
+              );
               if (downloadResult.success) {
                 audioPath = tempAudioPath;
                 tempFiles.push(tempAudioPath);
@@ -1222,7 +1244,6 @@ const exportAllMeetings = async (req, res) => {
 
             archive.append(summaryText, { name: `${meetingFolder}/summary.txt` });
           }
-
         } catch (meetingError) {
           logger.warn(`Error processing meeting ${meeting.id} for export: ${meetingError.message}`);
           // Continue with other meetings
@@ -1244,50 +1265,61 @@ const exportAllMeetings = async (req, res) => {
 
     fileStream.on('close', () => {
       // Cleanup all temp files
-      tempFiles.forEach(file => {
+      tempFiles.forEach((file) => {
         if (fs.existsSync(file)) {
-          try { fs.unlinkSync(file); } catch (e) { }
+          try {
+            fs.unlinkSync(file);
+          } catch (e) {}
         }
       });
       if (tempZipPath && fs.existsSync(tempZipPath)) {
-        try { fs.unlinkSync(tempZipPath); } catch (e) { }
+        try {
+          fs.unlinkSync(tempZipPath);
+        } catch (e) {}
       }
     });
 
     fileStream.on('error', (err) => {
       logger.error(`Error streaming export ZIP: ${err.message}`);
       // Cleanup on error
-      tempFiles.forEach(file => {
+      tempFiles.forEach((file) => {
         if (fs.existsSync(file)) {
-          try { fs.unlinkSync(file); } catch (e) { }
+          try {
+            fs.unlinkSync(file);
+          } catch (e) {}
         }
       });
       if (tempZipPath && fs.existsSync(tempZipPath)) {
-        try { fs.unlinkSync(tempZipPath); } catch (e) { }
+        try {
+          fs.unlinkSync(tempZipPath);
+        } catch (e) {}
       }
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
-          error: 'Failed to stream export file'
+          error: 'Failed to stream export file',
         });
       }
     });
-
   } catch (error) {
     logger.error(`Error creating export ZIP: ${error.message}`);
     // Cleanup on error
-    tempFiles.forEach(file => {
+    tempFiles.forEach((file) => {
       if (fs.existsSync(file)) {
-        try { fs.unlinkSync(file); } catch (e) { }
+        try {
+          fs.unlinkSync(file);
+        } catch (e) {}
       }
     });
     if (tempZipPath && fs.existsSync(tempZipPath)) {
-      try { fs.unlinkSync(tempZipPath); } catch (e) { }
+      try {
+        fs.unlinkSync(tempZipPath);
+      } catch (e) {}
     }
     return res.status(500).json({
       success: false,
       error: 'Failed to create export package',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -1310,5 +1342,5 @@ module.exports = {
   searchMeetings,
   getMeetingStats,
   getProcessingStatus,
-  streamAudio
+  streamAudio,
 };

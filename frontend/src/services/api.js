@@ -8,8 +8,8 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
 // Request deduplication map - Track pending requests
@@ -60,7 +60,7 @@ let failedQueue = [];
 
 // Process queued requests after token refresh
 const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
@@ -149,11 +149,11 @@ api.interceptors.response.use(
             return new Promise((resolve, reject) => {
               failedQueue.push({ resolve, reject });
             })
-              .then(token => {
+              .then((token) => {
                 originalRequest.headers['Authorization'] = `Bearer ${token}`;
                 return api(originalRequest);
               })
-              .catch(err => Promise.reject(err));
+              .catch((err) => Promise.reject(err));
           }
 
           originalRequest._retry = true;
@@ -238,7 +238,7 @@ export const authAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: error.response?.data?.message || 'Login failed',
       };
     }
   },
@@ -253,7 +253,7 @@ export const authAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Logout failed'
+        error: error.response?.data?.message || 'Logout failed',
       };
     }
   },
@@ -268,7 +268,7 @@ export const authAPI = {
     } catch (error) {
       return { success: false, error: 'Session invalid' };
     }
-  }
+  },
 };
 
 // ============================================
@@ -286,7 +286,7 @@ export const meetingsAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to fetch meetings'
+        error: error.response?.data?.message || 'Failed to fetch meetings',
       };
     }
   },
@@ -301,7 +301,7 @@ export const meetingsAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to fetch meeting'
+        error: error.response?.data?.message || 'Failed to fetch meeting',
       };
     }
   },
@@ -319,16 +319,16 @@ export const meetingsAPI = {
 
       const response = await api.post('/meetings', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000 // 60 seconds for file upload
+        timeout: 60000, // 60 seconds for file upload
       });
 
       return { success: true, data: response.data };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to upload meeting'
+        error: error.response?.data?.message || 'Failed to upload meeting',
       };
     }
   },
@@ -343,7 +343,7 @@ export const meetingsAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to update meeting'
+        error: error.response?.data?.message || 'Failed to update meeting',
       };
     }
   },
@@ -358,7 +358,7 @@ export const meetingsAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to delete meeting'
+        error: error.response?.data?.message || 'Failed to delete meeting',
       };
     }
   },
@@ -369,16 +369,16 @@ export const meetingsAPI = {
   searchMeetings: async (query) => {
     try {
       const response = await api.get('/meetings/search', {
-        params: { q: query }
+        params: { q: query },
       });
       return { success: true, data: response.data };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Search failed'
+        error: error.response?.data?.message || 'Search failed',
       };
     }
-  }
+  },
 };
 
 // ============================================
@@ -396,7 +396,7 @@ export const userAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to fetch profile'
+        error: error.response?.data?.message || 'Failed to fetch profile',
       };
     }
   },
@@ -411,7 +411,7 @@ export const userAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to update preferences'
+        error: error.response?.data?.message || 'Failed to update preferences',
       };
     }
   },
@@ -422,13 +422,13 @@ export const userAPI = {
   deleteAccount: async () => {
     try {
       const response = await api.delete('/users/me', {
-        data: { confirmation: 'DELETE_MY_ACCOUNT' }
+        data: { confirmation: 'DELETE_MY_ACCOUNT' },
       });
       return { success: true, data: response.data };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to delete account'
+        error: error.response?.data?.error || 'Failed to delete account',
       };
     }
   },
@@ -439,16 +439,16 @@ export const userAPI = {
   exportData: async () => {
     try {
       const response = await api.get('/user/export', {
-        responseType: 'blob'
+        responseType: 'blob',
       });
       return { success: true, data: response.data };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to export data'
+        error: error.response?.data?.message || 'Failed to export data',
       };
     }
-  }
+  },
 };
 
 // ============================================

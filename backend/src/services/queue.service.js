@@ -4,8 +4,8 @@ const meetingService = require('./meeting.service');
 
 class QueueService {
   constructor() {
-    this.queue = [];           // Array of { meetingId, userId, audioFile, addedAt }
-    this.processing = null;    // Currently processing meeting ID
+    this.queue = []; // Array of { meetingId, userId, audioFile, addedAt }
+    this.processing = null; // Currently processing meeting ID
     this.workerInterval = null;
     this.retryTimeouts = new Map(); // meetingId -> timeout handle
   }
@@ -20,7 +20,7 @@ class QueueService {
         meetingId,
         userId,
         audioFile,
-        addedAt: new Date()
+        addedAt: new Date(),
       });
 
       // Update meeting status to PENDING
@@ -28,8 +28,8 @@ class QueueService {
         where: { id: meetingId },
         data: {
           status: 'PENDING',
-          queuedAt: new Date()
-        }
+          queuedAt: new Date(),
+        },
       });
 
       logger.info(`Meeting ${meetingId} added to queue. Queue length: ${this.queue.length}`);
@@ -67,8 +67,8 @@ class QueueService {
         where: { id: job.meetingId },
         data: {
           status: 'PROCESSING_AUDIO',
-          processingStartedAt: new Date()
-        }
+          processingStartedAt: new Date(),
+        },
       });
 
       // Call existing processing pipeline
@@ -77,14 +77,13 @@ class QueueService {
       logger.info(`Meeting ${job.meetingId} processed successfully`);
 
       // Mark as completed (already done in uploadAndProcessAudio)
-
     } catch (error) {
       logger.error(`Meeting ${job.meetingId} processing failed:`, error);
 
       // Get current retry count
       const meeting = await prisma.meeting.findUnique({
         where: { id: job.meetingId },
-        select: { retryCount: true }
+        select: { retryCount: true },
       });
 
       const retryCount = meeting?.retryCount || 0;
@@ -92,7 +91,9 @@ class QueueService {
       if (retryCount < 3) {
         // Retry with exponential backoff
         const retryDelay = Math.pow(2, retryCount) * 60000; // 1min, 2min, 4min
-        logger.info(`Scheduling retry for meeting ${job.meetingId} in ${retryDelay/1000}s (attempt ${retryCount + 1}/3)`);
+        logger.info(
+          `Scheduling retry for meeting ${job.meetingId} in ${retryDelay / 1000}s (attempt ${retryCount + 1}/3)`
+        );
 
         // Update retry count and status
         await prisma.meeting.update({
@@ -100,8 +101,8 @@ class QueueService {
           data: {
             status: 'PENDING',
             retryCount: retryCount + 1,
-            lastRetryAt: new Date()
-          }
+            lastRetryAt: new Date(),
+          },
         });
 
         // Schedule retry
@@ -112,7 +113,6 @@ class QueueService {
         }, retryDelay);
 
         this.retryTimeouts.set(job.meetingId, timeout);
-
       } else {
         // Max retries exceeded - mark as FAILED
         logger.error(`Meeting ${job.meetingId} failed after 3 attempts`);
@@ -120,8 +120,8 @@ class QueueService {
           where: { id: job.meetingId },
           data: {
             status: 'FAILED',
-            processingError: error.message
-          }
+            processingError: error.message,
+          },
         });
       }
     } finally {
@@ -174,7 +174,7 @@ class QueueService {
     return {
       queueLength: this.queue.length,
       processing: this.processing,
-      retryingCount: this.retryTimeouts.size
+      retryingCount: this.retryTimeouts.size,
     };
   }
 
@@ -183,7 +183,7 @@ class QueueService {
    */
   async cancelMeeting(meetingId) {
     // Remove from queue
-    const index = this.queue.findIndex(job => job.meetingId === meetingId);
+    const index = this.queue.findIndex((job) => job.meetingId === meetingId);
     if (index !== -1) {
       this.queue.splice(index, 1);
       logger.info(`Meeting ${meetingId} removed from queue`);

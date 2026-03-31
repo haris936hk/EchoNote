@@ -48,17 +48,17 @@ async function createMeeting({ userId, title, description, category }) {
         audioUrl: null,
         transcriptText: null,
         summaryExecutive: null,
-        audioDuration: null
+        audioDuration: null,
       },
       include: {
         user: {
           select: {
             id: true,
             email: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
     console.log(`✅ Meeting created: ${meeting.id}`);
@@ -87,17 +87,17 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
+        userId,
       },
       include: {
         user: {
           select: {
             id: true,
             email: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
     if (!meeting) {
@@ -139,7 +139,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     const transcript = transcriptionResult.text;
     const transcriptionConfidence = transcriptionResult.confidence;
 
-    console.log(`✅ Transcription complete: ${transcript.length} characters, ${transcriptionConfidence}% confidence`);
+    console.log(
+      `✅ Transcription complete: ${transcript.length} characters, ${transcriptionConfidence}% confidence`
+    );
 
     // Step 4: Process transcript with NLP (SpaCy)
     await updateMeetingStatus(meetingId, 'PROCESSING_NLP');
@@ -150,7 +152,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
     }
 
-    console.log(`✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`);
+    console.log(
+      `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`
+    );
 
     // Step 5: Generate AI summary using Custom Model
     await updateMeetingStatus(meetingId, 'SUMMARIZING');
@@ -164,7 +168,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       keyPhrases: nlpResult.success ? nlpResult.keyPhrases : [],
       actionPatterns: nlpResult.success ? nlpResult.actionPatterns : [],
       sentiment: nlpResult.success ? nlpResult.sentiment : null,
-      topics: nlpResult.success ? nlpResult.topics : []
+      topics: nlpResult.success ? nlpResult.topics : [],
     });
 
     if (!summaryResult.success) {
@@ -178,7 +182,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       actionItems: summaryResult.actionItems,
       nextSteps: summaryResult.nextSteps,
       keyTopics: summaryResult.keyTopics,
-      sentiment: summaryResult.sentiment
+      sentiment: summaryResult.sentiment,
     };
 
     // Enhance summary with NLP data if available
@@ -186,14 +190,22 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       ? summarizationService.enhanceSummaryWithNLP(summary, nlpResult)
       : summary;
 
-    console.log(`✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`);
+    console.log(
+      `✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`
+    );
     console.log(`📝 Summary data to save:`, {
-      executiveSummary: enhancedSummary.executiveSummary ? enhancedSummary.executiveSummary.substring(0, 50) + '...' : 'null',
-      keyDecisions: Array.isArray(enhancedSummary.keyDecisions) ? `[${enhancedSummary.keyDecisions.length} items]` : 'null',
+      executiveSummary: enhancedSummary.executiveSummary
+        ? enhancedSummary.executiveSummary.substring(0, 50) + '...'
+        : 'null',
+      keyDecisions: Array.isArray(enhancedSummary.keyDecisions)
+        ? `[${enhancedSummary.keyDecisions.length} items]`
+        : 'null',
       actionItemsCount: enhancedSummary.actionItems?.length || 0,
-      nextSteps: Array.isArray(enhancedSummary.nextSteps) ? `[${enhancedSummary.nextSteps.length} items]` : 'null',
+      nextSteps: Array.isArray(enhancedSummary.nextSteps)
+        ? `[${enhancedSummary.nextSteps.length} items]`
+        : 'null',
       keyTopicsCount: enhancedSummary.keyTopics?.length || 0,
-      sentiment: enhancedSummary.sentiment || 'null'
+      sentiment: enhancedSummary.sentiment || 'null',
     });
 
     // Step 6: Store processed audio in permanent location
@@ -203,9 +215,11 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     const wordCount = transcript.split(/\s+/).length;
 
     // Extract audio metadata
-    const audioFormat = path.extname(audioFile.originalname || audioFile.filename)
-      .toLowerCase()
-      .replace('.', '') || 'unknown';
+    const audioFormat =
+      path
+        .extname(audioFile.originalname || audioFile.filename)
+        .toLowerCase()
+        .replace('.', '') || 'unknown';
 
     // Calculate processing duration
     const processingEndTime = new Date();
@@ -214,17 +228,18 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       : null;
 
     // Format NLP data to match dataset structure
-    const nlpEntitiesText = nlpResult.success && nlpResult.entities
-      ? nlpResult.entities.map(e => `${e.text} (${e.label})`).join(', ')
-      : null;
+    const nlpEntitiesText =
+      nlpResult.success && nlpResult.entities
+        ? nlpResult.entities.map((e) => `${e.text} (${e.label})`).join(', ')
+        : null;
 
-    const nlpKeyPhrasesText = nlpResult.success && nlpResult.keyPhrases
-      ? nlpResult.keyPhrases.join(', ')
-      : null;
+    const nlpKeyPhrasesText =
+      nlpResult.success && nlpResult.keyPhrases ? nlpResult.keyPhrases.join(', ') : null;
 
-    const nlpActionPatternsText = nlpResult.success && nlpResult.actionPatterns
-      ? '  • ' + nlpResult.actionPatterns.map(a => `${a.action}: ${a.object}`).join('\n  • ')
-      : null;
+    const nlpActionPatternsText =
+      nlpResult.success && nlpResult.actionPatterns
+        ? '  • ' + nlpResult.actionPatterns.map((a) => `${a.action}: ${a.object}`).join('\n  • ')
+        : null;
 
     const updatedMeeting = await prisma.meeting.update({
       where: { id: meetingId },
@@ -259,17 +274,17 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         // Processing timestamps
         processingDuration: processingDurationSeconds,
         processingCompletedAt: processingEndTime,
-        status: 'COMPLETED'
+        status: 'COMPLETED',
       },
       include: {
         user: {
           select: {
             id: true,
             email: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
     console.log(`✅ Meeting updated in database`);
@@ -294,8 +309,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
           summaryKeyDecisions: updatedMeeting.summaryKeyDecisions,
           summaryActionItems: updatedMeeting.summaryActionItems,
           summaryNextSteps: updatedMeeting.summaryNextSteps,
-          transcriptText: updatedMeeting.transcriptText
-        }
+          transcriptText: updatedMeeting.transcriptText,
+        },
       });
 
       console.log(`✅ Email sent to ${meeting.user.email}`);
@@ -305,10 +320,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         where: { id: meetingId },
         data: {
           emailSent: true,
-          emailSentAt: new Date()
-        }
+          emailSentAt: new Date(),
+        },
       });
-
     } catch (emailError) {
       console.error(`⚠️ Email send failed:`, emailError.message);
       // Don't fail the entire processing if email fails
@@ -318,7 +332,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     console.log(`\n🎉 Meeting processing complete! ID: ${meetingId}\n`);
 
     return updatedMeeting;
-
   } catch (error) {
     console.error(`\n❌ Meeting processing failed:`, error.message);
 
@@ -337,10 +350,10 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         user: {
           select: {
             email: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
     if (meeting && meeting.user) {
@@ -348,7 +361,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         to: meeting.user.email,
         userName: meeting.user.name,
         meetingTitle: meeting.title,
-        errorMessage: error.message
+        errorMessage: error.message,
       });
     }
 
@@ -383,8 +396,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         audioUrl: null,
         transcriptText: null,
         summaryExecutive: null,
-        audioDuration: null
-      }
+        audioDuration: null,
+      },
     });
 
     console.log(`✅ Meeting record created: ${meeting.id}`);
@@ -417,7 +430,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     const transcript = transcriptionResult.text;
     const transcriptionConfidence = transcriptionResult.confidence;
 
-    console.log(`✅ Transcription complete: ${transcript.length} characters, ${transcriptionConfidence}% confidence`);
+    console.log(
+      `✅ Transcription complete: ${transcript.length} characters, ${transcriptionConfidence}% confidence`
+    );
 
     // Step 5: Process transcript with NLP (SpaCy)
     await updateMeetingStatus(meeting.id, 'PROCESSING_NLP');
@@ -429,7 +444,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       // Continue without NLP data (not critical)
     }
 
-    console.log(`✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`);
+    console.log(
+      `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`
+    );
 
     // Step 6: Generate AI summary using Custom Model
     await updateMeetingStatus(meeting.id, 'SUMMARIZING');
@@ -437,7 +454,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     const summaryResult = await summarizationService.generateSummary(transcript, {
       title,
       category,
-      audioDuration
+      audioDuration,
     });
 
     if (!summaryResult.success) {
@@ -451,7 +468,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       ? summarizationService.enhanceSummaryWithNLP(summary, nlpResult)
       : summary;
 
-    console.log(`✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`);
+    console.log(
+      `✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`
+    );
 
     // Step 7: Store processed audio in permanent location
     const audioStoragePath = await storeAudioFile(processedAudioPath, meeting.id);
@@ -460,17 +479,18 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     const wordCount = transcript.split(/\s+/).length;
 
     // Format NLP data to match dataset structure
-    const nlpEntitiesText = nlpResult.success && nlpResult.entities
-      ? nlpResult.entities.map(e => `${e.text} (${e.label})`).join(', ')
-      : null;
+    const nlpEntitiesText =
+      nlpResult.success && nlpResult.entities
+        ? nlpResult.entities.map((e) => `${e.text} (${e.label})`).join(', ')
+        : null;
 
-    const nlpKeyPhrasesText = nlpResult.success && nlpResult.keyPhrases
-      ? nlpResult.keyPhrases.join(', ')
-      : null;
+    const nlpKeyPhrasesText =
+      nlpResult.success && nlpResult.keyPhrases ? nlpResult.keyPhrases.join(', ') : null;
 
-    const nlpActionPatternsText = nlpResult.success && nlpResult.actionPatterns
-      ? '  • ' + nlpResult.actionPatterns.map(a => `${a.action}: ${a.object}`).join('\n  • ')
-      : null;
+    const nlpActionPatternsText =
+      nlpResult.success && nlpResult.actionPatterns
+        ? '  • ' + nlpResult.actionPatterns.map((a) => `${a.action}: ${a.object}`).join('\n  • ')
+        : null;
 
     meeting = await prisma.meeting.update({
       where: { id: meeting.id },
@@ -500,17 +520,17 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         summaryKeyTopics: enhancedSummary.keyTopics || null,
         summarySentiment: enhancedSummary.sentiment || null,
 
-        status: 'COMPLETED'
+        status: 'COMPLETED',
       },
       include: {
         user: {
           select: {
             id: true,
             email: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
     console.log(`✅ Meeting updated in database`);
@@ -533,8 +553,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         summaryKeyDecisions: meeting.summaryKeyDecisions,
         summaryActionItems: meeting.summaryActionItems,
         summaryNextSteps: meeting.summaryNextSteps,
-        transcriptText: meeting.transcriptText
-      }
+        transcriptText: meeting.transcriptText,
+      },
     });
 
     console.log(`✅ Email sent to ${meeting.user.email}`);
@@ -542,9 +562,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
     return {
       success: true,
-      data: meeting
+      data: meeting,
     };
-
   } catch (error) {
     console.error(`\n❌ Meeting processing failed:`, error.message);
 
@@ -554,7 +573,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
       // Send failure email
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId },
       });
 
       if (user) {
@@ -562,7 +581,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
           to: user.email,
           userName: user.name,
           meetingTitle: title,
-          errorMessage: error.message
+          errorMessage: error.message,
         });
       }
     }
@@ -570,7 +589,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     return {
       success: false,
       error: error.message,
-      meetingId: meeting?.id
+      meetingId: meeting?.id,
     };
   }
 }
@@ -592,16 +611,20 @@ function transformMeetingForFrontend(meeting) {
     duration: meeting.audioDuration || null,
 
     // Combine summary fields into single object - deserialize JSON strings back to arrays
-    summary: (meeting.summaryExecutive || meeting.summaryKeyDecisions || meeting.summaryActionItems || meeting.summaryNextSteps)
-      ? {
-        executiveSummary: meeting.summaryExecutive,
-        keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
-        actionItems: meeting.summaryActionItems,
-        nextSteps: deserializeArrayField(meeting.summaryNextSteps),
-        keyTopics: meeting.summaryKeyTopics,
-        sentiment: meeting.summarySentiment
-      }
-      : null
+    summary:
+      meeting.summaryExecutive ||
+      meeting.summaryKeyDecisions ||
+      meeting.summaryActionItems ||
+      meeting.summaryNextSteps
+        ? {
+            executiveSummary: meeting.summaryExecutive,
+            keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
+            actionItems: meeting.summaryActionItems,
+            nextSteps: deserializeArrayField(meeting.summaryNextSteps),
+            keyTopics: meeting.summaryKeyTopics,
+            sentiment: meeting.summarySentiment,
+          }
+        : null,
   };
 }
 
@@ -616,17 +639,17 @@ async function getMeetingById(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId // Ensure user can only access their own meetings
+        userId, // Ensure user can only access their own meetings
       },
       include: {
         user: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     if (!meeting) return null;
@@ -656,7 +679,7 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
 
     // Build where clause
     const where = {
-      userId
+      userId,
     };
 
     if (category && category !== 'ALL') {
@@ -670,7 +693,7 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
-        { transcript: { contains: search, mode: 'insensitive' } }
+        { transcript: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -690,19 +713,19 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
         status: true,
         audioDuration: true,
         createdAt: true,
-        summaryExecutive: true // Include summary for preview
-      }
+        summaryExecutive: true, // Include summary for preview
+      },
     });
 
     // Transform meetings for frontend
-    const transformedMeetings = meetings.map(m => transformMeetingForFrontend(m));
+    const transformedMeetings = meetings.map((m) => transformMeetingForFrontend(m));
 
     return {
       meetings: transformedMeetings,
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   } catch (error) {
     console.error('Get user meetings error:', error.message);
@@ -724,8 +747,8 @@ async function searchMeetings(userId, query, options = {}) {
       status: 'COMPLETED', // Only search completed meetings
       OR: [
         { title: { contains: query, mode: 'insensitive' } },
-        { transcriptText: { contains: query, mode: 'insensitive' } }
-      ]
+        { transcriptText: { contains: query, mode: 'insensitive' } },
+      ],
     };
 
     // Add category filter if provided
@@ -743,13 +766,13 @@ async function searchMeetings(userId, query, options = {}) {
         category: true,
         createdAt: true,
         audioDuration: true,
-        transcriptText: true // Include for highlighting matches
-      }
+        transcriptText: true, // Include for highlighting matches
+      },
     });
 
-    return meetings.map(meeting => ({
+    return meetings.map((meeting) => ({
       ...meeting,
-      transcriptText: meeting.transcriptText?.substring(0, 200) + '...' // Preview only
+      transcriptText: meeting.transcriptText?.substring(0, 200) + '...', // Preview only
     }));
   } catch (error) {
     console.error('Search meetings error:', error.message);
@@ -775,9 +798,9 @@ async function updateMeeting(meetingId, userId, updates) {
     const updatedMeeting = await prisma.meeting.updateMany({
       where: {
         id: meetingId,
-        userId // Ensure user owns this meeting
+        userId, // Ensure user owns this meeting
       },
-      data: allowedUpdates
+      data: allowedUpdates,
     });
 
     if (updatedMeeting.count === 0) {
@@ -804,8 +827,8 @@ async function deleteMeeting(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
-      }
+        userId,
+      },
     });
 
     if (!meeting) {
@@ -836,7 +859,7 @@ async function deleteMeeting(meetingId, userId) {
 
     // Delete meeting record
     await prisma.meeting.delete({
-      where: { id: meetingId }
+      where: { id: meetingId },
     });
 
     console.log(`✅ Meeting deleted: ${meetingId}`);
@@ -853,28 +876,23 @@ async function deleteMeeting(meetingId, userId) {
  */
 async function getMeetingStatistics(userId) {
   try {
-    const [
-      totalMeetings,
-      completedMeetings,
-      processingMeetings,
-      failedMeetings,
-      totalDuration
-    ] = await Promise.all([
-      prisma.meeting.count({ where: { userId } }),
-      prisma.meeting.count({ where: { userId, status: 'COMPLETED' } }),
-      prisma.meeting.count({ where: { userId, status: 'PROCESSING_AUDIO' } }),
-      prisma.meeting.count({ where: { userId, status: 'FAILED' } }),
-      prisma.meeting.aggregate({
-        where: { userId, status: 'COMPLETED' },
-        _sum: { audioDuration: true }
-      })
-    ]);
+    const [totalMeetings, completedMeetings, processingMeetings, failedMeetings, totalDuration] =
+      await Promise.all([
+        prisma.meeting.count({ where: { userId } }),
+        prisma.meeting.count({ where: { userId, status: 'COMPLETED' } }),
+        prisma.meeting.count({ where: { userId, status: 'PROCESSING_AUDIO' } }),
+        prisma.meeting.count({ where: { userId, status: 'FAILED' } }),
+        prisma.meeting.aggregate({
+          where: { userId, status: 'COMPLETED' },
+          _sum: { audioDuration: true },
+        }),
+      ]);
 
     // Get meetings by category
     const categoryCounts = await prisma.meeting.groupBy({
       by: ['category'],
       where: { userId, status: 'COMPLETED' },
-      _count: true
+      _count: true,
     });
 
     // Get recent activity (last 7 days)
@@ -884,8 +902,8 @@ async function getMeetingStatistics(userId) {
     const recentMeetings = await prisma.meeting.count({
       where: {
         userId,
-        createdAt: { gte: sevenDaysAgo }
-      }
+        createdAt: { gte: sevenDaysAgo },
+      },
     });
 
     return {
@@ -893,7 +911,7 @@ async function getMeetingStatistics(userId) {
         total: totalMeetings,
         completed: completedMeetings,
         processing: processingMeetings,
-        failed: failedMeetings
+        failed: failedMeetings,
       },
       byCategory: categoryCounts.reduce((acc, item) => {
         acc[item.category] = item._count;
@@ -901,11 +919,12 @@ async function getMeetingStatistics(userId) {
       }, {}),
       metrics: {
         totalDuration: totalDuration._sum.audioDuration || 0,
-        averageDuration: completedMeetings > 0
-          ? Math.round((totalDuration._sum.audioDuration || 0) / completedMeetings)
-          : 0,
-        recentActivity: recentMeetings
-      }
+        averageDuration:
+          completedMeetings > 0
+            ? Math.round((totalDuration._sum.audioDuration || 0) / completedMeetings)
+            : 0,
+        recentActivity: recentMeetings,
+      },
     };
   } catch (error) {
     console.error('Get meeting statistics error:', error.message);
@@ -926,14 +945,14 @@ async function regenerateSummary(meetingId, userId, options = {}) {
       where: {
         id: meetingId,
         userId,
-        status: 'COMPLETED'
-      }
+        status: 'COMPLETED',
+      },
     });
 
     if (!meeting) {
       return {
         success: false,
-        error: 'Meeting not found or not completed'
+        error: 'Meeting not found or not completed',
       };
     }
 
@@ -945,7 +964,7 @@ async function regenerateSummary(meetingId, userId, options = {}) {
       {
         title: meeting.title,
         category: meeting.category,
-        duration: meeting.duration
+        duration: meeting.duration,
       },
       options
     );
@@ -958,21 +977,21 @@ async function regenerateSummary(meetingId, userId, options = {}) {
     const updatedMeeting = await prisma.meeting.update({
       where: { id: meetingId },
       data: {
-        summary: summaryResult.summary
-      }
+        summary: summaryResult.summary,
+      },
     });
 
     console.log(`✅ Summary regenerated successfully`);
 
     return {
       success: true,
-      data: updatedMeeting
+      data: updatedMeeting,
     };
   } catch (error) {
     console.error('Regenerate summary error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -988,13 +1007,13 @@ async function getTranscript(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
+        userId,
       },
       select: {
         transcriptText: true,
         transcriptWordCount: true,
-        status: true
-      }
+        status: true,
+      },
     });
 
     if (!meeting) {
@@ -1007,7 +1026,7 @@ async function getTranscript(meetingId, userId) {
 
     return {
       text: meeting.transcriptText,
-      wordCount: meeting.transcriptWordCount || meeting.transcriptText.split(/\s+/).length
+      wordCount: meeting.transcriptWordCount || meeting.transcriptText.split(/\s+/).length,
     };
   } catch (error) {
     console.error('Get transcript error:', error.message);
@@ -1026,7 +1045,7 @@ async function getSummary(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
+        userId,
       },
       select: {
         summaryExecutive: true,
@@ -1038,8 +1057,8 @@ async function getSummary(meetingId, userId) {
         status: true,
         title: true,
         category: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     if (!meeting) {
@@ -1056,7 +1075,7 @@ async function getSummary(meetingId, userId) {
       actionItems: meeting.summaryActionItems || [],
       nextSteps: deserializeArrayField(meeting.summaryNextSteps),
       keyTopics: meeting.summaryKeyTopics || [],
-      sentiment: meeting.summarySentiment
+      sentiment: meeting.summarySentiment,
     };
   } catch (error) {
     console.error('Get summary error:', error.message);
@@ -1075,7 +1094,7 @@ async function getMeetingWithNLP(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
+        userId,
       },
       select: {
         id: true,
@@ -1095,8 +1114,8 @@ async function getMeetingWithNLP(meetingId, userId) {
         summaryNextSteps: true,
         summaryKeyTopics: true,
         summarySentiment: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     if (!meeting) {
@@ -1114,8 +1133,8 @@ async function getMeetingWithNLP(meetingId, userId) {
         actionItems: meeting.summaryActionItems || [],
         nextSteps: deserializeArrayField(meeting.summaryNextSteps),
         keyTopics: meeting.summaryKeyTopics || [],
-        sentiment: meeting.summarySentiment
-      }
+        sentiment: meeting.summarySentiment,
+      },
     };
 
     return response;
@@ -1136,13 +1155,13 @@ async function getAudioDownloadUrl(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
+        userId,
       },
       select: {
         audioUrl: true,
         title: true,
-        audioSize: true
-      }
+        audioSize: true,
+      },
     });
 
     if (!meeting || !meeting.audioUrl) {
@@ -1157,7 +1176,7 @@ async function getAudioDownloadUrl(meetingId, userId) {
         filename: `${meetingId}.wav`,
         size: meeting.audioSize || null,
         isRemote: true,
-        expiresAt: null // Public URL, no expiration
+        expiresAt: null, // Public URL, no expiration
       };
     } else {
       // Local file - check if exists
@@ -1169,7 +1188,7 @@ async function getAudioDownloadUrl(meetingId, userId) {
           filename: path.basename(meeting.audioUrl),
           size: stats.size,
           isRemote: false,
-          expiresAt: null // Local file, no expiration
+          expiresAt: null, // Local file, no expiration
         };
       } catch (error) {
         console.warn('Audio file not found:', meeting.audioUrl);
@@ -1193,7 +1212,7 @@ async function getProcessingStatus(meetingId, userId) {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId
+        userId,
       },
       select: {
         status: true,
@@ -1201,8 +1220,8 @@ async function getProcessingStatus(meetingId, userId) {
         updatedAt: true,
         processingError: true,
         processingStartedAt: true,
-        processingCompletedAt: true
-      }
+        processingCompletedAt: true,
+      },
     });
 
     if (!meeting) {
@@ -1211,35 +1230,35 @@ async function getProcessingStatus(meetingId, userId) {
 
     // Calculate progress percentage based on status
     const statusProgress = {
-      'UPLOADING': 10,
-      'PROCESSING_AUDIO': 25,
-      'TRANSCRIBING': 50,
-      'PROCESSING_NLP': 75,
-      'SUMMARIZING': 90,
-      'COMPLETED': 100,
-      'FAILED': 0
+      UPLOADING: 10,
+      PROCESSING_AUDIO: 25,
+      TRANSCRIBING: 50,
+      PROCESSING_NLP: 75,
+      SUMMARIZING: 90,
+      COMPLETED: 100,
+      FAILED: 0,
     };
 
     // Estimate time remaining (rough estimates in seconds)
     const statusTimeEstimates = {
-      'UPLOADING': 85,
-      'PROCESSING_AUDIO': 80,
-      'TRANSCRIBING': 60,
-      'PROCESSING_NLP': 10,
-      'SUMMARIZING': 5,
-      'COMPLETED': 0,
-      'FAILED': 0
+      UPLOADING: 85,
+      PROCESSING_AUDIO: 80,
+      TRANSCRIBING: 60,
+      PROCESSING_NLP: 10,
+      SUMMARIZING: 5,
+      COMPLETED: 0,
+      FAILED: 0,
     };
 
     // Current stage descriptions
     const stageDescriptions = {
-      'UPLOADING': 'Uploading audio file',
-      'PROCESSING_AUDIO': 'Optimizing audio quality',
-      'TRANSCRIBING': 'Converting speech to text',
-      'PROCESSING_NLP': 'Extracting key information',
-      'SUMMARIZING': 'Generating AI summary',
-      'COMPLETED': 'Processing complete',
-      'FAILED': 'Processing failed'
+      UPLOADING: 'Uploading audio file',
+      PROCESSING_AUDIO: 'Optimizing audio quality',
+      TRANSCRIBING: 'Converting speech to text',
+      PROCESSING_NLP: 'Extracting key information',
+      SUMMARIZING: 'Generating AI summary',
+      COMPLETED: 'Processing complete',
+      FAILED: 'Processing failed',
     };
 
     return {
@@ -1250,7 +1269,7 @@ async function getProcessingStatus(meetingId, userId) {
       startedAt: meeting.processingStartedAt || meeting.createdAt,
       updatedAt: meeting.updatedAt,
       completedAt: meeting.processingCompletedAt,
-      error: meeting.processingError || null
+      error: meeting.processingError || null,
     };
   } catch (error) {
     console.error('Get processing status error:', error.message);
@@ -1282,7 +1301,7 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
 
     await prisma.meeting.update({
       where: { id: meetingId },
-      data: updateData
+      data: updateData,
     });
     console.log(`📊 Meeting status updated: ${status}`);
   } catch (error) {
@@ -1369,5 +1388,5 @@ module.exports = {
   updateMeetingStatus, // Needed by queue service
 
   // Advanced features
-  regenerateSummary
+  regenerateSummary,
 };

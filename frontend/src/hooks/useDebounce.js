@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 /**
  * Custom hook that debounces a value
  * Useful for search inputs, API calls, and expensive operations
- * 
+ *
  * @param {any} value - The value to debounce
  * @param {number} delay - Delay in milliseconds (default: 500ms)
  * @returns {any} Debounced value
- * 
+ *
  * @example
  * const debouncedSearch = useDebounce(searchQuery, 500);
  */

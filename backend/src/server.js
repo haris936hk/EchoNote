@@ -40,17 +40,21 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 // ============================================
 
 // Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
 // CORS configuration
-app.use(cors({
-  origin: FRONTEND_URL,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -77,10 +81,10 @@ app.get('/health', async (req, res) => {
   try {
     // Check database connection
     await prisma.$queryRaw`SELECT 1`;
-    
+
     // Get storage stats
     const storageStats = await storageService.getStorageStats();
-    
+
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -89,14 +93,14 @@ app.get('/health', async (req, res) => {
       version: process.env.npm_package_version || '1.0.0',
       services: {
         database: 'connected',
-        storage: storageStats.success ? 'operational' : 'degraded'
-      }
+        storage: storageStats.success ? 'operational' : 'degraded',
+      },
     });
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -122,8 +126,8 @@ app.get('/api', (req, res) => {
       users: '/api/users',
       meetings: '/api/meetings',
       storage: '/api/storage',
-      health: '/health'
-    }
+      health: '/health',
+    },
   });
 });
 
@@ -136,7 +140,7 @@ app.use('*', (req, res) => {
     success: false,
     error: 'Endpoint not found',
     path: req.originalUrl,
-    method: req.method
+    method: req.method,
   });
 });
 
@@ -153,14 +157,16 @@ app.use(errorHandler);
 // Clean up old temporary files every hour
 cron.schedule('0 * * * *', async () => {
   console.log('🧹 Running scheduled storage cleanup...');
-  
+
   try {
     await storageService.cleanupOldTempFiles();
     await storageService.cleanupProcessedFiles();
-    
+
     const stats = await storageService.getStorageStats();
     if (stats.success) {
-      console.log(`📊 Storage: ${stats.data.total.sizeFormatted} (${stats.data.total.count} files)`);
+      console.log(
+        `📊 Storage: ${stats.data.total.sizeFormatted} (${stats.data.total.count} files)`
+      );
     }
   } catch (error) {
     console.error('❌ Storage cleanup error:', error.message);
@@ -183,7 +189,7 @@ cron.schedule('*/5 * * * *', async () => {
 
 async function gracefulShutdown(signal) {
   console.log(`\n${signal} received. Starting graceful shutdown...`);
-  
+
   // Close server
   server.close(async () => {
     console.log('✅ HTTP server closed');
@@ -204,7 +210,7 @@ async function gracefulShutdown(signal) {
       process.exit(1);
     }
   });
-  
+
   // Force shutdown after 10 seconds
   setTimeout(() => {
     console.error('⚠️  Forced shutdown after timeout');
@@ -234,12 +240,12 @@ process.on('unhandledRejection', (reason, promise) => {
 async function initializeServer() {
   try {
     console.log('\n🚀 Starting EchoNote Backend Server...\n');
-    
+
     // Step 1: Test database connection
     console.log('📊 Connecting to database...');
     await prisma.$connect();
     console.log('✅ Database connected');
-    
+
     // Step 2: Initialize storage directories
     console.log('📁 Initializing storage...');
     const storageResult = await storageService.initializeStorage();
@@ -248,7 +254,7 @@ async function initializeServer() {
     } else {
       throw new Error(`Storage initialization failed: ${storageResult.error}`);
     }
-    
+
     // Step 3: Test email service (optional, won't fail if not configured)
     if (process.env.RESEND_API_KEY) {
       console.log('📧 Testing email service...');
@@ -256,7 +262,7 @@ async function initializeServer() {
     } else {
       console.log('⚠️  Email service not configured (RESEND_API_KEY missing)');
     }
-    
+
     // Step 4: Verify Python dependencies
     console.log('🐍 Checking Python dependencies...');
     const { execSync } = require('child_process');
@@ -267,11 +273,11 @@ async function initializeServer() {
     } catch (error) {
       console.log(`⚠️  Python not found (tried: ${pythonCmd}). Audio processing may fail.`);
     }
-    
+
     console.log('\n' + '='.repeat(60));
     console.log('✅ All services initialized successfully');
     console.log('='.repeat(60) + '\n');
-    
+
     return true;
   } catch (error) {
     console.error('\n❌ Server initialization failed:', error.message);
@@ -291,7 +297,7 @@ initializeServer().then((initialized) => {
     console.error('❌ Failed to initialize server. Exiting...');
     process.exit(1);
   }
-  
+
   // Start HTTP server
   server = app.listen(PORT, () => {
     console.log('🎉 EchoNote Backend Server Running\n');
@@ -338,4 +344,3 @@ initializeServer().then((initialized) => {
 // Export app for testing
 module.exports = app;
 // trigger reload
-

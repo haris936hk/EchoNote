@@ -1,24 +1,23 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import Header from '../common/Header';
 
-// Create context to share scroll state with child components
+// Scroll state context shared with child components
 export const ScrollContext = createContext({
   showNavbar: true,
-  isScrollingDown: false
+  isScrollingDown: false,
 });
 
 export const useScrollContext = () => useContext(ScrollContext);
 
 /**
- * Main Layout Component
- * Wrapper for authenticated pages with navigation
+ * MainLayout — Wrapper for authenticated pages
+ * OLED dark background, scroll-hide navbar, no footer
  */
 const MainLayout = ({ children }) => {
   const [showNavbar, setShowNavbar] = useState(true);
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Handle scroll to show/hide navbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -43,22 +42,20 @@ const MainLayout = ({ children }) => {
 
   return (
     <ScrollContext.Provider value={{ showNavbar, isScrollingDown }}>
-      <div className="min-h-screen bg-background">
-        {/* Navigation Bar - Slides on scroll */}
+      <div className="min-h-screen" style={{ backgroundColor: '#020617' }}>
+        {/* Navigation Bar — Slides on scroll */}
         <div
-          className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+          className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-in-out ${
             showNavbar
               ? 'translate-y-0 opacity-100'
-              : '-translate-y-full opacity-0 pointer-events-none'
+              : 'pointer-events-none -translate-y-full opacity-0'
           }`}
         >
           <Header />
         </div>
 
         {/* Main Content */}
-        <main className="container mx-auto px-4 max-w-7xl pt-[80px]">
-          {children}
-        </main>
+        <main className="container mx-auto max-w-7xl px-4 pt-[72px]">{children}</main>
       </div>
     </ScrollContext.Provider>
   );

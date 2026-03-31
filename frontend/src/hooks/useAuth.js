@@ -5,7 +5,7 @@ import { AuthContext } from '../contexts/AuthContext';
 /**
  * Custom hook to access authentication context
  * Provides user data, authentication status, and auth methods
- * 
+ *
  * @throws {Error} If used outside of AuthProvider
  * @returns {Object} Authentication context value
  */
@@ -15,7 +15,7 @@ const useAuth = () => {
   if (!context) {
     throw new Error(
       'useAuth must be used within an AuthProvider. ' +
-      'Wrap your component tree with <AuthProvider> to use this hook.'
+        'Wrap your component tree with <AuthProvider> to use this hook.'
     );
   }
 
@@ -44,7 +44,7 @@ export const usePermissions = () => {
 
   return {
     hasPermission,
-    hasRole
+    hasRole,
   };
 };
 
@@ -57,7 +57,7 @@ export const useAuthStatus = () => {
   return {
     isAuthenticated: !!user,
     isLoading: loading,
-    user
+    user,
   };
 };
 

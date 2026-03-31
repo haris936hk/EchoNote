@@ -8,18 +8,12 @@ const winston = require('winston');
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 // Configuration
@@ -27,7 +21,7 @@ const NLP_CONFIG = {
   pythonPath: process.env.PYTHON_PATH || 'python3',
   scriptsDir: path.join(__dirname, '../python_scripts'),
   spacyModel: 'en_core_web_lg',
-  enableAllComponents: true
+  enableAllComponents: true,
 };
 
 /**
@@ -45,7 +39,7 @@ const processText = async (text) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, NLP_CONFIG.spacyModel]
+      args: [text, NLP_CONFIG.spacyModel],
     };
 
     // Run SpaCy NLP processor
@@ -63,9 +57,8 @@ const processText = async (text) => {
       sentiment: result.sentiment || { polarity: 0, subjectivity: 0 },
       topics: result.topics || [],
       statistics: result.statistics || {},
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ NLP processing failed: ${error.message}`);
     throw new Error(`NLP processing failed: ${error.message}`);
@@ -87,7 +80,7 @@ const extractEntities = async (text) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'entities']
+      args: [text, 'entities'],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -98,14 +91,14 @@ const extractEntities = async (text) => {
 
     // Group entities by type
     const entitiesByType = {};
-    result.entities.forEach(entity => {
+    result.entities.forEach((entity) => {
       if (!entitiesByType[entity.label]) {
         entitiesByType[entity.label] = [];
       }
       entitiesByType[entity.label].push({
         text: entity.text,
         start: entity.start,
-        end: entity.end
+        end: entity.end,
       });
     });
 
@@ -118,11 +111,10 @@ const extractEntities = async (text) => {
         byType: Object.keys(entitiesByType).reduce((acc, type) => {
           acc[type] = entitiesByType[type].length;
           return acc;
-        }, {})
+        }, {}),
       },
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Entity extraction failed: ${error.message}`);
     throw new Error(`Entity extraction failed: ${error.message}`);
@@ -144,7 +136,7 @@ const extractKeyPhrases = async (text, topN = 10) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'keyphrases', topN.toString()]
+      args: [text, 'keyphrases', topN.toString()],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -155,14 +147,13 @@ const extractKeyPhrases = async (text, topN = 10) => {
 
     return {
       success: true,
-      keyPhrases: result.key_phrases.map(kp => ({
+      keyPhrases: result.key_phrases.map((kp) => ({
         phrase: kp.phrase,
         score: kp.score,
-        frequency: kp.frequency
+        frequency: kp.frequency,
       })),
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Key phrase extraction failed: ${error.message}`);
     throw new Error(`Key phrase extraction failed: ${error.message}`);
@@ -184,7 +175,7 @@ const extractActions = async (text) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'actions']
+      args: [text, 'actions'],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -195,17 +186,16 @@ const extractActions = async (text) => {
 
     return {
       success: true,
-      actions: result.actions.map(action => ({
+      actions: result.actions.map((action) => ({
         text: action.text,
         verb: action.verb,
         object: action.object,
         context: action.context,
-        confidence: action.confidence
+        confidence: action.confidence,
       })),
       count: result.actions.length,
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Action extraction failed: ${error.message}`);
     throw new Error(`Action extraction failed: ${error.message}`);
@@ -226,7 +216,7 @@ const analyzeSentiment = async (text) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'sentiment']
+      args: [text, 'sentiment'],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -242,13 +232,12 @@ const analyzeSentiment = async (text) => {
 
     return {
       success: true,
-      polarity: result.polarity,        // -1 (negative) to 1 (positive)
+      polarity: result.polarity, // -1 (negative) to 1 (positive)
       subjectivity: result.subjectivity, // 0 (objective) to 1 (subjective)
       classification,
       confidence: Math.abs(result.polarity),
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Sentiment analysis failed: ${error.message}`);
     throw new Error(`Sentiment analysis failed: ${error.message}`);
@@ -270,7 +259,7 @@ const extractTopics = async (text, topN = 5) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'topics', topN.toString()]
+      args: [text, 'topics', topN.toString()],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -281,14 +270,13 @@ const extractTopics = async (text, topN = 5) => {
 
     return {
       success: true,
-      topics: result.topics.map(topic => ({
+      topics: result.topics.map((topic) => ({
         term: topic.term,
         score: topic.score,
-        category: topic.category || 'general'
+        category: topic.category || 'general',
       })),
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Topic extraction failed: ${error.message}`);
     throw new Error(`Topic extraction failed: ${error.message}`);
@@ -308,13 +296,16 @@ const getTextStatistics = (text) => {
       sentenceCount: 0,
       paragraphCount: 0,
       averageWordLength: 0,
-      averageSentenceLength: 0
+      averageSentenceLength: 0,
     };
   }
 
-  const words = text.trim().split(/\s+/).filter(w => w.length > 0);
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-  const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
+  const words = text
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0);
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  const paragraphs = text.split(/\n\n+/).filter((p) => p.trim().length > 0);
 
   const totalCharacters = words.reduce((sum, word) => sum + word.length, 0);
   const averageWordLength = words.length > 0 ? totalCharacters / words.length : 0;
@@ -326,7 +317,7 @@ const getTextStatistics = (text) => {
     sentenceCount: sentences.length,
     paragraphCount: paragraphs.length,
     averageWordLength: parseFloat(averageWordLength.toFixed(2)),
-    averageSentenceLength: parseFloat(averageSentenceLength.toFixed(2))
+    averageSentenceLength: parseFloat(averageSentenceLength.toFixed(2)),
   };
 };
 
@@ -344,7 +335,7 @@ const extractDates = async (text) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'dates']
+      args: [text, 'dates'],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -355,15 +346,14 @@ const extractDates = async (text) => {
 
     return {
       success: true,
-      dates: result.dates.map(date => ({
+      dates: result.dates.map((date) => ({
         text: date.text,
         normalized: date.normalized,
-        type: date.type // 'DATE', 'TIME', 'DURATION'
+        type: date.type, // 'DATE', 'TIME', 'DURATION'
       })),
       count: result.dates.length,
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Date extraction failed: ${error.message}`);
     throw new Error(`Date extraction failed: ${error.message}`);
@@ -386,7 +376,7 @@ const processMeetingTranscript = async (text) => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: [text, 'full']
+      args: [text, 'full'],
     };
 
     // Run SpaCy NLP processor with updated format
@@ -399,14 +389,13 @@ const processMeetingTranscript = async (text) => {
     // Return in dataset format
     return {
       success: result.success || true,
-      entities: result.entities || [],        // [{text, label}]
-      keyPhrases: result.keyPhrases || [],    // ["phrase1", "phrase2"]
+      entities: result.entities || [], // [{text, label}]
+      keyPhrases: result.keyPhrases || [], // ["phrase1", "phrase2"]
       actionPatterns: result.actionPatterns || [], // [{action, object}]
-      sentiment: result.sentiment || {label: 'neutral', score: 0}, // {label, score}
-      topics: result.topics || [],            // ["topic1", "topic2"]
-      processingTime: parseFloat(totalTime)
+      sentiment: result.sentiment || { label: 'neutral', score: 0 }, // {label, score}
+      topics: result.topics || [], // ["topic1", "topic2"]
+      processingTime: parseFloat(totalTime),
     };
-
   } catch (error) {
     logger.error(`❌ NLP pipeline failed: ${error.message}`);
     return {
@@ -415,9 +404,9 @@ const processMeetingTranscript = async (text) => {
       entities: [],
       keyPhrases: [],
       actionPatterns: [],
-      sentiment: {label: 'neutral', score: 0},
+      sentiment: { label: 'neutral', score: 0 },
       topics: [],
-      processingTime: 0
+      processingTime: 0,
     };
   }
 };
@@ -464,19 +453,19 @@ const batchProcessTexts = async (texts) => {
       results.push({
         index: i,
         success: true,
-        ...result
+        ...result,
       });
     } catch (error) {
       logger.error(`Failed to process text ${i}: ${error.message}`);
       results.push({
         index: i,
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
-  const successful = results.filter(r => r.success).length;
+  const successful = results.filter((r) => r.success).length;
   logger.info(`✅ Batch processing complete: ${successful}/${texts.length} successful`);
 
   return results;
@@ -494,7 +483,7 @@ const testSpacyInstallation = async () => {
       mode: 'json',
       pythonPath: NLP_CONFIG.pythonPath,
       scriptPath: NLP_CONFIG.scriptsDir,
-      args: ['test']
+      args: ['test'],
     };
 
     const results = await PythonShell.run('nlp_processor.py', pythonOptions);
@@ -508,14 +497,13 @@ const testSpacyInstallation = async () => {
       model: result.model,
       modelVersion: result.model_version,
       pythonVersion: result.python_version,
-      components: result.components
+      components: result.components,
     };
-
   } catch (error) {
     logger.error(`❌ SpaCy installation test failed: ${error.message}`);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 };
@@ -533,5 +521,5 @@ module.exports = {
   preprocessText,
   batchProcessTexts,
   testSpacyInstallation,
-  NLP_CONFIG
+  NLP_CONFIG,
 };

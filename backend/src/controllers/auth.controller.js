@@ -15,7 +15,7 @@ const googleAuth = async (req, res) => {
     if (!idToken) {
       return res.status(400).json({
         success: false,
-        error: 'Google ID token is required'
+        error: 'Google ID token is required',
       });
     }
 
@@ -30,16 +30,15 @@ const googleAuth = async (req, res) => {
       data: {
         user: result.user,
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken
+        refreshToken: result.refreshToken,
       },
-      message: 'Authentication successful'
+      message: 'Authentication successful',
     });
-
   } catch (error) {
     console.error('Google auth controller error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Authentication failed. Please try again.'
+      error: 'Authentication failed. Please try again.',
     });
   }
 };
@@ -54,13 +53,13 @@ const getGoogleAuthUrl = async (req, res) => {
     // For now, returning not implemented as we use client-side flow
     return res.status(501).json({
       success: false,
-      error: 'Server-side OAuth flow not implemented. Use client-side flow instead.'
+      error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
     });
   } catch (error) {
     console.error('Get Google auth URL error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to generate auth URL'
+      error: 'Failed to generate auth URL',
     });
   }
 };
@@ -75,13 +74,13 @@ const googleCallback = async (req, res) => {
     // For now, returning not implemented as we use client-side flow
     return res.status(501).json({
       success: false,
-      error: 'Server-side OAuth flow not implemented. Use client-side flow instead.'
+      error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
     });
   } catch (error) {
     console.error('Google callback error:', error);
     return res.status(500).json({
       success: false,
-      error: 'OAuth callback failed'
+      error: 'OAuth callback failed',
     });
   }
 };
@@ -98,7 +97,7 @@ const refreshToken = async (req, res) => {
     if (!refreshToken) {
       return res.status(400).json({
         success: false,
-        error: 'Refresh token is required'
+        error: 'Refresh token is required',
       });
     }
 
@@ -111,16 +110,15 @@ const refreshToken = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        accessToken: result.accessToken
+        accessToken: result.accessToken,
       },
-      message: 'Token refreshed successfully'
+      message: 'Token refreshed successfully',
     });
-
   } catch (error) {
     console.error('Refresh token controller error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Token refresh failed'
+      error: 'Token refresh failed',
     });
   }
 };
@@ -140,14 +138,13 @@ const logout = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
     });
-
   } catch (error) {
     console.error('Logout controller error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Logout failed'
+      error: 'Logout failed',
     });
   }
 };
@@ -163,15 +160,14 @@ const getCurrentUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        user: req.user
-      }
+        user: req.user,
+      },
     });
-
   } catch (error) {
     console.error('Get current user error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to get user'
+      error: 'Failed to get user',
     });
   }
 };
@@ -188,7 +184,7 @@ const verifyToken = async (req, res) => {
     if (!token) {
       return res.status(400).json({
         success: false,
-        error: 'Token is required'
+        error: 'Token is required',
       });
     }
 
@@ -198,8 +194,8 @@ const verifyToken = async (req, res) => {
       return res.status(200).json({
         success: true,
         data: {
-          valid: false
-        }
+          valid: false,
+        },
       });
     }
 
@@ -208,18 +204,17 @@ const verifyToken = async (req, res) => {
       data: {
         valid: true,
         user: {
-          userId: decoded.id,  // Changed from decoded.userId to decoded.id
+          userId: decoded.id, // Changed from decoded.userId to decoded.id
           email: decoded.email,
-          name: decoded.name
-        }
-      }
+          name: decoded.name,
+        },
+      },
     });
-
   } catch (error) {
     console.error('Verify token error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Token verification failed'
+      error: 'Token verification failed',
     });
   }
 };
@@ -237,14 +232,13 @@ const revokeGoogleAccess = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Google access revoked successfully'
+      message: 'Google access revoked successfully',
     });
-
   } catch (error) {
     console.error('Revoke Google access error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to revoke Google access'
+      error: 'Failed to revoke Google access',
     });
   }
 };
@@ -259,13 +253,13 @@ const getCalendarStatus = async (req, res) => {
     // Calendar integration is not part of MVP
     return res.status(501).json({
       success: false,
-      error: 'Calendar integration not implemented in MVP'
+      error: 'Calendar integration not implemented in MVP',
     });
   } catch (error) {
     console.error('Get calendar status error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to get calendar status'
+      error: 'Failed to get calendar status',
     });
   }
 };
@@ -280,13 +274,13 @@ const connectCalendar = async (req, res) => {
     // Calendar integration is not part of MVP
     return res.status(501).json({
       success: false,
-      error: 'Calendar integration not implemented in MVP'
+      error: 'Calendar integration not implemented in MVP',
     });
   } catch (error) {
     console.error('Connect calendar error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to connect calendar'
+      error: 'Failed to connect calendar',
     });
   }
 };
@@ -301,13 +295,13 @@ const disconnectCalendar = async (req, res) => {
     // Calendar integration is not part of MVP
     return res.status(501).json({
       success: false,
-      error: 'Calendar integration not implemented in MVP'
+      error: 'Calendar integration not implemented in MVP',
     });
   } catch (error) {
     console.error('Disconnect calendar error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to disconnect calendar'
+      error: 'Failed to disconnect calendar',
     });
   }
 };
@@ -322,13 +316,13 @@ const getActiveSessions = async (req, res) => {
     // Session management is not part of MVP
     return res.status(501).json({
       success: false,
-      error: 'Session management not implemented in MVP'
+      error: 'Session management not implemented in MVP',
     });
   } catch (error) {
     console.error('Get active sessions error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to get sessions'
+      error: 'Failed to get sessions',
     });
   }
 };
@@ -343,13 +337,13 @@ const revokeSession = async (req, res) => {
     // Session management is not part of MVP
     return res.status(501).json({
       success: false,
-      error: 'Session management not implemented in MVP'
+      error: 'Session management not implemented in MVP',
     });
   } catch (error) {
     console.error('Revoke session error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to revoke session'
+      error: 'Failed to revoke session',
     });
   }
 };
@@ -367,5 +361,5 @@ module.exports = {
   connectCalendar,
   disconnectCalendar,
   getActiveSessions,
-  revokeSession
+  revokeSession,
 };

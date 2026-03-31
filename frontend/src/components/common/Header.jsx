@@ -1,116 +1,75 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FiMic, FiGrid, FiList, FiLogOut, FiSettings, FiSun, FiMoon } from 'react-icons/fi';
+import { Link, useLocation } from 'react-router-dom';
+import { LuMic as Mic } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 
+/**
+ * Header — Shared navigation bar for authenticated pages
+ * Matches Stitch design: full-width, glass bg, text-only nav links with dot separators
+ */
 const Header = () => {
-  const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   const isActive = (path) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
     return location.pathname === path || location.pathname.startsWith(path);
   };
 
+  const navLinks = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/record', label: 'Record' },
+    { path: '/meetings', label: 'Meetings' },
+  ];
+
   return (
-    <header className="w-full px-4 pt-2 pb-0">
-      {/* Centered wrapper */}
-      <div className="max-w-6xl mx-auto flex justify-center">
-        {/* Rounded container with subtle border */}
-        <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-xl backdrop-saturate-150 shadow-lg">
-          {/* Brand */}
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2 text-default-foreground hover:opacity-80 transition-opacity"
-          >
-            <FiMic size={20} />
-            <span className="font-semibold text-sm">EchoNote</span>
-          </Link>
+    <header className="w-full bg-[#2e3447]/40 shadow-2xl backdrop-blur-3xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        {/* Brand */}
+        <Link
+          to="/dashboard"
+          className="text-accent-primary flex items-center gap-2 transition-opacity hover:opacity-80"
+        >
+          <Mic size={20} />
+          <span className="text-xl font-bold tracking-tighter">EchoNote</span>
+        </Link>
 
-          {/* Navigation Links */}
-          <Link
-            to="/dashboard"
-            className={`text-sm font-medium transition-opacity flex items-center gap-2 ${
-              isActive('/dashboard')
-                ? 'text-default-foreground opacity-100'
-                : 'text-default-400 hover:opacity-70'
-            }`}
-          >
-            <FiGrid size={16} />
-            Dashboard
-          </Link>
+        {/* Center Nav Links */}
+        <nav className="hidden items-center gap-2 text-sm font-medium tracking-tight md:flex">
+          {navLinks.map((link, index) => (
+            <div key={link.path} className="flex items-center gap-2">
+              {index > 0 && <span className="select-none text-slate-600">·</span>}
+              <Link
+                to={link.path}
+                className={`transition-colors ${
+                  isActive(link.path) ? 'text-white' : 'text-slate-400 hover:text-slate-100'
+                }`}
+              >
+                {link.label}
+              </Link>
+            </div>
+          ))}
+        </nav>
 
-          <Link
-            to="/meetings"
-            className={`text-sm font-medium transition-opacity flex items-center gap-2 ${
-              isActive('/meetings')
-                ? 'text-default-foreground opacity-100'
-                : 'text-default-400 hover:opacity-70'
-            }`}
-          >
-            <FiList size={16} />
-            Meetings
-          </Link>
-
-          <Link
-            to="/record"
-            className={`text-sm font-medium transition-opacity flex items-center gap-2 ${
-              isActive('/record')
-                ? 'text-default-foreground opacity-100'
-                : 'text-default-400 hover:opacity-70'
-            }`}
-          >
-            <FiMic size={16} />
-            Record
-          </Link>
-
-          {/* User section */}
-          <div className="flex items-center gap-3 pl-2 border-l border-divider">
+        {/* User Avatar */}
+        <div className="flex items-center">
+          <Link to="/settings">
             {user?.picture ? (
               <img
                 src={user.picture}
-                alt={user.name}
-                className="w-7 h-7 rounded-full"
+                alt={user?.name || 'User'}
+                className="border-accent-primary/30 hover:border-accent-primary/60 size-8 cursor-pointer rounded-full border transition-colors"
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-default-200 flex items-center justify-center">
-                <span className="text-xs text-default-600 font-semibold">
+              <div className="bg-accent-primary/20 border-accent-primary/30 text-accent-primary hover:bg-accent-primary/30 flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors">
+                <span className="text-xs font-semibold">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
                 </span>
               </div>
             )}
-
-            <button
-              onClick={toggleTheme}
-              className="text-default-400 hover:text-default-foreground transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <FiSun size={18} /> : <FiMoon size={18} />}
-            </button>
-
-            <Link
-              to="/settings"
-              className="text-default-400 hover:text-default-foreground transition-colors"
-              aria-label="Settings"
-            >
-              <FiSettings size={18} />
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              className="text-default-400 hover:text-red-400 transition-colors"
-              aria-label="Logout"
-            >
-              <FiLogOut size={18} />
-            </button>
-          </div>
-        </nav>
+          </Link>
+        </div>
       </div>
     </header>
   );

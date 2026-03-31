@@ -10,18 +10,12 @@ const winston = require('winston');
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 // Configuration
@@ -32,7 +26,7 @@ const AUDIO_CONFIG = {
   targetSampleRate: 16000, // 16kHz for Whisper
   targetChannels: 1, // Mono
   targetFormat: 'wav',
-  useFfmpegFallback: process.env.USE_FFMPEG_FALLBACK === 'true'
+  useFfmpegFallback: process.env.USE_FFMPEG_FALLBACK === 'true',
 };
 
 /**
@@ -52,10 +46,7 @@ const processAudioWithPython = async (inputPath, outputPath) => {
       mode: 'json',
       pythonPath: AUDIO_CONFIG.pythonPath,
       scriptPath: AUDIO_CONFIG.scriptsDir,
-      args: [
-        inputPath,
-        outputPath
-      ]
+      args: [inputPath, outputPath],
     };
 
     // Run Python audio processor
@@ -76,9 +67,8 @@ const processAudioWithPython = async (inputPath, outputPath) => {
       channels: result.channels,
       fileSize: fileSize,
       processingTime: parseFloat(duration),
-      method: 'python'
+      method: 'python',
     };
-
   } catch (error) {
     logger.error(`❌ Python audio processing failed: ${error.message}`);
     throw new Error(`Audio processing failed: ${error.message}`);
@@ -104,9 +94,9 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
       .format('wav')
       .audioBitrate('256k')
       .audioFilters([
-        'highpass=f=85',      // Remove frequencies below 85Hz
-        'lowpass=f=8000',     // Remove frequencies above 8kHz
-        'loudnorm'            // Normalize audio levels
+        'highpass=f=85', // Remove frequencies below 85Hz
+        'lowpass=f=8000', // Remove frequencies above 8kHz
+        'loudnorm', // Normalize audio levels
       ])
       .on('start', (commandLine) => {
         logger.debug(`FFmpeg command: ${commandLine}`);
@@ -133,11 +123,11 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
               channels: AUDIO_CONFIG.targetChannels,
               fileSize: stats.size,
               processingTime: parseFloat(duration),
-              method: 'ffmpeg'
+              method: 'ffmpeg',
             });
           }
 
-          const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+          const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
 
           resolve({
             success: true,
@@ -147,7 +137,7 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
             channels: audioStream?.channels || AUDIO_CONFIG.targetChannels,
             fileSize: stats.size,
             processingTime: parseFloat(duration),
-            method: 'ffmpeg'
+            method: 'ffmpeg',
           });
         });
       })
@@ -176,7 +166,7 @@ const validateAudio = (filePath) => {
       }
 
       // Check if file has audio stream
-      const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+      const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
       if (!audioStream) {
         return reject(new Error('No audio stream found in file'));
       }
@@ -189,9 +179,11 @@ const validateAudio = (filePath) => {
 
       // Validate duration (max 3 minutes)
       if (duration > AUDIO_CONFIG.maxDuration) {
-        return reject(new Error(
-          `Audio duration (${Math.round(duration)}s) exceeds maximum allowed (${AUDIO_CONFIG.maxDuration}s)`
-        ));
+        return reject(
+          new Error(
+            `Audio duration (${Math.round(duration)}s) exceeds maximum allowed (${AUDIO_CONFIG.maxDuration}s)`
+          )
+        );
       }
 
       // Validate minimum duration (at least 1 second)
@@ -209,7 +201,7 @@ const validateAudio = (filePath) => {
         channels,
         codec,
         bitrate: audioStream.bit_rate,
-        format: metadata.format.format_name
+        format: metadata.format.format_name,
       });
     });
   });
@@ -227,7 +219,7 @@ const getAudioMetadata = (filePath) => {
         return reject(new Error(`Failed to read audio metadata: ${err.message}`));
       }
 
-      const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+      const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
 
       resolve({
         duration: parseFloat(metadata.format.duration),
@@ -236,7 +228,7 @@ const getAudioMetadata = (filePath) => {
         channels: audioStream?.channels,
         codec: audioStream?.codec_name,
         bitrate: audioStream?.bit_rate,
-        format: metadata.format.format_name
+        format: metadata.format.format_name,
       });
     });
   });
@@ -312,7 +304,7 @@ const analyzeQuality = async (filePath) => {
       mode: 'json',
       pythonPath: AUDIO_CONFIG.pythonPath,
       scriptPath: AUDIO_CONFIG.scriptsDir,
-      args: [filePath]
+      args: [filePath],
     };
 
     // Run Python quality analyzer
@@ -325,15 +317,14 @@ const analyzeQuality = async (filePath) => {
       success: true,
       snr: analysis.snr, // Signal-to-noise ratio
       quality: analysis.quality, // 'good', 'fair', 'poor'
-      recommendations: analysis.recommendations
+      recommendations: analysis.recommendations,
     };
-
   } catch (error) {
     logger.warn(`⚠️ Quality analysis failed: ${error.message}`);
     return {
       success: false,
       quality: 'unknown',
-      error: error.message
+      error: error.message,
     };
   }
 };
@@ -352,7 +343,7 @@ const generateWaveform = async (filePath, points = 100) => {
       mode: 'json',
       pythonPath: AUDIO_CONFIG.pythonPath,
       scriptPath: AUDIO_CONFIG.scriptsDir,
-      args: [filePath, points.toString()]
+      args: [filePath, points.toString()],
     };
 
     // Run Python waveform generator
@@ -364,9 +355,8 @@ const generateWaveform = async (filePath, points = 100) => {
     return {
       success: true,
       points: waveform.points,
-      duration: waveform.duration
+      duration: waveform.duration,
     };
-
   } catch (error) {
     logger.error(`❌ Waveform generation failed: ${error.message}`);
     throw new Error(`Waveform generation failed: ${error.message}`);
@@ -391,10 +381,14 @@ const processAudioPipeline = async (inputPath, outputDir) => {
     }
 
     const inputStats = fs.statSync(inputPath);
-    logger.info(`📁 Input file: ${path.basename(inputPath)} (${(inputStats.size / 1024).toFixed(1)} KB)`);
+    logger.info(
+      `📁 Input file: ${path.basename(inputPath)} (${(inputStats.size / 1024).toFixed(1)} KB)`
+    );
 
     // Process audio with Python (Python script handles all validation internally)
-    logger.info('🐍 Processing audio with Python (includes validation, noise reduction, optimization)...');
+    logger.info(
+      '🐍 Processing audio with Python (includes validation, noise reduction, optimization)...'
+    );
     const outputFilename = `processed_${Date.now()}.wav`;
     const outputPath = path.join(outputDir, outputFilename);
 
@@ -411,22 +405,21 @@ const processAudioPipeline = async (inputPath, outputDir) => {
       success: true,
       input: {
         path: inputPath,
-        fileSize: inputStats.size
+        fileSize: inputStats.size,
       },
       output: {
         path: outputPath,
         duration: processing.duration,
         fileSize: outputFileSize,
         sampleRate: processing.sampleRate,
-        channels: processing.channels
+        channels: processing.channels,
       },
       processing: {
         method: processing.method,
         time: processing.processingTime,
-        totalTime: parseFloat(totalTime)
-      }
+        totalTime: parseFloat(totalTime),
+      },
     };
-
   } catch (error) {
     logger.error(`❌ Audio processing pipeline failed: ${error.message}`);
     throw error;
@@ -442,7 +435,7 @@ const cleanupAudioFiles = (filePaths) => {
   let deleted = 0;
   let failed = 0;
 
-  filePaths.forEach(filePath => {
+  filePaths.forEach((filePath) => {
     try {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
@@ -486,14 +479,13 @@ const processAudioFile = async (inputPath) => {
       channels: result.output.channels,
       fileSize: result.output.fileSize,
       processingTime: result.processing.totalTime,
-      method: result.processing.method
+      method: result.processing.method,
     };
-
   } catch (error) {
     logger.error(`❌ processAudioFile failed: ${error.message}`);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 };
@@ -510,5 +502,5 @@ module.exports = {
   generateWaveform,
   processAudioPipeline,
   cleanupAudioFiles,
-  AUDIO_CONFIG
+  AUDIO_CONFIG,
 };

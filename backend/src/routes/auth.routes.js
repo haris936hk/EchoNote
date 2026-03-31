@@ -28,10 +28,7 @@ router.post(
  * @access  Public
  * @returns { success, data: { url }, message }
  */
-router.get(
-  '/google/url',
-  authController.getGoogleAuthUrl
-);
+router.get('/google/url', authController.getGoogleAuthUrl);
 
 /**
  * @route   GET /api/auth/google/callback
@@ -40,10 +37,7 @@ router.get(
  * @query   code=<authorization_code>
  * @returns Redirects to frontend with tokens
  */
-router.get(
-  '/google/callback',
-  authController.googleCallback
-);
+router.get('/google/callback', authController.googleCallback);
 
 /**
  * @route   POST /api/auth/refresh
@@ -65,11 +59,7 @@ router.post(
  * @access  Private
  * @returns { success, message }
  */
-router.post(
-  '/logout',
-  authenticate,
-  authController.logout
-);
+router.post('/logout', authenticate, authController.logout);
 
 /**
  * @route   GET /api/auth/me
@@ -77,11 +67,7 @@ router.post(
  * @access  Private
  * @returns { success, data: { user } }
  */
-router.get(
-  '/me',
-  authenticate,
-  authController.getCurrentUser
-);
+router.get('/me', authenticate, authController.getCurrentUser);
 
 /**
  * @route   POST /api/auth/verify
@@ -90,11 +76,7 @@ router.get(
  * @body    { token: string }
  * @returns { success, data: { valid, user? } }
  */
-router.post(
-  '/verify',
-  optionalAuth,
-  authController.verifyToken
-);
+router.post('/verify', optionalAuth, authController.verifyToken);
 
 /**
  * @route   POST /api/auth/revoke
@@ -102,11 +84,7 @@ router.post(
  * @access  Private
  * @returns { success, message }
  */
-router.post(
-  '/revoke',
-  authenticate,
-  authController.revokeGoogleAccess
-);
+router.post('/revoke', authenticate, authController.revokeGoogleAccess);
 
 /**
  * @route   GET /api/auth/calendar/status
@@ -114,11 +92,7 @@ router.post(
  * @access  Private
  * @returns { success, data: { connected, scopes } }
  */
-router.get(
-  '/calendar/status',
-  authenticate,
-  authController.getCalendarStatus
-);
+router.get('/calendar/status', authenticate, authController.getCalendarStatus);
 
 /**
  * @route   POST /api/auth/calendar/connect
@@ -126,11 +100,7 @@ router.get(
  * @access  Private
  * @returns { success, data: { authUrl } }
  */
-router.post(
-  '/calendar/connect',
-  authenticate,
-  authController.connectCalendar
-);
+router.post('/calendar/connect', authenticate, authController.connectCalendar);
 
 /**
  * @route   POST /api/auth/calendar/disconnect
@@ -138,11 +108,7 @@ router.post(
  * @access  Private
  * @returns { success, message }
  */
-router.post(
-  '/calendar/disconnect',
-  authenticate,
-  authController.disconnectCalendar
-);
+router.post('/calendar/disconnect', authenticate, authController.disconnectCalendar);
 
 /**
  * @route   GET /api/auth/sessions
@@ -150,11 +116,7 @@ router.post(
  * @access  Private
  * @returns { success, data: { sessions } }
  */
-router.get(
-  '/sessions',
-  authenticate,
-  authController.getActiveSessions
-);
+router.get('/sessions', authenticate, authController.getActiveSessions);
 
 /**
  * @route   DELETE /api/auth/sessions/:sessionId
@@ -162,11 +124,7 @@ router.get(
  * @access  Private
  * @returns { success, message }
  */
-router.delete(
-  '/sessions/:sessionId',
-  authenticate,
-  authController.revokeSession
-);
+router.delete('/sessions/:sessionId', authenticate, authController.revokeSession);
 
 /**
  * Health check for auth service
@@ -175,16 +133,13 @@ router.delete(
  * @access  Public
  * @returns { success, status, timestamp }
  */
-router.get(
-  '/health',
-  (req, res) => {
-    res.status(200).json({
-      success: true,
-      status: 'healthy',
-      service: 'authentication',
-      timestamp: new Date().toISOString()
-    });
-  }
-);
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'healthy',
+    service: 'authentication',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 module.exports = router;

@@ -30,11 +30,7 @@ function createOAuth2Client() {
     );
   }
 
-  return new OAuth2Client(
-    clientId,
-    clientSecret,
-    redirectUri
-  );
+  return new OAuth2Client(clientId, clientSecret, redirectUri);
 }
 
 /**
@@ -50,14 +46,14 @@ async function getGmailAccessToken() {
   if (!refreshToken || refreshToken === 'YOUR_REFRESH_TOKEN_HERE') {
     throw new Error(
       'Missing or invalid GMAIL_REFRESH_TOKEN in .env\n\n' +
-      'Please follow these steps to obtain a refresh token:\n' +
-      '1. Visit https://developers.google.com/oauthplayground/\n' +
-      '2. Click ⚙️ Settings and check "Use your own OAuth credentials"\n' +
-      '3. Enter your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET\n' +
-      '4. Select scope: https://mail.google.com/\n' +
-      '5. Authorize with your Gmail account (hariskhan936.hk@gmail.com)\n' +
-      '6. Exchange code for tokens and copy the refresh_token\n' +
-      '7. Update GMAIL_REFRESH_TOKEN in .env and restart the server'
+        'Please follow these steps to obtain a refresh token:\n' +
+        '1. Visit https://developers.google.com/oauthplayground/\n' +
+        '2. Click ⚙️ Settings and check "Use your own OAuth credentials"\n' +
+        '3. Enter your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET\n' +
+        '4. Select scope: https://mail.google.com/\n' +
+        '5. Authorize with your Gmail account (hariskhan936.hk@gmail.com)\n' +
+        '6. Exchange code for tokens and copy the refresh_token\n' +
+        '7. Update GMAIL_REFRESH_TOKEN in .env and restart the server'
     );
   }
 
@@ -66,7 +62,7 @@ async function getGmailAccessToken() {
 
     // Set refresh token credentials
     oAuth2Client.setCredentials({
-      refresh_token: refreshToken
+      refresh_token: refreshToken,
     });
 
     // Get access token (automatically refreshes if expired)
@@ -82,16 +78,16 @@ async function getGmailAccessToken() {
     if (error.message.includes('invalid_grant')) {
       throw new Error(
         'Invalid or expired refresh token.\n' +
-        'Please regenerate the refresh token via OAuth Playground:\n' +
-        'https://developers.google.com/oauthplayground/'
+          'Please regenerate the refresh token via OAuth Playground:\n' +
+          'https://developers.google.com/oauthplayground/'
       );
     }
 
     if (error.message.includes('quota')) {
       throw new Error(
         'Gmail API quota exceeded.\n' +
-        'Daily sending limit: 500 emails/day (free tier)\n' +
-        'Please wait 24 hours or upgrade to Google Workspace.'
+          'Daily sending limit: 500 emails/day (free tier)\n' +
+          'Please wait 24 hours or upgrade to Google Workspace.'
       );
     }
 
@@ -120,13 +116,13 @@ async function createGmailTransport() {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-      accessToken: accessToken
+      accessToken: accessToken,
     },
     pool: true, // Use connection pooling for better performance
     maxConnections: 5, // Max simultaneous connections
     maxMessages: 100, // Max messages per connection before reconnecting
     rateDelta: 1000, // 1 second
-    rateLimit: 5 // 5 emails per second (Gmail guideline)
+    rateLimit: 5, // 5 emails per second (Gmail guideline)
   });
 }
 
@@ -177,5 +173,5 @@ module.exports = {
   closeGmailTransport,
   verifyGmailTransport,
   createOAuth2Client,
-  getGmailAccessToken
+  getGmailAccessToken,
 };

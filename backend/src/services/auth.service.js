@@ -17,13 +17,13 @@ async function verifyGoogleToken(token) {
     });
 
     const payload = ticket.getPayload();
-    
+
     return {
       googleId: payload.sub,
       email: payload.email,
       name: payload.name,
       picture: payload.picture,
-      emailVerified: payload.email_verified
+      emailVerified: payload.email_verified,
     };
   } catch (error) {
     console.error('❌ Google token verification failed:', error.message);
@@ -40,10 +40,10 @@ async function authenticateWithGoogle(googleToken) {
   try {
     // Step 1: Verify Google token
     const googleProfile = await verifyGoogleToken(googleToken);
-    
+
     // Step 2: Find or create user
     let user = await prisma.user.findUnique({
-      where: { email: googleProfile.email }
+      where: { email: googleProfile.email },
     });
 
     if (user) {
@@ -53,8 +53,8 @@ async function authenticateWithGoogle(googleToken) {
         data: {
           name: googleProfile.name,
           picture: googleProfile.picture,
-          lastLoginAt: new Date()
-        }
+          lastLoginAt: new Date(),
+        },
       });
       console.log(`✅ User logged in: ${user.email}`);
     } else {
@@ -65,8 +65,8 @@ async function authenticateWithGoogle(googleToken) {
           name: googleProfile.name,
           picture: googleProfile.picture,
           googleId: googleProfile.googleId,
-          lastLoginAt: new Date()
-        }
+          lastLoginAt: new Date(),
+        },
       });
       console.log(`✅ New user created: ${user.email}`);
 
@@ -75,7 +75,7 @@ async function authenticateWithGoogle(googleToken) {
       try {
         await emailService.sendWelcomeEmail({
           to: user.email,
-          userName: user.name
+          userName: user.name,
         });
         console.log(`📧 Welcome email sent to ${user.email}`);
       } catch (error) {
@@ -91,7 +91,7 @@ async function authenticateWithGoogle(googleToken) {
     // Step 4: Store refresh token in database
     await prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken }
+      data: { refreshToken },
     });
 
     return {
@@ -100,16 +100,16 @@ async function authenticateWithGoogle(googleToken) {
         id: user.id,
         email: user.email,
         name: user.name,
-        picture: user.picture
+        picture: user.picture,
       },
       accessToken,
-      refreshToken
+      refreshToken,
     };
   } catch (error) {
     console.error('❌ Authentication error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -124,13 +124,13 @@ function generateAccessToken(user) {
     {
       id: user.id,
       email: user.email,
-      name: user.name
+      name: user.name,
     },
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRE || '1h',
       issuer: 'echonote-api',
-      audience: 'echonote-client'
+      audience: 'echonote-client',
     }
   );
 }
@@ -144,13 +144,13 @@ function generateRefreshToken(user) {
   return jwt.sign(
     {
       id: user.id,
-      email: user.email
+      email: user.email,
     },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d',
       issuer: 'echonote-api',
-      audience: 'echonote-client'
+      audience: 'echonote-client',
     }
   );
 }
@@ -166,12 +166,12 @@ async function refreshAccessToken(refreshToken) {
     const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
     const decoded = jwt.verify(refreshToken, secret, {
       issuer: 'echonote-api',
-      audience: 'echonote-client'
+      audience: 'echonote-client',
     });
 
     // Step 2: Find user and verify stored refresh token matches
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id }
+      where: { id: decoded.id },
     });
 
     if (!user) {
@@ -189,13 +189,13 @@ async function refreshAccessToken(refreshToken) {
 
     return {
       success: true,
-      accessToken: newAccessToken
+      accessToken: newAccessToken,
     };
   } catch (error) {
     console.error('❌ Token refresh error:', error.message);
     return {
       success: false,
-      error: 'Token refresh failed'
+      error: 'Token refresh failed',
     };
   }
 }
@@ -223,20 +223,20 @@ async function logout(userId) {
   try {
     await prisma.user.update({
       where: { id: userId },
-      data: { refreshToken: null }
+      data: { refreshToken: null },
     });
 
     console.log(`✅ User logged out: ${userId}`);
 
     return {
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
     };
   } catch (error) {
     console.error('❌ Logout error:', error.message);
     return {
       success: false,
-      error: 'Logout failed'
+      error: 'Logout failed',
     };
   }
 }
@@ -258,9 +258,9 @@ async function getUserProfile(userId) {
         createdAt: true,
         lastLogin: true,
         _count: {
-          select: { meetings: true }
-        }
-      }
+          select: { meetings: true },
+        },
+      },
     });
 
     if (!user) {
@@ -271,14 +271,14 @@ async function getUserProfile(userId) {
       success: true,
       data: {
         ...user,
-        totalMeetings: user._count.meetings
-      }
+        totalMeetings: user._count.meetings,
+      },
     };
   } catch (error) {
     console.error('❌ Get user profile error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -304,21 +304,21 @@ async function updateUserProfile(userId, updates) {
         id: true,
         email: true,
         name: true,
-        picture: true
-      }
+        picture: true,
+      },
     });
 
     console.log(`✅ Profile updated for: ${user.email}`);
 
     return {
       success: true,
-      data: user
+      data: user,
     };
   } catch (error) {
     console.error('❌ Update user profile error:', error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -332,20 +332,20 @@ async function deleteUserAccount(userId) {
   try {
     // Prisma cascade will delete all meetings due to onDelete: Cascade
     await prisma.user.delete({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     console.log(`✅ User account deleted: ${userId}`);
 
     return {
       success: true,
-      message: 'Account deleted successfully'
+      message: 'Account deleted successfully',
     };
   } catch (error) {
     console.error('❌ Delete user account error:', error.message);
     return {
       success: false,
-      error: 'Account deletion failed'
+      error: 'Account deletion failed',
     };
   }
 }
@@ -358,7 +358,7 @@ async function deleteUserAccount(userId) {
 async function userExists(email) {
   try {
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
     return !!user;
   } catch (error) {
@@ -378,5 +378,5 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   deleteUserAccount,
-  userExists
+  userExists,
 };

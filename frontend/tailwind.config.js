@@ -10,76 +10,139 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // ── EchoNote OLED Dark Mode Palette ──
+        'echo-base': '#020617',
+        'echo-surface': '#0F172A',
+        'echo-surface-hover': '#1E293B',
+        'echo-elevated': '#1E293B',
+        'echo-border': 'rgba(255,255,255,0.06)',
+        'echo-border-subtle': 'rgba(255,255,255,0.03)',
+
+        // Accent colors
+        accent: {
+          primary: '#818CF8',
+          secondary: '#A78BFA',
+          glow: 'rgba(129,140,248,0.12)',
+        },
+        cta: {
+          DEFAULT: '#22C55E',
+          hover: '#16A34A',
+        },
+
+        // Semantic status
+        status: {
+          success: '#34D399',
+          warning: '#FBBF24',
+          danger: '#F87171',
+          info: '#60A5FA',
+        },
+
+        // Sentiment
+        sentiment: {
+          positive: '#34D399',
+          neutral: '#818CF8',
+          negative: '#F87171',
+          mixed: '#FBBF24',
+        },
+
+        // Text hierarchy
+        'text-primary': '#F8FAFC',
+        'text-secondary': '#94A3B8',
+        'text-muted': '#64748B',
+
+        // Stitch surface tokens (from code.html)
+        surface: {
+          DEFAULT: '#0c1324',
+          bright: '#33394c',
+          container: '#191f31',
+          'container-low': '#151b2d',
+          'container-high': '#23293c',
+          'container-highest': '#2e3447',
+          'container-lowest': '#070d1f',
+          dim: '#0c1324',
+        },
+        'on-surface': '#dce1fb',
+        'on-surface-variant': '#c6c5d5',
+        'outline-variant': '#454653',
+
+        // HeroUI overrides
         primary: {
-          DEFAULT: '#006FEE',
-          50: '#E6F1FE',
-          100: '#CCE3FD',
-          200: '#99C7FB',
-          300: '#66AAF9',
-          400: '#338EF7',
-          500: '#006FEE',
-          600: '#005BC4',
-          700: '#004493',
-          800: '#002E62',
-          900: '#001731'
+          DEFAULT: '#818CF8',
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#4F46E5',
+          700: '#4338CA',
+          800: '#3730A3',
+          900: '#312E81',
+          foreground: '#FFFFFF'
         },
         secondary: {
-          DEFAULT: '#9353D3',
-          50: '#F2EAFA',
-          100: '#E4D4F4',
-          200: '#C9A9E9',
-          300: '#AE7EDE',
-          400: '#9353D3',
-          500: '#7828C8',
-          600: '#6020A0',
-          700: '#481878',
-          800: '#301050',
-          900: '#180828'
+          DEFAULT: '#A78BFA',
+          50: '#F5F3FF',
+          100: '#EDE9FE',
+          200: '#DDD6FE',
+          300: '#C4B5FD',
+          400: '#A78BFA',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+          700: '#6D28D9',
+          800: '#5B21B6',
+          900: '#4C1D95',
+          foreground: '#FFFFFF'
         },
         success: {
-          DEFAULT: '#17C964',
-          50: '#E8FAF0',
-          100: '#D1F4E0',
-          200: '#A2E9C1',
-          300: '#74DFA2',
-          400: '#45D483',
-          500: '#17C964',
-          600: '#12A150',
-          700: '#0E793C',
-          800: '#095028',
-          900: '#052814'
+          DEFAULT: '#22C55E',
+          50: '#F0FDF4',
+          100: '#DCFCE7',
+          200: '#BBF7D0',
+          300: '#86EFAC',
+          400: '#4ADE80',
+          500: '#22C55E',
+          600: '#16A34A',
+          700: '#15803D',
+          800: '#166534',
+          900: '#14532D',
+          foreground: '#FFFFFF'
         },
         warning: {
-          DEFAULT: '#F5A524',
-          50: '#FEF7E6',
-          100: '#FDEFCC',
-          200: '#FBDF99',
-          300: '#F9CF66',
-          400: '#F7BF33',
-          500: '#F5A524',
-          600: '#C4841D',
-          700: '#936316',
-          800: '#62420E',
-          900: '#312107'
+          DEFAULT: '#FBBF24',
+          50: '#FEFCE8',
+          100: '#FEF9C3',
+          200: '#FEF08A',
+          300: '#FDE047',
+          400: '#FACC15',
+          500: '#EAB308',
+          600: '#CA8A04',
+          700: '#A16207',
+          800: '#854D0E',
+          900: '#713F12',
+          foreground: '#000000'
         },
         danger: {
-          DEFAULT: '#F31260',
-          50: '#FEE7EF',
-          100: '#FDD0DF',
-          200: '#FAA0BF',
-          300: '#F871A0',
-          400: '#F54180',
-          500: '#F31260',
-          600: '#C20E4D',
-          700: '#920B3A',
-          800: '#610726',
-          900: '#310413'
-        }
+          DEFAULT: '#F87171',
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          200: '#FECACA',
+          300: '#FCA5A5',
+          400: '#F87171',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
+          800: '#991B1B',
+          900: '#7F1D1D',
+          foreground: '#FFFFFF'
+        },
       },
+
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['Fira Code', 'Monaco', 'Consolas', 'monospace']
+        sans: ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
+
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
@@ -87,9 +150,12 @@ module.exports = {
         'scale-in': 'scaleIn 0.2s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'gradient': 'gradient 3s ease infinite',
-        'glow': 'glow 2s ease-in-out infinite',
-        'glow-pulse': 'glowPulse 2s ease-in-out infinite'
+        'halo-pulse': 'haloPulse 2s ease-in-out infinite',
+        'shimmer': 'shimmer 1.5s linear infinite',
+        'ai-glow': 'aiGlow 1.5s ease-in-out infinite',
+        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
       },
+
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
@@ -111,26 +177,51 @@ module.exports = {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' }
         },
-        glow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(0, 111, 238, 0.5)' },
-          '50%': { boxShadow: '0 0 30px rgba(0, 111, 238, 0.8), 0 0 40px rgba(147, 83, 211, 0.5)' }
+        haloPulse: {
+          '0%, 100%': {
+            transform: 'scale(1)',
+            boxShadow: '0 0 20px rgba(129,140,248,0.3), 0 0 40px rgba(167,139,250,0.15)',
+          },
+          '50%': {
+            transform: 'scale(1.05)',
+            boxShadow: '0 0 30px rgba(129,140,248,0.5), 0 0 60px rgba(167,139,250,0.25)',
+          }
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' }
+        },
+        aiGlow: {
+          '0%, 100%': {
+            boxShadow: '0 0 8px rgba(129,140,248,0.4)',
+            opacity: '1'
+          },
+          '50%': {
+            boxShadow: '0 0 16px rgba(129,140,248,0.6)',
+            opacity: '0.8'
+          }
         },
         glowPulse: {
           '0%, 100%': {
-            boxShadow: '0 0 15px rgba(0, 111, 238, 0.4), 0 0 25px rgba(147, 83, 211, 0.3)',
+            boxShadow: '0 0 15px rgba(129,140,248,0.4), 0 0 25px rgba(167,139,250,0.3)',
             transform: 'scale(1)'
           },
           '50%': {
-            boxShadow: '0 0 25px rgba(0, 111, 238, 0.6), 0 0 40px rgba(147, 83, 211, 0.5)',
+            boxShadow: '0 0 25px rgba(129,140,248,0.6), 0 0 40px rgba(167,139,250,0.5)',
             transform: 'scale(1.02)'
           }
         }
       },
+
       spacing: {
         '128': '32rem',
         '144': '36rem'
       },
       borderRadius: {
+        'card': '16px',
+        'btn': '10px',
+        'input': '10px',
+        'chip': '9999px',
         '4xl': '2rem',
         '5xl': '2.5rem'
       },
@@ -148,26 +239,36 @@ module.exports = {
   plugins: [
     heroui({
       themes: {
-        light: {
-          colors: {
-            background: "#FFFFFF",
-            foreground: "#11181C",
-            primary: {
-              DEFAULT: "#006FEE",
-              foreground: "#FFFFFF"
-            },
-            focus: "#006FEE"
-          }
-        },
         dark: {
           colors: {
-            background: "#000000",
-            foreground: "#ECEDEE",
+            background: "#020617",
+            foreground: "#F8FAFC",
             primary: {
-              DEFAULT: "#006FEE",
+              DEFAULT: "#818CF8",
               foreground: "#FFFFFF"
             },
-            focus: "#006FEE"
+            secondary: {
+              DEFAULT: "#A78BFA",
+              foreground: "#FFFFFF"
+            },
+            success: {
+              DEFAULT: "#22C55E",
+              foreground: "#FFFFFF"
+            },
+            warning: {
+              DEFAULT: "#FBBF24",
+              foreground: "#000000"
+            },
+            danger: {
+              DEFAULT: "#F87171",
+              foreground: "#FFFFFF"
+            },
+            content1: "#0F172A",
+            content2: "#1E293B",
+            content3: "#334155",
+            content4: "#475569",
+            divider: "rgba(255,255,255,0.06)",
+            focus: "#818CF8"
           }
         }
       }

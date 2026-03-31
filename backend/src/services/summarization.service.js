@@ -7,18 +7,12 @@ const winston = require('winston');
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 /**
@@ -37,13 +31,13 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     // STEP 1: Extract NLP features from metadata (FIXED: Critical bug - was never passing NLP features!)
     const nlpFeatures = nlpData || {
       // Format entities as strings with labels to match training format
-      entities: (metadata.entities || []).map(e =>
+      entities: (metadata.entities || []).map((e) =>
         typeof e === 'string' ? e : `${e.text} (${e.label})`
       ),
       keyPhrases: metadata.keyPhrases || [],
       topics: metadata.topics || [],
       // Extract sentiment label (handle both string and object format)
-      sentiment: metadata.sentiment?.label || metadata.sentiment || null
+      sentiment: metadata.sentiment?.label || metadata.sentiment || null,
     };
 
     // STEP 2: Add sentiment polarity if available (for training format: "positive (polarity: 0.17)")
@@ -65,39 +59,39 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     const summary = {
       executiveSummary: result.data.executiveSummary || '',
       // FIXED: keyDecisions must ALWAYS be array (training schema requirement)
-      keyDecisions: Array.isArray(result.data.keyDecisions)
-        ? result.data.keyDecisions
+      keyDecisions: Array.isArray(result.data.keyDecisions) ? result.data.keyDecisions : [],
+      actionItems: Array.isArray(result.data.actionItems)
+        ? validateActionItems(result.data.actionItems)
         : [],
-      actionItems: Array.isArray(result.data.actionItems) ? validateActionItems(result.data.actionItems) : [],
       // FIXED: nextSteps must ALWAYS be array (training schema requirement)
-      nextSteps: Array.isArray(result.data.nextSteps)
-        ? result.data.nextSteps
-        : [],
+      nextSteps: Array.isArray(result.data.nextSteps) ? result.data.nextSteps : [],
       keyTopics: Array.isArray(result.data.keyTopics) ? result.data.keyTopics : [],
       sentiment: result.data.sentiment || 'neutral',
       metadata: {
         model: 'EchoNote-Custom-Qwen2.5-7B',
         duration: parseFloat(duration),
-        totalProcessingTime: parseFloat(duration)
-      }
+        totalProcessingTime: parseFloat(duration),
+      },
     };
 
     return {
       success: true,
-      ...summary
+      ...summary,
     };
-
   } catch (error) {
     logger.error(`❌ Summary generation failed: ${error.message}`);
 
     // User-friendly error messages for NGROK unavailability
     let userMessage = error.message;
-    if (error.message.includes('ECONNREFUSED') ||
-        error.message.includes('ETIMEDOUT') ||
-        error.message.includes('timeout') ||
-        error.message.includes('ENOTFOUND') ||
-        error.message.includes('EHOSTUNREACH')) {
-      userMessage = 'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+    if (
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('ETIMEDOUT') ||
+      error.message.includes('timeout') ||
+      error.message.includes('ENOTFOUND') ||
+      error.message.includes('EHOSTUNREACH')
+    ) {
+      userMessage =
+        'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
     }
 
     throw new Error(userMessage);
@@ -127,16 +121,20 @@ const generateExecutiveSummary = async (transcript, metadata = {}) => {
       success: true,
       executiveSummary: result.data.executiveSummary,
       sentiment: result.data.sentiment,
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Executive summary generation failed: ${error.message}`);
 
     // User-friendly error handling
     let userMessage = error.message;
-    if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT') || error.message.includes('timeout')) {
-      userMessage = 'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+    if (
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('ETIMEDOUT') ||
+      error.message.includes('timeout')
+    ) {
+      userMessage =
+        'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
     }
 
     throw new Error(userMessage);
@@ -169,16 +167,20 @@ const extractActions = async (transcript) => {
       success: true,
       actionItems: validateActionItems(actionItems),
       count: actionItems.length,
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Action item extraction failed: ${error.message}`);
 
     // User-friendly error handling
     let userMessage = error.message;
-    if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT') || error.message.includes('timeout')) {
-      userMessage = 'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
+    if (
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('ETIMEDOUT') ||
+      error.message.includes('timeout')
+    ) {
+      userMessage =
+        'AI summarization service is currently unavailable. Please ensure the model API is running and try again.';
     }
 
     throw new Error(userMessage);
@@ -200,41 +202,36 @@ const enhanceSummaryWithNLP = (summary, nlpData) => {
   // Add detected action items from NLP if AI missed them
   if (nlpData.actions && nlpData.actions.length > 0) {
     const nlpActions = nlpData.actions
-      .filter(action => action.confidence > 0.7)
-      .map(action => ({
+      .filter((action) => action.confidence > 0.7)
+      .map((action) => ({
         task: action.text,
         assignee: extractAssignee(action.context),
         deadline: extractDeadline(action.context),
         priority: 'medium',
-        source: 'nlp'
+        source: 'nlp',
       }));
 
     // Merge with AI-detected actions, avoiding duplicates
-    enhanced.actionItems = mergeActionItems(
-      summary.actionItems || [],
-      nlpActions
-    );
+    enhanced.actionItems = mergeActionItems(summary.actionItems || [], nlpActions);
   }
 
   // Add key phrases if not in topics
   if (nlpData.keyPhrases && nlpData.keyPhrases.length > 0) {
     const existingTopics = new Set(
-      (enhanced.keyTopics || []).filter(t => t).map(t => t.toLowerCase())
+      (enhanced.keyTopics || []).filter((t) => t).map((t) => t.toLowerCase())
     );
 
-    nlpData.keyPhrases
-      .slice(0, 5)
-      .forEach(kp => {
-        // Handle both string and object formats
-        const phrase = (typeof kp === 'string' ? kp : kp.phrase);
-        if (!phrase) return;
+    nlpData.keyPhrases.slice(0, 5).forEach((kp) => {
+      // Handle both string and object formats
+      const phrase = typeof kp === 'string' ? kp : kp.phrase;
+      if (!phrase) return;
 
-        const phraseLower = phrase.toLowerCase();
-        if (!existingTopics.has(phraseLower)) {
-          enhanced.keyTopics = enhanced.keyTopics || [];
-          enhanced.keyTopics.push(phrase);
-        }
-      });
+      const phraseLower = phrase.toLowerCase();
+      if (!existingTopics.has(phraseLower)) {
+        enhanced.keyTopics = enhanced.keyTopics || [];
+        enhanced.keyTopics.push(phrase);
+      }
+    });
   }
 
   // Enhance sentiment if available
@@ -247,8 +244,8 @@ const enhanceSummaryWithNLP = (summary, nlpData) => {
   if (nlpData.entities) {
     enhanced.metadata = enhanced.metadata || {};
     enhanced.metadata.entitiesDetected = nlpData.entities.length;
-    enhanced.metadata.peopleCount = nlpData.entities.filter(e => e.label === 'PERSON').length;
-    enhanced.metadata.organizationsCount = nlpData.entities.filter(e => e.label === 'ORG').length;
+    enhanced.metadata.peopleCount = nlpData.entities.filter((e) => e.label === 'PERSON').length;
+    enhanced.metadata.organizationsCount = nlpData.entities.filter((e) => e.label === 'ORG').length;
   }
 
   return enhanced;
@@ -270,11 +267,10 @@ const regenerateSummary = async (transcript, metadata, options = {}) => {
       ...metadata,
       focusArea: options.focusArea || null, // 'decisions', 'actions', 'overview'
       detailLevel: options.detailLevel || 'standard', // 'brief', 'standard', 'detailed'
-      tone: options.tone || 'professional' // 'professional', 'casual', 'technical'
+      tone: options.tone || 'professional', // 'professional', 'casual', 'technical'
     };
 
     return await generateSummary(transcript, enhancedMetadata);
-
   } catch (error) {
     logger.error(`❌ Summary regeneration failed: ${error.message}`);
     throw error;
@@ -291,23 +287,23 @@ const compareSummaries = (summary1, summary2) => {
   return {
     lengthDiff: {
       executiveSummary: summary1.executiveSummary.length - summary2.executiveSummary.length,
-      keyDecisions: summary1.keyDecisions.length - summary2.keyDecisions.length
+      keyDecisions: summary1.keyDecisions.length - summary2.keyDecisions.length,
     },
     actionItemsCount: {
       summary1: summary1.actionItems.length,
       summary2: summary2.actionItems.length,
-      diff: summary1.actionItems.length - summary2.actionItems.length
+      diff: summary1.actionItems.length - summary2.actionItems.length,
     },
     topicsCount: {
       summary1: summary1.keyTopics.length,
       summary2: summary2.keyTopics.length,
-      diff: summary1.keyTopics.length - summary2.keyTopics.length
+      diff: summary1.keyTopics.length - summary2.keyTopics.length,
     },
     sentiment: {
       summary1: summary1.sentiment,
       summary2: summary2.sentiment,
-      match: summary1.sentiment === summary2.sentiment
-    }
+      match: summary1.sentiment === summary2.sentiment,
+    },
   };
 };
 
@@ -320,12 +316,12 @@ const validateActionItems = (actionItems) => {
   if (!Array.isArray(actionItems)) return [];
 
   return actionItems
-    .filter(item => item && item.task && item.task.trim().length > 0)
-    .map(item => ({
+    .filter((item) => item && item.task && item.task.trim().length > 0)
+    .map((item) => ({
       task: item.task.trim(),
       assignee: item.assignee || null,
       deadline: item.deadline || null,
-      priority: validatePriority(item.priority)
+      priority: validatePriority(item.priority),
     }));
 };
 
@@ -336,7 +332,11 @@ const validateActionItems = (actionItems) => {
  */
 const validatePriority = (priority) => {
   const validPriorities = ['high', 'medium', 'low'];
-  if (priority && typeof priority === 'string' && validPriorities.includes(priority.toLowerCase())) {
+  if (
+    priority &&
+    typeof priority === 'string' &&
+    validPriorities.includes(priority.toLowerCase())
+  ) {
     return priority.toLowerCase();
   }
   return 'medium'; // Default
@@ -351,12 +351,7 @@ const extractAssignee = (context) => {
   if (!context) return null;
 
   // Look for patterns like "John will", "assigned to Sarah", "Mike should"
-  const patterns = [
-    /(\w+)\s+will/i,
-    /assigned to (\w+)/i,
-    /(\w+)\s+should/i,
-    /(\w+)\s+needs to/i
-  ];
+  const patterns = [/(\w+)\s+will/i, /assigned to (\w+)/i, /(\w+)\s+should/i, /(\w+)\s+needs to/i];
 
   for (const pattern of patterns) {
     const match = context.match(pattern);
@@ -379,7 +374,7 @@ const extractDeadline = (context) => {
     /by (monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i,
     /by (tomorrow|today|next week|this week)/i,
     /by (\d{1,2}\/\d{1,2})/,
-    /deadline:?\s*(\w+)/i
+    /deadline:?\s*(\w+)/i,
   ];
 
   for (const pattern of datePatterns) {
@@ -399,15 +394,15 @@ const extractDeadline = (context) => {
 const mergeActionItems = (aiActions, nlpActions) => {
   const merged = [...aiActions];
   const existingTasks = new Set(
-    aiActions.filter(a => a.task).map(a => a.task.toLowerCase().trim())
+    aiActions.filter((a) => a.task).map((a) => a.task.toLowerCase().trim())
   );
 
-  nlpActions.forEach(action => {
+  nlpActions.forEach((action) => {
     if (!action.task) return; // Skip actions without task
 
     const task = action.task.toLowerCase().trim();
     // Check for similarity (not just exact match)
-    const isDuplicate = Array.from(existingTasks).some(existingTask => {
+    const isDuplicate = Array.from(existingTasks).some((existingTask) => {
       return calculateSimilarity(task, existingTask) > 0.7;
     });
 
@@ -430,7 +425,7 @@ const calculateSimilarity = (str1, str2) => {
   const words1 = new Set(str1.toLowerCase().split(/\s+/));
   const words2 = new Set(str2.toLowerCase().split(/\s+/));
 
-  const intersection = new Set([...words1].filter(x => words2.has(x)));
+  const intersection = new Set([...words1].filter((x) => words2.has(x)));
   const union = new Set([...words1, ...words2]);
 
   return intersection.size / union.size;
@@ -448,7 +443,7 @@ const formatSummaryForEmail = (summary, meeting) => {
   formatted += `Duration: ${Math.round(meeting.audioDuration / 60)} minutes\n\n`;
 
   formatted += `=== EXECUTIVE SUMMARY ===\n${summary.executiveSummary}\n\n`;
-  
+
   formatted += `=== KEY DECISIONS ===\n${summary.keyDecisions}\n\n`;
 
   if (summary.actionItems && summary.actionItems.length > 0) {
@@ -477,7 +472,7 @@ const getSummaryQuality = (summary) => {
     completeness: 0,
     actionability: 0,
     clarity: 0,
-    overall: 0
+    overall: 0,
   };
 
   // Completeness (all sections present and non-empty)
@@ -490,21 +485,16 @@ const getSummaryQuality = (summary) => {
 
   // Actionability (presence of action items with details)
   if (summary.actionItems && summary.actionItems.length > 0) {
-    const detailedActions = summary.actionItems.filter(a => 
-      a.assignee || a.deadline
-    ).length;
-    scores.actionability = Math.min(
-      (detailedActions / summary.actionItems.length) * 100,
-      100
-    );
+    const detailedActions = summary.actionItems.filter((a) => a.assignee || a.deadline).length;
+    scores.actionability = Math.min((detailedActions / summary.actionItems.length) * 100, 100);
   }
 
   // Clarity (reasonable length, not too short or too long)
-  const totalLength = 
+  const totalLength =
     (summary.executiveSummary?.length || 0) +
     (summary.keyDecisions?.length || 0) +
     (summary.nextSteps?.length || 0);
-  
+
   if (totalLength > 200 && totalLength < 2000) {
     scores.clarity = 100;
   } else if (totalLength < 100) {
@@ -514,9 +504,7 @@ const getSummaryQuality = (summary) => {
   }
 
   // Overall score
-  scores.overall = Math.round(
-    (scores.completeness + scores.actionability + scores.clarity) / 3
-  );
+  scores.overall = Math.round((scores.completeness + scores.actionability + scores.clarity) / 3);
 
   return scores;
 };
@@ -531,5 +519,5 @@ module.exports = {
   validateActionItems,
   mergeActionItems,
   formatSummaryForEmail,
-  getSummaryQuality
+  getSummaryQuality,
 };

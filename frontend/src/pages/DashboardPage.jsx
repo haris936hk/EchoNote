@@ -1,25 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Divider
-} from '@heroui/react';
-import {
-  FiMic,
-  FiClock,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiTrendingUp,
-  FiPlus,
-  FiArrowUp,
-  FiGrid,
-  FiLayers
-} from 'react-icons/fi';
+import { Button } from '@heroui/react';
+import { LuMic as Mic, LuClock as Clock, LuCheckCircle as CheckCircle, LuAlertCircle as AlertCircle, LuTrendingUp as TrendingUp, LuPlus as Plus, LuArrowUp as ArrowUp, LuSettings as Settings, LuList as List } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
-import { useScrollContext } from '../components/layout/MainLayout';
+import { useAuth } from '../contexts/AuthContext';
+
 import MeetingList from '../components/meeting/MeetingList';
 import CategoryFilter from '../components/meeting/CategoryFilter';
 import SearchBar from '../components/meeting/SearchBar';
@@ -31,12 +16,7 @@ import { showToast } from '../components/common/Toast';
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { meetings, fetchMeetings, deleteMeeting, updateMeeting, loading } = useMeeting();
-  const { showNavbar } = useScrollContext();
-
-  // Debug: Log showNavbar changes
-  useEffect(() => {
-    console.log('Dashboard - showNavbar:', showNavbar);
-  }, [showNavbar]);
+  const { user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -57,114 +37,113 @@ const DashboardPage = () => {
 
   // Detect when meetings complete and show toast
   useEffect(() => {
-    const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
-    const currentlyProcessing = meetings.filter(m => processingStatuses.includes(m.status));
-    const currentIds = new Set(currentlyProcessing.map(m => m.id));
+    const processingStatuses = [
+      'UPLOADING',
+      'PROCESSING_AUDIO',
+      'TRANSCRIBING',
+      'PROCESSING_NLP',
+      'SUMMARIZING',
+    ];
+    const currentlyProcessing = meetings.filter((m) => processingStatuses.includes(m.status));
+    const currentIds = new Set(currentlyProcessing.map((m) => m.id));
     const prevIds = processingIdsRef.current;
 
-    // Check if any previously processing meetings have completed
     if (prevIds.size > 0) {
-      const completedIds = [...prevIds].filter(id => !currentIds.has(id));
-      completedIds.forEach(id => {
-        const meeting = meetings.find(m => m.id === id);
+      const completedIds = [...prevIds].filter((id) => !currentIds.has(id));
+      completedIds.forEach((id) => {
+        const meeting = meetings.find((m) => m.id === id);
         if (meeting) {
           if (meeting.status === 'COMPLETED') {
-            showToast(`✅ "${meeting.title}" is ready!`, 'success', 6000);
+            showToast(`"${meeting.title}" is ready!`, 'success', 6000);
           } else if (meeting.status === 'FAILED') {
-            showToast(`❌ "${meeting.title}" failed to process`, 'error', 8000);
+            showToast(`"${meeting.title}" failed to process`, 'error', 8000);
           }
         }
       });
     }
 
-    // Update tracking ref
     processingIdsRef.current = currentIds;
   }, [meetings]);
 
-  // Polling effect - separate from detection
+  // Polling effect
   useEffect(() => {
-    const processingStatuses = ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'];
-    const hasProcessingMeetings = meetings.some(m => processingStatuses.includes(m.status));
+    const processingStatuses = [
+      'UPLOADING',
+      'PROCESSING_AUDIO',
+      'TRANSCRIBING',
+      'PROCESSING_NLP',
+      'SUMMARIZING',
+    ];
+    const hasProcessingMeetings = meetings.some((m) => processingStatuses.includes(m.status));
 
     if (hasProcessingMeetings) {
-      console.log('📊 Polling active: meetings being processed');
       const interval = setInterval(() => {
         fetchMeetings();
-      }, 20000); // Poll every 20 seconds
-
-      return () => {
-        console.log('📊 Polling stopped');
-        clearInterval(interval);
-      };
+      }, 20000);
+      return () => clearInterval(interval);
     }
   }, [meetings, fetchMeetings]);
 
-  // Handle scroll for scroll-to-top button
+  // Scroll to top button
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setShowScrollTop(currentScrollY > 300);
+      setShowScrollTop(window.scrollY > 300);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter meetings based on search and category
+  // Filter meetings
   useEffect(() => {
     let result = meetings;
-
-    // Filter by category
     if (selectedCategory !== 'ALL') {
-      result = result.filter(m => m.category === selectedCategory);
+      result = result.filter((m) => m.category === selectedCategory);
     }
-
-    // Filter by search query
     if (debouncedSearch) {
       const query = debouncedSearch.toLowerCase();
-      result = result.filter(m =>
-        m.title.toLowerCase().includes(query) ||
-        m.description?.toLowerCase().includes(query)
+      result = result.filter(
+        (m) => m.title.toLowerCase().includes(query) || m.description?.toLowerCase().includes(query)
       );
     }
-
     setFilteredMeetings(result);
   }, [meetings, selectedCategory, debouncedSearch]);
 
-  // Calculate statistics
-  // Backend statuses: PENDING, UPLOADING, PROCESSING_AUDIO, TRANSCRIBING, PROCESSING_NLP, SUMMARIZING, COMPLETED, FAILED
+  // Statistics
   const stats = {
     total: meetings.length,
-    pending: meetings.filter(m => m.status === 'PENDING').length,
-    completed: meetings.filter(m => m.status === 'COMPLETED').length,
-    processing: meetings.filter(m =>
-      ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'].includes(m.status)
+    completed: meetings.filter((m) => m.status === 'COMPLETED').length,
+    processing: meetings.filter((m) =>
+      ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'].includes(
+        m.status
+      )
     ).length,
-    failed: meetings.filter(m => m.status === 'FAILED').length,
-    totalDuration: meetings.reduce((sum, m) => sum + (m.duration || 0), 0)
+    failed: meetings.filter((m) => m.status === 'FAILED').length,
+    totalDuration: meetings.reduce((sum, m) => sum + (m.duration || 0), 0),
   };
 
-  // Category counts
   const categoryCounts = meetings.reduce((acc, meeting) => {
     acc[meeting.category] = (acc[meeting.category] || 0) + 1;
     return acc;
   }, {});
 
+  // Greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       'Are you sure you want to delete this meeting? This action cannot be undone.'
     );
-
     if (confirmed) {
-      const result = await deleteMeeting(id);
-      if (result.success) {
-        // Could add toast notification here
-      }
+      await deleteMeeting(id);
     }
   };
 
@@ -175,12 +154,10 @@ const DashboardPage = () => {
 
   const handleSaveEdit = async (updates) => {
     if (!selectedMeeting) return;
-
     const result = await updateMeeting(selectedMeeting.id, updates);
     if (result.success) {
       setIsEditModalOpen(false);
       setSelectedMeeting(null);
-      // Could add toast notification here
     }
   };
 
@@ -197,296 +174,198 @@ const DashboardPage = () => {
     return <PageLoader label="Loading your meetings..." />;
   }
 
+  // Format duration
+  const formatDuration = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    const rm = m % 60;
+    return `${h}h ${rm}m`;
+  };
+
   return (
-    <div className="-mx-4">
-      {/* Page Header - Slides down when navbar slides up */}
-      <div
-        className={`fixed top-0 left-0 right-0 z-[45] px-4 pt-2 pb-0 transition-all duration-500 ease-in-out ${!showNavbar
-          ? 'translate-y-0 opacity-100'
-          : '-translate-y-full opacity-0 pointer-events-none'
-          }`}
-        style={{
-          willChange: 'transform, opacity'
-        }}
-      >
-        {/* Centered wrapper */}
-        <div className="max-w-6xl mx-auto flex justify-center">
-          {/* Rounded container with subtle border */}
-          <nav className="inline-flex items-center gap-6 px-6 py-2.5 rounded-full border border-divider/50 bg-content1/90 backdrop-blur-md backdrop-saturate-150 shadow-lg">
-            {/* Dashboard Title */}
-            <div className="flex items-center gap-2 text-default-foreground">
-              <FiGrid size={20} />
-              <span className="font-semibold text-sm">Dashboard</span>
-            </div>
-
-            {/* Divider */}
-            <div className="h-6 w-px bg-divider"></div>
-
-            {/* New Recording Button */}
-            <button
-              onClick={handleNewRecording}
-              className="flex items-center gap-2 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
-            >
-              <FiPlus size={16} />
-              New Recording
-            </button>
-          </nav>
+    <div className="space-y-6 py-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Dashboard</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            {getGreeting()}, {user?.name?.split(' ')[0] || 'there'}
+          </p>
         </div>
+        <button
+          onClick={handleNewRecording}
+          className="btn-cta inline-flex w-fit items-center gap-2 rounded-[10px] px-5 py-2.5 text-sm font-bold transition-all hover:brightness-110"
+        >
+          <Mic size={16} />
+          New Recording
+        </button>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 max-w-7xl pb-6">
-        {/* Empty State */}
-        {meetings.length === 0 && !loading && (
-          <Card className="border-divider/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 shadow-xl rounded-3xl border-2 border-primary/20 hover:border-primary/30 transition-all duration-500">
-            <CardBody className="text-center py-20">
-              <div className="mb-8">
-                <div className="w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-primary/30 border border-primary/20 hover:scale-110 transition-all duration-300">
-                  <FiMic size={56} className="text-primary" />
-                </div>
-              </div>
-              <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                No meetings yet
-              </h3>
-              <p className="text-default-700 dark:text-default-600 mb-8 max-w-md mx-auto text-lg">
-                Start recording your first meeting. Our custom AI model will extract action items, key decisions, and structured summaries automatically.
-              </p>
-              <div className="relative inline-block group">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500"></div>
-                <Button
-                  color="primary"
-                  size="md"
-                  startContent={<FiPlus size={18} />}
-                  onPress={handleNewRecording}
-                  className="relative font-semibold px-5 shadow-xl shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 hover:scale-105 rounded-3xl"
-                >
-                  Record Your First Meeting
-                </Button>
-              </div>
-
-              {/* Feature hints */}
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
-                  <div className="p-3 bg-primary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
-                    <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                  <p className="text-sm font-semibold mb-1">Quick Recording</p>
-                  <p className="text-xs text-default-500">Up to 10 minutes</p>
-                </div>
-                <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/20 transition-all duration-300 group">
-                  <div className="p-3 bg-secondary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
-                    <FiCheckCircle className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                  <p className="text-sm font-semibold mb-1">Smart Action Items</p>
-                  <p className="text-xs text-default-500">With assignees & deadlines</p>
-                </div>
-                <div className="p-4 rounded-3xl bg-background/50 backdrop-blur-sm border border-divider/20 text-center hover:border-primary/30 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
-                  <div className="p-3 bg-primary/10 rounded-2xl w-fit mb-3 mx-auto group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
-                    <FiTrendingUp className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                  <p className="text-sm font-semibold mb-1">Structured Summaries</p>
-                  <p className="text-xs text-default-500">Decisions, topics & sentiment</p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Statistics Cards - Only show when there are meetings */}
-        {meetings.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group">
-              <CardBody className="gap-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-default-500">Total Meetings</p>
-                    <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{stats.total}</p>
-                  </div>
-                  <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-300 shadow-lg">
-                    <FiMic className="text-primary group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-default/40 hover:shadow-xl hover:shadow-default/20 transition-all duration-300 group">
-              <CardBody className="gap-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-default-500">Pending</p>
-                    <p className="text-3xl font-bold text-default-600 mt-1 group-hover:scale-105 transition-transform duration-300">
-                      {stats.pending}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-default-100 rounded-2xl group-hover:bg-default-200 transition-colors duration-300 shadow-lg">
-                    <FiLayers className="text-default-600 group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-warning/40 hover:shadow-xl hover:shadow-warning/20 transition-all duration-300 group">
-              <CardBody className="gap-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-default-500">Processing</p>
-                    <p className="text-3xl font-bold text-warning mt-1 group-hover:scale-105 transition-transform duration-300">
-                      {stats.processing}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-warning/10 rounded-2xl group-hover:bg-warning/20 transition-colors duration-300 shadow-lg">
-                    <FiClock className="text-warning group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-success/40 hover:shadow-xl hover:shadow-success/20 transition-all duration-300 group">
-              <CardBody className="gap-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-default-500">Completed</p>
-                    <p className="text-3xl font-bold text-success mt-1 group-hover:scale-105 transition-transform duration-300">
-                      {stats.completed}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-success/10 rounded-2xl group-hover:bg-success/20 transition-colors duration-300 shadow-lg">
-                    <FiCheckCircle className="text-success group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-secondary/40 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 group">
-              <CardBody className="gap-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-default-500">Total Time</p>
-                    <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {Math.floor(stats.totalDuration / 60)}m
-                    </p>
-                  </div>
-                  <div className="p-3 bg-secondary/10 rounded-2xl group-hover:bg-secondary/20 transition-colors duration-300 shadow-lg">
-                    <FiTrendingUp className="text-secondary group-hover:scale-110 transition-transform duration-300" size={24} />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+      {/* ── Empty State ── */}
+      {meetings.length === 0 && !loading && (
+        <div className="rounded-card border border-echo-border bg-echo-surface p-16 text-center">
+          <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-accent-primary/10">
+            <Mic size={40} className="text-accent-primary" />
           </div>
-        )}
+          <h2 className="mb-3 text-2xl font-bold text-white">No meetings yet</h2>
+          <p className="mx-auto mb-8 max-w-md text-slate-400">
+            Record your first meeting and let AI handle the rest.
+          </p>
+          <button
+            onClick={handleNewRecording}
+            className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
+          >
+            <Plus size={16} />
+            Record Your First Meeting
+          </button>
+          <div className="mt-8 flex items-center justify-center gap-6 text-xs text-slate-500">
+            <span>10 min recordings</span>
+            <span className="text-slate-700">·</span>
+            <span>AI summaries</span>
+            <span className="text-slate-700">·</span>
+            <span>Email alerts</span>
+          </div>
+        </div>
+      )}
 
-        {/* Failed Meetings Alert */}
-        {meetings.length > 0 && stats.failed > 0 && (
-          <Card className="border-danger/20 bg-danger/5 rounded-3xl hover:border-danger/40 transition-all duration-300 mt-4">
-            <CardBody>
-              <div className="flex items-start gap-3">
-                <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" size={20} />
-                <div className="flex-1">
-                  <p className="font-semibold text-danger">
-                    {stats.failed} meeting{stats.failed !== 1 ? 's' : ''} failed to process
-                  </p>
-                  <p className="text-sm text-danger/80 mt-1">
-                    Please try uploading these recordings again or contact support if the issue persists.
-                  </p>
-                </div>
+      {/* ── Stats Strip ── */}
+      {meetings.length > 0 && (
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-accent-primary/10">
+                <Mic size={18} className="text-accent-primary" />
               </div>
-            </CardBody>
-          </Card>
-        )}
+              <div>
+                <p className="font-mono text-2xl font-bold text-white">{stats.total}</p>
+                <p className="text-xs text-slate-500">Total Meetings</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10">
+                <Clock size={18} className="text-amber-400" />
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-amber-400">{stats.processing}</p>
+                <p className="text-xs text-slate-500">Processing</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10">
+                <CheckCircle size={18} className="text-emerald-400" />
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-emerald-400">{stats.completed}</p>
+                <p className="text-xs text-slate-500">Completed</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-accent-secondary/10">
+                <TrendingUp size={18} className="text-accent-secondary" />
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-white">
+                  {formatDuration(stats.totalDuration)}
+                </p>
+                <p className="text-xs text-slate-500">Total Duration</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* Main Content */}
-        {meetings.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4">
-            {/* Left Column - Meetings (4/5) */}
-            <div className="lg:col-span-4 space-y-6">
-              {/* Search and Filters */}
-              <Card className="rounded-3xl border-2 border-default-200 dark:border-divider hover:border-primary/30 transition-all duration-300">
-                <CardBody className="gap-4">
-                  <SearchBar
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder="Search by title or description..."
-                  />
+      {/* ── Processing Alert ── */}
+      {stats.processing > 0 && (
+        <div className="flex items-center gap-3 rounded-[10px] border border-accent-primary/10 bg-accent-primary/5 px-4 py-3">
+          <div className="ai-dot"></div>
+          <p className="text-sm text-slate-300">
+            {stats.processing} meeting{stats.processing !== 1 ? 's are' : ' is'} being processed…
+          </p>
+        </div>
+      )}
 
-                  <CategoryFilter
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={setSelectedCategory}
-                    showCount={true}
-                    counts={categoryCounts}
-                  />
-                </CardBody>
-              </Card>
+      {/* ── Failed Alert ── */}
+      {stats.failed > 0 && (
+        <div className="flex items-center gap-3 rounded-[10px] border border-red-500/10 bg-red-500/5 px-4 py-3">
+          <AlertCircle size={16} className="shrink-0 text-red-400" />
+          <p className="text-sm text-red-400">
+            {stats.failed} meeting{stats.failed !== 1 ? 's' : ''} failed to process
+          </p>
+        </div>
+      )}
 
-              {/* Meetings List */}
-              <MeetingList
-                meetings={filteredMeetings}
-                loading={loading}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-                itemsPerPage={12}
+      {/* ── Main Content ── */}
+      {meetings.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+          {/* Left Column — Meetings (4/5) */}
+          <div className="space-y-5 lg:col-span-4">
+            {/* Search & Filters */}
+            <div className="space-y-4">
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search across all your meetings..."
+              />
+              <CategoryFilter
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                showCount={true}
+                counts={categoryCounts}
               />
             </div>
 
-            {/* Right Column - Quick Actions (1/5) */}
-            <div className="space-y-6">
-              {/* Quick Actions */}
-              <Card className="rounded-3xl border-2 border-default-200 dark:border-divider">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Quick Actions</h3>
-                </CardHeader>
-                <Divider />
-                <CardBody className="gap-2">
-                  <Button
-                    variant="flat"
-                    onPress={handleNewRecording}
-                    startContent={<FiPlus size={16} />}
-                    fullWidth
-                    className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                  >
-                    New Recording
-                  </Button>
+            {/* Meetings List */}
+            <MeetingList
+              meetings={filteredMeetings}
+              loading={loading}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+              itemsPerPage={12}
+            />
+          </div>
 
-                  <Button
-                    variant="flat"
-                    onPress={() => navigate('/meetings')}
-                    fullWidth
-                    className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                  >
-                    View All Meetings
-                  </Button>
-
-                  <Button
-                    variant="flat"
-                    onPress={() => navigate('/settings')}
-                    fullWidth
-                    className="justify-start rounded-2xl hover:bg-primary/10 hover:border-primary/20 transition-all duration-300"
-                  >
-                    Settings
-                  </Button>
-                </CardBody>
-              </Card>
+          {/* Right Column — Quick Actions (1/5) */}
+          <div className="space-y-4">
+            <div className="rounded-card border border-echo-border bg-echo-surface p-5">
+              <h3 className="mb-4 text-sm font-semibold text-white">Quick Actions</h3>
+              <div className="space-y-1">
+                <button
+                  onClick={handleNewRecording}
+                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                >
+                  <Plus size={16} className="text-accent-primary" />
+                  New Recording
+                </button>
+                <button
+                  onClick={() => navigate('/meetings')}
+                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                >
+                  <List size={16} className="text-accent-primary" />
+                  View All Meetings
+                </button>
+                <button
+                  onClick={() => navigate('/settings')}
+                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                >
+                  <Settings size={16} className="text-accent-primary" />
+                  Settings
+                </button>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Scroll to Top Button */}
+      {/* Scroll to Top */}
       {showScrollTop && (
         <div className="fixed bottom-8 right-8 z-50">
-          {/* Glowing effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/40 via-secondary/40 to-primary/40 rounded-full blur-2xl animate-pulse"></div>
-
-          {/* Button */}
           <Button
             isIconOnly
-            color="primary"
-            variant="shadow"
-            className={`relative w-14 h-14 shadow-2xl shadow-primary/50 hover:shadow-3xl hover:shadow-primary/60 transition-all duration-300 ${showScrollTop ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-              }`}
-            radius="full"
+            className="size-12 rounded-full bg-accent-primary text-white shadow-lg shadow-accent-primary/30 transition-all hover:shadow-xl hover:shadow-accent-primary/40"
             onPress={scrollToTop}
           >
-            <FiArrowUp size={24} />
+            <ArrowUp size={20} />
           </Button>
         </div>
       )}

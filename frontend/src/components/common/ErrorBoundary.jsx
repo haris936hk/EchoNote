@@ -20,7 +20,7 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, errorInfo) {
     // Log error details
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo,
@@ -45,21 +45,19 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen p-4 bg-content1">
-          <Card className="max-w-2xl w-full">
+        <div className="bg-content1 flex min-h-screen items-center justify-center p-4">
+          <Card className="w-full max-w-2xl">
             <CardBody className="gap-6 p-8">
               {/* Error Icon */}
               <div className="flex justify-center">
-                <div className="p-4 rounded-full bg-danger/10">
+                <div className="bg-danger/10 rounded-full p-4">
                   <FiAlertTriangle size={48} className="text-danger" />
                 </div>
               </div>
 
               {/* Error Title */}
               <div className="text-center">
-                <h1 className="text-2xl font-bold mb-2">
-                  Oops! Something went wrong
-                </h1>
+                <h1 className="mb-2 text-2xl font-bold">Oops! Something went wrong</h1>
                 <p className="text-default-500">
                   We're sorry for the inconvenience. An unexpected error has occurred.
                 </p>
@@ -67,16 +65,14 @@ class ErrorBoundary extends Component {
 
               {/* Error Details (only in development) */}
               {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="bg-default-100 rounded-lg p-4 overflow-auto max-h-60">
-                  <p className="font-mono text-sm text-danger mb-2">
+                <div className="bg-default-100 max-h-60 overflow-auto rounded-lg p-4">
+                  <p className="text-danger mb-2 font-mono text-sm">
                     <strong>Error:</strong> {this.state.error.toString()}
                   </p>
                   {this.state.errorInfo && (
                     <details className="cursor-pointer">
-                      <summary className="font-semibold text-sm mb-2">
-                        Stack Trace
-                      </summary>
-                      <pre className="text-xs whitespace-pre-wrap text-default-600">
+                      <summary className="mb-2 text-sm font-semibold">Stack Trace</summary>
+                      <pre className="text-default-600 whitespace-pre-wrap text-xs">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -85,7 +81,7 @@ class ErrorBoundary extends Component {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 justify-center flex-wrap">
+              <div className="flex flex-wrap justify-center gap-3">
                 <Button
                   color="primary"
                   variant="solid"
@@ -94,18 +90,14 @@ class ErrorBoundary extends Component {
                 >
                   Try Again
                 </Button>
-                
-                <Button
-                  color="default"
-                  variant="bordered"
-                  onPress={this.handleReload}
-                >
+
+                <Button color="default" variant="bordered" onPress={this.handleReload}>
                   Reload Page
                 </Button>
               </div>
 
               {/* Help Text */}
-              <p className="text-center text-sm text-default-400">
+              <p className="text-default-400 text-center text-sm">
                 If the problem persists, please contact support or try again later.
               </p>
             </CardBody>

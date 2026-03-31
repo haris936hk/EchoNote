@@ -9,18 +9,12 @@ const winston = require('winston');
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 // Configuration
@@ -36,7 +30,7 @@ const TRANSCRIPTION_CONFIG = {
   patience: 1.0,
   compressionRatioThreshold: 2.4,
   logprobThreshold: -1.0,
-  noSpeechThreshold: 0.6
+  noSpeechThreshold: 0.6,
 };
 
 /**
@@ -56,7 +50,7 @@ const transcribeAudio = async (audioPath, options = {}) => {
       language: options.language || TRANSCRIPTION_CONFIG.language,
       task: options.task || TRANSCRIPTION_CONFIG.task,
       temperature: options.temperature ?? TRANSCRIPTION_CONFIG.temperature,
-      beamSize: options.beamSize || TRANSCRIPTION_CONFIG.beamSize
+      beamSize: options.beamSize || TRANSCRIPTION_CONFIG.beamSize,
     };
 
     // Python script options
@@ -70,8 +64,8 @@ const transcribeAudio = async (audioPath, options = {}) => {
         transcriptionOptions.language,
         transcriptionOptions.task,
         transcriptionOptions.temperature.toString(),
-        transcriptionOptions.beamSize.toString()
-      ]
+        transcriptionOptions.beamSize.toString(),
+      ],
     };
 
     // Run Whisper transcription
@@ -90,9 +84,8 @@ const transcribeAudio = async (audioPath, options = {}) => {
       wordCount: countWords(result.text),
       confidence: result.confidence || 0,
       processingTime: parseFloat(duration),
-      model: transcriptionOptions.model
+      model: transcriptionOptions.model,
     };
-
   } catch (error) {
     logger.error(`❌ Transcription failed: ${error.message}`);
     throw new Error(`Transcription failed: ${error.message}`);
@@ -118,8 +111,8 @@ const transcribeWithTimestamps = async (audioPath) => {
         audioPath,
         TRANSCRIPTION_CONFIG.whisperModel,
         TRANSCRIPTION_CONFIG.language,
-        'timestamps' // Special flag for timestamp mode
-      ]
+        'timestamps', // Special flag for timestamp mode
+      ],
     };
 
     const results = await PythonShell.run('transcribe.py', pythonOptions);
@@ -131,7 +124,7 @@ const transcribeWithTimestamps = async (audioPath) => {
     return {
       success: true,
       text: result.text,
-      segments: result.segments.map(seg => ({
+      segments: result.segments.map((seg) => ({
         id: seg.id,
         start: seg.start,
         end: seg.end,
@@ -140,14 +133,13 @@ const transcribeWithTimestamps = async (audioPath) => {
         temperature: seg.temperature,
         avgLogprob: seg.avg_logprob,
         compressionRatio: seg.compression_ratio,
-        noSpeechProb: seg.no_speech_prob
+        noSpeechProb: seg.no_speech_prob,
       })),
       language: result.language,
       duration: result.duration,
       wordCount: countWords(result.text),
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Transcription with timestamps failed: ${error.message}`);
     throw new Error(`Transcription failed: ${error.message}`);
@@ -166,25 +158,24 @@ const batchTranscribe = async (audioPaths) => {
   for (let i = 0; i < audioPaths.length; i++) {
     try {
       logger.info(`Processing ${i + 1}/${audioPaths.length}: ${path.basename(audioPaths[i])}`);
-      
+
       const result = await transcribeAudio(audioPaths[i]);
       results.push({
         path: audioPaths[i],
         success: true,
-        ...result
+        ...result,
       });
-
     } catch (error) {
       logger.error(`Failed to transcribe ${audioPaths[i]}: ${error.message}`);
       results.push({
         path: audioPaths[i],
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
-  const successful = results.filter(r => r.success).length;
+  const successful = results.filter((r) => r.success).length;
   logger.info(`✅ Batch transcription complete: ${successful}/${audioPaths.length} successful`);
 
   return results;
@@ -211,8 +202,8 @@ const transcribeWithContext = async (audioPath, contextTerms = []) => {
         TRANSCRIPTION_CONFIG.whisperModel,
         TRANSCRIPTION_CONFIG.language,
         'context',
-        JSON.stringify(contextTerms)
-      ]
+        JSON.stringify(contextTerms),
+      ],
     };
 
     const results = await PythonShell.run('transcribe.py', pythonOptions);
@@ -228,9 +219,8 @@ const transcribeWithContext = async (audioPath, contextTerms = []) => {
       contextTermsFound: result.context_terms_found || [],
       language: result.language,
       wordCount: countWords(result.text),
-      processingTime: parseFloat(duration)
+      processingTime: parseFloat(duration),
     };
-
   } catch (error) {
     logger.error(`❌ Context-aware transcription failed: ${error.message}`);
     throw new Error(`Context-aware transcription failed: ${error.message}`);
@@ -251,7 +241,7 @@ const getTranscriptionQuality = async (audioPath, transcriptText) => {
     const wordCount = countWords(transcriptText);
     const characterCount = transcriptText.length;
     const averageWordLength = characterCount / wordCount;
-    
+
     // Estimate words per second
     const audioMetadata = require('./audio.service').getAudioMetadata;
     const metadata = await audioMetadata(audioPath);
@@ -265,13 +255,12 @@ const getTranscriptionQuality = async (audioPath, transcriptText) => {
       wordsPerSecond: wordsPerSecond.toFixed(2),
       estimatedAccuracy: estimateAccuracy(wordsPerSecond, averageWordLength),
       confidence: calculateConfidence(transcriptText),
-      completeness: checkCompleteness(transcriptText)
+      completeness: checkCompleteness(transcriptText),
     };
 
     logger.info(`✅ Quality analysis complete: ${quality.estimatedAccuracy}% estimated accuracy`);
 
     return quality;
-
   } catch (error) {
     logger.error(`❌ Quality analysis failed: ${error.message}`);
     return null;
@@ -295,11 +284,11 @@ const cleanTranscript = (text) => {
   cleaned = cleaned.trim();
 
   // Capitalize first letter of sentences
-  cleaned = cleaned.replace(/(^\w|\.\s+\w)/g, letter => letter.toUpperCase());
+  cleaned = cleaned.replace(/(^\w|\.\s+\w)/g, (letter) => letter.toUpperCase());
 
   // Remove filler words (optional - be careful not to remove legitimate words)
   const fillers = [' um ', ' uh ', ' like ', ' you know '];
-  fillers.forEach(filler => {
+  fillers.forEach((filler) => {
     const regex = new RegExp(filler, 'gi');
     cleaned = cleaned.replace(regex, ' ');
   });
@@ -330,9 +319,10 @@ const formatTranscriptWithParagraphs = (segments) => {
     // 1. Current paragraph is > 30 seconds
     // 2. Long pause detected
     // 3. Last segment
-    const isLongPause = index < segments.length - 1 && 
-                       (segments[index + 1].start - segment.end) > 2;
-    const isParagraphLong = segment.end - segments.find(s => currentParagraph.includes(s.text))?.start > paragraphDuration;
+    const isLongPause = index < segments.length - 1 && segments[index + 1].start - segment.end > 2;
+    const isParagraphLong =
+      segment.end - segments.find((s) => currentParagraph.includes(s.text))?.start >
+      paragraphDuration;
     const isLastSegment = index === segments.length - 1;
 
     if (isParagraphLong || isLongPause || isLastSegment) {
@@ -353,11 +343,11 @@ const formatTranscriptWithParagraphs = (segments) => {
 const extractSpeakers = async (audioPath) => {
   // Future implementation with pyannote.audio or similar
   logger.warn('⚠️ Speaker diarization not yet implemented');
-  
+
   return {
     success: false,
     speakers: [],
-    message: 'Speaker diarization requires additional models'
+    message: 'Speaker diarization requires additional models',
   };
 };
 
@@ -368,7 +358,10 @@ const extractSpeakers = async (audioPath) => {
  */
 const countWords = (text) => {
   if (!text) return 0;
-  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
 };
 
 /**
@@ -381,7 +374,7 @@ const countWords = (text) => {
 const estimateAccuracy = (wps, awl) => {
   // Normal speech: 2-3 words per second
   // Normal word length: 4-6 characters
-  
+
   let accuracy = 90; // Base accuracy
 
   // Adjust for speech rate
@@ -410,7 +403,7 @@ const calculateConfidence = (text) => {
 
   const wordCount = countWords(text);
   const words = text.toLowerCase().split(/\s+/);
-  
+
   // Check for repetition
   const uniqueWords = new Set(words);
   const repetitionRatio = uniqueWords.size / wordCount;
@@ -436,9 +429,9 @@ const calculateConfidence = (text) => {
  */
 const checkCompleteness = (text) => {
   if (!text) return 'empty';
-  
+
   const wordCount = countWords(text);
-  
+
   if (wordCount < 10) return 'very_short';
   if (wordCount < 50) return 'short';
   if (wordCount < 200) return 'medium';
@@ -457,7 +450,7 @@ const testWhisperInstallation = async () => {
       mode: 'json',
       pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
       scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      args: ['test']
+      args: ['test'],
     };
 
     const results = await PythonShell.run('transcribe.py', pythonOptions);
@@ -469,14 +462,13 @@ const testWhisperInstallation = async () => {
       success: true,
       whisperVersion: result.version,
       availableModels: result.models,
-      pythonVersion: result.python_version
+      pythonVersion: result.python_version,
     };
-
   } catch (error) {
     logger.error(`❌ Whisper installation test failed: ${error.message}`);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 };
@@ -492,5 +484,5 @@ module.exports = {
   extractSpeakers,
   countWords,
   testWhisperInstallation,
-  TRANSCRIPTION_CONFIG
+  TRANSCRIPTION_CONFIG,
 };

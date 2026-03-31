@@ -12,29 +12,26 @@ const { AppError } = require('./error.middleware');
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 // Upload configuration - Using unified storage directory
 const STORAGE_BASE = path.join(process.cwd(), 'storage');
 const UPLOAD_CONFIG = {
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 52428800, // 50MB (updated from 10MB)
-  uploadDir: path.join(STORAGE_BASE, 'temp'),  // Unified: use storage/temp
-  rawDir: path.join(STORAGE_BASE, 'temp'),      // Raw uploads go to temp
+  uploadDir: path.join(STORAGE_BASE, 'temp'), // Unified: use storage/temp
+  rawDir: path.join(STORAGE_BASE, 'temp'), // Raw uploads go to temp
   processedDir: path.join(STORAGE_BASE, 'processed'),
-  allowedFormats: (process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg,audio/m4a,audio/x-m4a,audio/mp4').split(','),
-  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 600 // 10 minutes in seconds (updated from 180)
+  allowedFormats: (
+    process.env.ALLOWED_AUDIO_FORMATS ||
+    'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg,audio/m4a,audio/x-m4a,audio/mp4'
+  ).split(','),
+  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 600, // 10 minutes in seconds (updated from 180)
 };
 
 // Ensure upload directories exist
@@ -43,10 +40,10 @@ const ensureUploadDirs = () => {
     STORAGE_BASE,
     UPLOAD_CONFIG.uploadDir,
     UPLOAD_CONFIG.processedDir,
-    path.join(STORAGE_BASE, 'audio')  // Also ensure audio dir exists
+    path.join(STORAGE_BASE, 'audio'), // Also ensure audio dir exists
   ];
 
-  dirs.forEach(dir => {
+  dirs.forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
       logger.info(`📁 Created directory: ${dir}`);
@@ -78,7 +75,7 @@ const storage = multer.diskStorage({
     const userId = req.userId || 'anonymous';
     const filename = generateFilename(file.originalname, userId);
     cb(null, filename);
-  }
+  },
 });
 
 /**
@@ -124,9 +121,9 @@ const upload = multer({
   storage: storage,
   limits: {
     fileSize: UPLOAD_CONFIG.maxFileSize,
-    files: 1 // Only allow 1 file at a time
+    files: 1, // Only allow 1 file at a time
   },
-  fileFilter: fileFilter
+  fileFilter: fileFilter,
 });
 
 /**
@@ -140,9 +137,7 @@ const uploadAudio = upload.single('audio');
 const validateAudioFile = async (req, res, next) => {
   try {
     if (!req.file) {
-      return next(
-        new AppError('No audio file provided', 400, 'NO_FILE_PROVIDED')
-      );
+      return next(new AppError('No audio file provided', 400, 'NO_FILE_PROVIDED'));
     }
 
     const file = req.file;
@@ -166,17 +161,13 @@ const validateAudioFile = async (req, res, next) => {
 
     // Validate file exists and is readable
     if (!fs.existsSync(file.path)) {
-      return next(
-        new AppError('Uploaded file not found', 500, 'FILE_NOT_FOUND')
-      );
+      return next(new AppError('Uploaded file not found', 500, 'FILE_NOT_FOUND'));
     }
 
     // Check if file is empty
     if (file.size === 0) {
       fs.unlinkSync(file.path);
-      return next(
-        new AppError('Uploaded file is empty', 400, 'EMPTY_FILE')
-      );
+      return next(new AppError('Uploaded file is empty', 400, 'EMPTY_FILE'));
     }
 
     // Attach file info to request
@@ -186,12 +177,11 @@ const validateAudioFile = async (req, res, next) => {
       path: file.path,
       size: file.size,
       mimetype: file.mimetype,
-      uploadedAt: new Date()
+      uploadedAt: new Date(),
     };
 
     logger.info(`✅ File validation passed: ${file.filename}`);
     next();
-
   } catch (error) {
     logger.error(`Error validating file: ${error.message}`);
 
@@ -212,7 +202,11 @@ const validateAudioDuration = async (req, res, next) => {
   try {
     if (!req.uploadedFile || !req.uploadedFile.path) {
       return next(
-        new AppError('No uploaded file found for duration validation', 500, 'NO_FILE_FOR_VALIDATION')
+        new AppError(
+          'No uploaded file found for duration validation',
+          500,
+          'NO_FILE_FOR_VALIDATION'
+        )
       );
     }
 
@@ -282,14 +276,11 @@ const validateAudioDuration = async (req, res, next) => {
         req.uploadedFile.duration = duration;
         req.uploadedFile.durationFormatted = `${Math.floor(duration / 60)}m ${Math.floor(duration % 60)}s`;
 
-        logger.info(
-          `✅ Duration validated: ${req.uploadedFile.durationFormatted} (${duration}s)`
-        );
+        logger.info(`✅ Duration validated: ${req.uploadedFile.durationFormatted} (${duration}s)`);
 
         resolve(next());
       });
     });
-
   } catch (error) {
     logger.error(`Error validating audio duration: ${error.message}`);
 
@@ -308,7 +299,7 @@ const validateAudioDuration = async (req, res, next) => {
  */
 const expressFileUploadConfig = {
   limits: {
-    fileSize: UPLOAD_CONFIG.maxFileSize
+    fileSize: UPLOAD_CONFIG.maxFileSize,
   },
   abortOnLimit: true,
   responseOnLimit: 'File size limit exceeded',
@@ -316,7 +307,7 @@ const expressFileUploadConfig = {
   tempFileDir: UPLOAD_CONFIG.rawDir,
   uploadTimeout: 60000, // 60 seconds
   debug: process.env.NODE_ENV === 'development',
-  parseNested: true
+  parseNested: true,
 };
 
 /**
@@ -325,9 +316,7 @@ const expressFileUploadConfig = {
 const validateExpressFileUpload = async (req, res, next) => {
   try {
     if (!req.files || !req.files.audio) {
-      return next(
-        new AppError('No audio file provided', 400, 'NO_FILE_PROVIDED')
-      );
+      return next(new AppError('No audio file provided', 400, 'NO_FILE_PROVIDED'));
     }
 
     const audioFile = req.files.audio;
@@ -383,12 +372,11 @@ const validateExpressFileUpload = async (req, res, next) => {
       path: finalPath,
       size: audioFile.size,
       mimetype: audioFile.mimetype,
-      uploadedAt: new Date()
+      uploadedAt: new Date(),
     };
 
     logger.info(`✅ File uploaded and validated: ${uniqueFilename} (${audioFile.size} bytes)`);
     next();
-
   } catch (error) {
     logger.error(`Error in file upload: ${error.message}`);
     next(new AppError('File upload failed', 500, 'UPLOAD_ERROR'));
@@ -444,7 +432,6 @@ const cleanupOldFiles = async (maxAgeHours = 24) => {
 
     logger.info(`🧹 Cleanup complete: ${cleanedCount} files deleted`);
     return cleanedCount;
-
   } catch (error) {
     logger.error(`Error during cleanup: ${error.message}`);
     throw error;
@@ -458,7 +445,7 @@ const getUploadStats = () => {
   try {
     const stats = {
       raw: { count: 0, totalSize: 0 },
-      processed: { count: 0, totalSize: 0 }
+      processed: { count: 0, totalSize: 0 },
     };
 
     // Count raw files
@@ -487,7 +474,6 @@ const getUploadStats = () => {
     stats.totalSizeMB = stats.raw.totalSizeMB + stats.processed.totalSizeMB;
 
     return stats;
-
   } catch (error) {
     logger.error(`Error getting upload stats: ${error.message}`);
     return null;
@@ -513,9 +499,7 @@ const handleMulterError = (err, req, res, next) => {
     }
 
     if (err.code === 'LIMIT_FILE_COUNT') {
-      return next(
-        new AppError('Only one file can be uploaded at a time', 400, 'TOO_MANY_FILES')
-      );
+      return next(new AppError('Only one file can be uploaded at a time', 400, 'TOO_MANY_FILES'));
     }
 
     if (err.code === 'LIMIT_UNEXPECTED_FILE') {
@@ -524,9 +508,7 @@ const handleMulterError = (err, req, res, next) => {
       );
     }
 
-    return next(
-      new AppError(`Upload error: ${err.message}`, 400, 'UPLOAD_ERROR')
-    );
+    return next(new AppError(`Upload error: ${err.message}`, 400, 'UPLOAD_ERROR'));
   }
 
   next(err);
@@ -572,7 +554,6 @@ const isAudioFile = (filePath) => {
     }
 
     return null;
-
   } catch (error) {
     logger.error(`Error checking file type: ${error.message}`);
     return null;
@@ -592,5 +573,5 @@ module.exports = {
   handleMulterError,
   isAudioFile,
   ensureUploadDirs,
-  generateFilename
+  generateFilename,
 };

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 
 const ThemeContext = createContext(null);
 
@@ -10,42 +10,23 @@ export const useTheme = () => {
   return context;
 };
 
+/**
+ * ThemeProvider — Hardcoded to OLED dark mode
+ * EchoNote is dark-mode-only by design.
+ */
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(() => {
-    // Check localStorage first
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
-    }
-    // Default to system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
   useEffect(() => {
-    // Apply theme to document
+    // Always enforce dark mode
     const root = document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
-  };
-
-  const setTheme = (dark) => {
-    setIsDark(dark);
-  };
+    root.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }, []);
 
   const value = {
-    isDark,
-    toggleTheme,
-    setTheme,
-    theme: isDark ? 'dark' : 'light',
+    isDark: true,
+    toggleTheme: () => {}, // No-op — dark mode only
+    setTheme: () => {}, // No-op — dark mode only
+    theme: 'dark',
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
