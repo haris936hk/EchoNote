@@ -298,17 +298,8 @@ class AudioProcessorWithBandpass(AudioProcessor):
 
 def main():
     """Main entry point"""
-    if len(sys.argv) < 3:
-        result = {
-            'success': False,
-            'error': 'Usage: audio_processor.py <input_file> <output_file> [mode]',
-            'modes': {
-                'minimal': 'Default - minimal processing (recommended)',
-                'vad': 'With voice activity detection',
-                'bandpass': 'With gentle bandpass filter'
-            }
-        }
-        print(json.dumps(result, indent=2))
+    if len(sys.argv) < 2:
+        print("Usage: python audio_processor.py <input_file> [output_file] [--optimize]", file=sys.stderr)
         sys.exit(1)
     
     input_path = sys.argv[1]

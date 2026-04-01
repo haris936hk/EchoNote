@@ -68,7 +68,9 @@ const getEvents = async (req, res) => {
         });
         logger.info(`Passive token refresh successful for user ${userId}`);
       } catch (err) {
-        logger.error(`Failed to passively save refreshed tokens for user ${userId}: ${err.message}`);
+        logger.error(
+          `Failed to passively save refreshed tokens for user ${userId}: ${err.message}`
+        );
       }
     });
 
@@ -77,7 +79,7 @@ const getEvents = async (req, res) => {
       logger.info(`Tokens expired for user ${userId}, explicitly refreshing...`);
       try {
         const { credentials } = await client.refreshAccessToken();
-        
+
         // Update credentials block (the listener ABOVE will also fire and handle the DB save)
         client.setCredentials(credentials);
         logger.info(`Explicit token refresh successful for user ${userId}`);
@@ -94,7 +96,7 @@ const getEvents = async (req, res) => {
 
     // 5. Query Calendar API
     const calendar = google.calendar({ version: 'v3', auth: client });
-    
+
     // Fetch from now to +7 days
     const timeMin = new Date();
     const timeMax = new Date();
@@ -111,17 +113,17 @@ const getEvents = async (req, res) => {
       });
 
       const events = response.data.items || [];
-      
+
       // Parse into standard format
       const parsedEvents = events.map((event) => {
         // Handle full-day events vs specific time events safely
         const start = event.start?.dateTime || event.start?.date;
         const end = event.end?.dateTime || event.end?.date;
-        
+
         const attendees = (event.attendees || [])
           // filter out resource rooms
-          .filter(a => !a.resource)
-          .map(a => ({
+          .filter((a) => !a.resource)
+          .map((a) => ({
             name: a.displayName || (a.email ? a.email.split('@')[0] : 'Unknown'), // fallback to email prefix if no name
             email: a.email || '',
           }));
@@ -141,10 +143,9 @@ const getEvents = async (req, res) => {
         data: parsedEvents,
       });
     } catch (apiErr) {
-        logger.error(`Google Calendar API error for user ${userId}: ${apiErr.message}`);
-        throw apiErr;
+      logger.error(`Google Calendar API error for user ${userId}: ${apiErr.message}`);
+      throw apiErr;
     }
-    
   } catch (error) {
     logger.error('Calendar controller getEvents error:', error);
     return res.status(500).json({

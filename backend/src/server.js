@@ -9,6 +9,16 @@ const cron = require('node-cron');
 // Load environment variables
 dotenv.config();
 
+const ffmpeg = require('fluent-ffmpeg');
+
+// Configure FFmpeg/FFprobe paths if provided in .env
+if (process.env.FFMPEG_PATH) {
+  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+}
+if (process.env.FFPROBE_PATH) {
+  ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
+}
+
 // Import configuration
 const { prisma } = require('./config/database');
 
@@ -274,6 +284,26 @@ async function initializeServer() {
       console.log(`✅ Python available (${pythonCmd})`);
     } catch (error) {
       console.log(`⚠️  Python not found (tried: ${pythonCmd}). Audio processing may fail.`);
+    }
+
+    // Step 5: Verify FFmpeg/FFprobe
+    console.log('🎵 Checking FFmpeg/FFprobe dependencies...');
+    try {
+      const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg';
+      const ffprobePath = process.env.FFPROBE_PATH || 'ffprobe';
+
+      execSync(`${ffmpegPath} -version`, { stdio: 'ignore' });
+      console.log(`✅ FFmpeg available (${ffmpegPath})`);
+
+      execSync(`${ffprobePath} -version`, { stdio: 'ignore' });
+      console.log(`✅ FFprobe available (${ffprobePath})`);
+    } catch (error) {
+      console.log(
+        '❌ FFmpeg/FFprobe not found. Audio duration validation and processing will fail.'
+      );
+      console.log(
+        '👉 Please install FFmpeg and add it to PATH, or set FFMPEG_PATH and FFPROBE_PATH in .env'
+      );
     }
 
     console.log('\n' + '='.repeat(60));

@@ -137,6 +137,11 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     }
 
     const transcript = transcriptionResult.text;
+    const transcriptionSegments = transcriptionResult.segments || [];
+    const diarizedTranscriptText =
+      transcriptionSegments.length > 0
+        ? transcriptionSegments.map((s) => `[${s.speaker}]: ${s.text}`).join('\n')
+        : transcript;
     const transcriptionConfidence = transcriptionResult.confidence;
 
     console.log(
@@ -159,7 +164,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     // Step 5: Generate AI summary using Custom Model
     await updateMeetingStatus(meetingId, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
-    const summaryResult = await summarizationService.generateSummary(transcript, {
+    const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
       title: meeting.title,
       category: meeting.category,
       duration: audioDuration,
@@ -249,6 +254,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
         audioSize: audioFile.size,
         audioFormat: audioFormat,
         transcriptText: transcript,
+        transcriptSegments: transcriptionSegments,
+        speakerMap: {},
         transcriptWordCount: wordCount,
 
         // NLP Features
@@ -360,8 +367,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       await emailService.sendMeetingFailedEmail({
         to: meeting.user.email,
         userName: meeting.user.name,
-        meetingTitle: meeting.title,
-        errorMessage: error.message,
+        meeting,
+        error: error.message,
       });
     }
 
@@ -428,6 +435,11 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     }
 
     const transcript = transcriptionResult.text;
+    const transcriptionSegments = transcriptionResult.segments || [];
+    const diarizedTranscriptText =
+      transcriptionSegments.length > 0
+        ? transcriptionSegments.map((s) => `[${s.speaker}]: ${s.text}`).join('\n')
+        : transcript;
     const transcriptionConfidence = transcriptionResult.confidence;
 
     console.log(
@@ -451,7 +463,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     // Step 6: Generate AI summary using Custom Model
     await updateMeetingStatus(meeting.id, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
-    const summaryResult = await summarizationService.generateSummary(transcript, {
+    const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
       title,
       category,
       audioDuration,
@@ -498,6 +510,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         audioUrl: audioStoragePath,
         audioDuration,
         transcriptText: transcript,
+        transcriptSegments: transcriptionSegments,
+        speakerMap: {},
         transcriptWordCount: wordCount,
 
         // NLP Features
@@ -580,8 +594,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         await emailService.sendMeetingFailedEmail({
           to: user.email,
           userName: user.name,
-          meetingTitle: title,
-          errorMessage: error.message,
+          meeting,
+          error: error.message,
         });
       }
     }
@@ -604,8 +618,10 @@ function transformMeetingForFrontend(meeting) {
 
   return {
     ...meeting,
-    // Map transcript field
+    // Map transcript fields
     transcript: meeting.transcriptText || null,
+    transcriptSegments: meeting.transcriptSegments || null,
+    speakerMap: meeting.speakerMap || {},
 
     // Map duration field
     duration: meeting.audioDuration || null,

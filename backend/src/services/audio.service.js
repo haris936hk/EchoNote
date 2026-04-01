@@ -5,6 +5,15 @@ const { PythonShell } = require('python-shell');
 const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
+
+// Configure FFmpeg/FFprobe paths if provided in .env
+if (process.env.FFMPEG_PATH) {
+  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+}
+if (process.env.FFPROBE_PATH) {
+  ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
+}
+
 const winston = require('winston');
 
 // Initialize logger
@@ -49,8 +58,14 @@ const processAudioWithPython = async (inputPath, outputPath) => {
       args: [inputPath, outputPath],
     };
 
-    // Run Python audio processor
-    const results = await PythonShell.run('audio_processor.py', options);
+    // Run conversion script
+    const results = await PythonShell.run('audio_processor.py', options).catch((err) => {
+      logger.error(`❌ Audio processing script failed: ${err.message}`);
+      if (err.message.includes('JSON')) {
+        throw new Error('Internal error: Python audio processor returned malformed output.');
+      }
+      throw err;
+    });
     const result = results[0];
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);

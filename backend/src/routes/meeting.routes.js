@@ -135,6 +135,22 @@ router.patch(
 );
 
 /**
+ * @route   PATCH /api/meetings/:id/speakers
+ * @desc    Update speaker name mapping
+ * @access  Private (owner only)
+ * @body    { speakerId, newName }
+ * @returns { success, data: speakerMap, message }
+ */
+router.patch(
+  '/:id/speakers',
+  authenticate,
+  validateUUIDParam('id'),
+  authorize('meeting'),
+  sanitizeBody,
+  meetingController.updateSpeakerMap
+);
+
+/**
  * @route   DELETE /api/meetings/:id
  * @desc    Delete meeting and associated data
  * @access  Private (owner only)

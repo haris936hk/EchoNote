@@ -8,6 +8,7 @@ import TranscriptViewer from '../components/meeting/TranscriptViewer';
 import { CategoryBadge } from '../components/meeting/CategoryFilter';
 import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
+import SpeakerRenameModal from '../components/meeting/SpeakerRenameModal';
 
 const PIPELINE_STEPS = [
   { key: 'UPLOADING', label: 'Upload' },
@@ -24,6 +25,37 @@ const MeetingDetailPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [isSpeakerModalOpen, setIsSpeakerModalOpen] = useState(false);
+  const [selectedSpeaker, setSelectedSpeaker] = useState({ id: '', name: '' });
+
+  const handleRenameSpeaker = (speakerId, currentName) => {
+    setSelectedSpeaker({ id: speakerId, name: currentName });
+    setIsSpeakerModalOpen(true);
+  };
+
+  const handleSaveSpeaker = async (speakerId, newName) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/${id}/speakers`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ speakerId, newName }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update speaker');
+      
+      const result = await response.json();
+      if (result.success) {
+        // Optimistic UI update or refresh meeting data
+        fetchMeeting(id);
+      }
+    } catch (error) {
+      window.alert('Failed to rename speaker.');
+    }
+  };
 
   useEffect(() => {
     if (id) fetchMeeting(id);
@@ -367,7 +399,10 @@ const MeetingDetailPage = () => {
             <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
               <TranscriptViewer
                 transcript={currentMeeting.transcript}
+                transcriptSegments={currentMeeting.transcriptSegments}
+                speakerMap={currentMeeting.speakerMap}
                 nlpData={currentMeeting.nlpAnalysis}
+                onRenameSpeaker={handleRenameSpeaker}
               />
             </div>
           </div>
@@ -387,6 +422,15 @@ const MeetingDetailPage = () => {
         onClose={() => setIsEditModalOpen(false)}
         meeting={currentMeeting}
         onSave={handleSaveEdit}
+      />
+
+      {/* Speaker Rename Modal */}
+      <SpeakerRenameModal
+        isOpen={isSpeakerModalOpen}
+        onClose={() => setIsSpeakerModalOpen(false)}
+        speakerId={selectedSpeaker.id}
+        currentName={selectedSpeaker.name}
+        onSave={handleSaveSpeaker}
       />
     </div>
   );

@@ -3,7 +3,6 @@
 
 const { PythonShell } = require('python-shell');
 const path = require('path');
-const fs = require('fs');
 const winston = require('winston');
 
 // Initialize logger
@@ -58,18 +57,23 @@ const transcribeAudio = async (audioPath, options = {}) => {
       mode: 'json',
       pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
       scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      args: [
-        audioPath,
-        transcriptionOptions.model,
-        transcriptionOptions.language,
-        transcriptionOptions.task,
-        transcriptionOptions.temperature.toString(),
-        transcriptionOptions.beamSize.toString(),
-      ],
+      env: { ...process.env, HF_TOKEN: process.env.HF_TOKEN },
+      args: [audioPath],
     };
 
     // Run Whisper transcription
-    const results = await PythonShell.run('transcribe.py', pythonOptions);
+    const results = await PythonShell.run('transcribe.py', pythonOptions).catch((err) => {
+      logger.error(`❌ Transcription script failed: ${err.message}`);
+      if (err.message.includes('JSON')) {
+        return [
+          {
+            success: false,
+            error: 'Internal error: Python transcription script returned malformed output.',
+          },
+        ];
+      }
+      throw err;
+    });
     const result = results[0];
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -78,9 +82,8 @@ const transcribeAudio = async (audioPath, options = {}) => {
     return {
       success: true,
       text: result.text,
-      segments: result.segments || [],
+      segments: result.segments || [], // Now includes speaker fields
       language: result.language,
-      duration: result.duration,
       wordCount: countWords(result.text),
       confidence: result.confidence || 0,
       processingTime: parseFloat(duration),

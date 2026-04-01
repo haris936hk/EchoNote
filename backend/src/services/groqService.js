@@ -57,6 +57,7 @@ Rules:
 - executiveSummary must be at least 150 characters.
 - keyDecisions: list every consequential decision reached; use [] if none.
 - actionItems: every concrete task with an owner or deadline mentioned; use [] if none.
+  * IMPORTANT: The transcript may contain speaker labels (e.g. [SPEAKER_00]: or [John]:). Use these labels to determine the exact 'assignee' for each action item. Pay close attention to who commits to doing what.
 - nextSteps: high-level follow-up items or milestones discussed; use [] if none.
 - keyTopics: 3–8 single-phrase topics that capture the meeting's subject matter.
 - sentiment: overall tone of the meeting.

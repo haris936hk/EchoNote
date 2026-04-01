@@ -1324,6 +1324,74 @@ const exportAllMeetings = async (req, res) => {
   }
 };
 
+/**
+ * Update speaker map for diarization
+ * PATCH /api/meetings/:id/speakers
+ */
+const updateSpeakerMap = async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+    const { speakerId, newName } = req.body;
+
+    if (!speakerId || !newName) {
+      return res.status(400).json({
+        success: false,
+        error: 'speakerId and newName are required',
+      });
+    }
+
+    // Fetch the meeting to verify it belongs to the user
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    const meeting = await prisma.meeting.findFirst({
+      where: { id: meetingId, userId },
+    });
+
+    if (!meeting) {
+      await prisma.$disconnect();
+      return res.status(404).json({
+        success: false,
+        error: 'Meeting not found',
+      });
+    }
+
+    // Parse existing speaker map
+    let currentMap = {};
+    if (meeting.speakerMap) {
+      currentMap =
+        typeof meeting.speakerMap === 'string'
+          ? JSON.parse(meeting.speakerMap)
+          : meeting.speakerMap;
+    }
+
+    // Update map
+    currentMap[speakerId] = newName;
+
+    const updatedMeeting = await prisma.meeting.update({
+      where: { id: meetingId },
+      data: { speakerMap: currentMap },
+    });
+
+    await prisma.$disconnect();
+
+    logger.info(`✅ Speaker map updated for meeting: ${meetingId}`);
+
+    return res.status(200).json({
+      success: true,
+      data: updatedMeeting.speakerMap,
+      message: 'Speaker updated successfully',
+    });
+  } catch (error) {
+    logger.error(`Error updating speaker: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to update speaker',
+      details: error.message,
+    });
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -1343,4 +1411,5 @@ module.exports = {
   getMeetingStats,
   getProcessingStatus,
   streamAudio,
+  updateSpeakerMap,
 };

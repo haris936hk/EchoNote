@@ -9,7 +9,8 @@ pydub
 spacy
 
 # Transcription (if running locally)
-openai-whisper
+whisperx
+pyannote.audio
 
 # Utilities
 numpy

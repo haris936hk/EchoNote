@@ -4,6 +4,7 @@ import json
 import spacy
 from textblob import TextBlob
 import warnings
+from utils import Logger
 warnings.filterwarnings("ignore")
 
 def process_text(text, model_name):
@@ -244,7 +245,9 @@ if __name__ == '__main__':
     if sys.argv[1] == 'test':
         # Test mode
         import platform
-        nlp = spacy.load('en_core_web_lg')
+        print("🧪 Testing SpaCy installation...", file=sys.stderr)
+        with Logger.suppress_stdout():
+            nlp = spacy.load('en_core_web_lg')
         print(json.dumps({
             'spacy_version': spacy.__version__,
             'model': 'en_core_web_lg',

@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 import numpy as np
 from datetime import datetime, timedelta
+import contextlib
 
 
 class Logger:
@@ -54,6 +55,18 @@ class Logger:
         print(f"\n{'='*60}", file=sys.stderr)
         print(f"{title}", file=sys.stderr)
         print(f"{'='*60}\n", file=sys.stderr)
+
+    @staticmethod
+    @contextlib.contextmanager
+    def suppress_stdout():
+        """Context manager to suppress stdout from noisy libraries"""
+        with open(os.devnull, "w") as devnull:
+            old_stdout = sys.stdout
+            sys.stdout = devnull
+            try:
+                yield
+            finally:
+                sys.stdout = old_stdout
 
 
 class FileValidator:

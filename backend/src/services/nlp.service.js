@@ -380,7 +380,18 @@ const processMeetingTranscript = async (text) => {
     };
 
     // Run SpaCy NLP processor with updated format
-    const results = await PythonShell.run('nlp_processor.py', pythonOptions);
+    const results = await PythonShell.run('nlp_processor.py', pythonOptions).catch((err) => {
+      logger.error(`❌ NLP script failed: ${err.message}`);
+      if (err.message.includes('JSON')) {
+        return [
+          {
+            success: false,
+            error: 'Internal error: Python NLP processor returned malformed output.',
+          },
+        ];
+      }
+      throw err;
+    });
     const result = results[0];
 
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);

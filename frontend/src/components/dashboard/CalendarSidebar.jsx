@@ -4,7 +4,7 @@ import { LuClock as Clock, LuCalendar as CalendarIcon } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import LoginButton from '../auth/LoginButton';
-import { Avatar, AvatarGroup, Tooltip, Spinner } from '@heroui/react';
+import { Tooltip, Spinner } from '@heroui/react';
 import { format, isToday, isTomorrow, isThisWeek, parseISO, isSameDay } from 'date-fns';
 import { useMeeting } from '../../contexts/MeetingContext';
 
@@ -25,6 +25,10 @@ const CalendarSidebar = () => {
         setEvents(data.data || []);
       }
     } catch (err) {
+      if (err.name === 'CanceledError') {
+        // Silently ignore aborted requests from deduplication
+        return;
+      }
       if (err.response?.status === 403 || err.response?.status === 401) {
         setErrorStatus(err.response?.status);
       } else {
@@ -84,34 +88,48 @@ const CalendarSidebar = () => {
         >
           {event.title}
         </h4>
-        <div className="mb-4 flex items-center gap-2 font-mono text-xs text-slate-400">
-          <Clock size={12} className="text-accent-secondary" />
-          <span>
-            {startTime} – {endTime}
-          </span>
+        <div className="mb-4 flex flex-wrap items-center gap-4 font-mono text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 bg-accent-primary/5 px-2 py-1 rounded-md text-accent-primary/90">
+            <CalendarIcon size={12} />
+            <span>{format(startObj, 'MMM d')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock size={12} className="text-slate-500" />
+            <span>
+              {startTime} – {endTime}
+            </span>
+          </div>
         </div>
 
         <div className="mt-auto flex items-center justify-between">
           {event.attendees && event.attendees.length > 0 ? (
-            <AvatarGroup className="-space-x-2" size="sm" max={3}>
-              {event.attendees.map((attendee, idx) => (
-                <Tooltip key={idx} content={attendee.name || attendee.email}>
-                  <Avatar
-                    name={attendee.name || attendee.email.substring(0, 2).toUpperCase()}
-                    className="ring-2 ring-echo-surface"
-                  />
-                </Tooltip>
-              ))}
-            </AvatarGroup>
+            <div className="flex items-center -space-x-2">
+              {event.attendees.slice(0, 3).map((attendee, idx) => {
+                const nameStr = attendee.name || attendee.email || '?';
+                const initial = nameStr.substring(0, 1).toUpperCase();
+                return (
+                  <Tooltip key={idx} content={attendee.name || attendee.email}>
+                    <div className="flex size-7 items-center justify-center rounded-full bg-echo-surface shadow-sm ring-2 ring-echo-base text-[10px] font-semibold text-accent-secondary">
+                      {initial}
+                    </div>
+                  </Tooltip>
+                );
+              })}
+              {event.attendees.length > 3 && (
+                <div className="flex size-7 items-center justify-center rounded-full bg-echo-surface shadow-sm ring-2 ring-echo-base text-[10px] font-medium text-slate-400">
+                  +{event.attendees.length - 3}
+                </div>
+              )}
+            </div>
           ) : (
             <div className="text-xs italic text-slate-500">No attendees</div>
           )}
 
           <button
             onClick={() => handleRecord(event)}
-            className="rounded-full bg-accent-primary/10 px-3 py-1 text-xs font-medium text-accent-primary opacity-0 transition-opacity hover:bg-accent-primary hover:text-white group-hover:opacity-100"
+            className="rounded-full bg-accent-primary/10 px-3 py-1.5 text-xs font-semibold text-accent-primary opacity-0 transition-opacity hover:bg-accent-primary hover:text-white group-hover:opacity-100"
           >
-            Record
+            Record Meeting
           </button>
         </div>
       </div>

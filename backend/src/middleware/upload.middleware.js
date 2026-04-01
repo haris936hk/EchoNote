@@ -7,6 +7,15 @@ const fs = require('fs');
 const crypto = require('crypto');
 const winston = require('winston');
 const ffmpeg = require('fluent-ffmpeg');
+
+// Configure FFmpeg/FFprobe paths if provided in .env
+if (process.env.FFMPEG_PATH) {
+  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+}
+if (process.env.FFPROBE_PATH) {
+  ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
+}
+
 const { AppError } = require('./error.middleware');
 
 // Initialize logger
