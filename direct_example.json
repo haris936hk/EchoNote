@@ -1,0 +1,59 @@
+{
+  "success": true,
+  "entities": [
+    {
+      "text": "morning",
+      "label": "TIME"
+    },
+    {
+      "text": "Lenovo",
+      "label": "ORG"
+    },
+    {
+      "text": "John",
+      "label": "PERSON"
+    },
+    {
+      "text": "Mary",
+      "label": "PERSON"
+    },
+    {
+      "text": "Kubernetes",
+      "label": "TECH"
+    },
+    {
+      "text": "this afternoon",
+      "label": "TIME"
+    }
+  ],
+  "svoTriplets": [
+    {
+      "subject": "'s",
+      "verb": "discuss",
+      "object": "the new Lenovo device and its battery optimization"
+    },
+    {
+      "subject": "you",
+      "verb": "review",
+      "object": "the chip architecture"
+    },
+    {
+      "subject": "apps",
+      "verb": "drain",
+      "object": "the battery"
+    },
+    {
+      "subject": "Mary",
+      "verb": "deploy",
+      "object": "the Kubernetes cluster"
+    }
+  ],
+  "questions": [
+    "John, did you review the chip architecture?",
+    "When is the deployment deadline?"
+  ],
+  "sentiment": {
+    "label": "positive",
+    "score": 0.42
+  }
+}

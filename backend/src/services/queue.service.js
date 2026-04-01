@@ -72,7 +72,9 @@ class QueueService {
       });
 
       // Call existing processing pipeline
-      await meetingService.uploadAndProcessAudio(job.meetingId, job.userId, job.audioFile);
+      await meetingService.uploadAndProcessAudio(job.meetingId, job.userId, job.audioFile, {
+        keepTempOnError: true,
+      });
 
       logger.info(`Meeting ${job.meetingId} processed successfully`);
 
@@ -123,6 +125,17 @@ class QueueService {
             processingError: error.message,
           },
         });
+
+        // Clean up temp file on final failure
+        if (job.audioFile && job.audioFile.path) {
+          try {
+            const fs = require('fs').promises;
+            await fs.unlink(job.audioFile.path);
+            logger.info(`🗑️ Cleaned up temp file after max retries: ${job.audioFile.path}`);
+          } catch (cleanupError) {
+            // Ignore if already deleted
+          }
+        }
       }
     } finally {
       // Clear processing flag

@@ -75,9 +75,10 @@ async function createMeeting({ userId, title, description, category }) {
  * @param {string} meetingId - Meeting ID
  * @param {string} userId - User ID
  * @param {Object} audioFile - Uploaded audio file object
+ * @param {Object} options - Processing options
  * @returns {Promise<Object>} Processing result
  */
-async function uploadAndProcessAudio(meetingId, userId, audioFile) {
+async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {}) {
   let tempPath = null;
 
   try {
@@ -171,7 +172,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       // Pass NLP features to guide AI summary generation (matches echonote_dataset.json format)
       entities: nlpResult.success ? nlpResult.entities : [],
       keyPhrases: nlpResult.success ? nlpResult.keyPhrases : [],
-      actionPatterns: nlpResult.success ? nlpResult.actionPatterns : [],
+      svoTriplets: nlpResult.success ? nlpResult.svoTriplets : [],
+      questions: nlpResult.success ? nlpResult.questions : [],
       sentiment: nlpResult.success ? nlpResult.sentiment : null,
       topics: nlpResult.success ? nlpResult.topics : [],
     });
@@ -242,8 +244,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
       nlpResult.success && nlpResult.keyPhrases ? nlpResult.keyPhrases.join(', ') : null;
 
     const nlpActionPatternsText =
-      nlpResult.success && nlpResult.actionPatterns
-        ? '  • ' + nlpResult.actionPatterns.map((a) => `${a.action}: ${a.object}`).join('\n  • ')
+      nlpResult.success && nlpResult.svoTriplets
+        ? '  • ' +
+          nlpResult.svoTriplets.map((t) => `${t.subject} ${t.verb} ${t.object}`).join('\n  • ')
         : null;
 
     const updatedMeeting = await prisma.meeting.update({
@@ -345,8 +348,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile) {
     // Update meeting status to FAILED
     await updateMeetingStatus(meetingId, 'FAILED', error.message);
 
-    // Clean up temp file if exists
-    if (tempPath) {
+    // Clean up temp file if exists and not keeping it for retries
+    if (tempPath && !options.keepTempOnError) {
       await cleanupTempFiles([tempPath]);
     }
 
@@ -496,12 +499,10 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         ? nlpResult.entities.map((e) => `${e.text} (${e.label})`).join(', ')
         : null;
 
-    const nlpKeyPhrasesText =
-      nlpResult.success && nlpResult.keyPhrases ? nlpResult.keyPhrases.join(', ') : null;
-
     const nlpActionPatternsText =
-      nlpResult.success && nlpResult.actionPatterns
-        ? '  • ' + nlpResult.actionPatterns.map((a) => `${a.action}: ${a.object}`).join('\n  • ')
+      nlpResult.success && nlpResult.svoTriplets
+        ? '  • ' +
+          nlpResult.svoTriplets.map((t) => `${t.subject} ${t.verb} ${t.object}`).join('\n  • ')
         : null;
 
     meeting = await prisma.meeting.update({
@@ -516,11 +517,11 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
         // NLP Features
         nlpEntities: nlpEntitiesText,
-        nlpKeyPhrases: nlpKeyPhrasesText,
+        nlpKeyPhrases: null,
         nlpActionPatterns: nlpActionPatternsText,
         nlpSentiment: nlpResult.success ? nlpResult.sentiment?.label : null,
         nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
-        nlpTopics: nlpResult.success ? nlpResult.topics : null,
+        nlpTopics: null,
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -598,6 +599,11 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
           error: error.message,
         });
       }
+    }
+
+    // Clean up temp file if exists
+    if (audioPath) {
+      await cleanupTempFiles([audioPath]);
     }
 
     return {

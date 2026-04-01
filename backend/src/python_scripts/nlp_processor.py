@@ -23,6 +23,18 @@ def process_text(text, model_name):
         # Load SpaCy model with all components
         nlp = spacy.load(model_name)
 
+        # Load custom entities
+        import os
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        try:
+            with open(os.path.join(base_dir, 'entities_config.json'), 'r') as f:
+                custom_patterns = json.load(f)
+            if not nlp.has_pipe("entity_ruler"):
+                ruler = nlp.add_pipe("entity_ruler", before="ner")
+                ruler.add_patterns(custom_patterns)
+        except Exception:
+            pass
+
         # Process text
         doc = nlp(text)
 
@@ -34,46 +46,23 @@ def process_text(text, model_name):
                 'label': ent.label_
             })
 
-        # Extract key phrases (simple strings, top 8)
-        phrase_freq = {}
-        for chunk in doc.noun_chunks:
-            phrase = chunk.text.lower().strip()
-            if len(phrase.split()) <= 4 and len(phrase) > 2:  # 2-4 word phrases
-                phrase_freq[phrase] = phrase_freq.get(phrase, 0) + 1
-
-        # Get top phrases by frequency
-        key_phrases = [phrase for phrase, freq in sorted(phrase_freq.items(), key=lambda x: x[1], reverse=True)[:8]]
-
-        # Extract action patterns (verb: object format)
-        action_patterns = []
-        seen_patterns = set()
-
+        # Extract SVO Triplets (Subject-Verb-Object)
+        svo_triplets = []
         for token in doc:
-            if token.pos_ == 'VERB' and token.dep_ in ['ROOT', 'relcl', 'ccomp']:
-                # Find direct objects
-                objects = []
-                for child in token.children:
-                    if child.dep_ in ['dobj', 'pobj', 'attr']:
-                        obj_text = child.text
-                        # Include compound nouns
-                        compounds = [c.text for c in child.children if c.dep_ == 'compound']
-                        if compounds:
-                            obj_text = ' '.join(compounds + [child.text])
-                        objects.append(obj_text)
-
-                if objects:
-                    for obj in objects:
-                        pattern_key = f"{token.lemma_}:{obj.lower()}"
-                        if pattern_key not in seen_patterns:
-                            action_patterns.append({
-                                'action': token.lemma_,
-                                'object': obj.lower()
-                            })
-                            seen_patterns.add(pattern_key)
-                            if len(action_patterns) >= 10:  # Limit to 10
-                                break
-            if len(action_patterns) >= 10:
-                break
+            if token.pos_ == 'VERB':
+                subjects = [w for w in token.lefts if w.dep_ in ("nsubj", "nsubjpass")]
+                objects = [w for w in token.rights if w.dep_ in ("dobj", "pobj", "attr")]
+                
+                if subjects and objects:
+                    subj_text = " ".join([t.text for t in subjects[0].subtree])
+                    obj_text = " ".join([t.text for t in objects[0].subtree])
+                    svo_triplets.append({
+                        'subject': subj_text.strip(),
+                        'verb': token.lemma_.strip(),
+                        'object': obj_text.strip()
+                    })
+                    if len(svo_triplets) >= 15:
+                        break
 
         # Sentiment analysis using TextBlob
         blob = TextBlob(text)
@@ -92,23 +81,11 @@ def process_text(text, model_name):
             'score': polarity
         }
 
-        # Extract topics (top 5 most frequent nouns/proper nouns)
-        word_freq = {}
-        for token in doc:
-            if token.pos_ in ['NOUN', 'PROPN'] and not token.is_stop and len(token.text) > 2:
-                word = token.lemma_.lower()
-                word_freq[word] = word_freq.get(word, 0) + 1
-
-        # Get top 5 topics as simple strings
-        topics = [word for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:5]]
-
         return {
             'success': True,
             'entities': entities,
-            'keyPhrases': key_phrases,
-            'actionPatterns': action_patterns,
-            'sentiment': sentiment,
-            'topics': topics
+            'svoTriplets': svo_triplets,
+            'sentiment': sentiment
         }
 
     except Exception as e:
@@ -116,10 +93,8 @@ def process_text(text, model_name):
             'success': False,
             'error': str(e),
             'entities': [],
-            'keyPhrases': [],
-            'actionPatterns': [],
-            'sentiment': {'label': 'neutral', 'score': 0.0},
-            'topics': []
+            'svoTriplets': [],
+            'sentiment': {'label': 'neutral', 'score': 0.0}
         }
 
 def extract_entities(text, model_name):
@@ -143,6 +118,8 @@ def extract_key_phrases(text, model_name, top_n):
     
     phrase_freq = {}
     for chunk in doc.noun_chunks:
+        if chunk.root.pos_ in ['PRON', 'DET'] or chunk.root.is_stop:
+            continue
         phrase = chunk.text.lower().strip()
         if len(phrase.split()) > 1:  # Multi-word phrases only
             phrase_freq[phrase] = phrase_freq.get(phrase, 0) + 1

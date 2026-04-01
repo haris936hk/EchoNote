@@ -74,7 +74,7 @@ class WhisperXTranscriber:
             # 3. Diarize
             print(f"🗣️ Diarizing speakers...", file=sys.stderr)
             with Logger.suppress_stdout():
-                diarize_model = DiarizationPipeline(use_auth_token=hf_token, device=self.device)
+                diarize_model = DiarizationPipeline(device=self.device)
                 diarize_segments = diarize_model(audio)
             
             # 4. Assign Speakers

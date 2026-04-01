@@ -33,36 +33,42 @@ const RETRY_BASE_DELAY_MS = 1_000;
  * Using a detailed system prompt in place of fine-tuning on the 7B model
  * gives superior, more consistent results with a 120B instruction model.
  */
-const SYSTEM_PROMPT = `You are an expert meeting analyst. Your task is to produce a structured, actionable summary of a meeting transcript.
+const SYSTEM_PROMPT = `You are an expert linguist and data extraction engine specializing in structural meeting analysis. Your task is to accurately distill a meeting transcript into actionable documentation.
 
-You MUST respond with a single valid JSON object — no markdown, no explanation, no extra text — conforming EXACTLY to this schema:
+You MUST respond with ONLY a single valid JSON object. Do NOT include markdown code blocks, preamble, explanations, or post-script commentary. Your response must be directly parseable by JSON.parse().
 
+Follow this EXACT JSON schema for your output:
 {
-  "executiveSummary": "<string: 2–5 sentence paragraph summarising the meeting's purpose, main discussion points and outcomes>",
-  "keyDecisions": ["<string>", ...],
+  "_reasoning_scratchpad": "<string: Your internal CoT (Chain of Thought). Step 1: Analyze SVO triplets and map them to transcript dialogue. Step 2: Extract explicit decisions and next steps. Step 3: Synthesize abstract conceptual topics. Think step-by-step here before formatting the rest.>",
+  "executiveSummary": "<string: 2–5 sentence paragraph summarizing the meeting's purpose, main discussion points, and key outcomes>",
+  "keyDecisions": ["<string: concise statement of decision>", ...],
   "actionItems": [
     {
-      "task": "<string: clear, specific task description>",
-      "assignee": "<string | null: person responsible, or null if unknown>",
-      "deadline": "<string | null: date or relative time, or null if not mentioned>",
+      "task": "<string: clear, specific task description taking action>",
+      "assignee": "<string | null: exact person responsible, or null if unknown>",
+      "deadline": "<string | null: exact date/time, or null if not mentioned>",
       "priority": "<'high' | 'medium' | 'low'>"
     }
   ],
-  "nextSteps": ["<string>", ...],
-  "keyTopics": ["<string>", ...],
+  "nextSteps": ["<string: high-level follow-up issue or risk>", ...],
+  "keyTopics": ["<string: single-phrase topic>", ...],
   "sentiment": "<'positive' | 'neutral' | 'negative'>"
 }
 
-Rules:
-- executiveSummary must be at least 150 characters.
-- keyDecisions: list every consequential decision reached; use [] if none.
-- actionItems: every concrete task with an owner or deadline mentioned; use [] if none.
-  * IMPORTANT: The transcript may contain speaker labels (e.g. [SPEAKER_00]: or [John]:). Use these labels to determine the exact 'assignee' for each action item. Pay close attention to who commits to doing what.
-- nextSteps: high-level follow-up items or milestones discussed; use [] if none.
-- keyTopics: 3–8 single-phrase topics that capture the meeting's subject matter.
-- sentiment: overall tone of the meeting.
-- All string values must be in English regardless of transcript language.
-- Do NOT invent information not present in the transcript.`;
+CRITICAL RULES & CONSTRAINTS:
+1. REASONING FIRST: You MUST implement the "_reasoning_scratchpad" as the very first key in your JSON. Use this space to map the strict <nlp_metadata> facts to the transcript.
+2. JSON ONLY: Output absolutely nothing except the JSON object.
+3. NO HALLUCINATIONS: Use ONLY information from the <transcript>. Do not add outside assumptions.
+4. METADATA AS ANCHORS: Use the <nlp_metadata> as verified anchor points to ensure you do not miss critical entities, or action bindings. However, you must comprehensively analyze the actual <transcript> to extract any implicit actions or decisions that the metadata may have missed.
+5. EXECUTIVE SUMMARY: Must be at least 150 characters and provide objective, professional context.
+6. ACTION ITEMS: Focus strictly on concrete tasks tied to explicit commitments, not hypothetical discussions.
+   * Use the SVO Triplets in <nlp_metadata> as a starting point. Provide any additional action items you logically deduce from the <transcript>.
+   * If an assignee or deadline is not explicitly mentioned, you MUST set them to \`null\`. Do not guess.
+   * Use speaker labels (e.g. [SPEAKER_00]: or [John]:) to determine the exact assignee.
+7. KEY DECISIONS & NEXT STEPS: Document unresolved issues in the \`nextSteps\` array, and explicit decisions in the \`keyDecisions\` array based purely on your reading of the <transcript>. Use empty arrays \`[]\` if none are discussed.
+8. KEY TOPICS: Synthesize 3–8 high-level conceptual themes that capture the meeting's core subject matter (e.g., "Battery Life Engineering", "Q3 Marketing Strategy", "Supply Chain Architecture"). Do NOT extract simple statistical noun chunks (e.g., "device", "a lot", "the previous generation"). Topics must be abstract, conceptual categories of discussion, not literal objects mentioned.
+
+Output your valid JSON now:`;
 
 // ─── Class ────────────────────────────────────────────────────────────────────
 
@@ -163,8 +169,10 @@ class GroqService {
    * model receives the same structured context.
    */
   _buildUserMessage(transcript, nlpFeatures) {
+    const transcriptBlock = `<transcript>\n${transcript}\n</transcript>`;
+
     if (!nlpFeatures) {
-      return `MEETING TRANSCRIPT:\n${transcript}`;
+      return transcriptBlock;
     }
 
     // Log received features during development
@@ -172,12 +180,14 @@ class GroqService {
       logger.debug('[GroqService] NLP features received', {
         entities: nlpFeatures.entities?.length ?? 0,
         keyPhrases: nlpFeatures.keyPhrases?.length ?? 0,
+        svoTriplets: nlpFeatures.svoTriplets?.length ?? 0,
+        questions: nlpFeatures.questions?.length ?? 0,
         topics: nlpFeatures.topics?.length ?? 0,
         sentiment: nlpFeatures.sentiment,
       });
     }
 
-    let message = `MEETING TRANSCRIPT:\n${transcript}\n\nNLP ANALYSIS:\n`;
+    let message = `${transcriptBlock}\n\n<nlp_metadata>\n`;
 
     // Entities — already formatted as "Name (LABEL)" strings by summarization.service.js
     if (nlpFeatures.entities?.length > 0) {
@@ -186,18 +196,14 @@ class GroqService {
       message += `Entities: None\n`;
     }
 
-    // Key phrases
-    if (nlpFeatures.keyPhrases?.length > 0) {
-      message += `Key Phrases: ${nlpFeatures.keyPhrases.join(', ')}\n`;
+    // SVO Triplets
+    if (nlpFeatures.svoTriplets?.length > 0) {
+      const svoStrs = nlpFeatures.svoTriplets.map(
+        (t) => `[${t.subject} -> ${t.verb} -> ${t.object}]`
+      );
+      message += `SVO Triplets: ${svoStrs.join(', ')}\n`;
     } else {
-      message += `Key Phrases: None\n`;
-    }
-
-    // Topics
-    if (nlpFeatures.topics?.length > 0) {
-      message += `Topics: ${nlpFeatures.topics.join(', ')}\n`;
-    } else {
-      message += `Topics: None\n`;
+      message += `SVO Triplets: None\n`;
     }
 
     // Sentiment + optional polarity score
@@ -217,6 +223,7 @@ class GroqService {
       message += `Sentiment: Neutral`;
     }
 
+    message += `\n</nlp_metadata>`;
     return message;
   }
 

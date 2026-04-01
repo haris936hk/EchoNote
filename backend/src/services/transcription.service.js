@@ -5,6 +5,43 @@ const { PythonShell } = require('python-shell');
 const path = require('path');
 const winston = require('winston');
 
+const safePythonRun = async (scriptName, options) => {
+  // Ensure FFmpeg is in the PATH so WhisperX can run load_audio internally
+  let envPath = process.env.PATH || '';
+  if (process.env.FFMPEG_PATH) {
+    const ffmpegDir = path.dirname(process.env.FFMPEG_PATH);
+    const separator = process.platform === 'win32' ? ';' : ':';
+    if (!envPath.includes(ffmpegDir)) {
+      envPath = `${ffmpegDir}${separator}${envPath}`;
+    }
+  }
+
+  const textOptions = {
+    ...options,
+    mode: 'text',
+    env: { ...process.env, ...(options.env || {}), PATH: envPath },
+  };
+  const resultsText = await PythonShell.run(scriptName, textOptions);
+  
+  if (!resultsText || resultsText.length === 0) {
+    throw new Error('Python script returned empty output');
+  }
+  
+  for (let i = resultsText.length - 1; i >= 0; i--) {
+    try {
+      const parsed = JSON.parse(resultsText[i]);
+      if (parsed !== null && typeof parsed === 'object') {
+        return [parsed]; // Return matching format
+      }
+    } catch (e) {
+      // Continue searching
+    }
+  }
+  
+  throw new Error(`Python script ${scriptName} returned malformed output without valid JSON arrays.`);
+};
+
+
 // Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -62,9 +99,9 @@ const transcribeAudio = async (audioPath, options = {}) => {
     };
 
     // Run Whisper transcription
-    const results = await PythonShell.run('transcribe.py', pythonOptions).catch((err) => {
+    const results = await safePythonRun('transcribe.py', pythonOptions).catch((err) => {
       logger.error(`❌ Transcription script failed: ${err.message}`);
-      if (err.message.includes('JSON')) {
+      if (err.message.includes('JSON') || err.message.includes('malformed')) {
         return [
           {
             success: false,
@@ -75,6 +112,15 @@ const transcribeAudio = async (audioPath, options = {}) => {
       throw err;
     });
     const result = results[0];
+
+    // Check if the Python script itself reported a failure
+    if (!result.success) {
+      throw new Error(result.error || 'Transcription script returned an unsuccessful result');
+    }
+
+    if (!result.text) {
+      throw new Error('Transcription script returned no text output');
+    }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Transcription completed in ${duration}s`);
@@ -118,8 +164,16 @@ const transcribeWithTimestamps = async (audioPath) => {
       ],
     };
 
-    const results = await PythonShell.run('transcribe.py', pythonOptions);
+    const results = await safePythonRun('transcribe.py', pythonOptions);
     const result = results[0];
+
+    if (!result.success) {
+      throw new Error(result.error || 'Transcription script returned an unsuccessful result');
+    }
+
+    if (!result.text) {
+      throw new Error('Transcription script returned no text output');
+    }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Transcription with timestamps completed in ${duration}s`);
@@ -209,8 +263,16 @@ const transcribeWithContext = async (audioPath, contextTerms = []) => {
       ],
     };
 
-    const results = await PythonShell.run('transcribe.py', pythonOptions);
+    const results = await safePythonRun('transcribe.py', pythonOptions);
     const result = results[0];
+
+    if (!result.success) {
+      throw new Error(result.error || 'Transcription script returned an unsuccessful result');
+    }
+
+    if (!result.text) {
+      throw new Error('Transcription script returned no text output');
+    }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Context-aware transcription completed in ${duration}s`);
@@ -457,7 +519,7 @@ const testWhisperInstallation = async () => {
       args: ['test'],
     };
 
-    const results = await PythonShell.run('transcribe.py', pythonOptions);
+    const results = await safePythonRun('transcribe.py', pythonOptions);
     const result = results[0];
 
     logger.info('✅ Whisper installation test passed');

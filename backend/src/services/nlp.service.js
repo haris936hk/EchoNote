@@ -401,10 +401,8 @@ const processMeetingTranscript = async (text) => {
     return {
       success: result.success || true,
       entities: result.entities || [], // [{text, label}]
-      keyPhrases: result.keyPhrases || [], // ["phrase1", "phrase2"]
-      actionPatterns: result.actionPatterns || [], // [{action, object}]
+      svoTriplets: result.svoTriplets || [], // [{subject, verb, object}]
       sentiment: result.sentiment || { label: 'neutral', score: 0 }, // {label, score}
-      topics: result.topics || [], // ["topic1", "topic2"]
       processingTime: parseFloat(totalTime),
     };
   } catch (error) {
@@ -413,10 +411,8 @@ const processMeetingTranscript = async (text) => {
       success: false,
       error: error.message,
       entities: [],
-      keyPhrases: [],
-      actionPatterns: [],
+      svoTriplets: [],
       sentiment: { label: 'neutral', score: 0 },
-      topics: [],
       processingTime: 0,
     };
   }
