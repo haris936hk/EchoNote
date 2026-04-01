@@ -343,6 +343,7 @@ const formatTranscriptWithParagraphs = (segments) => {
  * @param {string} audioPath - Path to audio file
  * @returns {Object} Speaker segments
  */
+// eslint-disable-next-line no-unused-vars
 const extractSpeakers = async (audioPath) => {
   // Future implementation with pyannote.audio or similar
   logger.warn('⚠️ Speaker diarization not yet implemented');

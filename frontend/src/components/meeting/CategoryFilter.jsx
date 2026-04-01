@@ -30,8 +30,8 @@ const CategoryFilter = ({
             onClick={() => onCategoryChange?.(category.value)}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
               isSelected
-                ? 'bg-accent-primary/15 text-accent-primary border-accent-primary/30 border'
-                : 'border-echo-border hover:border-accent-primary/20 border text-slate-400 hover:text-white'
+                ? 'border border-accent-primary/30 bg-accent-primary/15 text-accent-primary'
+                : 'border border-echo-border text-slate-400 hover:border-accent-primary/20 hover:text-white'
             }`}
           >
             {category.label}

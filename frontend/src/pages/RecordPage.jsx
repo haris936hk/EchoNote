@@ -321,7 +321,7 @@ const RecordPage = () => {
 
             {/* Error */}
             {(recordingError || uploadError) && (
-              <div className="flex items-center gap-2 rounded-[10px] border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+              <div className="flex items-center gap-2 rounded-btn border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
                 <AlertCircle size={16} />
                 <span>{recordingError || uploadError}</span>
               </div>
@@ -333,7 +333,7 @@ const RecordPage = () => {
                 <>
                   <button
                     onClick={handleStartRecording}
-                    className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
+                    className="btn-cta inline-flex items-center gap-2 rounded-btn px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
                   >
                     <Mic size={16} />
                     Start Recording
@@ -341,7 +341,7 @@ const RecordPage = () => {
                   <button
                     onClick={handleUploadClick}
                     disabled={fileValidating}
-                    className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-sm font-medium"
+                    className="btn-ghost inline-flex items-center gap-2 rounded-btn px-6 py-3 text-sm font-medium"
                   >
                     <Upload size={16} />
                     {fileValidating ? 'Validating...' : 'Upload File'}
@@ -351,14 +351,14 @@ const RecordPage = () => {
                 <>
                   <button
                     onClick={handleResumeRecording}
-                    className="inline-flex items-center gap-2 rounded-[10px] bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600"
+                    className="inline-flex items-center gap-2 rounded-btn bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600"
                   >
                     <Play size={16} />
                     Resume
                   </button>
                   <button
                     onClick={handleStopRecording}
-                    className="inline-flex items-center gap-2 rounded-[10px] bg-red-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-red-600"
+                    className="inline-flex items-center gap-2 rounded-btn bg-red-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-red-600"
                   >
                     <Square size={16} />
                     Stop
@@ -368,14 +368,14 @@ const RecordPage = () => {
                 <>
                   <button
                     onClick={handlePauseRecording}
-                    className="inline-flex items-center gap-2 rounded-[10px] bg-amber-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-amber-600"
+                    className="inline-flex items-center gap-2 rounded-btn bg-amber-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-amber-600"
                   >
                     <Pause size={16} />
                     Pause
                   </button>
                   <button
                     onClick={handleStopRecording}
-                    className="inline-flex items-center gap-2 rounded-[10px] bg-red-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-red-600"
+                    className="inline-flex items-center gap-2 rounded-btn bg-red-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-red-600"
                   >
                     <Square size={16} />
                     Stop
@@ -462,7 +462,7 @@ const RecordPage = () => {
                   }}
                   classNames={{
                     trigger:
-                      'bg-echo-surface border border-echo-border rounded-[10px] hover:border-accent-primary/30',
+                      'bg-echo-surface border border-echo-border rounded-btn hover:border-accent-primary/30',
                     popoverContent: 'bg-echo-elevated border border-echo-border',
                   }}
                 >
@@ -493,7 +493,7 @@ const RecordPage = () => {
 
             {/* Error */}
             {uploadError && (
-              <div className="flex items-center gap-2 rounded-[10px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+              <div className="flex items-center gap-2 rounded-btn border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                 <AlertCircle size={16} className="shrink-0" />
                 <span>{uploadError}</span>
               </div>
@@ -503,7 +503,7 @@ const RecordPage = () => {
             <div className="flex items-center justify-between pt-2">
               <button
                 onClick={handleBack}
-                className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2.5 text-sm font-medium"
+                className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2.5 text-sm font-medium"
               >
                 <ArrowLeft size={16} />
                 Back to Recording
@@ -511,7 +511,7 @@ const RecordPage = () => {
               <button
                 onClick={handleSubmit}
                 disabled={uploadLoading}
-                className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-6 py-2.5 text-sm font-bold transition-all hover:brightness-110 disabled:opacity-50"
+                className="btn-cta inline-flex items-center gap-2 rounded-btn px-6 py-2.5 text-sm font-bold transition-all hover:brightness-110 disabled:opacity-50"
               >
                 <Upload size={16} />
                 {uploadLoading ? 'Uploading...' : 'Upload & Process'}

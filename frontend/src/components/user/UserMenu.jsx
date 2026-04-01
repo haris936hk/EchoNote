@@ -77,7 +77,7 @@ const UserMenu = () => {
           >
             <div className="flex flex-col gap-1">
               <p className="max-w-[200px] truncate text-sm font-semibold">{user.name}</p>
-              <p className="text-default-500 max-w-[200px] truncate text-xs">{user.email}</p>
+              <p className="max-w-[200px] truncate text-xs text-default-500">{user.email}</p>
             </div>
           </DropdownItem>
         </DropdownSection>
@@ -137,7 +137,7 @@ export const SimpleUserMenu = () => {
       <DropdownMenu aria-label="User actions">
         <DropdownItem key="profile" className="h-14" textValue="Profile">
           <p className="font-semibold">{user.name}</p>
-          <p className="text-default-500 text-xs">{user.email}</p>
+          <p className="text-xs text-default-500">{user.email}</p>
         </DropdownItem>
 
         <DropdownItem key="settings" onPress={() => navigate('/settings')}>
@@ -169,7 +169,7 @@ export const UserMenuWithBadge = ({ badgeContent }) => {
         <DropdownMenu>
           <DropdownItem key="profile" className="h-14">
             <p className="font-semibold">{user.name}</p>
-            <p className="text-default-500 text-xs">{user.email}</p>
+            <p className="text-xs text-default-500">{user.email}</p>
           </DropdownItem>
 
           <DropdownItem onPress={() => navigate('/settings')}>Settings</DropdownItem>
@@ -182,7 +182,7 @@ export const UserMenuWithBadge = ({ badgeContent }) => {
 
       {/* Badge */}
       {badgeContent && (
-        <span className="bg-danger absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full text-xs font-medium text-white">
+        <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-danger text-xs font-medium text-white">
           {badgeContent}
         </span>
       )}
@@ -200,11 +200,11 @@ export const MobileUserButton = () => {
   return (
     <Dropdown placement="bottom">
       <DropdownTrigger>
-        <button className="hover:bg-default-100 flex w-full items-center gap-2 rounded-lg p-2 transition-colors">
+        <button className="flex w-full items-center gap-2 rounded-lg p-2 transition-colors hover:bg-default-100">
           <Avatar size="sm" src={user.picture} name={user.name} />
           <div className="min-w-0 flex-1 text-left">
             <p className="truncate text-sm font-medium">{user.name}</p>
-            <p className="text-default-500 truncate text-xs">{user.email}</p>
+            <p className="truncate text-xs text-default-500">{user.email}</p>
           </div>
         </button>
       </DropdownTrigger>

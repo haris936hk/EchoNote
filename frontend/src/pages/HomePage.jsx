@@ -1,5 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { LuMic as Mic, LuWaves as AudioLines, LuBrain as Brain, LuSparkles as Sparkles, LuListChecks as ListChecks, LuSmilePlus as SmilePlus, LuMail as Mail } from 'react-icons/lu';
+import {
+  LuMic as Mic,
+  LuWaves as AudioLines,
+  LuBrain as Brain,
+  LuSparkles as Sparkles,
+  LuListChecks as ListChecks,
+  LuSmilePlus as SmilePlus,
+  LuMail as Mail,
+} from 'react-icons/lu';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from '../components/common/Footer';
 
@@ -61,7 +69,7 @@ const HomePage = () => {
       {/* ── Navigation ── */}
       <nav className="fixed top-0 z-50 w-full bg-[#2e3447]/40 shadow-2xl backdrop-blur-3xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="text-accent-primary flex items-center gap-2">
+          <div className="flex items-center gap-2 text-accent-primary">
             <Mic size={20} />
             <span className="text-xl font-bold tracking-tighter">EchoNote</span>
           </div>
@@ -84,13 +92,13 @@ const HomePage = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={handleGetStarted}
-              className="bg-cta hidden rounded-lg px-5 py-2 text-sm font-bold text-white transition-all hover:brightness-110 sm:block"
+              className="hidden rounded-lg bg-cta px-5 py-2 text-sm font-bold text-white transition-all hover:brightness-110 sm:block"
             >
               Get Started
             </button>
             <div
               onClick={handleGetStarted}
-              className="bg-accent-primary/20 border-accent-primary/30 text-accent-primary hover:bg-accent-primary/30 flex size-10 cursor-pointer items-center justify-center rounded-full border transition-colors"
+              className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-accent-primary/30 bg-accent-primary/20 text-accent-primary transition-colors hover:bg-accent-primary/30"
             >
               <Mic size={16} />
             </div>
@@ -102,16 +110,16 @@ const HomePage = () => {
         {/* ── Hero Section ── */}
         <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
           <div className="space-y-8">
-            <h1 className="text-5xl font-extrabold leading-tight tracking-tighter text-[#dce1fb] md:text-7xl">
+            <h1 className="text-5xl font-extrabold leading-tight tracking-tighter text-on-surface md:text-7xl">
               Your meetings, <span className="text-gradient">perfectly</span> remembered.
             </h1>
-            <p className="max-w-lg text-xl leading-relaxed text-[#c6c5d5]">
+            <p className="max-w-lg text-xl leading-relaxed text-on-surface-variant">
               Record. Transcribe. Summarize. Powered by a custom AI model.
             </p>
             <div className="flex gap-4">
               <button
                 onClick={handleGetStarted}
-                className="from-accent-primary to-primary-400 shadow-accent-primary/10 hover:shadow-accent-primary/20 rounded-xl bg-gradient-to-br px-8 py-4 font-bold text-white shadow-lg transition-all active:scale-95"
+                className="rounded-xl bg-gradient-to-br from-accent-primary to-primary-400 px-8 py-4 font-bold text-white shadow-lg shadow-accent-primary/10 transition-all hover:shadow-accent-primary/20 active:scale-95"
               >
                 Get Started Free →
               </button>
@@ -120,12 +128,12 @@ const HomePage = () => {
 
           {/* Product mockup */}
           <div className="group relative">
-            <div className="from-accent-primary/20 to-accent-secondary/20 absolute -inset-1 rounded-2xl bg-gradient-to-r blur-2xl transition duration-1000 group-hover:opacity-40"></div>
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 blur-2xl transition duration-1000 group-hover:opacity-40"></div>
             <div className="glass-card relative rotate-2 rounded-2xl border border-[#454653]/10 p-2 shadow-2xl">
               <div className="flex aspect-video overflow-hidden rounded-xl border border-[#454653]/20 bg-[#23293c] shadow-2xl">
                 {/* Left panel - transcript mockup */}
                 <div className="w-1/2 space-y-3 border-r border-[#454653]/20 p-4">
-                  <div className="bg-accent-primary/20 h-4 w-1/3 rounded"></div>
+                  <div className="h-4 w-1/3 rounded bg-accent-primary/20"></div>
                   <div className="space-y-2">
                     <div className="h-2 w-full rounded bg-[#c6c5d5]/10"></div>
                     <div className="h-2 w-5/6 rounded bg-[#c6c5d5]/10"></div>
@@ -138,18 +146,18 @@ const HomePage = () => {
                 </div>
                 {/* Right panel - summary mockup */}
                 <div className="w-1/2 space-y-4 bg-[#070d1f]/50 p-4">
-                  <div className="bg-accent-secondary/20 h-4 w-1/2 rounded"></div>
+                  <div className="h-4 w-1/2 rounded bg-accent-secondary/20"></div>
                   <div className="rounded-lg border border-[#454653]/10 bg-[#191f31] p-3">
-                    <div className="bg-cta/20 mb-2 h-2 w-full rounded"></div>
+                    <div className="mb-2 h-2 w-full rounded bg-cta/20"></div>
                     <div className="h-2 w-2/3 rounded bg-[#c6c5d5]/10"></div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="bg-accent-primary size-2 rounded-full"></div>
+                      <div className="size-2 rounded-full bg-accent-primary"></div>
                       <div className="h-2 w-1/2 rounded bg-[#c6c5d5]/10"></div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="bg-accent-primary size-2 rounded-full"></div>
+                      <div className="size-2 rounded-full bg-accent-primary"></div>
                       <div className="h-2 w-2/3 rounded bg-[#c6c5d5]/10"></div>
                     </div>
                   </div>
@@ -163,21 +171,21 @@ const HomePage = () => {
         <section className="mx-auto max-w-7xl px-6 py-20">
           <div className="flex flex-wrap items-center justify-center gap-8 rounded-2xl bg-[#151b2d]/50 px-12 py-8 md:justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-accent-primary font-mono text-3xl font-bold">88%+</span>
+              <span className="font-mono text-3xl font-bold text-accent-primary">88%+</span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Summary Accuracy
               </span>
             </div>
             <div className="hidden h-8 w-px bg-[#454653]/10 md:block"></div>
             <div className="flex items-center gap-3">
-              <span className="text-accent-primary font-mono text-3xl font-bold">10 min</span>
+              <span className="font-mono text-3xl font-bold text-accent-primary">10 min</span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Max Recording
               </span>
             </div>
             <div className="hidden h-8 w-px bg-[#454653]/10 md:block"></div>
             <div className="flex items-center gap-3">
-              <span className="text-accent-primary font-mono text-3xl font-bold">~70s</span>
+              <span className="font-mono text-3xl font-bold text-accent-primary">~70s</span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Processing
               </span>
@@ -188,7 +196,7 @@ const HomePage = () => {
         {/* ── Features Section ── */}
         <section id="features" className="mx-auto max-w-7xl px-6 py-20">
           <div className="mb-16 text-center lg:text-left">
-            <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-[#dce1fb] md:text-5xl">
+            <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-on-surface md:text-5xl">
               Built for meeting intelligence
             </h2>
           </div>
@@ -200,11 +208,13 @@ const HomePage = () => {
                   key={index}
                   className="group rounded-2xl bg-[#151b2d] p-8 transition-colors hover:bg-[#191f31]"
                 >
-                  <div className="bg-accent-primary/10 mb-6 flex size-12 items-center justify-center rounded-lg">
+                  <div className="mb-6 flex size-12 items-center justify-center rounded-lg bg-accent-primary/10">
                     <Icon size={20} className="text-accent-primary" />
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-[#dce1fb]">{feature.title}</h3>
-                  <p className="text-sm leading-relaxed text-[#c6c5d5]">{feature.description}</p>
+                  <h3 className="mb-2 text-lg font-bold text-on-surface">{feature.title}</h3>
+                  <p className="text-sm leading-relaxed text-on-surface-variant">
+                    {feature.description}
+                  </p>
                 </div>
               );
             })}
@@ -216,9 +226,9 @@ const HomePage = () => {
           id="how-it-works"
           className="relative mx-auto max-w-7xl overflow-hidden px-6 py-20"
         >
-          <div className="via-accent-primary/20 absolute left-0 top-1/2 hidden h-px w-full bg-gradient-to-r from-transparent to-transparent lg:block"></div>
+          <div className="absolute left-0 top-1/2 hidden h-px w-full bg-gradient-to-r from-transparent via-accent-primary/20 to-transparent lg:block"></div>
           <div className="mb-20 text-center">
-            <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-[#dce1fb] md:text-5xl">
+            <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-on-surface md:text-5xl">
               How It Works
             </h2>
           </div>
@@ -226,11 +236,11 @@ const HomePage = () => {
             {/* Step 1 */}
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="mb-8 flex size-16 items-center justify-center rounded-full border-4 border-[#0c1324] bg-[#23293c] shadow-xl">
-                <span className="text-accent-primary font-mono text-xl font-bold">01</span>
+                <span className="font-mono text-xl font-bold text-accent-primary">01</span>
               </div>
               <div className="w-full rounded-2xl border border-[#454653]/10 bg-[#151b2d] p-6">
-                <h4 className="mb-2 text-lg font-bold text-[#dce1fb]">Record</h4>
-                <p className="text-sm text-[#c6c5d5]">
+                <h4 className="mb-2 text-lg font-bold text-on-surface">Record</h4>
+                <p className="text-sm text-on-surface-variant">
                   Start the recording via our web interface during your live meeting.
                 </p>
               </div>
@@ -238,11 +248,11 @@ const HomePage = () => {
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="ai-glow mb-8 flex size-16 items-center justify-center rounded-full border-4 border-[#0c1324] bg-[#23293c] shadow-xl">
-                <span className="text-accent-secondary font-mono text-xl font-bold">02</span>
+                <span className="font-mono text-xl font-bold text-accent-secondary">02</span>
               </div>
               <div className="w-full rounded-2xl border border-[#454653]/10 bg-[#151b2d] p-6">
-                <h4 className="mb-2 text-lg font-bold text-[#dce1fb]">AI Processes</h4>
-                <p className="text-sm text-[#c6c5d5]">
+                <h4 className="mb-2 text-lg font-bold text-on-surface">AI Processes</h4>
+                <p className="text-sm text-on-surface-variant">
                   Our custom model transcribes and identifies key entities in real-time with sub-70s
                   latency.
                 </p>
@@ -251,11 +261,11 @@ const HomePage = () => {
             {/* Step 3 */}
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="mb-8 flex size-16 items-center justify-center rounded-full border-4 border-[#0c1324] bg-[#23293c] shadow-xl">
-                <span className="text-accent-primary font-mono text-xl font-bold">03</span>
+                <span className="font-mono text-xl font-bold text-accent-primary">03</span>
               </div>
               <div className="w-full rounded-2xl border border-[#454653]/10 bg-[#151b2d] p-6">
-                <h4 className="mb-2 text-lg font-bold text-[#dce1fb]">Get Insights</h4>
-                <p className="text-sm text-[#c6c5d5]">
+                <h4 className="mb-2 text-lg font-bold text-on-surface">Get Insights</h4>
+                <p className="text-sm text-on-surface-variant">
                   Access structured summaries and action items on your dashboard or via email.
                 </p>
               </div>
@@ -267,15 +277,15 @@ const HomePage = () => {
         <section id="cta" className="mx-auto max-w-5xl px-6 py-20">
           <div className="gradient-border-card px-8 py-20 text-center">
             <div className="mx-auto max-w-2xl">
-              <h2 className="mb-6 text-3xl font-extrabold tracking-tighter text-[#dce1fb] md:text-5xl">
+              <h2 className="mb-6 text-3xl font-extrabold tracking-tighter text-on-surface md:text-5xl">
                 Ready to transform your meetings?
               </h2>
-              <p className="mb-10 text-lg text-[#c6c5d5]">
+              <p className="mb-10 text-lg text-on-surface-variant">
                 Join forward-thinking teams using EchoNote to capture clarity from chaos.
               </p>
               <button
                 onClick={handleGetStarted}
-                className="from-accent-primary to-primary-400 rounded-xl bg-gradient-to-br px-10 py-5 font-bold text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
+                className="rounded-xl bg-gradient-to-br from-accent-primary to-primary-400 px-10 py-5 font-bold text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
               >
                 Get Started For Free
               </button>

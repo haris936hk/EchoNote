@@ -1,0 +1,126 @@
+﻿
+> echonote@1.0.0 lint
+> npm run frontend:lint && npm run backend:lint
+
+
+> echonote@1.0.0 frontend:lint
+> npm run lint --prefix frontend
+
+
+> echonote-frontend@1.0.0 lint
+> eslint src/**/*.{js,jsx}
+
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\AudioVisualizer.jsx
+  138:10  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\common\ErrorBoundary.jsx
+  60:20  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  82:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  90:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\MeetingDetail.jsx
+  39:5  warning  Expected a default case  default-case
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\MeetingList.jsx
+  50:14  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\SummaryViewer.jsx
+  166:19  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\TranscriptViewer.jsx
+    1:28  warning  'useEffect' is defined but never used                                                       no-unused-vars
+  146:9   warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\DashboardPage.jsx
+  212:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  218:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  238:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  301:14  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  311:14  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  361:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  368:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  375:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\MeetingDetailPage.jsx
+  219:11  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  283:15  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  291:23  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  338:21  warning  '_isPending' is assigned a value but never used                                             no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\MeetingsPage.jsx
+  210:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  217:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  236:15  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  296:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\NotFoundPage.jsx
+  69:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  75:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\RecordPage.jsx
+  324:20  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  336:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  344:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  354:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  361:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  371:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  378:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  496:20  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  506:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  514:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\SettingsPage.jsx
+   67:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  243:11  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  347:28  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  365:26  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  397:19  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  409:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  423:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  480:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  515:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\utils\constants.js
+  477:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\utils\formatters.js
+  523:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+Γ£û 48 problems (0 errors, 48 warnings)
+
+
+> echonote@1.0.0 backend:lint
+> npm run lint --prefix backend
+
+
+> echonote-backend@1.0.0 lint
+> eslint src/**/*.js
+
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\controllers\auth.controller.js
+  231:11  warning  'result' is assigned a value but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\controllers\meeting.controller.js
+  1152:23  error  Promise executor functions should not be async  no-async-promise-executor
+  1272:23  error  Empty block statement                           no-empty
+  1278:21  error  Empty block statement                           no-empty
+  1289:23  error  Empty block statement                           no-empty
+  1295:21  error  Empty block statement                           no-empty
+  1311:21  error  Empty block statement                           no-empty
+  1317:19  error  Empty block statement                           no-empty
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\middleware\error.middleware.js
+  234:38  warning  'next' is defined but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\middleware\validation.middleware.js
+  8:7  warning  'logger' is assigned a value but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\services\supabase-storage.service.js
+  78:13  warning  'data' is assigned a value but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\services\transcription.service.js
+  346:32  warning  'audioPath' is defined but never used  no-unused-vars
+
+Γ£û 12 problems (7 errors, 5 warnings)
+

@@ -29,7 +29,7 @@ const Header = () => {
         {/* Brand */}
         <Link
           to="/dashboard"
-          className="text-accent-primary flex items-center gap-2 transition-opacity hover:opacity-80"
+          className="flex items-center gap-2 text-accent-primary transition-opacity hover:opacity-80"
         >
           <Mic size={20} />
           <span className="text-xl font-bold tracking-tighter">EchoNote</span>
@@ -59,10 +59,10 @@ const Header = () => {
               <img
                 src={user.picture}
                 alt={user?.name || 'User'}
-                className="border-accent-primary/30 hover:border-accent-primary/60 size-8 cursor-pointer rounded-full border transition-colors"
+                className="size-8 cursor-pointer rounded-full border border-accent-primary/30 transition-colors hover:border-accent-primary/60"
               />
             ) : (
-              <div className="bg-accent-primary/20 border-accent-primary/30 text-accent-primary hover:bg-accent-primary/30 flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors">
+              <div className="flex size-8 cursor-pointer items-center justify-center rounded-full border border-accent-primary/30 bg-accent-primary/20 text-accent-primary transition-colors hover:bg-accent-primary/30">
                 <span className="text-xs font-semibold">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
                 </span>

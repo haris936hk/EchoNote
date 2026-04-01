@@ -10,7 +10,7 @@ const MeetingDetail = ({ meeting }) => {
     return (
       <Card>
         <CardBody>
-          <p className="text-default-500 text-center">Meeting not found</p>
+          <p className="text-center text-default-500">Meeting not found</p>
         </CardBody>
       </Card>
     );
@@ -61,6 +61,8 @@ const MeetingDetail = ({ meeting }) => {
           a.download = `${meeting.title}-summary.txt`;
           a.click();
         }
+        break;
+      default:
         break;
     }
   };
@@ -117,7 +119,7 @@ const MeetingDetail = ({ meeting }) => {
             <div className="flex-1">
               <h1 className="text-2xl font-bold">{meeting.title}</h1>
               {meeting.description && (
-                <p className="text-default-500 mt-2">{meeting.description}</p>
+                <p className="mt-2 text-default-500">{meeting.description}</p>
               )}
             </div>
 
@@ -209,7 +211,7 @@ const MeetingDetail = ({ meeting }) => {
                           <FiFileText className="text-primary" />
                           Executive Summary
                         </h3>
-                        <p className="text-default-700 leading-relaxed">{summaryData.executive}</p>
+                        <p className="leading-relaxed text-default-700">{summaryData.executive}</p>
                       </div>
                     )}
 
@@ -226,9 +228,9 @@ const MeetingDetail = ({ meeting }) => {
                           {summaryData.decisions.map((decision, index) => (
                             <li
                               key={index}
-                              className="bg-success/10 flex items-start gap-3 rounded-lg p-3"
+                              className="flex items-start gap-3 rounded-lg bg-success/10 p-3"
                             >
-                              <FiCheckCircle className="text-success mt-0.5 shrink-0" size={16} />
+                              <FiCheckCircle className="mt-0.5 shrink-0 text-success" size={16} />
                               <span className="text-default-700">{decision}</span>
                             </li>
                           ))}
@@ -249,9 +251,9 @@ const MeetingDetail = ({ meeting }) => {
                           {summaryData.actions.map((action, index) => (
                             <li
                               key={index}
-                              className="bg-warning/10 flex items-start gap-3 rounded-lg p-3"
+                              className="flex items-start gap-3 rounded-lg bg-warning/10 p-3"
                             >
-                              <div className="border-warning mt-0.5 size-5 shrink-0 rounded border-2" />
+                              <div className="mt-0.5 size-5 shrink-0 rounded border-2 border-warning" />
                               <span className="text-default-700">{action}</span>
                             </li>
                           ))}
@@ -268,7 +270,7 @@ const MeetingDetail = ({ meeting }) => {
                             <FiCalendar className="text-primary" />
                             Next Steps
                           </h3>
-                          <p className="text-default-700 leading-relaxed">
+                          <p className="leading-relaxed text-default-700">
                             {summaryData.nextSteps}
                           </p>
                         </div>
@@ -276,7 +278,7 @@ const MeetingDetail = ({ meeting }) => {
                     )}
                   </>
                 ) : (
-                  <div className="text-default-500 py-8 text-center">
+                  <div className="py-8 text-center text-default-500">
                     <p>No summary available</p>
                   </div>
                 )}
@@ -295,13 +297,13 @@ const MeetingDetail = ({ meeting }) => {
             >
               <div className="p-6">
                 {meeting.transcript ? (
-                  <div className="bg-default-100 rounded-lg p-4">
-                    <pre className="text-default-700 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                  <div className="rounded-lg bg-default-100 p-4">
+                    <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-default-700">
                       {meeting.transcript}
                     </pre>
                   </div>
                 ) : (
-                  <div className="text-default-500 py-8 text-center">
+                  <div className="py-8 text-center text-default-500">
                     <p>No transcript available</p>
                   </div>
                 )}

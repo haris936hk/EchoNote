@@ -1,5 +1,13 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { LuFileText as FileText, LuCopy as Copy, LuCheck as Check, LuSearch as Search, LuX as X, LuPenLine as PenLine, LuUser as User } from 'react-icons/lu';
+import { useState, useRef, useMemo } from 'react';
+import {
+  LuFileText as FileText,
+  LuCopy as Copy,
+  LuCheck as Check,
+  LuSearch as Search,
+  LuX as X,
+  LuPenLine as PenLine,
+  LuUser as User,
+} from 'react-icons/lu';
 
 const TranscriptViewer = ({
   transcript,
@@ -51,13 +59,15 @@ const TranscriptViewer = ({
   const handleCopy = async () => {
     try {
       let textToCopy = transcript;
-      
+
       // Attempt to build pretty text if segments exist
       if (hasSegments) {
-        textToCopy = transcriptSegments.map((seg) => {
-          const speakerName = speakerMap[seg.speaker] || seg.speaker || 'Unknown Speaker';
-          return `[${speakerName}]: ${seg.text}`;
-        }).join('\n');
+        textToCopy = transcriptSegments
+          .map((seg) => {
+            const speakerName = speakerMap[seg.speaker] || seg.speaker || 'Unknown Speaker';
+            return `[${speakerName}]: ${seg.text}`;
+          })
+          .join('\n');
       }
 
       await navigator.clipboard.writeText(textToCopy);
@@ -74,8 +84,14 @@ const TranscriptViewer = ({
   const highlightSegmentText = (text) => {
     if (!searchQuery) return text;
     const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.split(regex).map((part, i) => 
-      regex.test(part) ? <mark key={i} className="bg-amber-500/30 rounded px-0.5">{part}</mark> : part
+    return text.split(regex).map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className="rounded bg-amber-500/30 px-0.5">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
     );
   };
 
@@ -86,13 +102,13 @@ const TranscriptViewer = ({
         <div className="flex items-center gap-2">
           <FileText size={16} className="text-accent-primary" />
           <h3 className="text-base font-semibold text-white">{title}</h3>
-          <span className="bg-echo-base rounded-full px-2 py-0.5 font-mono text-xs text-slate-500">
+          <span className="rounded-full bg-echo-base px-2 py-0.5 font-mono text-xs text-slate-500">
             {wordCount.toLocaleString()} words
           </span>
         </div>
         <button
           onClick={handleCopy}
-          className="btn-ghost inline-flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-xs font-medium"
+          className="btn-ghost inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
         >
           {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
           {copied ? 'Copied!' : 'Copy Text'}
@@ -127,12 +143,12 @@ const TranscriptViewer = ({
       {/* Transcript Content */}
       <div
         ref={transcriptRef}
-        className="bg-echo-base custom-scrollbar max-h-[600px] overflow-y-auto rounded-[10px] p-4 text-sm leading-relaxed text-slate-300"
+        className="custom-scrollbar max-h-[600px] overflow-y-auto rounded-btn bg-echo-base p-4 text-sm leading-relaxed text-slate-300"
       >
         {!hasSegments ? (
-          <div 
+          <div
             className="whitespace-pre-wrap font-mono"
-            dangerouslySetInnerHTML={{ __html: highlightedRawText }} 
+            dangerouslySetInnerHTML={{ __html: highlightedRawText }}
           />
         ) : (
           <div className="space-y-4 font-sans">
@@ -140,36 +156,36 @@ const TranscriptViewer = ({
               const speakerId = seg.speaker || 'UNKNOWN';
               const speakerName = speakerMap[speakerId] || speakerId;
               const isDefaultName = speakerName === speakerId;
-              
+
               return (
-                <div key={idx} className="flex flex-col gap-1 group">
+                <div key={idx} className="group flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span 
-                      className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-md ${isDefaultName ? 'text-accent-secondary bg-accent-secondary/10' : 'text-accent-primary bg-accent-primary/10'}`}
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold ${isDefaultName ? 'bg-accent-secondary/10 text-accent-secondary' : 'bg-accent-primary/10 text-accent-primary'}`}
                     >
                       <User size={10} />
                       {speakerName}
-                      
+
                       {/* Rename Speaker Button (shows on hover) */}
                       {onRenameSpeaker && (
-                        <button 
+                        <button
                           onClick={() => onRenameSpeaker(speakerId, speakerName)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 hover:text-white"
+                          className="ml-1 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
                           title="Rename speaker"
                         >
                           <PenLine size={10} />
                         </button>
                       )}
                     </span>
-                    
+
                     {/* Timestamp (if available) */}
                     {seg.start !== undefined && (
-                      <span className="text-[10px] font-mono text-slate-500">
+                      <span className="font-mono text-[10px] text-slate-500">
                         {new Date(seg.start * 1000).toISOString().substr(14, 5)}
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-300 pl-1 leading-relaxed">
+                  <p className="pl-1 leading-relaxed text-slate-300">
                     {highlightSegmentText(seg.text)}
                   </p>
                 </div>

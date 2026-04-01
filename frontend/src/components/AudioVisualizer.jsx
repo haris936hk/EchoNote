@@ -87,8 +87,8 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
 
         if (normalizedHeight > 0.65) {
           // High — bright indigo
-          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)');   // indigo-400
-          gradient.addColorStop(1, 'rgba(167, 139, 250, 1)');   // violet-400
+          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)'); // indigo-400
+          gradient.addColorStop(1, 'rgba(167, 139, 250, 1)'); // violet-400
         } else if (normalizedHeight > 0.35) {
           // Medium — indigo at 80% opacity
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.75)');
@@ -135,7 +135,7 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
   }, [stream, isActive]);
 
   return (
-    <div className="relative h-16 w-full overflow-hidden rounded-[10px] border border-white/[0.06] bg-echo-surface">
+    <div className="relative h-16 w-full overflow-hidden rounded-btn border border-white/[0.06] bg-echo-surface">
       <canvas ref={canvasRef} className="size-full" style={{ display: 'block' }} />
       {!stream && (
         <div className="absolute inset-0 flex items-center justify-center gap-1.5">

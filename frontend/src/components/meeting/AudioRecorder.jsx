@@ -54,7 +54,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
             <Chip
               color="danger"
               variant="flat"
-              startContent={<span className="bg-danger size-2 animate-pulse rounded-full" />}
+              startContent={<span className="size-2 animate-pulse rounded-full bg-danger" />}
             >
               Recording
             </Chip>
@@ -70,8 +70,8 @@ const AudioRecorder = ({ onRecordingComplete }) => {
                 flex size-32 items-center justify-center rounded-full
                 ${
                   isRecording
-                    ? 'bg-danger/10 border-danger border-4'
-                    : 'bg-primary/10 border-primary border-4'
+                    ? 'border-4 border-danger bg-danger/10'
+                    : 'border-4 border-primary bg-primary/10'
                 }
                 transition-all duration-300
               `}
@@ -82,8 +82,8 @@ const AudioRecorder = ({ onRecordingComplete }) => {
             {/* Pulse rings when recording */}
             {isRecording && (
               <>
-                <div className="bg-danger/20 absolute inset-0 animate-ping rounded-full" />
-                <div className="bg-danger/10 absolute inset-0 animate-ping rounded-full delay-75" />
+                <div className="absolute inset-0 animate-ping rounded-full bg-danger/20" />
+                <div className="absolute inset-0 animate-ping rounded-full bg-danger/10 delay-75" />
               </>
             )}
           </div>
@@ -91,7 +91,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
           {/* Timer */}
           <div className="text-center">
             <p className="font-mono text-4xl font-bold">{recordingTime}</p>
-            {isRecording && <p className="text-default-500 mt-2 text-sm">{getRemainingTime()}</p>}
+            {isRecording && <p className="mt-2 text-sm text-default-500">{getRemainingTime()}</p>}
           </div>
 
           {/* Progress Bar */}
@@ -136,21 +136,21 @@ const AudioRecorder = ({ onRecordingComplete }) => {
 
         {/* Info/Error Messages */}
         {error && (
-          <div className="bg-danger/10 border-danger/20 flex items-start gap-3 rounded-lg border p-4">
-            <FiAlertCircle className="text-danger mt-0.5 shrink-0" size={20} />
+          <div className="flex items-start gap-3 rounded-lg border border-danger/20 bg-danger/10 p-4">
+            <FiAlertCircle className="mt-0.5 shrink-0 text-danger" size={20} />
             <div className="flex-1">
-              <p className="text-danger text-sm font-medium">Recording Error</p>
-              <p className="text-danger/80 mt-1 text-xs">{error}</p>
+              <p className="text-sm font-medium text-danger">Recording Error</p>
+              <p className="mt-1 text-xs text-danger/80">{error}</p>
             </div>
           </div>
         )}
 
         {!isRecording && !error && (
-          <div className="bg-primary/10 border-primary/20 flex items-start gap-3 rounded-lg border p-4">
-            <FiAlertCircle className="text-primary mt-0.5 shrink-0" size={20} />
+          <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/10 p-4">
+            <FiAlertCircle className="mt-0.5 shrink-0 text-primary" size={20} />
             <div className="flex-1">
-              <p className="text-primary text-sm font-medium">Recording Tips</p>
-              <ul className="text-primary/80 mt-2 list-inside list-disc space-y-1 text-xs">
+              <p className="text-sm font-medium text-primary">Recording Tips</p>
+              <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-primary/80">
                 <li>Maximum recording time is 10 minutes</li>
                 <li>Ensure your microphone is connected and permissions are granted</li>
                 <li>Speak clearly and minimize background noise</li>

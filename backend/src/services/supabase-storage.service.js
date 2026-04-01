@@ -75,12 +75,10 @@ const uploadAudioToSupabase = async (localFilePath, meetingId) => {
 
     // Upload to Supabase Storage
     const config = getConfig();
-    const { data, error } = await client.storage
-      .from(config.bucketName)
-      .upload(storagePath, fileBuffer, {
-        contentType: 'audio/wav',
-        upsert: true, // Overwrite if exists
-      });
+    const { error } = await client.storage.from(config.bucketName).upload(storagePath, fileBuffer, {
+      contentType: 'audio/wav',
+      upsert: true, // Overwrite if exists
+    });
 
     if (error) {
       logger.error(`❌ Supabase upload error: ${error.message}`);

@@ -105,7 +105,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
               <div className="space-y-5">
                 {/* Title Input */}
                 <div className="space-y-2">
-                  <label className="text-foreground text-sm font-medium">
+                  <label className="text-sm font-medium text-foreground">
                     Meeting Title <span className="text-danger">*</span>
                   </label>
                   <Input
@@ -126,7 +126,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
 
                 {/* Description Input */}
                 <div className="space-y-2">
-                  <label className="text-foreground text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium text-foreground">Description</label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -147,7 +147,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                 variant="flat"
                 onPress={handleClose}
                 isDisabled={isSubmitting}
-                className="hover:bg-default-200 rounded-xl transition-all duration-200"
+                className="rounded-xl transition-all duration-200 hover:bg-default-200"
                 startContent={<FiX size={16} />}
               >
                 Cancel
@@ -156,7 +156,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                 color="primary"
                 onPress={handleSubmit}
                 isLoading={isSubmitting}
-                className="hover:shadow-primary/30 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                className="rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
               >
                 Save Changes
               </Button>

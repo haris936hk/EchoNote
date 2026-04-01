@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from '@heroui/react';
-import { LuPlus as Plus, LuDownload as Download, LuTrash2 as Trash2, LuArrowUp as ArrowUp } from 'react-icons/lu';
+import {
+  LuPlus as Plus,
+  LuDownload as Download,
+  LuTrash2 as Trash2,
+  LuArrowUp as ArrowUp,
+} from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import MeetingList from '../components/meeting/MeetingList';
 import CategoryFilter from '../components/meeting/CategoryFilter';
@@ -202,14 +207,14 @@ const MeetingsPage = () => {
           <button
             onClick={handleExportAll}
             disabled={isExporting}
-            className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium"
+            className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium"
           >
             {isExporting ? <Spinner size="sm" /> : <Download size={14} />}
             {isExporting ? 'Exporting...' : 'Export All'}
           </button>
           <button
             onClick={() => navigate('/record')}
-            className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-5 py-2 text-sm font-bold transition-all hover:brightness-110"
+            className="btn-cta inline-flex items-center gap-2 rounded-btn px-5 py-2 text-sm font-bold transition-all hover:brightness-110"
           >
             <Plus size={16} />
             New Recording
@@ -228,10 +233,10 @@ const MeetingsPage = () => {
             <button
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
-              className={`rounded-[10px] px-4 py-2 text-sm font-medium transition-all ${
+              className={`rounded-btn px-4 py-2 text-sm font-medium transition-all ${
                 statusFilter === tab.key
                   ? 'bg-accent-primary text-white'
-                  : 'hover:bg-echo-surface-hover text-slate-400 hover:text-white'
+                  : 'text-slate-400 hover:bg-echo-surface-hover hover:text-white'
               }`}
             >
               {tab.label}
@@ -250,7 +255,7 @@ const MeetingsPage = () => {
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
-                className="text-accent-primary text-xs hover:underline"
+                className="text-xs text-accent-primary hover:underline"
               >
                 Clear filters
               </button>
@@ -278,7 +283,7 @@ const MeetingsPage = () => {
 
       {/* ── Bulk Actions Bar ── */}
       {selectedMeetings.length > 0 && (
-        <div className="bg-echo-surface border-echo-border fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border px-6 py-3 shadow-2xl backdrop-blur-xl">
+        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border border-echo-border bg-echo-surface px-6 py-3 shadow-2xl backdrop-blur-xl">
           <span className="text-sm font-medium text-white">{selectedMeetings.length} selected</span>
           <button
             onClick={() => setSelectedMeetings([])}
@@ -288,7 +293,7 @@ const MeetingsPage = () => {
           </button>
           <button
             onClick={handleBulkDelete}
-            className="inline-flex items-center gap-1.5 rounded-[10px] bg-red-500 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-600"
+            className="inline-flex items-center gap-1.5 rounded-btn bg-red-500 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-600"
           >
             <Trash2 size={14} />
             Delete Selected
@@ -301,7 +306,7 @@ const MeetingsPage = () => {
         <div className="fixed bottom-8 right-8 z-50">
           <Button
             isIconOnly
-            className="bg-accent-primary shadow-accent-primary/30 hover:shadow-accent-primary/40 size-12 rounded-full text-white shadow-lg transition-all hover:shadow-xl"
+            className="size-12 rounded-full bg-accent-primary text-white shadow-lg shadow-accent-primary/30 transition-all hover:shadow-xl hover:shadow-accent-primary/40"
             onPress={scrollToTop}
           >
             <ArrowUp size={20} />

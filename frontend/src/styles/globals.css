@@ -631,7 +631,6 @@ audio::-webkit-media-controls-panel {
   box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
 }
 
-
 /* ============================================
    CARD UTILITIES
    ============================================ */
@@ -797,7 +796,6 @@ audio::-webkit-media-controls-panel {
 .bg-accent-secondary\/10 {
   background-color: rgba(167, 139, 250, 0.1);
 }
-
 
 /* ============================================
    AI GLOW ANIMATION

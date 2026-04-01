@@ -1,0 +1,13 @@
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\MeetingDetail.jsx
+  39:5  warning  Expected a default case  default-case
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\TranscriptViewer.jsx
+  1:28  warning  'useEffect' is defined but never used  no-unused-vars
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\MeetingDetailPage.jsx
+  217:16  error    Replace `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖onClick={handleBack}ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖className="btn-cta┬╖rounded-btn┬╖px-6┬╖py-2.5┬╖text-sm┬╖font-bold"ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖onClick={handleBack}┬╖className="btn-cta┬╖rounded-btn┬╖px-6┬╖py-2.5┬╖text-sm┬╖font-bold"`  prettier/prettier
+  338:21  warning  '_isPending' is assigned a value but never used                                                                                                                                                                        no-unused-vars
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\utils\constants.js
+  477:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\utils\formatters.js
+  523:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+Γ£û 6 problems (1 error, 5 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.

@@ -1,0 +1,346 @@
+﻿
+> echonote@1.0.0 lint
+> npm run frontend:lint && npm run backend:lint
+
+
+> echonote@1.0.0 frontend:lint
+> npm run lint --prefix frontend
+
+
+> echonote-frontend@1.0.0 lint
+> eslint src/**/*.{js,jsx}
+
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\AudioVisualizer.jsx
+  138:10  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\common\ErrorBoundary.jsx
+  40:16  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  60:20  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  82:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  90:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\common\Header.jsx
+  32:11  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  62:17  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  65:20  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\common\Loader.jsx
+   6:7   warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  12:12  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  46:10  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  57:9   warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  57:9   warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'  tailwindcss/no-unnecessary-arbitrary-value
+  60:16  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  62:18  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  63:18  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\dashboard\CalendarSidebar.jsx
+   92:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  112:26  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  119:22  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\AudioRecorder.jsx
+   57:35  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   69:15  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   69:15  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   85:22  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   86:22  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   94:32  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  139:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  140:28  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  142:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  143:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  149:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  150:28  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  152:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  153:19  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\CategoryFilter.jsx
+  31:13  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  31:13  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\EditMeetingModal.jsx
+  108:26  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  129:26  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  150:17  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  159:17  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\MeetingCard.jsx
+   65:11  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+   73:9   warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  106:7   warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  106:7   warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'  tailwindcss/no-unnecessary-arbitrary-value
+  134:13  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+  168:17  warning  Invalid Tailwind CSS classnames order                                     tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\MeetingDetail.jsx
+   13:14  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   39:5   warning  Expected a default case                default-case
+  120:20  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  212:28  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  229:31  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  231:46  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  252:31  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  254:36  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  271:30  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  279:24  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  298:24  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  299:26  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  304:24  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\MeetingList.jsx
+  32:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  50:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  50:14  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\SearchBar.jsx
+  39:9  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\SpeakerRenameModal.jsx
+  41:14  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\SummaryViewer.jsx
+   21:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+   21:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  113:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  113:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  128:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  128:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  139:22  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  149:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  149:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  166:19  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  166:19  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  198:31  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  203:31  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  225:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  225:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  236:17  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  246:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  246:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  256:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  256:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\meeting\TranscriptViewer.jsx
+    1:28  warning  'useEffect' is defined but never used                                                       no-unused-vars
+   89:23  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  105:17  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  146:9   warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  146:9   warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  161:32  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  164:23  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  164:23  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  164:23  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  173:27  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  183:29  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  188:22  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\user\ProfileSettings.jsx
+   46:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   51:20  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   66:20  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+   76:20  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  100:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  111:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  120:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  121:23  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  123:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  124:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  160:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\components\user\UserMenu.jsx
+   80:18  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  140:14  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  172:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  185:15  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  203:17  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+  207:16  warning  Invalid Tailwind CSS classnames order  tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\DashboardPage.jsx
+  212:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  218:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  238:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  301:14  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  311:14  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  361:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  368:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  375:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\HomePage.jsx
+   72:16  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+   95:15  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  101:15  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  113:17  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  116:16  warning  The arbitrary class 'text-[#c6c5d5]' could be replaced by 'text-on-surface-variant'  tailwindcss/no-unnecessary-arbitrary-value
+  122:17  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  131:18  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  136:24  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  149:24  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  151:26  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  156:28  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  160:28  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  174:21  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  181:21  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  188:21  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  199:17  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  211:24  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  214:23  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  215:22  warning  The arbitrary class 'text-[#c6c5d5]' could be replaced by 'text-on-surface-variant'  tailwindcss/no-unnecessary-arbitrary-value
+  227:16  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  229:17  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  237:23  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  240:21  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  241:20  warning  The arbitrary class 'text-[#c6c5d5]' could be replaced by 'text-on-surface-variant'  tailwindcss/no-unnecessary-arbitrary-value
+  249:23  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  252:21  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  253:20  warning  The arbitrary class 'text-[#c6c5d5]' could be replaced by 'text-on-surface-variant'  tailwindcss/no-unnecessary-arbitrary-value
+  262:23  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+  265:21  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  266:20  warning  The arbitrary class 'text-[#c6c5d5]' could be replaced by 'text-on-surface-variant'  tailwindcss/no-unnecessary-arbitrary-value
+  278:19  warning  The arbitrary class 'text-[#dce1fb]' could be replaced by 'text-on-surface'          tailwindcss/no-unnecessary-arbitrary-value
+  281:18  warning  The arbitrary class 'text-[#c6c5d5]' could be replaced by 'text-on-surface-variant'  tailwindcss/no-unnecessary-arbitrary-value
+  286:17  warning  Invalid Tailwind CSS classnames order                                                tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\LoginPage.jsx
+  41:12  warning  Invalid Tailwind CSS classnames order                                                            tailwindcss/classnames-order
+  42:12  warning  Invalid Tailwind CSS classnames order                                                            tailwindcss/classnames-order
+  46:14  warning  The arbitrary class 'border-[rgba(255,255,255,0.06)]' could be replaced by 'border-echo-border'  tailwindcss/no-unnecessary-arbitrary-value
+  49:18  warning  Invalid Tailwind CSS classnames order                                                            tailwindcss/classnames-order
+  64:19  warning  Invalid Tailwind CSS classnames order                                                            tailwindcss/classnames-order
+  65:19  warning  Invalid Tailwind CSS classnames order                                                            tailwindcss/classnames-order
+  71:16  warning  The arbitrary class 'border-[rgba(255,255,255,0.06)]' could be replaced by 'border-echo-border'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\MeetingDetailPage.jsx
+  219:11  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  283:15  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  291:23  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  291:23  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  297:15  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  326:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  326:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  338:21  warning  '_isPending' is assigned a value but never used                                             no-unused-vars
+  344:23  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  381:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  400:20  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  400:20  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  410:18  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  410:18  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\MeetingsPage.jsx
+  210:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  217:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  236:15  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  236:15  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  258:17  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  286:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  296:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  309:13  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\NotFoundPage.jsx
+  18:13  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  36:16  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  69:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  75:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\RecordPage.jsx
+  324:20  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  336:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  344:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  354:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  361:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  371:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  378:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  496:20  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  506:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  514:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\pages\SettingsPage.jsx
+   59:16  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+   59:16  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+   67:21  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+   67:21  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  167:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  174:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  174:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  178:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  187:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  243:11  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  328:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  328:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  332:18  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  347:28  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  347:28  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  357:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  357:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  365:26  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  365:26  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  377:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  377:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  379:29  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  381:16  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  382:16  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  392:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  392:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  397:19  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  402:14  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  402:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  409:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  415:14  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  423:13  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  472:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  472:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  480:17  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  480:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+  482:33  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  492:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  492:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  512:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  512:12  warning  The arbitrary class 'rounded-[16px]' could be replaced by 'rounded-card'                    tailwindcss/no-unnecessary-arbitrary-value
+  513:12  warning  Invalid Tailwind CSS classnames order                                                       tailwindcss/classnames-order
+  515:17  warning  The arbitrary class 'rounded-[10px]' could be replaced by 'rounded-btn' or 'rounded-input'  tailwindcss/no-unnecessary-arbitrary-value
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\utils\constants.js
+  477:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\HK\Desktop\GitHub\EchoNote\frontend\src\utils\formatters.js
+  523:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+Γ£û 241 problems (0 errors, 241 warnings)
+  0 errors and 193 warnings potentially fixable with the `--fix` option.
+
+
+> echonote@1.0.0 backend:lint
+> npm run lint --prefix backend
+
+
+> echonote-backend@1.0.0 lint
+> eslint src/**/*.js
+
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\controllers\auth.controller.js
+  231:11  warning  'result' is assigned a value but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\controllers\meeting.controller.js
+  1152:23  error  Promise executor functions should not be async  no-async-promise-executor
+  1272:23  error  Empty block statement                           no-empty
+  1278:21  error  Empty block statement                           no-empty
+  1289:23  error  Empty block statement                           no-empty
+  1295:21  error  Empty block statement                           no-empty
+  1311:21  error  Empty block statement                           no-empty
+  1317:19  error  Empty block statement                           no-empty
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\middleware\error.middleware.js
+  234:38  warning  'next' is defined but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\middleware\validation.middleware.js
+  8:7  warning  'logger' is assigned a value but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\services\supabase-storage.service.js
+  78:13  warning  'data' is assigned a value but never used  no-unused-vars
+
+C:\Users\HK\Desktop\GitHub\EchoNote\backend\src\services\transcription.service.js
+  346:32  warning  'audioPath' is defined but never used  no-unused-vars
+
+Γ£û 12 problems (7 errors, 5 warnings)
+

@@ -474,7 +474,7 @@ export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 // EXPORT ALL
 // ============================================
 
-export default {
+const constants = {
   APP_NAME,
   APP_VERSION,
   APP_DESCRIPTION,
@@ -512,3 +512,5 @@ export default {
   ENVIRONMENT,
   GOOGLE_CLIENT_ID,
 };
+
+export default constants;

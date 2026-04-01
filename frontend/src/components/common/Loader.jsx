@@ -3,13 +3,13 @@ const Loader = ({ size = 'lg', label = 'Loading...', fullScreen = false, classNa
 
   const spinner = (
     <div
-      className={`${sizeClass} border-accent-primary animate-spin rounded-full border-2 border-t-transparent`}
+      className={`${sizeClass} animate-spin rounded-full border-2 border-accent-primary border-t-transparent`}
     ></div>
   );
 
   if (fullScreen) {
     return (
-      <div className="bg-echo-base/80 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-echo-base/80 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-4">
           {spinner}
           {label && <p className="text-sm text-slate-400">{label}</p>}
@@ -43,7 +43,7 @@ export const CardLoader = ({ label = 'Loading...' }) => (
 // Inline loader
 export const InlineLoader = ({ label }) => (
   <div className="flex items-center gap-2">
-    <div className="border-accent-primary size-4 animate-spin rounded-full border-2 border-t-transparent"></div>
+    <div className="size-4 animate-spin rounded-full border-2 border-accent-primary border-t-transparent"></div>
     {label && <span className="text-xs text-slate-500">{label}</span>}
   </div>
 );
@@ -54,13 +54,13 @@ export const SkeletonLoader = ({ count = 3 }) => (
     {Array.from({ length: count }).map((_, index) => (
       <div
         key={index}
-        className="bg-echo-surface border-echo-border animate-pulse rounded-[16px] border p-5"
+        className="animate-pulse rounded-card border border-echo-border bg-echo-surface p-5"
       >
         <div className="flex items-start gap-4">
-          <div className="bg-echo-surface-hover size-10 rounded-lg" />
+          <div className="size-10 rounded-lg bg-echo-surface-hover" />
           <div className="flex-1 space-y-2">
-            <div className="bg-echo-surface-hover h-4 w-3/4 rounded" />
-            <div className="bg-echo-surface-hover h-3 w-1/2 rounded" />
+            <div className="h-4 w-3/4 rounded bg-echo-surface-hover" />
+            <div className="h-3 w-1/2 rounded bg-echo-surface-hover" />
           </div>
         </div>
       </div>

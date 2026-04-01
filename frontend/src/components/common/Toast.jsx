@@ -3,7 +3,12 @@
 // Glass card style, slides in from top-right, indigo/green/red semantics
 
 import { useEffect, useState } from 'react';
-import { LuCheckCircle as CheckCircle, LuXCircle as XCircle, LuInfo as Info, LuX as X } from 'react-icons/lu';
+import {
+  LuCheckCircle as CheckCircle,
+  LuXCircle as XCircle,
+  LuInfo as Info,
+  LuX as X,
+} from 'react-icons/lu';
 
 const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
   const [visible, setVisible] = useState(false);
@@ -56,16 +61,14 @@ const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
       aria-live="assertive"
       className={[
         'pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden',
-        'rounded-[12px] border backdrop-blur-xl',
+        'rounded-xl border backdrop-blur-xl',
         'px-4 py-3 shadow-2xl',
         'transition-all duration-300 ease-out',
         v.border,
         v.bg,
         // Use bg-echo-elevated as base surface
         'bg-echo-elevated/90',
-        visible
-          ? 'translate-x-0 opacity-100'
-          : 'translate-x-4 opacity-0',
+        visible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0',
       ].join(' ')}
     >
       {/* Left accent bar */}
@@ -75,15 +78,13 @@ const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
       <div className="mt-0.5 pl-2">{v.icon}</div>
 
       {/* Message */}
-      <span className="flex-1 text-sm font-medium leading-snug text-white/90">
-        {message}
-      </span>
+      <span className="flex-1 text-sm font-medium leading-snug text-white/90">{message}</span>
 
       {/* Close button */}
       <button
         onClick={handleClose}
         aria-label="Dismiss notification"
-        className="mt-0.5 shrink-0 rounded-[6px] p-1 text-white/40 transition-colors duration-150 hover:bg-white/[0.08] hover:text-white/80"
+        className="mt-0.5 shrink-0 rounded-md p-1 text-white/40 transition-colors duration-150 hover:bg-white/[0.08] hover:text-white/80"
       >
         <X size={14} />
       </button>

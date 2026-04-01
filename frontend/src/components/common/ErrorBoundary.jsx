@@ -37,8 +37,7 @@ class ErrorBoundary extends Component {
       return (
         <div className="flex min-h-screen items-center justify-center bg-echo-base p-6">
           {/* Glass error card */}
-          <div className="w-full max-w-lg rounded-[16px] border border-white/[0.06] bg-echo-surface px-8 py-10 shadow-2xl">
-
+          <div className="w-full max-w-lg rounded-card border border-white/[0.06] bg-echo-surface px-8 py-10 shadow-2xl">
             {/* Icon */}
             <div className="mb-6 flex justify-center">
               <div className="flex size-16 items-center justify-center rounded-full border border-[#F87171]/20 bg-[#F87171]/[0.08]">
@@ -58,7 +57,7 @@ class ErrorBoundary extends Component {
 
             {/* Dev-only error details */}
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <div className="mb-6 max-h-56 overflow-auto rounded-[10px] border border-white/[0.06] bg-echo-base p-4">
+              <div className="mb-6 max-h-56 overflow-auto rounded-btn border border-white/[0.06] bg-echo-base p-4">
                 <p className="mb-2 font-mono text-xs text-[#F87171]">
                   <span className="font-semibold">Error: </span>
                   {this.state.error.toString()}
@@ -80,7 +79,7 @@ class ErrorBoundary extends Component {
             <div className="flex flex-wrap justify-center gap-3">
               <button
                 onClick={this.handleReset}
-                className="inline-flex items-center gap-2 rounded-[10px] bg-accent-primary px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-accent-primary/90"
+                className="inline-flex items-center gap-2 rounded-btn bg-accent-primary px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-accent-primary/90"
               >
                 <RefreshCw size={15} />
                 Try Again
@@ -88,7 +87,7 @@ class ErrorBoundary extends Component {
 
               <button
                 onClick={this.handleReload}
-                className="inline-flex items-center gap-2 rounded-[10px] border border-white/[0.06] bg-transparent px-5 py-2.5 text-sm font-medium text-white/70 transition-all duration-150 hover:bg-echo-surface-hover hover:text-white"
+                className="inline-flex items-center gap-2 rounded-btn border border-white/[0.06] bg-transparent px-5 py-2.5 text-sm font-medium text-white/70 transition-all duration-150 hover:bg-echo-surface-hover hover:text-white"
               >
                 Reload Page
               </button>

@@ -24,7 +24,6 @@ const { prisma } = require('./config/database');
 
 // Import services
 const storageService = require('./services/storage.service');
-const emailService = require('./services/email.service');
 const queueService = require('./services/queue.service');
 
 // Import routes

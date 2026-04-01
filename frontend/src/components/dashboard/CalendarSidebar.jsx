@@ -89,7 +89,7 @@ const CalendarSidebar = () => {
           {event.title}
         </h4>
         <div className="mb-4 flex flex-wrap items-center gap-4 font-mono text-xs text-slate-400">
-          <div className="flex items-center gap-1.5 bg-accent-primary/5 px-2 py-1 rounded-md text-accent-primary/90">
+          <div className="flex items-center gap-1.5 rounded-md bg-accent-primary/5 px-2 py-1 text-accent-primary/90">
             <CalendarIcon size={12} />
             <span>{format(startObj, 'MMM d')}</span>
           </div>
@@ -109,14 +109,14 @@ const CalendarSidebar = () => {
                 const initial = nameStr.substring(0, 1).toUpperCase();
                 return (
                   <Tooltip key={idx} content={attendee.name || attendee.email}>
-                    <div className="flex size-7 items-center justify-center rounded-full bg-echo-surface shadow-sm ring-2 ring-echo-base text-[10px] font-semibold text-accent-secondary">
+                    <div className="flex size-7 items-center justify-center rounded-full bg-echo-surface text-[10px] font-semibold text-accent-secondary shadow-sm ring-2 ring-echo-base">
                       {initial}
                     </div>
                   </Tooltip>
                 );
               })}
               {event.attendees.length > 3 && (
-                <div className="flex size-7 items-center justify-center rounded-full bg-echo-surface shadow-sm ring-2 ring-echo-base text-[10px] font-medium text-slate-400">
+                <div className="flex size-7 items-center justify-center rounded-full bg-echo-surface text-[10px] font-medium text-slate-400 shadow-sm ring-2 ring-echo-base">
                   +{event.attendees.length - 3}
                 </div>
               )}

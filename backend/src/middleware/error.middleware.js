@@ -231,6 +231,7 @@ const sendErrorProd = (err, req, res) => {
  * Global error handler middleware
  * Must be placed after all routes
  */
+// eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   // Set defaults
   err.statusCode = err.statusCode || 500;

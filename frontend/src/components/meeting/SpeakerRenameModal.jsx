@@ -1,4 +1,12 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@heroui/react';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+} from '@heroui/react';
 import { useState, useEffect } from 'react';
 
 const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave }) => {
@@ -16,18 +24,21 @@ const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave })
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={(open) => !open && onClose()} placement="center" classNames={{
-      base: 'bg-echo-surface border border-echo-border max-w-sm',
-      header: 'border-b border-echo-border text-white px-6 py-4',
-      body: 'py-6 px-6',
-      footer: 'border-t border-echo-border px-6 py-4',
-    }}>
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+      placement="center"
+      classNames={{
+        base: 'bg-echo-surface border border-echo-border max-w-sm',
+        header: 'border-b border-echo-border text-white px-6 py-4',
+        body: 'py-6 px-6',
+        footer: 'border-t border-echo-border px-6 py-4',
+      }}
+    >
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
-          Rename Speaker
-        </ModalHeader>
+        <ModalHeader className="flex flex-col gap-1">Rename Speaker</ModalHeader>
         <ModalBody>
-          <p className="text-sm text-slate-400 mb-2">
+          <p className="mb-2 text-sm text-slate-400">
             Enter a new name for <strong>{speakerId}</strong> across the entire transcript.
           </p>
           <Input

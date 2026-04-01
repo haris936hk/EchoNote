@@ -43,12 +43,12 @@ const ProfileSettings = () => {
             />
             <div className="flex-1">
               <h3 className="text-lg font-semibold">{user.name}</h3>
-              <p className="text-default-500 mt-1 flex items-center gap-2 text-sm">
+              <p className="mt-1 flex items-center gap-2 text-sm text-default-500">
                 <FiMail size={14} />
                 {user.email}
               </p>
               {user.emailVerified && (
-                <p className="text-success mt-1 flex items-center gap-1 text-xs">
+                <p className="mt-1 flex items-center gap-1 text-xs text-success">
                   <FiShield size={12} />
                   Email verified
                 </p>
@@ -63,7 +63,7 @@ const ProfileSettings = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Account Provider</p>
-                <p className="text-default-500 text-xs">Google OAuth</p>
+                <p className="text-xs text-default-500">Google OAuth</p>
               </div>
               <Button size="sm" variant="flat" isDisabled>
                 Connected
@@ -73,7 +73,7 @@ const ProfileSettings = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Member Since</p>
-                <p className="text-default-500 text-xs">
+                <p className="text-xs text-default-500">
                   {new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'long',
                     year: 'numeric',
@@ -97,7 +97,7 @@ const ProfileSettings = () => {
         <CardBody className="gap-4">
           <div>
             <p className="mb-2 text-sm font-medium">Data Storage</p>
-            <p className="text-default-500 text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed text-default-500">
               Your meeting recordings and transcripts are stored securely. Audio files are stored
               temporarily and can be automatically deleted based on your retention settings.
               Transcripts and summaries are retained until you manually delete them.
@@ -108,7 +108,7 @@ const ProfileSettings = () => {
 
           <div>
             <p className="mb-2 text-sm font-medium">Data Processing</p>
-            <p className="text-default-500 text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed text-default-500">
               Audio is processed using Whisper ASR for transcription, SpaCy for NLP, and EchoNote's
               custom AI model for summarization. Processing happens server-side and data is
               encrypted in transit and at rest.
@@ -117,11 +117,11 @@ const ProfileSettings = () => {
 
           <Divider />
 
-          <div className="bg-warning/10 border-warning/20 flex items-start gap-3 rounded-lg border p-3">
-            <FiShield className="text-warning mt-0.5 shrink-0" size={18} />
+          <div className="flex items-start gap-3 rounded-lg border border-warning/20 bg-warning/10 p-3">
+            <FiShield className="mt-0.5 shrink-0 text-warning" size={18} />
             <div className="flex-1">
-              <p className="text-warning text-xs font-medium">Privacy Notice</p>
-              <p className="text-warning/80 mt-1 text-xs">
+              <p className="text-xs font-medium text-warning">Privacy Notice</p>
+              <p className="mt-1 text-xs text-warning/80">
                 We never share your meeting data with third parties. All processing is done on our
                 secure servers.
               </p>
@@ -157,7 +157,7 @@ export const ProfileCard = () => {
           />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{user.name}</p>
-            <p className="text-default-500 truncate text-xs">{user.email}</p>
+            <p className="truncate text-xs text-default-500">{user.email}</p>
           </div>
         </div>
       </CardBody>

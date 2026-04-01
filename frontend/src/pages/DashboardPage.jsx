@@ -209,13 +209,13 @@ const DashboardPage = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowMobileSidebar(!showMobileSidebar)}
-            className="btn-secondary inline-flex items-center justify-center rounded-[10px] p-2.5 text-slate-400 transition-all hover:bg-echo-surface hover:text-white lg:hidden"
+            className="btn-secondary inline-flex items-center justify-center rounded-btn p-2.5 text-slate-400 transition-all hover:bg-echo-surface hover:text-white lg:hidden"
           >
             <CalendarIcon size={20} />
           </button>
           <button
             onClick={handleNewRecording}
-            className="btn-cta inline-flex w-fit items-center gap-2 rounded-[10px] px-5 py-2.5 text-sm font-bold transition-all hover:brightness-110"
+            className="btn-cta inline-flex w-fit items-center gap-2 rounded-btn px-5 py-2.5 text-sm font-bold transition-all hover:brightness-110"
           >
             <Mic size={16} />
             <span className="hidden sm:inline">New Recording</span>
@@ -235,7 +235,7 @@ const DashboardPage = () => {
           </p>
           <button
             onClick={handleNewRecording}
-            className="btn-cta inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
+            className="btn-cta inline-flex items-center gap-2 rounded-btn px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
           >
             <Plus size={16} />
             Record Your First Meeting
@@ -298,7 +298,7 @@ const DashboardPage = () => {
 
       {/* ── Processing Alert ── */}
       {stats.processing > 0 && (
-        <div className="flex items-center gap-3 rounded-[10px] border border-accent-primary/10 bg-accent-primary/5 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-btn border border-accent-primary/10 bg-accent-primary/5 px-4 py-3">
           <div className="ai-dot"></div>
           <p className="text-sm text-slate-300">
             {stats.processing} meeting{stats.processing !== 1 ? 's are' : ' is'} being processed…
@@ -308,7 +308,7 @@ const DashboardPage = () => {
 
       {/* ── Failed Alert ── */}
       {stats.failed > 0 && (
-        <div className="flex items-center gap-3 rounded-[10px] border border-red-500/10 bg-red-500/5 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-btn border border-red-500/10 bg-red-500/5 px-4 py-3">
           <AlertCircle size={16} className="shrink-0 text-red-400" />
           <p className="text-sm text-red-400">
             {stats.failed} meeting{stats.failed !== 1 ? 's' : ''} failed to process
@@ -358,21 +358,21 @@ const DashboardPage = () => {
             <div className="space-y-1">
               <button
                 onClick={handleNewRecording}
-                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
               >
                 <Plus size={16} className="text-accent-primary" />
                 New Recording
               </button>
               <button
                 onClick={() => navigate('/meetings')}
-                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
               >
                 <List size={16} className="text-accent-primary" />
                 View All Meetings
               </button>
               <button
                 onClick={() => navigate('/settings')}
-                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
               >
                 <Settings size={16} className="text-accent-primary" />
                 Settings

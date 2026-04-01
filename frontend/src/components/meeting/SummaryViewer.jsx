@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { LuSparkles as Sparkles, LuCheckCircle as CheckCircle, LuListChecks as ListChecks, LuArrowRight as ArrowRight, LuCopy as Copy, LuCheck as Check, LuUser as User, LuCalendar as Calendar, LuTag as Tag } from 'react-icons/lu';
+import {
+  LuSparkles as Sparkles,
+  LuCheckCircle as CheckCircle,
+  LuListChecks as ListChecks,
+  LuArrowRight as ArrowRight,
+  LuCopy as Copy,
+  LuCheck as Check,
+  LuUser as User,
+  LuCalendar as Calendar,
+  LuTag as Tag,
+} from 'react-icons/lu';
 import { sentimentColors } from '../../styles/theme';
 
 const SummaryViewer = ({ summary, meetingId }) => {
@@ -8,7 +18,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
 
   if (!summary) {
     return (
-      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-8 text-center">
+      <div className="rounded-card border border-echo-border bg-echo-surface p-8 text-center">
         <Sparkles size={32} className="mx-auto mb-3 text-slate-600" />
         <p className="text-slate-400">No summary available</p>
         <p className="mt-1 text-xs text-slate-600">Will appear after processing</p>
@@ -100,7 +110,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
     <div className="space-y-4">
       {/* ── Executive Summary ── */}
       {summaryData.executive && (
-        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles size={14} className="text-accent-primary" />
@@ -115,7 +125,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
 
       {/* ── Key Decisions ── */}
       {summaryData.decisions.length > 0 && (
-        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CheckCircle size={14} className="text-emerald-400" />
@@ -126,7 +136,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
           <div className="space-y-2">
             {summaryData.decisions.map((decision, i) => (
               <div key={i} className="flex items-start gap-2.5 pl-1">
-                <div className="bg-accent-primary mt-2 size-1 shrink-0 rounded-full"></div>
+                <div className="mt-2 size-1 shrink-0 rounded-full bg-accent-primary"></div>
                 <p className="text-sm leading-relaxed text-slate-300">{decision}</p>
               </div>
             ))}
@@ -136,7 +146,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
 
       {/* ── Action Items ── */}
       {summaryData.actions.length > 0 && (
-        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ListChecks size={14} className="text-amber-400" />
@@ -153,7 +163,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
               return (
                 <div
                   key={i}
-                  className={`bg-echo-base border-echo-border space-y-2 rounded-[10px] border p-3 ${isChecked ? 'opacity-50' : ''}`}
+                  className={`space-y-2 rounded-btn border border-echo-border bg-echo-base p-3 ${isChecked ? 'opacity-50' : ''}`}
                 >
                   <div className="flex items-start gap-2.5">
                     <div
@@ -185,12 +195,12 @@ const SummaryViewer = ({ summary, meetingId }) => {
                   {(action.assignee || action.deadline || action.priority) && (
                     <div className="flex flex-wrap items-center gap-1.5 pl-6">
                       {action.assignee && (
-                        <span className="bg-echo-surface-hover inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-slate-400">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-echo-surface-hover px-2 py-0.5 text-[10px] text-slate-400">
                           <User size={9} /> {action.assignee}
                         </span>
                       )}
                       {action.deadline && (
-                        <span className="bg-echo-surface-hover inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-slate-400">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-echo-surface-hover px-2 py-0.5 text-[10px] text-slate-400">
                           <Calendar size={9} /> {action.deadline}
                         </span>
                       )}
@@ -212,7 +222,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
 
       {/* ── Key Topics ── */}
       {summaryData.keyTopics.length > 0 && (
-        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Tag size={14} className="text-accent-secondary" />
@@ -223,7 +233,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
             {summaryData.keyTopics.map((topic, i) => (
               <span
                 key={i}
-                className="bg-accent-primary/10 text-accent-primary rounded-full px-2.5 py-1 text-xs font-medium"
+                className="rounded-full bg-accent-primary/10 px-2.5 py-1 text-xs font-medium text-accent-primary"
               >
                 {topic}
               </span>
@@ -233,7 +243,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
       )}
 
       {/* ── Sentiment ── */}
-      <div className="bg-echo-surface border-echo-border rounded-[16px] border p-4">
+      <div className="rounded-card border border-echo-border bg-echo-surface p-4">
         <div className="flex items-center gap-2">
           <span className={`size-2 rounded-full ${sentiment.dot}`}></span>
           <span className="text-sm font-medium text-slate-300">{sentiment.label}</span>
@@ -243,7 +253,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
 
       {/* ── Next Steps ── */}
       {summaryData.nextSteps.length > 0 && (
-        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-5">
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ArrowRight size={14} className="text-emerald-400" />

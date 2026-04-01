@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
-import { LuArrowLeft as ArrowLeft, LuDownload as Download, LuMoreVertical as MoreVertical, LuTrash2 as Trash2, LuPenLine as Edit3, LuCalendar as Calendar, LuClock as Clock, LuAlertCircle as AlertCircle, LuMic as Mic, LuCheckCircle as CheckCircle } from 'react-icons/lu';
+import {
+  LuArrowLeft as ArrowLeft,
+  LuDownload as Download,
+  LuMoreVertical as MoreVertical,
+  LuTrash2 as Trash2,
+  LuPenLine as Edit3,
+  LuCalendar as Calendar,
+  LuClock as Clock,
+  LuAlertCircle as AlertCircle,
+  LuMic as Mic,
+  LuCheckCircle as CheckCircle,
+} from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import SummaryViewer from '../components/meeting/SummaryViewer';
 import TranscriptViewer from '../components/meeting/TranscriptViewer';
@@ -46,7 +57,7 @@ const MeetingDetailPage = () => {
       });
 
       if (!response.ok) throw new Error('Failed to update speaker');
-      
+
       const result = await response.json();
       if (result.success) {
         // Optimistic UI update or refresh meeting data
@@ -203,10 +214,7 @@ const MeetingDetailPage = () => {
       <div className="py-20 text-center">
         <p className="mb-2 text-xl font-semibold text-white">Meeting Not Found</p>
         <p className="mb-6 text-slate-400">This meeting doesn't exist or has been deleted.</p>
-        <button
-          onClick={handleBack}
-          className="btn-cta rounded-[10px] px-6 py-2.5 text-sm font-bold"
-        >
+        <button onClick={handleBack} className="btn-cta rounded-btn px-6 py-2.5 text-sm font-bold">
           Back to Dashboard
         </button>
       </div>
@@ -269,7 +277,7 @@ const MeetingDetailPage = () => {
           {currentMeeting.audioUrl && (
             <button
               onClick={handleDownloadAudio}
-              className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium"
+              className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium"
             >
               <Download size={14} />
               Download Audio
@@ -277,13 +285,13 @@ const MeetingDetailPage = () => {
           )}
           <Dropdown>
             <DropdownTrigger>
-              <button className="border-echo-border hover:bg-echo-surface-hover flex size-9 items-center justify-center rounded-[10px] border text-slate-400 transition-all hover:text-white">
+              <button className="flex size-9 items-center justify-center rounded-btn border border-echo-border text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white">
                 <MoreVertical size={16} />
               </button>
             </DropdownTrigger>
             <DropdownMenu
               aria-label="Meeting actions"
-              className="bg-echo-elevated border-echo-border border"
+              className="border border-echo-border bg-echo-elevated"
             >
               <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
                 Edit Meeting
@@ -312,7 +320,7 @@ const MeetingDetailPage = () => {
 
       {/* ── Processing State ── */}
       {isProcessing && (
-        <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+        <div className="rounded-card border border-echo-border bg-echo-surface p-6">
           <div className="mb-6 flex items-center gap-3">
             <div className="ai-dot"></div>
             <p className="text-sm font-medium text-white">Your meeting is being processed…</p>
@@ -324,7 +332,6 @@ const MeetingDetailPage = () => {
               const currentIdx = getCurrentStepIndex();
               const isComplete = index < currentIdx;
               const isActive = index === currentIdx;
-              const _isPending = index > currentIdx;
 
               return (
                 <div key={step.key} className="flex flex-1 items-center gap-2">
@@ -334,7 +341,7 @@ const MeetingDetailPage = () => {
                         isComplete
                           ? 'bg-emerald-500/20 text-emerald-400'
                           : isActive
-                            ? 'bg-accent-primary/20 text-accent-primary animate-ai-glow'
+                            ? 'animate-ai-glow bg-accent-primary/20 text-accent-primary'
                             : 'bg-echo-surface-hover text-slate-600'
                       }`}
                     >
@@ -367,7 +374,7 @@ const MeetingDetailPage = () => {
 
       {/* ── Failed State ── */}
       {isFailed && (
-        <div className="flex items-center gap-3 rounded-[16px] border border-red-500/10 bg-red-500/5 px-5 py-4">
+        <div className="flex items-center gap-3 rounded-card border border-red-500/10 bg-red-500/5 px-5 py-4">
           <AlertCircle size={18} className="shrink-0 text-red-400" />
           <div>
             <p className="text-sm font-medium text-red-400">Processing Failed</p>
@@ -386,7 +393,7 @@ const MeetingDetailPage = () => {
           <div className="space-y-4 lg:col-span-3">
             {/* Audio Player */}
             {currentMeeting.audioUrl && (
-              <div className="bg-echo-surface border-echo-border rounded-[16px] border p-4">
+              <div className="rounded-card border border-echo-border bg-echo-surface p-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Mic size={14} className="text-accent-primary" />
                   <span className="text-xs font-medium text-slate-400">Audio Recording</span>
@@ -396,7 +403,7 @@ const MeetingDetailPage = () => {
             )}
 
             {/* Transcript */}
-            <div className="bg-echo-surface border-echo-border rounded-[16px] border p-6">
+            <div className="rounded-card border border-echo-border bg-echo-surface p-6">
               <TranscriptViewer
                 transcript={currentMeeting.transcript}
                 transcriptSegments={currentMeeting.transcriptSegments}

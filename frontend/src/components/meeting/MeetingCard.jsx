@@ -1,5 +1,13 @@
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
-import { LuClock as Clock, LuMoreVertical as MoreVertical, LuEye as Eye, LuTrash2 as Trash2, LuDownload as Download, LuPenLine as Edit3, LuCalendar as Calendar } from 'react-icons/lu';
+import {
+  LuClock as Clock,
+  LuMoreVertical as MoreVertical,
+  LuEye as Eye,
+  LuTrash2 as Trash2,
+  LuDownload as Download,
+  LuPenLine as Edit3,
+  LuCalendar as Calendar,
+} from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import { CategoryBadge } from './CategoryFilter';
 import { categoryColors, statusColors } from '../../styles/theme';
@@ -54,7 +62,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
     <Dropdown placement="bottom-end">
       <DropdownTrigger>
         <button
-          className="hover:bg-echo-surface-hover flex size-7 items-center justify-center rounded-md text-slate-500 opacity-0 transition-all hover:text-white group-hover:opacity-100"
+          className="flex size-7 items-center justify-center rounded-md text-slate-500 opacity-0 transition-all hover:bg-echo-surface-hover hover:text-white group-hover:opacity-100"
           aria-label="Meeting actions"
         >
           <MoreVertical size={14} />
@@ -62,7 +70,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
       </DropdownTrigger>
       <DropdownMenu
         aria-label="Meeting actions"
-        className="bg-echo-elevated border-echo-border border"
+        className="border border-echo-border bg-echo-elevated"
       >
         {isCompleted && (
           <DropdownItem key="view" startContent={<Eye size={14} />} onPress={handleView}>
@@ -95,7 +103,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
 
   return (
     <div
-      className={`bg-echo-surface border-echo-border card-hover group relative overflow-hidden rounded-[16px] border ${
+      className={`card-hover group relative overflow-hidden rounded-card border border-echo-border bg-echo-surface ${
         isCompleted ? 'cursor-pointer' : ''
       }`}
       onClick={isCompleted ? handleView : undefined}
@@ -123,7 +131,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
         </div>
 
         {/* Title */}
-        <h3 className="truncate-2 group-hover:text-accent-primary text-sm font-semibold leading-snug text-white transition-colors">
+        <h3 className="truncate-2 text-sm font-semibold leading-snug text-white transition-colors group-hover:text-accent-primary">
           {meeting.title}
         </h3>
 
@@ -157,7 +165,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
             {topics.map((topic, i) => (
               <span
                 key={i}
-                className="bg-accent-primary/10 text-accent-primary rounded-full px-2 py-0.5 text-[10px] font-medium"
+                className="rounded-full bg-accent-primary/10 px-2 py-0.5 text-[10px] font-medium text-accent-primary"
               >
                 {topic}
               </span>
@@ -167,7 +175,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
 
         {/* Processing indicator */}
         {isProcessing && (
-          <div className="flex items-center gap-2 rounded-[8px] border border-amber-500/10 bg-amber-500/5 px-3 py-2">
+          <div className="flex items-center gap-2 rounded-lg border border-amber-500/10 bg-amber-500/5 px-3 py-2">
             <div className="ai-dot"></div>
             <span className="text-[11px] font-medium text-amber-400/80">
               Processing your meeting...
@@ -177,7 +185,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
 
         {/* Failed indicator */}
         {isFailed && (
-          <div className="rounded-[8px] border border-red-500/10 bg-red-500/5 px-3 py-2">
+          <div className="rounded-lg border border-red-500/10 bg-red-500/5 px-3 py-2">
             <span className="text-[11px] text-red-400/80">
               Processing failed. Try uploading again.
             </span>

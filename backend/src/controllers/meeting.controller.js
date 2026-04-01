@@ -1149,7 +1149,7 @@ const exportAllMeetings = async (req, res) => {
     tempZipPath = path.join(tempDir, `export_${userId}_${Date.now()}.zip`);
 
     // Create ZIP archive
-    await new Promise(async (resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const outputStream = fs.createWriteStream(tempZipPath);
       const archive = archiver('zip', { zlib: { level: 6 } }); // Level 6 for balance of speed/compression
 
@@ -1158,99 +1158,107 @@ const exportAllMeetings = async (req, res) => {
       archive.pipe(outputStream);
 
       // Process each meeting
-      for (const meeting of meetings) {
+      (async () => {
         try {
-          // Sanitize meeting title for folder name
-          const folderName = meeting.title
-            .replace(/[<>:"/\\|?*]/g, '_')
-            .replace(/\s+/g, '_')
-            .substring(0, 50);
+          for (const meeting of meetings) {
+            try {
+              // Sanitize meeting title for folder name
+              const folderName = meeting.title
+                .replace(/[<>:"/\\|?*]/g, '_')
+                .replace(/\s+/g, '_')
+                .substring(0, 50);
 
-          const meetingFolder = `${folderName}_${meeting.id.substring(0, 8)}`;
+              const meetingFolder = `${folderName}_${meeting.id.substring(0, 8)}`;
 
-          // Get audio and convert to MP3
-          const audioData = await meetingService.getAudioDownloadUrl(meeting.id, userId);
-          if (audioData && audioData.url) {
-            let audioPath = audioData.url;
+              // Get audio and convert to MP3
+              const audioData = await meetingService.getAudioDownloadUrl(meeting.id, userId);
+              if (audioData && audioData.url) {
+                let audioPath = audioData.url;
 
-            // Handle Supabase URLs
-            if (audioData.isRemote || audioData.url.startsWith('http')) {
-              const tempAudioPath = path.join(tempDir, `export_${meeting.id}_audio.wav`);
-              const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
-                audioData.url,
-                tempAudioPath
+                // Handle Supabase URLs
+                if (audioData.isRemote || audioData.url.startsWith('http')) {
+                  const tempAudioPath = path.join(tempDir, `export_${meeting.id}_audio.wav`);
+                  const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
+                    audioData.url,
+                    tempAudioPath
+                  );
+                  if (downloadResult.success) {
+                    audioPath = tempAudioPath;
+                    tempFiles.push(tempAudioPath);
+                  } else {
+                    logger.warn(`Failed to download audio for meeting ${meeting.id}`);
+                    audioPath = null;
+                  }
+                }
+
+                if (audioPath && fs.existsSync(audioPath)) {
+                  const tempMp3Path = path.join(tempDir, `export_${meeting.id}_audio.mp3`);
+                  const conversionResult = await convertWavToMp3(audioPath, tempMp3Path);
+                  if (conversionResult.success) {
+                    archive.file(tempMp3Path, { name: `${meetingFolder}/audio.mp3` });
+                    tempFiles.push(tempMp3Path);
+                  }
+                }
+              }
+
+              // Get transcript
+              const transcriptData = await meetingService.getTranscript(meeting.id, userId);
+              if (transcriptData && transcriptData.text) {
+                const transcriptText = `Meeting: ${meeting.title}\nDate: ${new Date(meeting.createdAt).toLocaleString()}\nCategory: ${meeting.category}\n\n${'='.repeat(60)}\n\n${transcriptData.text}`;
+                archive.append(transcriptText, { name: `${meetingFolder}/transcript.txt` });
+              }
+
+              // Get summary
+              const summary = await meetingService.getSummary(meeting.id, userId);
+              if (summary) {
+                let summaryText = `Meeting Summary: ${meeting.title}\n`;
+                summaryText += `Category: ${meeting.category}\n`;
+                summaryText += `Date: ${new Date(meeting.createdAt).toLocaleString()}\n\n`;
+                summaryText += `${'='.repeat(60)}\n\n`;
+                summaryText += `EXECUTIVE SUMMARY\n${'-'.repeat(40)}\n${summary.executiveSummary || 'N/A'}\n\n`;
+
+                if (Array.isArray(summary.keyDecisions) && summary.keyDecisions.length > 0) {
+                  summaryText += `KEY DECISIONS\n${'-'.repeat(40)}\n`;
+                  summary.keyDecisions.forEach((decision, i) => {
+                    summaryText += `${i + 1}. ${decision}\n`;
+                  });
+                  summaryText += '\n';
+                }
+
+                summaryText += `ACTION ITEMS\n${'-'.repeat(40)}\n`;
+                if (summary.actionItems && summary.actionItems.length > 0) {
+                  summary.actionItems.forEach((item, i) => {
+                    summaryText += `${i + 1}. ${item.task}`;
+                    if (item.assignee) summaryText += ` (${item.assignee})`;
+                    if (item.deadline) summaryText += ` - Due: ${item.deadline}`;
+                    summaryText += '\n';
+                  });
+                } else {
+                  summaryText += 'No action items recorded.\n';
+                }
+
+                if (Array.isArray(summary.nextSteps) && summary.nextSteps.length > 0) {
+                  summaryText += `\nNEXT STEPS\n${'-'.repeat(40)}\n`;
+                  summary.nextSteps.forEach((step, i) => {
+                    summaryText += `${i + 1}. ${step}\n`;
+                  });
+                }
+
+                archive.append(summaryText, { name: `${meetingFolder}/summary.txt` });
+              }
+            } catch (meetingError) {
+              logger.warn(
+                `Error processing meeting ${meeting.id} for export: ${meetingError.message}`
               );
-              if (downloadResult.success) {
-                audioPath = tempAudioPath;
-                tempFiles.push(tempAudioPath);
-              } else {
-                logger.warn(`Failed to download audio for meeting ${meeting.id}`);
-                audioPath = null;
-              }
-            }
-
-            if (audioPath && fs.existsSync(audioPath)) {
-              const tempMp3Path = path.join(tempDir, `export_${meeting.id}_audio.mp3`);
-              const conversionResult = await convertWavToMp3(audioPath, tempMp3Path);
-              if (conversionResult.success) {
-                archive.file(tempMp3Path, { name: `${meetingFolder}/audio.mp3` });
-                tempFiles.push(tempMp3Path);
-              }
+              // Continue with other meetings
             }
           }
 
-          // Get transcript
-          const transcriptData = await meetingService.getTranscript(meeting.id, userId);
-          if (transcriptData && transcriptData.text) {
-            const transcriptText = `Meeting: ${meeting.title}\nDate: ${new Date(meeting.createdAt).toLocaleString()}\nCategory: ${meeting.category}\n\n${'='.repeat(60)}\n\n${transcriptData.text}`;
-            archive.append(transcriptText, { name: `${meetingFolder}/transcript.txt` });
-          }
-
-          // Get summary
-          const summary = await meetingService.getSummary(meeting.id, userId);
-          if (summary) {
-            let summaryText = `Meeting Summary: ${meeting.title}\n`;
-            summaryText += `Category: ${meeting.category}\n`;
-            summaryText += `Date: ${new Date(meeting.createdAt).toLocaleString()}\n\n`;
-            summaryText += `${'='.repeat(60)}\n\n`;
-            summaryText += `EXECUTIVE SUMMARY\n${'-'.repeat(40)}\n${summary.executiveSummary || 'N/A'}\n\n`;
-
-            if (Array.isArray(summary.keyDecisions) && summary.keyDecisions.length > 0) {
-              summaryText += `KEY DECISIONS\n${'-'.repeat(40)}\n`;
-              summary.keyDecisions.forEach((decision, i) => {
-                summaryText += `${i + 1}. ${decision}\n`;
-              });
-              summaryText += '\n';
-            }
-
-            summaryText += `ACTION ITEMS\n${'-'.repeat(40)}\n`;
-            if (summary.actionItems && summary.actionItems.length > 0) {
-              summary.actionItems.forEach((item, i) => {
-                summaryText += `${i + 1}. ${item.task}`;
-                if (item.assignee) summaryText += ` (${item.assignee})`;
-                if (item.deadline) summaryText += ` - Due: ${item.deadline}`;
-                summaryText += '\n';
-              });
-            } else {
-              summaryText += 'No action items recorded.\n';
-            }
-
-            if (Array.isArray(summary.nextSteps) && summary.nextSteps.length > 0) {
-              summaryText += `\nNEXT STEPS\n${'-'.repeat(40)}\n`;
-              summary.nextSteps.forEach((step, i) => {
-                summaryText += `${i + 1}. ${step}\n`;
-              });
-            }
-
-            archive.append(summaryText, { name: `${meetingFolder}/summary.txt` });
-          }
-        } catch (meetingError) {
-          logger.warn(`Error processing meeting ${meeting.id} for export: ${meetingError.message}`);
-          // Continue with other meetings
+          archive.finalize();
+        } catch (err) {
+          reject(err);
         }
-      }
-
-      archive.finalize();
+      })();
     });
 
     // Stream ZIP to client
@@ -1269,13 +1277,17 @@ const exportAllMeetings = async (req, res) => {
         if (fs.existsSync(file)) {
           try {
             fs.unlinkSync(file);
-          } catch (e) {}
+          } catch (e) {
+            // ignore
+          }
         }
       });
       if (tempZipPath && fs.existsSync(tempZipPath)) {
         try {
           fs.unlinkSync(tempZipPath);
-        } catch (e) {}
+        } catch (e) {
+          // ignore
+        }
       }
     });
 
@@ -1286,13 +1298,17 @@ const exportAllMeetings = async (req, res) => {
         if (fs.existsSync(file)) {
           try {
             fs.unlinkSync(file);
-          } catch (e) {}
+          } catch (e) {
+            // ignore
+          }
         }
       });
       if (tempZipPath && fs.existsSync(tempZipPath)) {
         try {
           fs.unlinkSync(tempZipPath);
-        } catch (e) {}
+        } catch (e) {
+          // ignore
+        }
       }
       if (!res.headersSent) {
         res.status(500).json({
@@ -1308,13 +1324,17 @@ const exportAllMeetings = async (req, res) => {
       if (fs.existsSync(file)) {
         try {
           fs.unlinkSync(file);
-        } catch (e) {}
+        } catch (e) {
+          // ignore
+        }
       }
     });
     if (tempZipPath && fs.existsSync(tempZipPath)) {
       try {
         fs.unlinkSync(tempZipPath);
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
     }
     return res.status(500).json({
       success: false,

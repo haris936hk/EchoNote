@@ -520,7 +520,7 @@ export const formatList = (array, conjunction = 'and') => {
 // EXPORT ALL
 // ============================================
 
-export default {
+const formatHelpers = {
   // Date & Time
   formatDate,
   formatDateTime,
@@ -572,3 +572,5 @@ export default {
   // Array
   formatList,
 };
+
+export default formatHelpers;

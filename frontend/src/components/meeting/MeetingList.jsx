@@ -29,7 +29,7 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
   if (meetings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-16">
-        <div className="bg-echo-surface mb-4 flex size-20 items-center justify-center rounded-full">
+        <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-echo-surface">
           <List size={32} className="text-slate-600" />
         </div>
         <h3 className="mb-2 text-lg font-semibold text-white">No meetings found</h3>
@@ -47,10 +47,10 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
         <p className="font-mono text-xs text-slate-500">
           {startIndex + 1}–{Math.min(endIndex, meetings.length)} of {meetings.length}
         </p>
-        <div className="bg-echo-surface border-echo-border flex gap-1 rounded-[10px] border p-1">
+        <div className="flex gap-1 rounded-btn border border-echo-border bg-echo-surface p-1">
           <button
             onClick={() => setViewMode('grid')}
-            className={`flex size-8 items-center justify-center rounded-[8px] transition-all ${
+            className={`flex size-8 items-center justify-center rounded-lg transition-all ${
               viewMode === 'grid'
                 ? 'bg-accent-primary text-white'
                 : 'text-slate-500 hover:text-white'
@@ -61,7 +61,7 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`flex size-8 items-center justify-center rounded-[8px] transition-all ${
+            className={`flex size-8 items-center justify-center rounded-lg transition-all ${
               viewMode === 'list'
                 ? 'bg-accent-primary text-white'
                 : 'text-slate-500 hover:text-white'

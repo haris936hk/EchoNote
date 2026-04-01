@@ -228,12 +228,8 @@ const revokeGoogleAccess = async (req, res) => {
   try {
     // This would revoke Google OAuth permissions
     // For now, just logout
-    const result = await authService.logout(req.userId);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Google access revoked successfully',
-    });
+    await authService.logout(req.userId);
+    res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
     console.error('Revoke Google access error:', error);
     return res.status(500).json({

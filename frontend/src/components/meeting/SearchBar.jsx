@@ -36,7 +36,7 @@ const SearchBar = ({
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
-        className="input-echo w-full !pl-12 !pr-10 py-2.5 text-sm"
+        className="input-echo w-full py-2.5 !pl-12 !pr-10 text-sm"
       />
       {localValue && (
         <button

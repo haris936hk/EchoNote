@@ -15,7 +15,7 @@ const NotFoundPage = () => {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link
             to="/dashboard"
-            className="text-accent-primary flex items-center gap-2 transition-opacity hover:opacity-80"
+            className="flex items-center gap-2 text-accent-primary transition-opacity hover:opacity-80"
           >
             <Mic size={20} />
             <span className="text-xl font-bold tracking-tighter">EchoNote</span>
@@ -33,7 +33,7 @@ const NotFoundPage = () => {
               Meetings
             </Link>
           </div>
-          <div className="bg-accent-primary/20 border-accent-primary/30 text-accent-primary flex size-8 items-center justify-center rounded-full border">
+          <div className="flex size-8 items-center justify-center rounded-full border border-accent-primary/30 bg-accent-primary/20 text-accent-primary">
             <Mic size={14} />
           </div>
         </div>
@@ -66,13 +66,13 @@ const NotFoundPage = () => {
         <div className="flex items-center gap-4">
           <Link
             to="/dashboard"
-            className="btn-cta inline-flex items-center rounded-[10px] px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
+            className="btn-cta inline-flex items-center rounded-btn px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
           >
             Go to Dashboard
           </Link>
           <button
             onClick={() => navigate(-1)}
-            className="btn-ghost inline-flex items-center rounded-[10px] px-6 py-3 text-sm font-medium"
+            className="btn-ghost inline-flex items-center rounded-btn px-6 py-3 text-sm font-medium"
           >
             Go Back
           </button>
