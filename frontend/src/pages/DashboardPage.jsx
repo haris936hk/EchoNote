@@ -371,6 +371,13 @@ const DashboardPage = () => {
                 View All Meetings
               </button>
               <button
+                onClick={() => navigate('/tasks')}
+                className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+              >
+                <CheckCircle size={16} className="text-accent-primary" />
+                View Action Items
+              </button>
+              <button
                 onClick={() => navigate('/settings')}
                 className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
               >

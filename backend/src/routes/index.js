@@ -9,6 +9,7 @@ const authRoutes = require('./auth.routes');
 const meetingRoutes = require('./meeting.routes');
 const userRoutes = require('./user.routes');
 const calendarRoutes = require('./calendar.routes');
+const taskRoutes = require('./task.routes');
 
 // API version and status
 const API_VERSION = '1.0.0';
@@ -381,6 +382,7 @@ router.use('/auth', authRoutes);
 router.use('/meetings', meetingRoutes);
 router.use('/users', userRoutes);
 router.use('/calendar', calendarRoutes);
+router.use('/tasks', taskRoutes);
 
 /**
  * Helper function to format uptime

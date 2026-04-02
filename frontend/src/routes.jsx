@@ -13,8 +13,10 @@ import DashboardPage from './pages/DashboardPage';
 import RecordPage from './pages/RecordPage';
 import MeetingsPage from './pages/MeetingsPage';
 import MeetingDetailPage from './pages/MeetingDetailPage';
+import CalendarPage from './pages/CalendarPage';
 import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import Tasks from './pages/Tasks';
 
 /**
  * Public Route Component
@@ -79,6 +81,16 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/calendar"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CalendarPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/meetings"
         element={
           <ProtectedRoute>
@@ -104,6 +116,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <MainLayout>
               <SettingsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tasks"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Tasks />
             </MainLayout>
           </ProtectedRoute>
         }

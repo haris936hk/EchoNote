@@ -97,10 +97,13 @@ const getEvents = async (req, res) => {
     // 5. Query Calendar API
     const calendar = google.calendar({ version: 'v3', auth: client });
 
-    // Fetch from now to +7 days
+    // Fetch from now to +X days (default 7, max 60 to prevent massive payloads)
+    const daysToFetch = parseInt(req.query.days) || 7;
+    const maxDays = Math.min(daysToFetch, 60);
+
     const timeMin = new Date();
     const timeMax = new Date();
-    timeMax.setDate(timeMax.getDate() + 7);
+    timeMax.setDate(timeMax.getDate() + maxDays);
 
     try {
       const response = await calendar.events.list({
@@ -135,6 +138,9 @@ const getEvents = async (req, res) => {
           end,
           attendees,
           hangoutLink: event.hangoutLink || null,
+          location: event.location || null,
+          description: event.description || null,
+          htmlLink: event.htmlLink || null,
         };
       });
 

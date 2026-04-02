@@ -12,28 +12,29 @@ datasource db {
 
 // User model - Google OAuth only
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String?
-  picture       String?   // Google profile picture URL
-  googleId      String    @unique
-  googleAccessToken String? @db.Text
-  googleRefreshToken String? @db.Text
-  googleTokenExpiry DateTime?
-  refreshToken  String?   @db.Text // JWT refresh token
-  
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  name               String?
+  picture            String? // Google profile picture URL
+  googleId           String    @unique
+  googleAccessToken  String?   @db.Text
+  googleRefreshToken String?   @db.Text
+  googleTokenExpiry  DateTime?
+  refreshToken       String?   @db.Text // JWT refresh token
+
   // Settings
-  autoDeleteDays Int?     // Auto-delete audio after X days (null = never delete)
+  autoDeleteDays     Int? // Auto-delete audio after X days (null = never delete)
   emailNotifications Boolean @default(true)
-  
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastLoginAt   DateTime  @default(now())
-  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastLoginAt DateTime @default(now())
+
   // Relations
-  meetings      Meeting[]
-  
+  meetings    Meeting[]
+  actionItems ActionItem[]
+
   @@index([email])
   @@index([googleId])
   @@map("users")
@@ -42,7 +43,7 @@ model User {
 // Meeting status enum
 enum MeetingStatus {
   UPLOADING
-  PENDING           // Queued, waiting for worker
+  PENDING // Queued, waiting for worker
   PROCESSING_AUDIO
   TRANSCRIBING
   PROCESSING_NLP
@@ -60,73 +61,81 @@ enum MeetingCategory {
   OTHER
 }
 
+// Task status enum
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
 // Meeting model - Core entity
 model Meeting {
-  id            String          @id @default(uuid())
-  title         String
-  description   String?         @db.Text
-  category      MeetingCategory @default(OTHER)
-  status        MeetingStatus   @default(UPLOADING)
-  
+  id          String          @id @default(uuid())
+  title       String
+  description String?         @db.Text
+  category    MeetingCategory @default(OTHER)
+  status      MeetingStatus   @default(UPLOADING)
+
   // Google Calendar Integration
   googleEventId String?
   attendees     Json?
-  
+
   // Audio metadata
-  audioUrl      String?         // Processed audio URL (Supabase storage)
-  audioSize     Int?            // File size in bytes
-  audioDuration Float?          // Duration in seconds (max 180)
-  audioFormat   String?         // e.g., "mp3", "wav"
-  
+  audioUrl      String? // Processed audio URL (Supabase storage)
+  audioSize     Int? // File size in bytes
+  audioDuration Float? // Duration in seconds (max 180)
+  audioFormat   String? // e.g., "mp3", "wav"
+
   // Processing results - Full transcript with embedded NLP features
-  transcriptText String?        @db.Text // Full transcript text (fallback or SpaCy feed)
-  transcriptSegments Json?      // Structured arrays of [{start, end, text, speaker}]
-  speakerMap Json?              // User-defined speaker names e.g., {"SPEAKER_00": "John"}
+  transcriptText      String? @db.Text // Full transcript text (fallback or SpaCy feed)
+  transcriptSegments  Json? // Structured arrays of [{start, end, text, speaker}]
+  speakerMap          Json? // User-defined speaker names e.g., {"SPEAKER_00": "John"}
   transcriptWordCount Int?
 
   // NLP Features (extracted from transcript)
-  nlpEntities   String?         @db.Text // Named entities (e.g., "John Doe (PERSON), Q4 2024 (DATE)")
-  nlpKeyPhrases String?         @db.Text // Key phrases (e.g., "you guys, all ages, a deal")
-  nlpActionPatterns String?     @db.Text // Action patterns (e.g., "cut: it, love: you")
-  nlpSentiment  String?         // Sentiment label (positive/negative/neutral)
-  nlpSentimentScore Float?      // Sentiment polarity score
-  nlpTopics     Json?           // Array of main topics
+  nlpEntities       String? @db.Text // Named entities (e.g., "John Doe (PERSON), Q4 2024 (DATE)")
+  nlpKeyPhrases     String? @db.Text // Key phrases (e.g., "you guys, all ages, a deal")
+  nlpActionPatterns String? @db.Text // Action patterns (e.g., "cut: it, love: you")
+  nlpSentiment      String? // Sentiment label (positive/negative/neutral)
+  nlpSentimentScore Float? // Sentiment polarity score
+  nlpTopics         Json? // Array of main topics
 
   // AI Summary (structured format matching dataset)
-  summaryExecutive String?      @db.Text // Executive summary (2-3 sentences)
-  summaryKeyDecisions String?   @db.Text // Key decisions made
-  summaryActionItems Json?      // [{task, assignee?, deadline?, priority?}]
-  summaryNextSteps String?      @db.Text // Next steps
-  summaryKeyTopics Json?        // Array of key topics from summary
-  summarySentiment String?      // Overall sentiment from summary
-  
+  summaryExecutive    String? @db.Text // Executive summary (2-3 sentences)
+  summaryKeyDecisions String? @db.Text // Key decisions made
+  summaryActionItems  Json? // [{task, assignee?, deadline?, priority?}]
+  summaryNextSteps    String? @db.Text // Next steps
+  summaryKeyTopics    Json? // Array of key topics from summary
+  summarySentiment    String? // Overall sentiment from summary
+
   // Processing metadata
-  processingError String?       @db.Text
-  processingStartedAt DateTime?
+  processingError       String?   @db.Text
+  processingStartedAt   DateTime?
   processingCompletedAt DateTime?
-  processingDuration Float?     // Total processing time in seconds
+  processingDuration    Float? // Total processing time in seconds
 
   // Queue tracking
-  retryCount    Int         @default(0) // Number of retry attempts
-  queuedAt      DateTime?   // When added to queue
-  lastRetryAt   DateTime?   // Last retry attempt timestamp
+  retryCount  Int       @default(0) // Number of retry attempts
+  queuedAt    DateTime? // When added to queue
+  lastRetryAt DateTime? // Last retry attempt timestamp
 
   // Audio deletion tracking
-  audioDeletedAt DateTime?      // When audio was auto-deleted
+  audioDeletedAt      DateTime? // When audio was auto-deleted
   shouldDeleteAudioAt DateTime? // Scheduled deletion date
-  
+
   // Email notification
-  emailSent      Boolean        @default(false)
-  emailSentAt    DateTime?
-  
+  emailSent   Boolean   @default(false)
+  emailSentAt DateTime?
+
   // Timestamps
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  userId         String
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actionItems ActionItem[]
+
   @@index([userId])
   @@index([status])
   @@index([category])
@@ -138,14 +147,14 @@ model Meeting {
 
 // Processing log for debugging and analytics
 model ProcessingLog {
-  id            String   @id @default(uuid())
-  meetingId     String
-  stage         String   // "audio", "transcription", "nlp", "summary"
-  status        String   // "started", "completed", "failed"
-  details       Json?    // Additional details, errors, metrics
-  duration      Float?   // Stage duration in seconds
-  createdAt     DateTime @default(now())
-  
+  id        String   @id @default(uuid())
+  meetingId String
+  stage     String // "audio", "transcription", "nlp", "summary"
+  status    String // "started", "completed", "failed"
+  details   Json? // Additional details, errors, metrics
+  duration  Float? // Stage duration in seconds
+  createdAt DateTime @default(now())
+
   @@index([meetingId])
   @@index([stage])
   @@index([createdAt])
@@ -154,14 +163,38 @@ model ProcessingLog {
 
 // User activity tracking (optional for analytics)
 model UserActivity {
-  id            String   @id @default(uuid())
-  userId        String
-  action        String   // "login", "record", "view_meeting", "download"
-  metadata      Json?    // Additional context
-  createdAt     DateTime @default(now())
-  
+  id        String   @id @default(uuid())
+  userId    String
+  action    String // "login", "record", "view_meeting", "download"
+  metadata  Json? // Additional context
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@index([action])
   @@index([createdAt])
   @@map("user_activities")
+}
+
+// ActionItem model - Linked to Meetings and Users for Kanban board
+model ActionItem {
+  id       String     @id @default(uuid())
+  task     String     @db.Text
+  assignee String?
+  deadline String?
+  priority String?    @default("medium")
+  status   TaskStatus @default(TODO)
+
+  meetingId String
+  meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([meetingId])
+  @@index([userId])
+  @@index([status])
+  @@map("action_items")
 }

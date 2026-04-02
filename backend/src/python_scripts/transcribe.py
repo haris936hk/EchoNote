@@ -19,11 +19,24 @@ from utils import Logger
 
 warnings.filterwarnings('ignore')
 
+# ── CPU thread tuning ────────────────────────────────────────────────────────
+# Set BEFORE any CTranslate2/torch imports take effect.
+# Half of physical cores avoids hyperthread contention on OMP workloads.
+import multiprocessing
+_PHYSICAL_CORES = multiprocessing.cpu_count()
+_OMP_THREADS = str(max(1, _PHYSICAL_CORES // 2))  # e.g. 8 on a 16-core box
+os.environ.setdefault("OMP_NUM_THREADS", _OMP_THREADS)
+os.environ.setdefault("MKL_NUM_THREADS", _OMP_THREADS)
+# ─────────────────────────────────────────────────────────────────────────────
+
 # WhisperX configuration
 MODEL_NAME = "base.en"  # Options: tiny.en, base.en, small.en, medium.en, large
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 COMPUTE_TYPE = "float16" if DEVICE == "cuda" else "int8"
-BATCH_SIZE = 16
+# BATCH_SIZE: 16 is GPU-optimal; CPU int8 performs best at 4-8 (avoids memory pressure)
+BATCH_SIZE = 4 if DEVICE == "cpu" else 16
+# CTranslate2 cpu_threads: use half of physical cores (same as OMP)
+CPU_THREADS = max(1, _PHYSICAL_CORES // 2)
 
 class WhisperXTranscriber:
     """WhisperX transcription with alignment and diarization"""
@@ -55,9 +68,15 @@ class WhisperXTranscriber:
             start_time = time.time()
             
             # 1. Load audio and transcribe
-            print(f"🤖 Loading WhisperX model: {self.model_name}", file=sys.stderr)
+            print(f"🤖 Loading WhisperX model: {self.model_name} ({DEVICE}, {COMPUTE_TYPE}, threads={CPU_THREADS})", file=sys.stderr)
             with Logger.suppress_stdout():
-                self.model = load_model(self.model_name, self.device, compute_type=self.compute_type)
+                self.model = load_model(
+                    self.model_name,
+                    self.device,
+                    compute_type=self.compute_type,
+                    threads=CPU_THREADS,
+                    download_root=None,
+                )
             
             audio = load_audio(audio_path)
             

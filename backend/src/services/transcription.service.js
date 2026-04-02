@@ -89,12 +89,23 @@ const transcribeAudio = async (audioPath, options = {}) => {
       beamSize: options.beamSize || TRANSCRIPTION_CONFIG.beamSize,
     };
 
+    // Calculate optimal thread count (half of logical cores avoids hyperthread contention)
+    const cpuCores = require('os').cpus().length;
+    const optimalThreads = String(Math.max(1, Math.floor(cpuCores / 2)));
+
     // Python script options
     const pythonOptions = {
       mode: 'json',
       pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
       scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      env: { ...process.env, HF_TOKEN: process.env.HF_TOKEN },
+      env: {
+        ...process.env,
+        HF_TOKEN: process.env.HF_TOKEN,
+        // Must be set before ctranslate2 / OMP initialise — passing via env
+        // is more reliable than os.environ.setdefault inside the subprocess.
+        OMP_NUM_THREADS: process.env.OMP_NUM_THREADS || optimalThreads,
+        MKL_NUM_THREADS: process.env.MKL_NUM_THREADS || optimalThreads,
+      },
       args: [audioPath],
     };
 

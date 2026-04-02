@@ -299,6 +299,24 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
 
     console.log(`✅ Meeting updated in database`);
 
+    // --- NEW: Create relational Action Items ---
+    if (enhancedSummary.actionItems && enhancedSummary.actionItems.length > 0) {
+      const actionItemsData = enhancedSummary.actionItems.map((item) => ({
+        task: item.task,
+        assignee: item.assignee || null,
+        deadline: item.deadline || null,
+        priority: item.priority || 'medium',
+        status: 'TODO',
+        meetingId: updatedMeeting.id,
+        userId: userId,
+      }));
+
+      await prisma.actionItem.createMany({
+        data: actionItemsData,
+      });
+      console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
+    }
+
     // Step 8: Clean up temporary files
     await cleanupTempFiles([tempPath, processedAudioPath]);
 
@@ -549,6 +567,24 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     });
 
     console.log(`✅ Meeting updated in database`);
+
+    // --- NEW: Create relational Action Items ---
+    if (enhancedSummary.actionItems && enhancedSummary.actionItems.length > 0) {
+      const actionItemsData = enhancedSummary.actionItems.map((item) => ({
+        task: item.task,
+        assignee: item.assignee || null,
+        deadline: item.deadline || null,
+        priority: item.priority || 'medium',
+        status: 'TODO',
+        meetingId: meeting.id,
+        userId: userId,
+      }));
+
+      await prisma.actionItem.createMany({
+        data: actionItemsData,
+      });
+      console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
+    }
 
     // Step 9: Clean up temporary files
     await cleanupTempFiles([audioPath, processedAudioPath]);

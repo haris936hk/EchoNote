@@ -272,6 +272,31 @@ export const authAPI = {
 };
 
 // ============================================
+// CALENDAR API
+// ============================================
+
+export const calendarAPI = {
+  /**
+   * Get upcoming calendar events
+   * @param {number} days - Number of days to fetch ahead (default 7 via backend if undefined)
+   */
+  getEvents: async (days = 30) => {
+    try {
+      const response = await api.get('/calendar/events', {
+        params: { days },
+      });
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch calendar events',
+        status: error.response?.status,
+      };
+    }
+  },
+};
+
+// ============================================
 // MEETINGS API
 // ============================================
 
@@ -446,6 +471,42 @@ export const userAPI = {
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to export data',
+      };
+    }
+  },
+};
+
+// ============================================
+// TASKS API
+// ============================================
+
+export const tasksAPI = {
+  /**
+   * Get all tasks (action items) for current user
+   */
+  getTasks: async () => {
+    try {
+      const response = await api.get('/tasks');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch tasks',
+      };
+    }
+  },
+
+  /**
+   * Update task status
+   */
+  updateTaskStatus: async (id, status) => {
+    try {
+      const response = await api.patch(`/tasks/${id}`, { status });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to update task status',
       };
     }
   },
