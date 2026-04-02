@@ -135,6 +135,6 @@ The AI pipeline MUST be sequential. Never attempt to parallelize these stages:
 - **Python Integration:** Use `backend/src/python_scripts/*.py` with JSON inputs for manual testing.
 - **Database:** `npx prisma studio` for visual data management.
 
-Refer to `CLAUDE.md` for even more granular technical specifications, `PROJECT_OVERVIEW.md` for high-level business logic, and the following for exhaustive design details:
+exhaustive design details:
 - `stitch/echonote_midnight/DESIGN.md`: Full "Luminous Archive" design system specification.
 - `stitch_ui_ux_prompt.md`: Comprehensive UI/UX design brief and aesthetic direction.
