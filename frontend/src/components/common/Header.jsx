@@ -1,76 +1,128 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { LuMic as Mic } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * Header — Shared navigation bar for authenticated pages
- * Matches Stitch design: full-width, glass bg, text-only nav links with dot separators
+ * Matches Stitch design: floating pill, glass bg, logo | nav | user
  */
-const Header = () => {
+const Header = ({ navItems = [] }) => {
   const { user } = useAuth();
   const location = useLocation();
+  const [activeItem, setActiveItem] = useState(location.pathname);
+
+  // Sync activeItem with URL changes
+  useEffect(() => {
+    setActiveItem(location.pathname);
+  }, [location.pathname]);
 
   const isActive = (path) => {
-    if (path === '/dashboard') {
-      return location.pathname === '/dashboard';
+    if (path.startsWith('#')) {
+      return location.hash === path;
     }
-    return location.pathname === path || location.pathname.startsWith(path);
+    if (path === '/dashboard') {
+      return activeItem === '/dashboard';
+    }
+    return activeItem === path || activeItem.startsWith(path);
   };
 
-  const navLinks = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/calendar', label: 'Calendar' },
-    { path: '/record', label: 'Record' },
-    { path: '/meetings', label: 'Meetings' },
-    { path: '/tasks', label: 'Tasks' },
-  ];
-
   return (
-    <header className="w-full bg-[#2e3447]/40 shadow-2xl backdrop-blur-3xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Brand */}
+    <header className="flex w-full justify-center px-4 py-6">
+      <div className="flex h-14 items-center gap-6 rounded-full border border-white/10 bg-surface/40 px-6 shadow-[0_0_40px_rgba(189,194,255,0.08)] backdrop-blur-2xl">
+        {/* Brand/Logo Section */}
         <Link
           to="/dashboard"
           className="flex items-center gap-2 text-accent-primary transition-opacity hover:opacity-80"
+          onClick={() => setActiveItem('/dashboard')}
         >
-          <Mic size={20} />
-          <span className="text-xl font-bold tracking-tighter">EchoNote</span>
+          <Mic size={18} className="text-accent-secondary" />
+          <span className="text-base font-bold tracking-tighter">EchoNote</span>
         </Link>
 
-        {/* Center Nav Links */}
-        <nav className="hidden items-center gap-2 text-sm font-medium tracking-tight md:flex">
-          {navLinks.map((link, index) => (
-            <div key={link.path} className="flex items-center gap-2">
-              {index > 0 && <span className="select-none text-slate-600">·</span>}
+        {/* Vertical Divider */}
+        <div className="h-6 w-px bg-white/10" />
+
+        {/* Navigation Section */}
+        <nav className="flex items-center gap-1">
+          {navItems.map((link) => {
+            const isHash = link.path.startsWith('#');
+            const active = isActive(link.path);
+            const classes = `relative rounded-full px-4 py-1.5 text-sm font-medium tracking-tight transition-colors duration-300 ${
+              active ? 'text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+            }`;
+
+            return isHash ? (
+              <a key={link.path} href={link.path} className={classes}>
+                {active && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 z-0 rounded-full border border-white/5 bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
+              </a>
+            ) : (
               <Link
+                key={link.path}
                 to={link.path}
-                className={`transition-colors ${
-                  isActive(link.path) ? 'text-white' : 'text-slate-400 hover:text-slate-100'
-                }`}
+                onClick={() => setActiveItem(link.path)}
+                className={classes}
               >
-                {link.label}
+                {active && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 z-0 rounded-full border border-white/5 bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
               </Link>
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
-        {/* User Avatar */}
+        {/* Vertical Divider (Optional, to separate user from nav) */}
+        <div className="h-6 w-px bg-white/10" />
+
+        {/* User Avatar / Auth Section */}
         <div className="flex items-center">
-          <Link to="/settings">
-            {user?.picture ? (
-              <img
-                src={user.picture}
-                alt={user?.name || 'User'}
-                className="size-8 cursor-pointer rounded-full border border-accent-primary/30 transition-colors hover:border-accent-primary/60"
-              />
-            ) : (
-              <div className="flex size-8 cursor-pointer items-center justify-center rounded-full border border-accent-primary/30 bg-accent-primary/20 text-accent-primary transition-colors hover:bg-accent-primary/30">
-                <span className="text-xs font-semibold">
-                  {user?.name?.[0]?.toUpperCase() || 'U'}
-                </span>
-              </div>
-            )}
-          </Link>
+          {user ? (
+            <Link to="/settings" onClick={() => setActiveItem('/settings')}>
+              {user?.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user?.name || 'User'}
+                  className={`size-8 cursor-pointer rounded-full border transition-all duration-300 ${
+                    activeItem === '/settings'
+                      ? 'border-accent-primary scale-110 shadow-[0_0_12px_rgba(129,140,248,0.4)]'
+                      : 'border-white/10 hover:border-accent-primary/40'
+                  }`}
+                />
+              ) : (
+                <div
+                  className={`flex size-8 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
+                    activeItem === '/settings'
+                      ? 'border-accent-primary bg-accent-primary/30 text-white shadow-[0_0_12px_rgba(129,140,248,0.4)]'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:border-accent-primary/40'
+                  }`}
+                >
+                  <span className="text-xs font-semibold">
+                    {user?.name?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="rounded-full bg-cta px-4 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
+            >
+              Get Started
+            </Link>
+          )}
         </div>
       </div>
     </header>

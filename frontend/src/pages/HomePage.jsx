@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  LuMic as Mic,
   LuWaves as AudioLines,
   LuBrain as Brain,
   LuSparkles as Sparkles,
@@ -9,6 +8,8 @@ import {
   LuMail as Mail,
 } from 'react-icons/lu';
 import { useAuth } from '../contexts/AuthContext';
+import Header from '../components/common/Header';
+import ScrollReveal from '../components/common/ScrollReveal';
 import Footer from '../components/common/Footer';
 
 /**
@@ -26,6 +27,12 @@ const HomePage = () => {
       navigate('/login');
     }
   };
+
+  const navLinks = [
+    { path: '#features', label: 'Features' },
+    { path: '#how-it-works', label: 'How It Works' },
+    { path: '#cta', label: 'Benefits' },
+  ];
 
   const features = [
     {
@@ -67,44 +74,9 @@ const HomePage = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0c1324', color: '#dce1fb' }}>
       {/* ── Navigation ── */}
-      <nav className="fixed top-0 z-50 w-full bg-[#2e3447]/40 shadow-2xl backdrop-blur-3xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2 text-accent-primary">
-            <Mic size={20} />
-            <span className="text-xl font-bold tracking-tighter">EchoNote</span>
-          </div>
-          <div className="hidden items-center gap-8 text-sm font-medium tracking-tight md:flex">
-            <a href="#features" className="text-slate-400 transition-colors hover:text-slate-100">
-              Features
-            </a>
-            <span className="text-slate-600">·</span>
-            <a
-              href="#how-it-works"
-              className="text-slate-400 transition-colors hover:text-slate-100"
-            >
-              How It Works
-            </a>
-            <span className="text-slate-600">·</span>
-            <a href="#cta" className="text-slate-400 transition-colors hover:text-slate-100">
-              Benefits
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleGetStarted}
-              className="hidden rounded-lg bg-cta px-5 py-2 text-sm font-bold text-white transition-all hover:brightness-110 sm:block"
-            >
-              Get Started
-            </button>
-            <div
-              onClick={handleGetStarted}
-              className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-accent-primary/30 bg-accent-primary/20 text-accent-primary transition-colors hover:bg-accent-primary/30"
-            >
-              <Mic size={16} />
-            </div>
-          </div>
-        </div>
-      </nav>
+      <ScrollReveal>
+        <Header navItems={navLinks} />
+      </ScrollReveal>
 
       <main className="pb-20 pt-32">
         {/* ── Hero Section ── */}

@@ -1,61 +1,35 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { createContext } from 'react';
 import Header from '../common/Header';
+import ScrollReveal from '../common/ScrollReveal';
 
-// Scroll state context shared with child components
+// Scroll state context - optionally kept for children
 export const ScrollContext = createContext({
   showNavbar: true,
-  isScrollingDown: false,
 });
-
-export const useScrollContext = () => useContext(ScrollContext);
 
 /**
  * MainLayout — Wrapper for authenticated pages
  * OLED dark background, scroll-hide navbar, no footer
  */
 const MainLayout = ({ children }) => {
-  const [showNavbar, setShowNavbar] = useState(true);
-  const [isScrollingDown, setIsScrollingDown] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 10) {
-        setShowNavbar(true);
-        setIsScrollingDown(false);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setShowNavbar(false);
-        setIsScrollingDown(true);
-      } else if (currentScrollY < lastScrollY) {
-        setShowNavbar(true);
-        setIsScrollingDown(false);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  const navLinks = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/calendar', label: 'Calendar' },
+    { path: '/record', label: 'Record' },
+    { path: '/meetings', label: 'Meetings' },
+    { path: '/tasks', label: 'Tasks' },
+  ];
 
   return (
-    <ScrollContext.Provider value={{ showNavbar, isScrollingDown }}>
+    <ScrollContext.Provider value={{ showNavbar: true }}>
       <div className="min-h-screen" style={{ backgroundColor: '#020617' }}>
-        {/* Navigation Bar — Slides on scroll */}
-        <div
-          className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-in-out ${
-            showNavbar
-              ? 'translate-y-0 opacity-100'
-              : 'pointer-events-none -translate-y-full opacity-0'
-          }`}
-        >
-          <Header />
-        </div>
+        {/* Navigation Bar — Reveal on scroll up */}
+        <ScrollReveal>
+          <Header navItems={navLinks} />
+        </ScrollReveal>
 
         {/* Main Content */}
-        <main className="container mx-auto max-w-7xl px-4 pt-[72px]">{children}</main>
+        <main className="container mx-auto max-w-7xl px-4 pt-[100px]">{children}</main>
       </div>
     </ScrollContext.Provider>
   );

@@ -21,32 +21,39 @@ const getRequestKey = (config) => {
   return `${method}:${url}:${JSON.stringify(params)}:${JSON.stringify(data)}`;
 };
 
+// Wrap api.request to implement Promise Cache deduplication
+const originalRequest = api.request.bind(api);
+api.request = (config) => {
+  const method = config.method?.toLowerCase() || 'get';
+
+  // Only deduplicate GET requests
+  if (method === 'get') {
+    const requestKey = getRequestKey(config);
+
+    if (pendingRequests.has(requestKey)) {
+      console.log(`[API] Deduplicated request (shared promise): ${requestKey}`);
+      return pendingRequests.get(requestKey);
+    }
+
+    const promise = originalRequest(config).finally(() => {
+      pendingRequests.delete(requestKey);
+    });
+
+    pendingRequests.set(requestKey, promise);
+    return promise;
+  }
+
+  return originalRequest(config);
+};
+
 // Request interceptor - Add auth token and handle deduplication
 api.interceptors.request.use(
   (config) => {
-    // Add auth token
+    // Auth token handling
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
-    // Request deduplication - Only for GET requests to prevent loops
-    if (config.method === 'get') {
-      const requestKey = getRequestKey(config);
-
-      // If same request is already pending, cancel this one
-      if (pendingRequests.has(requestKey)) {
-        const controller = new AbortController();
-        controller.abort();
-        config.signal = controller.signal;
-        console.log(`[API] Deduplicated request: ${requestKey}`);
-      } else {
-        // Mark this request as pending
-        pendingRequests.set(requestKey, true);
-        config.metadata = { requestKey }; // Store key for cleanup
-      }
-    }
-
     return config;
   },
   (error) => {
@@ -73,25 +80,9 @@ const processQueue = (error, token = null) => {
 // Response interceptor - Handle errors globally, token refresh, and cleanup
 api.interceptors.response.use(
   (response) => {
-    // Clean up pending request tracker
-    const requestKey = response.config?.metadata?.requestKey;
-    if (requestKey) {
-      pendingRequests.delete(requestKey);
-    }
     return response;
   },
   async (error) => {
-    // Clean up pending request tracker
-    const requestKey = error.config?.metadata?.requestKey;
-    if (requestKey) {
-      pendingRequests.delete(requestKey);
-    }
-
-    // Skip error handling for aborted requests (deduplicated)
-    if (error.code === 'ERR_CANCELED') {
-      return Promise.reject(error);
-    }
-
     const originalRequest = error.config;
 
     // Handle different error scenarios
