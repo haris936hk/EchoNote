@@ -17,6 +17,7 @@ import CalendarPage from './pages/CalendarPage';
 import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Tasks from './pages/Tasks';
+import Decisions from './pages/Decisions';
 
 /**
  * Public Route Component
@@ -116,6 +117,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <MainLayout>
               <SettingsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/decisions"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Decisions />
             </MainLayout>
           </ProtectedRoute>
         }

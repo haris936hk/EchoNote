@@ -2,6 +2,7 @@
 // Authentication controller - handles HTTP requests for auth routes
 
 const authService = require('../services/auth.service');
+const { prisma } = require('../config/database');
 
 /**
  * Google OAuth authentication (client-side flow)
@@ -240,107 +241,115 @@ const revokeGoogleAccess = async (req, res) => {
 };
 
 /**
- * Get Google Calendar connection status (placeholder)
+ * Get Google Calendar connection status (B4)
  * GET /api/auth/calendar/status
  * @requires authenticate middleware
  */
 const getCalendarStatus = async (req, res) => {
   try {
-    // Calendar integration is not part of MVP
-    return res.status(501).json({
-      success: false,
-      error: 'Calendar integration not implemented in MVP',
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { googleAccessToken: true, googleTokenExpiry: true },
+    });
+    const connected = !!(user && user.googleAccessToken);
+    const tokenExpired =
+      connected && user.googleTokenExpiry && new Date(user.googleTokenExpiry) < new Date();
+    return res.status(200).json({
+      success: true,
+      data: { connected, tokenExpired: !!tokenExpired },
     });
   } catch (error) {
     console.error('Get calendar status error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to get calendar status',
-    });
+    return res.status(500).json({ success: false, error: 'Failed to get calendar status' });
   }
 };
 
 /**
- * Connect Google Calendar (placeholder)
+ * Connect Google Calendar (B4)
  * POST /api/auth/calendar/connect
+ * Informs client of the calendar scope — re-consent is handled client-side.
  * @requires authenticate middleware
  */
 const connectCalendar = async (req, res) => {
   try {
-    // Calendar integration is not part of MVP
-    return res.status(501).json({
-      success: false,
-      error: 'Calendar integration not implemented in MVP',
+    const calendarScope = 'https://www.googleapis.com/auth/calendar.readonly';
+    return res.status(200).json({
+      success: true,
+      data: { scope: calendarScope },
+      message: 'Trigger re-consent on the client with this scope',
     });
   } catch (error) {
     console.error('Connect calendar error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to connect calendar',
-    });
+    return res.status(500).json({ success: false, error: 'Failed to initiate calendar connect' });
   }
 };
 
 /**
- * Disconnect Google Calendar (placeholder)
+ * Disconnect Google Calendar (B4)
  * POST /api/auth/calendar/disconnect
  * @requires authenticate middleware
  */
 const disconnectCalendar = async (req, res) => {
   try {
-    // Calendar integration is not part of MVP
-    return res.status(501).json({
-      success: false,
-      error: 'Calendar integration not implemented in MVP',
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { googleAccessToken: null, googleTokenExpiry: null },
     });
+    return res.status(200).json({ success: true, message: 'Calendar disconnected successfully' });
   } catch (error) {
     console.error('Disconnect calendar error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to disconnect calendar',
-    });
+    return res.status(500).json({ success: false, error: 'Failed to disconnect calendar' });
   }
 };
 
 /**
- * Get active sessions (placeholder)
+ * Get active sessions (B5)
  * GET /api/auth/sessions
+ * Single refresh-token model — returns current session from lastLoginAt.
  * @requires authenticate middleware
  */
 const getActiveSessions = async (req, res) => {
   try {
-    // Session management is not part of MVP
-    return res.status(501).json({
-      success: false,
-      error: 'Session management not implemented in MVP',
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { lastLoginAt: true, email: true },
+    });
+    return res.status(200).json({
+      success: true,
+      data: {
+        sessions: [
+          {
+            id: 'current',
+            label: 'Current session',
+            email: user.email,
+            lastActive: user.lastLoginAt,
+            isCurrent: true,
+          },
+        ],
+      },
     });
   } catch (error) {
     console.error('Get active sessions error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to get sessions',
-    });
+    return res.status(500).json({ success: false, error: 'Failed to get sessions' });
   }
 };
 
 /**
- * Revoke specific session (placeholder)
+ * Revoke all other sessions (B5)
  * DELETE /api/auth/sessions/:sessionId
+ * Nulls the stored refresh token, invalidating all non-current sessions.
  * @requires authenticate middleware
  */
 const revokeSession = async (req, res) => {
   try {
-    // Session management is not part of MVP
-    return res.status(501).json({
-      success: false,
-      error: 'Session management not implemented in MVP',
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { refreshToken: null },
     });
+    return res.status(200).json({ success: true, message: 'All other sessions have been revoked' });
   } catch (error) {
     console.error('Revoke session error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to revoke session',
-    });
+    return res.status(500).json({ success: false, error: 'Failed to revoke session' });
   }
 };
 

@@ -1412,6 +1412,193 @@ const updateSpeakerMap = async (req, res) => {
   }
 };
 
+/**
+ * Reprocess a failed meeting
+ * POST /api/meetings/:id/reprocess
+ * Uses the original audioUrl stored on the meeting — no re-upload required.
+ */
+const reprocessMeeting = async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const meeting = await prisma.meeting.findFirst({
+      where: { id: meetingId, userId },
+    });
+
+    if (!meeting) {
+      await prisma.$disconnect();
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    if (meeting.status !== 'FAILED') {
+      await prisma.$disconnect();
+      return res.status(400).json({
+        success: false,
+        error: 'Only failed meetings can be reprocessed',
+      });
+    }
+
+    if (!meeting.audioUrl) {
+      await prisma.$disconnect();
+      return res.status(400).json({
+        success: false,
+        error: 'No audio file found for this meeting. Please upload a new recording.',
+      });
+    }
+
+    // Reset meeting to a clean pending state
+    await prisma.meeting.update({
+      where: { id: meetingId },
+      data: {
+        status: 'PENDING',
+        processingError: null,
+        processingStartedAt: null,
+        processingCompletedAt: null,
+        processingDuration: null,
+        retryCount: { increment: 1 },
+        lastRetryAt: new Date(),
+      },
+    });
+
+    await prisma.$disconnect();
+
+    // Re-queue for processing
+    queueService.addToQueue(meetingId);
+
+    logger.info(`🔄 Meeting ${meetingId} queued for reprocessing by user ${userId}`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Meeting has been queued for reprocessing',
+      data: { meetingId, status: 'PENDING' },
+    });
+  } catch (error) {
+    logger.error(`Error reprocessing meeting: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to reprocess meeting',
+      details: error.message,
+    });
+  }
+};
+
+/**
+ * Generate share link for a meeting (Phase 1: canonical app URL)
+ * POST /api/meetings/:id/share
+ */
+const generateShareLink = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const appUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    return res.status(200).json({
+      success: true,
+      data: { shareUrl: `${appUrl}/meeting/${id}` },
+      message: 'Share link generated',
+    });
+  } catch (error) {
+    logger.error(`Error generating share link: ${error.message}`);
+    return res.status(500).json({ success: false, error: 'Failed to generate share link' });
+  }
+};
+
+/**
+ * Get meeting analytics (speaker time, sentiment, topics)
+ * GET /api/meetings/:id/analytics
+ */
+const getMeetingAnalytics = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const meeting = await prisma.meeting.findFirst({
+      where: { id, userId },
+      select: {
+        transcriptSegments: true,
+        speakerMap: true,
+        transcriptWordCount: true,
+        audioDuration: true,
+        nlpSentiment: true,
+        nlpSentimentScore: true,
+        nlpTopics: true,
+        summaryKeyTopics: true,
+        summarySentiment: true,
+      },
+    });
+
+    await prisma.$disconnect();
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    // Compute speaker talk-time from diarized segments
+    const segments = Array.isArray(meeting.transcriptSegments) ? meeting.transcriptSegments : [];
+    const speakerMap = meeting.speakerMap || {};
+    const speakerTime = {};
+    for (const seg of segments) {
+      const dur = (parseFloat(seg.end) || 0) - (parseFloat(seg.start) || 0);
+      const sid = seg.speaker || 'UNKNOWN';
+      speakerTime[sid] = (speakerTime[sid] || 0) + dur;
+    }
+    const totalDuration =
+      Object.values(speakerTime).reduce((a, b) => a + b, 0) || meeting.audioDuration || 1;
+    const speakerStats = Object.entries(speakerTime)
+      .map(([id, secs]) => ({
+        speakerId: id,
+        speakerName: speakerMap[id] || id,
+        totalSeconds: Math.round(secs),
+        percentage: Math.round((secs / totalDuration) * 100),
+      }))
+      .sort((a, b) => b.totalSeconds - a.totalSeconds);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        speakerStats,
+        sentiment: {
+          label: meeting.nlpSentiment || meeting.summarySentiment || null,
+          score: meeting.nlpSentimentScore || null,
+        },
+        topics: meeting.summaryKeyTopics || meeting.nlpTopics || [],
+        wordCount: meeting.transcriptWordCount || null,
+        audioDuration: meeting.audioDuration || null,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error getting meeting analytics: ${error.message}`);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve analytics' });
+  }
+};
+
+/**
+ * Get all decisions across all meetings for the user
+ * GET /api/meetings/decisions
+ */
+const getAllDecisions = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const decisions = await meetingService.getGlobalDecisions(userId);
+
+    return res.status(200).json({
+      success: true,
+      data: decisions,
+    });
+  } catch (error) {
+    logger.error(`Error getting global decisions: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve decisions archive',
+    });
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -1432,4 +1619,8 @@ module.exports = {
   getProcessingStatus,
   streamAudio,
   updateSpeakerMap,
+  reprocessMeeting,
+  generateShareLink,
+  getMeetingAnalytics,
+  getAllDecisions,
 };

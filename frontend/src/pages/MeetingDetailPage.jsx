@@ -12,10 +12,15 @@ import {
   LuAlertCircle as AlertCircle,
   LuMic as Mic,
   LuCheckCircle as CheckCircle,
+  LuRefreshCw as RefreshCw,
+  LuExternalLink as ExternalLink,
+  LuFileText as FileText,
+  LuShare2 as Share2,
 } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import SummaryViewer from '../components/meeting/SummaryViewer';
 import TranscriptViewer from '../components/meeting/TranscriptViewer';
+import ProcessingLogAccordion from '../components/meeting/ProcessingLogAccordion';
 import { CategoryBadge } from '../components/meeting/CategoryFilter';
 import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
@@ -38,6 +43,22 @@ const MeetingDetailPage = () => {
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isSpeakerModalOpen, setIsSpeakerModalOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState({ id: '', name: '' });
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  // B2 — Copy meeting URL to clipboard
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/meeting/${id}`);
+      window.dispatchEvent(
+        new CustomEvent('echonote-toast', {
+          detail: { message: 'Link copied to clipboard!', type: 'success' },
+        })
+      );
+    } catch (_) {
+      // Fallback for browsers without clipboard API
+      window.prompt('Copy this link:', `${window.location.origin}/meeting/${id}`);
+    }
+  };
 
   const handleRenameSpeaker = (speakerId, currentName) => {
     setSelectedSpeaker({ id: speakerId, name: currentName });
@@ -106,6 +127,29 @@ const MeetingDetailPage = () => {
   const handleSaveEdit = async (updates) => {
     const result = await updateMeeting(id, updates);
     if (result.success) fetchMeeting(id);
+  };
+
+  // F1 — Retry failed meeting using original audio URL stored in DB
+  const handleRetry = async () => {
+    try {
+      setIsRetrying(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/${id}/reprocess`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Refresh meeting — triggers the polling effect since status is now PENDING
+        fetchMeeting(id);
+      } else {
+        window.alert(data.error || 'Failed to reprocess meeting.');
+      }
+    } catch {
+      window.alert('Network error. Please try again.');
+    } finally {
+      setIsRetrying(false);
+    }
   };
 
   const handleDownloadAudio = async () => {
@@ -249,6 +293,13 @@ const MeetingDetailPage = () => {
           <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
             {currentMeeting.title}
           </h1>
+          {/* A1 — Meeting description */}
+          {currentMeeting.description && (
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-400">
+              {currentMeeting.description}
+            </p>
+          )}
+
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}
@@ -263,11 +314,69 @@ const MeetingDetailPage = () => {
               <Calendar size={12} />
               {formatDate(currentMeeting.createdAt)}
             </span>
-            {currentMeeting.duration && (
+
+            {/* A2 — Word count chip */}
+            {currentMeeting.transcriptWordCount > 0 && (
+              <span className="inline-flex items-center gap-1 font-mono text-xs text-slate-500">
+                <FileText size={12} className="opacity-60" />
+                {currentMeeting.transcriptWordCount.toLocaleString()} words
+              </span>
+            )}
+
+            {/* F4 — Attendee avatar cluster */}
+            {(() => {
+              const attendees = (() => {
+                try {
+                  if (!currentMeeting.attendees) return [];
+                  return typeof currentMeeting.attendees === 'string'
+                    ? JSON.parse(currentMeeting.attendees)
+                    : currentMeeting.attendees;
+                } catch (_) {
+                  return [];
+                }
+              })();
+              if (!attendees.length) return null;
+              const visible = attendees.slice(0, 4);
+              const overflow = attendees.length - visible.length;
+              return (
+                <span className="inline-flex items-center -space-x-1.5">
+                  {visible.map((a, i) => (
+                    <span
+                      key={i}
+                      title={a.name || a.email || 'Attendee'}
+                      className="inline-flex size-5 items-center justify-center rounded-full border border-echo-border bg-echo-surface text-[9px] font-bold text-accent-secondary"
+                    >
+                      {(a.name || a.email || '?').charAt(0).toUpperCase()}
+                    </span>
+                  ))}
+                  {overflow > 0 && (
+                    <span className="inline-flex h-5 items-center rounded-full border border-echo-border bg-accent-primary/10 px-1.5 font-mono text-[9px] text-accent-primary">
+                      +{overflow}
+                    </span>
+                  )}
+                </span>
+              );
+            })()}
+
+            {currentMeeting.audioDuration && (
               <span className="inline-flex items-center gap-1 font-mono text-xs text-slate-500">
                 <Clock size={12} />
-                {formatDuration(currentMeeting.duration)}
+                {formatDuration(currentMeeting.audioDuration)}
               </span>
+            )}
+
+            {/* F7 — Google Calendar source link */}
+            {currentMeeting.googleEventId && (
+              <a
+                href={`https://calendar.google.com/calendar/r/eventedit/${currentMeeting.googleEventId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-accent-primary"
+                title="Open source calendar event"
+              >
+                <ExternalLink size={11} />
+                Calendar Event
+              </a>
             )}
           </div>
         </div>
@@ -293,6 +402,9 @@ const MeetingDetailPage = () => {
               aria-label="Meeting actions"
               className="border border-echo-border bg-echo-elevated"
             >
+              <DropdownItem key="share" startContent={<Share2 size={14} />} onPress={handleShare}>
+                Copy Link
+              </DropdownItem>
               <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
                 Edit Meeting
               </DropdownItem>
@@ -374,53 +486,75 @@ const MeetingDetailPage = () => {
 
       {/* ── Failed State ── */}
       {isFailed && (
-        <div className="flex items-center gap-3 rounded-card border border-red-500/10 bg-red-500/5 px-5 py-4">
-          <AlertCircle size={18} className="shrink-0 text-red-400" />
-          <div>
+        <div className="flex items-start gap-3 rounded-card border border-red-500/10 bg-red-500/5 px-5 py-4">
+          <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-400" />
+          <div className="flex-1">
             <p className="text-sm font-medium text-red-400">Processing Failed</p>
             <p className="mt-0.5 text-xs text-red-400/70">
-              {currentMeeting.error ||
-                'An error occurred during processing. Please try uploading again.'}
+              {currentMeeting.processingError || 'An error occurred during processing.'}
             </p>
           </div>
+          {/* F1 — Retry button */}
+          <button
+            onClick={handleRetry}
+            disabled={isRetrying}
+            className="btn-cta inline-flex shrink-0 items-center gap-2 rounded-btn px-4 py-2 text-xs font-bold disabled:opacity-50"
+          >
+            {isRetrying ? (
+              <div className="size-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <RefreshCw size={13} />
+            )}
+            {isRetrying ? 'Retrying...' : 'Retry Processing'}
+          </button>
         </div>
       )}
 
       {/* ── Completed State — Split View ── */}
       {isCompleted && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-          {/* Left Column — Transcript (60%) */}
-          <div className="space-y-4 lg:col-span-3">
-            {/* Audio Player */}
-            {currentMeeting.audioUrl && (
-              <div className="rounded-card border border-echo-border bg-echo-surface p-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <Mic size={14} className="text-accent-primary" />
-                  <span className="text-xs font-medium text-slate-400">Audio Recording</span>
+        <>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+            {/* Left Column — Transcript (60%) */}
+            <div className="space-y-4 lg:col-span-3">
+              {/* Audio Player */}
+              {currentMeeting.audioUrl && (
+                <div className="rounded-card border border-echo-border bg-echo-surface p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Mic size={14} className="text-accent-primary" />
+                    <span className="text-xs font-medium text-slate-400">Audio Recording</span>
+                  </div>
+                  <audio controls src={currentMeeting.audioUrl} className="w-full" />
                 </div>
-                <audio controls src={currentMeeting.audioUrl} className="w-full" />
+              )}
+
+              {/* Transcript */}
+              <div className="rounded-card border border-echo-border bg-echo-surface p-6">
+                <TranscriptViewer
+                  transcript={currentMeeting.transcript}
+                  transcriptSegments={currentMeeting.transcriptSegments}
+                  speakerMap={currentMeeting.speakerMap}
+                  nlpData={currentMeeting.nlpAnalysis}
+                  onRenameSpeaker={handleRenameSpeaker}
+                />
               </div>
-            )}
+            </div>
 
-            {/* Transcript */}
-            <div className="rounded-card border border-echo-border bg-echo-surface p-6">
-              <TranscriptViewer
-                transcript={currentMeeting.transcript}
-                transcriptSegments={currentMeeting.transcriptSegments}
-                speakerMap={currentMeeting.speakerMap}
-                nlpData={currentMeeting.nlpAnalysis}
-                onRenameSpeaker={handleRenameSpeaker}
-              />
+            {/* Right Column — AI Insights (40%, sticky) */}
+            <div className="lg:col-span-2">
+              <div className="space-y-4 lg:sticky lg:top-[88px]">
+                <SummaryViewer summary={currentMeeting.summary} />
+              </div>
             </div>
           </div>
 
-          {/* Right Column — AI Insights (40%, sticky) */}
-          <div className="lg:col-span-2">
-            <div className="space-y-4 lg:sticky lg:top-[88px]">
-              <SummaryViewer summary={currentMeeting.summary} />
-            </div>
-          </div>
-        </div>
+          {/* F3 — Processing History accordion, full width below split view */}
+          <ProcessingLogAccordion
+            meetingId={id}
+            processingDuration={currentMeeting.processingDuration}
+            processingStartedAt={currentMeeting.processingStartedAt}
+            processingCompletedAt={currentMeeting.processingCompletedAt}
+          />
+        </>
       )}
 
       {/* Edit Modal */}

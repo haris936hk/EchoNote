@@ -119,6 +119,14 @@ router.post('/calendar/disconnect', authenticate, authController.disconnectCalen
 router.get('/sessions', authenticate, authController.getActiveSessions);
 
 /**
+ * @route   DELETE /api/auth/sessions/revoke
+ * @desc    Revoke all other sessions - sign out all other devices
+ * @access  Private
+ * @returns { success, message }
+ */
+router.delete('/sessions/revoke', authenticate, authController.revokeSession);
+
+/**
  * @route   DELETE /api/auth/sessions/:sessionId
  * @desc    Revoke specific session (future feature)
  * @access  Private

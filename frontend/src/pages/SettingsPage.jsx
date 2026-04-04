@@ -15,6 +15,9 @@ import {
   LuBug as Bug,
   LuLightbulb as Lightbulb,
   LuChevronRight as ChevronRight,
+  LuCalendar as Calendar,
+  LuMonitor as Monitor,
+  LuLink as Link,
 } from 'react-icons/lu';
 import ProfileSettings from '../components/user/ProfileSettings';
 import { useAuth } from '../contexts/AuthContext';
@@ -261,6 +264,39 @@ const PrivacyContent = () => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  // B4 — Calendar connection state
+  const [calStatus, setCalStatus] = useState(null);
+  const [isDisconnectingCal, setIsDisconnectingCal] = useState(false);
+  // B5 — Session state
+  const [sessions, setSessions] = useState([]);
+  const [isRevokingSessions, setIsRevokingSessions] = useState(false);
+
+  // B1 — Export all meetings as ZIP via existing /meetings/download/all endpoint
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/meetings/download/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `EchoNote_Export_${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showToast('Export downloaded successfully!', 'success');
+    } catch (_) {
+      showToast('Export failed. Please try again.', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -316,6 +352,75 @@ const PrivacyContent = () => {
     loadStats();
   }, []);
 
+  // B4 — Load calendar status
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch(`${process.env.REACT_APP_API_URL}/auth/calendar/status`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => d.success && setCalStatus(d.data))
+      .catch(() => {});
+  }, []);
+
+  // B5 — Load sessions
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch(`${process.env.REACT_APP_API_URL}/auth/sessions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => d.success && setSessions(d.data.sessions || []))
+      .catch(() => {});
+  }, []);
+
+  // B4 — Disconnect calendar
+  const handleDisconnectCalendar = async () => {
+    if (!window.confirm('Disconnect Google Calendar? You can reconnect at any time.')) return;
+    setIsDisconnectingCal(true);
+    try {
+      const token = localStorage.getItem('token');
+      const r = await fetch(`${process.env.REACT_APP_API_URL}/auth/calendar/disconnect`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await r.json();
+      if (d.success) {
+        setCalStatus({ connected: false, tokenExpired: false });
+        showToast('Google Calendar disconnected', 'success');
+      } else {
+        showToast('Failed to disconnect calendar', 'error');
+      }
+    } catch (_) {
+      showToast('Failed to disconnect calendar', 'error');
+    } finally {
+      setIsDisconnectingCal(false);
+    }
+  };
+
+  // B5 — Revoke all other sessions
+  const handleRevokeSessions = async () => {
+    if (!window.confirm('Sign out all other devices? Your current session will remain active.')) return;
+    setIsRevokingSessions(true);
+    try {
+      const token = localStorage.getItem('token');
+      const r = await fetch(`${process.env.REACT_APP_API_URL}/auth/sessions/revoke`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await r.json();
+      if (d.success) {
+        showToast('All other sessions revoked', 'success');
+      } else {
+        showToast('Failed to revoke sessions', 'error');
+      }
+    } catch (_) {
+      showToast('Failed to revoke sessions', 'error');
+    } finally {
+      setIsRevokingSessions(false);
+    }
+  };
+
   const formatBytes = (bytes) => {
     if (!bytes || bytes === 0) return '0 MB';
     const mb = bytes / (1024 * 1024);
@@ -351,6 +456,97 @@ const PrivacyContent = () => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* B4 — Google Calendar connection */}
+      <div className="rounded-card border border-echo-border bg-echo-surface p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Google Calendar</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-btn bg-accent-primary/10">
+              <Calendar size={16} className="text-accent-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">
+                {calStatus === null
+                  ? 'Checking…'
+                  : calStatus.connected
+                    ? 'Connected'
+                    : 'Not connected'}
+              </p>
+              <p className="text-xs text-slate-500">
+                {calStatus?.tokenExpired
+                  ? 'Token expired — reconnect to restore access'
+                  : calStatus?.connected
+                    ? 'Calendar events sync with your meetings'
+                    : 'Connect to see calendar events on dashboard'}
+              </p>
+            </div>
+          </div>
+          {calStatus?.connected ? (
+            <button
+              onClick={handleDisconnectCalendar}
+              disabled={isDisconnectingCal}
+              className="inline-flex items-center gap-2 rounded-btn border border-red-500/20 bg-red-500/5 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+            >
+              {isDisconnectingCal ? 'Disconnecting…' : 'Disconnect'}
+            </button>
+          ) : (
+            <span className="rounded-full bg-slate-800 px-2.5 py-1 font-mono text-[10px] text-slate-500">
+              Managed via Google Sign-In
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* B5 — Session management */}
+      <div className="rounded-card border border-echo-border bg-echo-surface p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Active Sessions</h2>
+        {sessions.length === 0 ? (
+          <p className="text-sm text-slate-500">Loading sessions…</p>
+        ) : (
+          <div className="space-y-2">
+            {sessions.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center justify-between rounded-btn bg-echo-base p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <Monitor size={14} className="shrink-0 text-slate-500" />
+                  <div>
+                    <p className="flex items-center gap-1.5 text-sm font-medium text-white">
+                      {s.label}
+                      {s.isCurrent && (
+                        <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[9px] text-emerald-400">
+                          CURRENT
+                        </span>
+                      )}
+                    </p>
+                    <p className="font-mono text-[11px] text-slate-500">
+                      Last active:{' '}
+                      {new Intl.DateTimeFormat('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }).format(new Date(s.lastActive))}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="mt-4 border-t border-echo-border pt-4">
+          <button
+            onClick={handleRevokeSessions}
+            disabled={isRevokingSessions}
+            className="inline-flex items-center gap-2 rounded-btn border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/10 disabled:opacity-50"
+          >
+            <Link size={13} />
+            {isRevokingSessions ? 'Revoking…' : 'Sign out all other devices'}
+          </button>
+        </div>
       </div>
 
       {/* AI Models */}
@@ -394,8 +590,17 @@ const PrivacyContent = () => {
             <p className="text-sm font-medium text-white">Export Your Data</p>
             <p className="text-xs text-slate-500">Download meetings, transcripts, and summaries</p>
           </div>
-          <button className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium">
-            <Download size={14} /> Export
+          <button
+            onClick={handleExportData}
+            disabled={isExporting}
+            className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium disabled:opacity-50"
+          >
+            {isExporting ? (
+              <div className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <Download size={14} />
+            )}
+            {isExporting ? 'Exporting...' : 'Export'}
           </button>
         </div>
 
@@ -460,10 +665,26 @@ const HelpContent = () => {
   ];
 
   const quickLinks = [
-    { icon: BookOpen, label: 'Documentation' },
-    { icon: MessageSquare, label: 'Contact Support' },
-    { icon: Bug, label: 'Report a Bug' },
-    { icon: Lightbulb, label: 'Request a Feature' },
+    {
+      icon: BookOpen,
+      label: 'Documentation',
+      href: 'https://github.com/haris936hk/EchoNote/wiki',
+    },
+    {
+      icon: MessageSquare,
+      label: 'Contact Support',
+      href: 'mailto:support@echonote.app',
+    },
+    {
+      icon: Bug,
+      label: 'Report a Bug',
+      href: 'https://github.com/haris936hk/EchoNote/issues/new?template=bug_report.md',
+    },
+    {
+      icon: Lightbulb,
+      label: 'Request a Feature',
+      href: 'https://github.com/haris936hk/EchoNote/issues/new?template=feature_request.md',
+    },
   ];
 
   return (
@@ -475,14 +696,17 @@ const HelpContent = () => {
           {quickLinks.map((link, i) => {
             const Icon = link.icon;
             return (
-              <button
+              <a
                 key={i}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-btn bg-echo-base p-3 text-left transition-colors hover:bg-echo-surface-hover"
               >
                 <Icon size={16} className="shrink-0 text-accent-primary" />
                 <span className="flex-1 text-sm font-medium text-white">{link.label}</span>
                 <ChevronRight size={14} className="text-slate-600" />
-              </button>
+              </a>
             );
           })}
         </div>
@@ -512,9 +736,12 @@ const HelpContent = () => {
       <div className="rounded-card border border-accent-primary/10 bg-accent-primary/5 p-6 text-center">
         <p className="mb-1 text-sm font-semibold text-accent-primary">Still need help?</p>
         <p className="mb-4 text-xs text-slate-400">Our support team is here to assist you</p>
-        <button className="btn-primary rounded-btn px-5 py-2 text-sm font-bold">
+        <a
+          href="mailto:support@echonote.app"
+          className="btn-primary inline-block rounded-btn px-5 py-2 text-sm font-bold"
+        >
           Contact Support
-        </button>
+        </a>
       </div>
     </div>
   );

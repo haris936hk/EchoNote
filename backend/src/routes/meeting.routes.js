@@ -61,6 +61,14 @@ router.get(
 router.get('/export', authenticate, meetingController.exportAllMeetings);
 
 /**
+ * @route   GET /api/meetings/decisions
+ * @desc    Get all decisions across all meetings
+ * @access  Private
+ * @returns { success, data: [decisions] }
+ */
+router.get('/decisions', authenticate, meetingController.getAllDecisions);
+
+/**
  * @route   GET /api/meetings
  * @desc    Get all meetings for authenticated user
  * @access  Private
@@ -319,14 +327,7 @@ router.post(
   validateUUIDParam('id'),
   authorize('meeting'),
   sanitizeBody,
-  (req, res) => {
-    // Future feature - reprocess failed or update summary
-    res.status(501).json({
-      success: false,
-      error: 'Reprocessing feature not yet implemented',
-      code: 'NOT_IMPLEMENTED',
-    });
-  }
+  meetingController.reprocessMeeting
 );
 
 /**
@@ -341,14 +342,7 @@ router.post(
   authenticate,
   validateUUIDParam('id'),
   authorize('meeting'),
-  (req, res) => {
-    // Future feature - generate public share link
-    res.status(501).json({
-      success: false,
-      error: 'Sharing feature not yet implemented',
-      code: 'NOT_IMPLEMENTED',
-    });
-  }
+  meetingController.generateShareLink
 );
 
 /**
@@ -363,14 +357,7 @@ router.get(
   validateUUIDParam('id'),
   authorize('meeting'),
   requireCompletedMeeting,
-  (req, res) => {
-    // Future feature - detailed analytics
-    res.status(501).json({
-      success: false,
-      error: 'Analytics feature not yet implemented',
-      code: 'NOT_IMPLEMENTED',
-    });
-  }
+  meetingController.getMeetingAnalytics
 );
 
 /**

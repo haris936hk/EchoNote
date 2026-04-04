@@ -644,6 +644,33 @@ export const exportMeetingsAsCSV = (meetings) => {
   URL.revokeObjectURL(url);
 };
 
+/**
+ * Fetch all decisions across all meetings
+ */
+export const getDecisions = async () => {
+  try {
+    const result = await meetingsAPI.getDecisions();
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data || [],
+      };
+    }
+
+    return {
+      success: false,
+      error: result.error || 'Failed to fetch decisions',
+    };
+  } catch (error) {
+    console.error('Get decisions error:', error);
+    return {
+      success: false,
+      error: 'An unexpected error occurred',
+    };
+  }
+};
+
 const meetingService = {
   // CRUD operations
   getAllMeetings,
@@ -682,6 +709,7 @@ const meetingService = {
   getCategoryLabel,
   exportMeetingsAsJSON,
   exportMeetingsAsCSV,
+  getDecisions,
 };
 
 export default meetingService;

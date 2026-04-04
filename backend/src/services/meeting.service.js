@@ -767,11 +767,14 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
       select: {
         id: true,
         title: true,
+        description: true, // A3: needed for MeetingCard description
         category: true,
         status: true,
         audioDuration: true,
         createdAt: true,
         summaryExecutive: true, // Include summary for preview
+        summaryKeyTopics: true, // A3: feeds topic chips in MeetingCard
+        processingError: true, // A3: needed for failed state card text
       },
     });
 
@@ -1406,6 +1409,50 @@ async function storeAudioFile(tempPath, meetingId) {
 }
 
 /**
+ * Get all decisions across all meetings for a user
+ * @param {string} userId - User ID
+ * @returns {Promise<Array>} List of decisions with meeting context
+ */
+async function getGlobalDecisions(userId) {
+  try {
+    const meetings = await prisma.meeting.findMany({
+      where: {
+        userId,
+        summaryKeyDecisions: { not: null },
+      },
+      select: {
+        id: true,
+        title: true,
+        summaryKeyDecisions: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const allDecisions = [];
+    meetings.forEach((m) => {
+      const decisions = deserializeArrayField(m.summaryKeyDecisions);
+      if (Array.isArray(decisions)) {
+        decisions.forEach((d, index) => {
+          allDecisions.push({
+            id: `${m.id}-dec-${index}`, // Unique ID for keying
+            decision: typeof d === 'string' ? d : d.decision || d.text || JSON.stringify(d),
+            meetingId: m.id,
+            meetingTitle: m.title,
+            createdAt: m.createdAt,
+          });
+        });
+      }
+    });
+
+    return allDecisions;
+  } catch (error) {
+    console.error('Get global decisions error:', error.message);
+    throw error;
+  }
+}
+
+/**
  * Clean up temporary files
  */
 async function cleanupTempFiles(filePaths) {
@@ -1447,4 +1494,5 @@ module.exports = {
 
   // Advanced features
   regenerateSummary,
+  getGlobalDecisions,
 };
