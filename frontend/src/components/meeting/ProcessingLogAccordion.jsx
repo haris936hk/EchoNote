@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { LuChevronDown, LuClock, LuCheckCircle2, LuXCircle } from 'react-icons/lu';
 
 const STAGE_LABELS = {
@@ -132,8 +133,8 @@ const ProcessingLogAccordion = ({
           {/* Per-stage breakdown from ProcessingLog */}
           {!loadingStages && hasStages && (
             <div className="space-y-2.5">
-              {stages.map((stage, i) => (
-                <div key={i} className="flex items-center gap-3 py-0.5">
+              {stages.map((stage) => (
+                <div key={stage.stage} className="flex items-center gap-3 py-0.5">
                   {stage.errorMessage ? (
                     <LuXCircle size={13} className="shrink-0 text-red-400/60" />
                   ) : (
@@ -187,6 +188,13 @@ const ProcessingLogAccordion = ({
       )}
     </div>
   );
+};
+
+ProcessingLogAccordion.propTypes = {
+  meetingId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  processingDuration: PropTypes.number,
+  processingStartedAt: PropTypes.string,
+  processingCompletedAt: PropTypes.string,
 };
 
 export default ProcessingLogAccordion;

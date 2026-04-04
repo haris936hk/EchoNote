@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { LuSearch as Search, LuX as X } from 'react-icons/lu';
 
 const SearchBar = ({
@@ -51,6 +52,14 @@ const SearchBar = ({
   );
 };
 
+SearchBar.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  debounceMs: PropTypes.number,
+  className: PropTypes.string,
+};
+
 // Compact search bar
 export const CompactSearchBar = ({ value, onChange, placeholder }) => (
   <div className="relative">
@@ -64,5 +73,11 @@ export const CompactSearchBar = ({ value, onChange, placeholder }) => (
     />
   </div>
 );
+
+CompactSearchBar.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+};
 
 export default SearchBar;

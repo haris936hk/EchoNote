@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
@@ -19,16 +20,13 @@ export const AuthProvider = ({ children }) => {
   // Helper function to fetch fresh user data from backend
   const fetchFreshUserData = useCallback(async () => {
     try {
-      console.log('[Auth] Fetching fresh user data from /auth/me...');
       const { data } = await api.get('/auth/me');
       if (data.success && data.data.user) {
-        console.log('[Auth] Fresh user data fetched:', data.data.user);
-        console.log('[Auth] User picture:', data.data.user.picture);
         localStorage.setItem('user', JSON.stringify(data.data.user));
         setUser(data.data.user);
       }
-    } catch (error) {
-      console.error('[Auth] Failed to fetch fresh user data:', error);
+    } catch (err) {
+      console.error('[Auth] Failed to fetch fresh user data:', err);
     }
   }, []);
 
@@ -40,16 +38,10 @@ export const AuthProvider = ({ children }) => {
     if (token && userData) {
       try {
         const parsedUser = JSON.parse(userData);
-        console.log('[Auth] Loaded user from localStorage:', parsedUser);
-        console.log('[Auth] User has picture?', !!parsedUser.picture);
-        console.log('[Auth] Picture URL:', parsedUser.picture);
-
         setUser(parsedUser);
-        // Note: Authorization header is handled by api.js interceptor
 
         // Migration: If user data doesn't have picture field, fetch fresh user data
         if (!parsedUser.picture) {
-          console.log('[Auth] ⚠️ User data missing picture field, fetching fresh data...');
           fetchFreshUserData();
         }
       } catch (err) {
@@ -68,51 +60,27 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log('[Auth] Starting Google login with auth code:', {
-        hasCode: !!codeResponse.code,
-        codeLength: codeResponse.code?.length,
-      });
-
       // Send auth code to backend
       const { data } = await api.post('/auth/google', {
         code: codeResponse.code,
       });
 
-      console.log('[Auth] Backend response received:', {
-        hasData: !!data,
-        hasUser: !!data?.data?.user,
-        hasToken: !!data?.data?.accessToken,
-        hasPicture: !!data?.data?.user?.picture,
-      });
-
-      console.log('[Auth] Full user object from backend:', data.data.user);
-
       // Store tokens and user data
       localStorage.setItem('token', data.data.accessToken);
       localStorage.setItem('refreshToken', data.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.data.user));
-      // Note: Authorization header is handled by api.js interceptor
-
-      console.log('[Auth] Login successful:', {
-        user: data.data.user.email,
-        picture: data.data.user.picture,
-        tokenLength: data.data.accessToken.length,
-        hasRefreshToken: !!data.data.refreshToken,
-      });
 
       setUser(data.data.user);
       setLoading(false);
 
       return { success: true };
-    } catch (error) {
-      console.error('[Auth] Login failed:', error);
-      console.error('[Auth] Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Login failed';
+      console.error('[Auth] Login failed:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
       });
-      const errorMessage =
-        error.response?.data?.error || error.response?.data?.message || 'Login failed';
       setError(errorMessage);
       setLoading(false);
       return { success: false, error: errorMessage };
@@ -120,17 +88,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
-    console.log('[Auth] Logging out user');
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-    // Note: Authorization header is handled by api.js interceptor
     setUser(null);
     setError(null);
   }, []);
 
   const refreshUserData = useCallback(async () => {
-    console.log('[Auth] Manually refreshing user data...');
     await fetchFreshUserData();
   }, [fetchFreshUserData]);
 
@@ -146,3 +111,9 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export default AuthContext;

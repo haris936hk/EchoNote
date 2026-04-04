@@ -1,4 +1,5 @@
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
+import PropTypes from 'prop-types';
 import {
   LuClock as Clock,
   LuMoreVertical as MoreVertical,
@@ -12,12 +13,71 @@ import { useNavigate } from 'react-router-dom';
 import { CategoryBadge } from './CategoryFilter';
 import { categoryColors, statusColors } from '../../styles/theme';
 
-const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
+const ActionsDropdown = ({ isCompleted, handleView, handleEdit, handleDelete, audioUrl }) => (
+  <Dropdown placement="bottom-end">
+    <DropdownTrigger>
+      <button
+        className="flex size-7 items-center justify-center rounded-md text-slate-500 opacity-0 transition-all hover:bg-echo-surface-hover hover:text-white group-hover:opacity-100"
+        aria-label="Meeting actions"
+      >
+        <MoreVertical size={14} />
+      </button>
+    </DropdownTrigger>
+    <DropdownMenu
+      aria-label="Meeting actions"
+      className="border border-echo-border bg-echo-elevated"
+    >
+      {isCompleted && (
+        <DropdownItem key="view" startContent={<Eye size={14} />} onPress={handleView}>
+          View Details
+        </DropdownItem>
+      )}
+      <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
+        Edit
+      </DropdownItem>
+      {isCompleted && audioUrl && (
+        <DropdownItem
+          key="download"
+          startContent={<Download size={14} />}
+          onPress={() => window.open(audioUrl, '_blank')}
+        >
+          Download Audio
+        </DropdownItem>
+      )}
+      <DropdownItem
+        key="delete"
+        className="text-red-400"
+        startContent={<Trash2 size={14} />}
+        onPress={handleDelete}
+      >
+        Delete
+      </DropdownItem>
+    </DropdownMenu>
+  </Dropdown>
+);
+
+ActionsDropdown.propTypes = {
+  isCompleted: PropTypes.bool.isRequired,
+  handleView: PropTypes.func.isRequired,
+  handleEdit: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func.isRequired,
+  audioUrl: PropTypes.string,
+};
+
+const MeetingCard = ({ meeting, onDelete, onEdit }) => {
   const navigate = useNavigate();
 
   const handleView = () => navigate(`/meeting/${meeting.id}`);
   const handleDelete = () => onDelete?.(meeting.id);
   const handleEdit = () => onEdit?.(meeting);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (isCompleted) {
+        handleView();
+      }
+    }
+  };
 
   const formatDate = (dateString) =>
     new Intl.DateTimeFormat('en-US', {
@@ -58,51 +118,11 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
   // Get topic chips from summary
   const topics = meeting.summary?.keyTopics?.slice(0, 3) || [];
 
-  const ActionsDropdown = () => (
-    <Dropdown placement="bottom-end">
-      <DropdownTrigger>
-        <button
-          className="flex size-7 items-center justify-center rounded-md text-slate-500 opacity-0 transition-all hover:bg-echo-surface-hover hover:text-white group-hover:opacity-100"
-          aria-label="Meeting actions"
-        >
-          <MoreVertical size={14} />
-        </button>
-      </DropdownTrigger>
-      <DropdownMenu
-        aria-label="Meeting actions"
-        className="border border-echo-border bg-echo-elevated"
-      >
-        {isCompleted && (
-          <DropdownItem key="view" startContent={<Eye size={14} />} onPress={handleView}>
-            View Details
-          </DropdownItem>
-        )}
-        <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
-          Edit
-        </DropdownItem>
-        {isCompleted && meeting.audioUrl && (
-          <DropdownItem
-            key="download"
-            startContent={<Download size={14} />}
-            onPress={() => window.open(meeting.audioUrl, '_blank')}
-          >
-            Download Audio
-          </DropdownItem>
-        )}
-        <DropdownItem
-          key="delete"
-          className="text-red-400"
-          startContent={<Trash2 size={14} />}
-          onPress={handleDelete}
-        >
-          Delete
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
-  );
-
   return (
     <div
+      role="button"
+      tabIndex={isCompleted ? 0 : -1}
+      onKeyDown={handleKeyDown}
       className={`card-hover group relative overflow-hidden rounded-card border border-echo-border bg-echo-surface ${
         isCompleted ? 'cursor-pointer' : ''
       }`}
@@ -117,7 +137,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
         {/* Top row: Category chip + Status dot + Actions */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <CategoryBadge category={meeting.category} size="sm" />
+            <CategoryBadge category={meeting.category} />
             <span
               className={`inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider ${statColors.text}`}
             >
@@ -127,7 +147,19 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
               {statColors.label}
             </span>
           </div>
-          <ActionsDropdown />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="presentation"
+          >
+            <ActionsDropdown
+              isCompleted={isCompleted}
+              handleView={handleView}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              audioUrl={meeting.audioUrl}
+            />
+          </div>
         </div>
 
         {/* Title */}
@@ -162,9 +194,9 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
         {/* Topic chips */}
         {topics.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {topics.map((topic, i) => (
+            {topics.map((topic) => (
               <span
-                key={i}
+                key={topic}
                 className="rounded-full bg-accent-primary/10 px-2 py-0.5 text-[10px] font-medium text-accent-primary"
               >
                 {topic}
@@ -194,6 +226,24 @@ const MeetingCard = ({ meeting, onDelete, onEdit, viewMode = 'grid' }) => {
       </div>
     </div>
   );
+};
+
+MeetingCard.propTypes = {
+  meeting: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    status: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    createdAt: PropTypes.string.isRequired,
+    duration: PropTypes.number,
+    audioUrl: PropTypes.string,
+    summary: PropTypes.shape({
+      keyTopics: PropTypes.arrayOf(PropTypes.string),
+    }),
+  }).isRequired,
+  onDelete: PropTypes.func,
+  onEdit: PropTypes.func,
 };
 
 export default MeetingCard;

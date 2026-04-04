@@ -14,8 +14,7 @@ export const saveToken = (token) => {
   try {
     localStorage.setItem(TOKEN_KEY, token);
     return true;
-  } catch (error) {
-    console.error('Failed to save token:', error);
+  } catch {
     return false;
   }
 };
@@ -26,8 +25,7 @@ export const saveToken = (token) => {
 export const getToken = () => {
   try {
     return localStorage.getItem(TOKEN_KEY);
-  } catch (error) {
-    console.error('Failed to get token:', error);
+  } catch {
     return null;
   }
 };
@@ -39,8 +37,7 @@ export const removeToken = () => {
   try {
     localStorage.removeItem(TOKEN_KEY);
     return true;
-  } catch (error) {
-    console.error('Failed to remove token:', error);
+  } catch {
     return false;
   }
 };
@@ -63,8 +60,7 @@ export const saveUser = (user) => {
   try {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     return true;
-  } catch (error) {
-    console.error('Failed to save user:', error);
+  } catch {
     return false;
   }
 };
@@ -76,8 +72,7 @@ export const getUser = () => {
   try {
     const userStr = localStorage.getItem(USER_KEY);
     return userStr ? JSON.parse(userStr) : null;
-  } catch (error) {
-    console.error('Failed to get user:', error);
+  } catch {
     return null;
   }
 };
@@ -89,8 +84,7 @@ export const removeUser = () => {
   try {
     localStorage.removeItem(USER_KEY);
     return true;
-  } catch (error) {
-    console.error('Failed to remove user:', error);
+  } catch {
     return false;
   }
 };
@@ -129,8 +123,7 @@ export const loginWithGoogle = async (credential) => {
       success: false,
       error: result.error || 'Login failed',
     };
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch {
     return {
       success: false,
       error: 'An unexpected error occurred during login',
@@ -151,9 +144,7 @@ export const logout = async () => {
     removeUser();
 
     return { success: true };
-  } catch (error) {
-    console.error('Logout error:', error);
-
+  } catch {
     // Even if API call fails, clear local data
     removeToken();
     removeUser();
@@ -193,8 +184,7 @@ export const verifySession = async () => {
       success: false,
       error: 'Session expired',
     };
-  } catch (error) {
-    console.error('Session verification error:', error);
+  } catch {
     return {
       success: false,
       error: 'Failed to verify session',
@@ -291,8 +281,7 @@ export const initializeAuth = async () => {
       success: true,
       user: authState.user,
     };
-  } catch (error) {
-    console.error('Auth initialization error:', error);
+  } catch {
     clearAuthData();
     return {
       success: false,

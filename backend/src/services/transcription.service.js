@@ -22,11 +22,11 @@ const safePythonRun = async (scriptName, options) => {
     env: { ...process.env, ...(options.env || {}), PATH: envPath },
   };
   const resultsText = await PythonShell.run(scriptName, textOptions);
-  
+
   if (!resultsText || resultsText.length === 0) {
     throw new Error('Python script returned empty output');
   }
-  
+
   for (let i = resultsText.length - 1; i >= 0; i--) {
     try {
       const parsed = JSON.parse(resultsText[i]);
@@ -37,10 +37,11 @@ const safePythonRun = async (scriptName, options) => {
       // Continue searching
     }
   }
-  
-  throw new Error(`Python script ${scriptName} returned malformed output without valid JSON arrays.`);
-};
 
+  throw new Error(
+    `Python script ${scriptName} returned malformed output without valid JSON arrays.`
+  );
+};
 
 // Initialize logger
 const logger = winston.createLogger({

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Pagination } from '@heroui/react';
 import { LuLayoutGrid as LayoutGrid, LuList as List } from 'react-icons/lu';
 import MeetingCard from './MeetingCard';
@@ -82,13 +83,7 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
         }
       >
         {currentMeetings.map((meeting) => (
-          <MeetingCard
-            key={meeting.id}
-            meeting={meeting}
-            onDelete={onDelete}
-            onEdit={onEdit}
-            viewMode={viewMode}
-          />
+          <MeetingCard key={meeting.id} meeting={meeting} onDelete={onDelete} onEdit={onEdit} />
         ))}
       </div>
 
@@ -116,6 +111,14 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
       )}
     </div>
   );
+};
+
+MeetingList.propTypes = {
+  meetings: PropTypes.arrayOf(PropTypes.object),
+  loading: PropTypes.bool,
+  onDelete: PropTypes.func,
+  onEdit: PropTypes.func,
+  itemsPerPage: PropTypes.number,
 };
 
 export default MeetingList;

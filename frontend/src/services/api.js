@@ -31,7 +31,6 @@ api.request = (config) => {
     const requestKey = getRequestKey(config);
 
     if (pendingRequests.has(requestKey)) {
-      console.log(`[API] Deduplicated request (shared promise): ${requestKey}`);
       return pendingRequests.get(requestKey);
     }
 
@@ -88,16 +87,13 @@ api.interceptors.response.use(
     // Handle different error scenarios
     if (error.response) {
       // Server responded with error status
-      const { status, data } = error.response;
+      const { status } = error.response;
 
       switch (status) {
         case 401:
           // Unauthorized - Attempt token refresh before logging out
-          console.log('[API] 401 Unauthorized - Attempting token refresh');
-
           // Prevent infinite loop - don't retry if this IS the refresh endpoint
           if (originalRequest.url?.includes('/auth/refresh')) {
-            console.log('[API] Refresh token expired - Logging out');
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
@@ -110,7 +106,6 @@ api.interceptors.response.use(
 
           // Prevent retry loops - don't retry if already retried
           if (originalRequest._retry) {
-            console.log('[API] Retry failed - Logging out');
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
@@ -125,7 +120,6 @@ api.interceptors.response.use(
 
           // No refresh token available - logout
           if (!refreshToken) {
-            console.log('[API] No refresh token - Logging out');
             localStorage.removeItem('token');
             localStorage.removeItem('user');
 
@@ -162,7 +156,6 @@ api.interceptors.response.use(
 
             // Update token in localStorage
             localStorage.setItem('token', accessToken);
-            console.log('[API] Token refreshed successfully');
 
             // Update authorization header for original request
             originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -173,7 +166,6 @@ api.interceptors.response.use(
             // Retry original request
             return api(originalRequest);
           } catch (refreshError) {
-            console.error('[API] Token refresh failed:', refreshError);
             processQueue(refreshError, null);
 
             // Clear all auth data and redirect to login
@@ -191,23 +183,11 @@ api.interceptors.response.use(
           }
 
         case 403:
-          console.error('Forbidden:', data.message);
-          break;
         case 404:
-          console.error('Not found:', data.message);
-          break;
         case 500:
-          console.error('Server error:', data.message);
-          break;
         default:
-          console.error('API error:', data.message);
+          break;
       }
-    } else if (error.request) {
-      // Request made but no response received
-      console.error('Network error: No response from server');
-    } else {
-      // Error in request configuration
-      console.error('Request error:', error.message);
     }
 
     return Promise.reject(error);
@@ -256,7 +236,7 @@ export const authAPI = {
     try {
       const response = await api.get('/auth/verify');
       return { success: true, data: response.data };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'Session invalid' };
     }
   },
@@ -410,6 +390,23 @@ export const meetingsAPI = {
       };
     }
   },
+
+  /**
+   * Generate AI follow-up email draft
+   */
+  generateFollowUp: async (id, tone = 'formal') => {
+    try {
+      const response = await api.post(`/meetings/${id}/followup`, null, {
+        params: { tone },
+      });
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to generate follow-up',
+      };
+    }
+  },
 };
 
 // ============================================
@@ -529,7 +526,7 @@ export const checkAPIHealth = async () => {
   try {
     const response = await api.get('/health');
     return { success: true, data: response.data };
-  } catch (error) {
+  } catch {
     return { success: false, error: 'API unreachable' };
   }
 };

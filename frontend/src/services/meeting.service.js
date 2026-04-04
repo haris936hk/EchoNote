@@ -26,8 +26,7 @@ export const getAllMeetings = async () => {
       success: false,
       error: result.error || 'Failed to fetch meetings',
     };
-  } catch (error) {
-    console.error('Get meetings error:', error);
+  } catch {
     return {
       success: false,
       error: 'An unexpected error occurred',
@@ -60,8 +59,7 @@ export const getMeetingById = async (id) => {
       success: false,
       error: result.error || 'Meeting not found',
     };
-  } catch (error) {
-    console.error('Get meeting error:', error);
+  } catch {
     return {
       success: false,
       error: 'Failed to fetch meeting details',
@@ -110,8 +108,7 @@ export const uploadMeeting = async (meetingData) => {
       success: false,
       error: result.error || 'Failed to upload meeting',
     };
-  } catch (error) {
-    console.error('Upload meeting error:', error);
+  } catch {
     return {
       success: false,
       error: 'An unexpected error occurred during upload',
@@ -152,8 +149,7 @@ export const updateMeeting = async (id, updates) => {
       success: false,
       error: result.error || 'Failed to update meeting',
     };
-  } catch (error) {
-    console.error('Update meeting error:', error);
+  } catch {
     return {
       success: false,
       error: 'Failed to update meeting',
@@ -186,8 +182,7 @@ export const deleteMeeting = async (id) => {
       success: false,
       error: result.error || 'Failed to delete meeting',
     };
-  } catch (error) {
-    console.error('Delete meeting error:', error);
+  } catch {
     return {
       success: false,
       error: 'Failed to delete meeting',
@@ -221,8 +216,7 @@ export const deleteMeetings = async (ids) => {
       },
       error: failed.length > 0 ? `${failed.length} meeting(s) failed to delete` : null,
     };
-  } catch (error) {
-    console.error('Delete meetings error:', error);
+  } catch {
     return {
       success: false,
       error: 'Failed to delete meetings',
@@ -259,8 +253,7 @@ export const searchMeetings = async (query) => {
       success: false,
       error: result.error || 'Search failed',
     };
-  } catch (error) {
-    console.error('Search error:', error);
+  } catch {
     return {
       success: false,
       error: 'Search failed',
@@ -662,12 +655,26 @@ export const getDecisions = async () => {
       success: false,
       error: result.error || 'Failed to fetch decisions',
     };
-  } catch (error) {
-    console.error('Get decisions error:', error);
+  } catch {
     return {
       success: false,
       error: 'An unexpected error occurred',
     };
+  }
+};
+
+/**
+ * Generate AI follow-up email draft
+ */
+export const generateFollowUp = async (id, tone = 'formal') => {
+  try {
+    if (!id) return { success: false, error: 'Meeting ID is required' };
+    const result = await meetingsAPI.generateFollowUp(id, tone);
+    if (result.success) return { success: true, data: result.data };
+    return { success: false, error: result.error || 'Failed to generate follow-up' };
+  } catch (error) {
+    console.error('Generate follow-up error:', error);
+    return { success: false, error: 'An unexpected error occurred' };
   }
 };
 
@@ -710,6 +717,7 @@ const meetingService = {
   exportMeetingsAsJSON,
   exportMeetingsAsCSV,
   getDecisions,
+  generateFollowUp,
 };
 
 export default meetingService;

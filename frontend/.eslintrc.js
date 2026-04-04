@@ -1,9 +1,5 @@
 module.exports = {
-  extends: [
-    'react-app',
-    'plugin:tailwindcss/recommended',
-    'plugin:prettier/recommended'
-  ],
+  extends: ['react-app', 'plugin:tailwindcss/recommended', 'plugin:prettier/recommended'],
   plugins: ['prettier', 'tailwindcss'],
   rules: {
     'prettier/prettier': [
@@ -16,7 +12,7 @@ module.exports = {
     'tailwindcss/no-custom-classname': 'off',
     'no-unused-vars': 'warn',
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn'
+    'react-hooks/exhaustive-deps': 'warn',
   },
   settings: {
     tailwindcss: {

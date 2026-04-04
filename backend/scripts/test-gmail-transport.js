@@ -29,7 +29,6 @@ async function testTransport() {
 
     console.log('✅ All tests passed! Gmail OAuth2 transport is working correctly.\n');
     process.exit(0);
-
   } catch (error) {
     console.error('❌ Transport test failed:\n');
     console.error(`   Error: ${error.message}\n`);

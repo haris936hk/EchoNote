@@ -1599,6 +1599,44 @@ const getAllDecisions = async (req, res) => {
   }
 };
 
+/**
+ * Generate AI follow-up email draft
+ * POST /api/meetings/:id/followup
+ * @query tone (formal|casual)
+ */
+const generateFollowUp = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    const tone = req.query.tone || 'formal';
+
+    const groqService = require('../services/groqService');
+    const meeting = await meetingService.getMeetingById(id, userId);
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    if (meeting.status !== 'COMPLETED') {
+      return res.status(400).json({ success: false, error: 'Meeting processing not yet complete' });
+    }
+
+    const result = await groqService.generateFollowUpEmail(meeting, tone);
+
+    if (!result.success) {
+      return res.status(500).json({ success: false, error: result.error });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result.data,
+    });
+  } catch (error) {
+    logger.error(`Error generating follow-up: ${error.message}`);
+    return res.status(500).json({ success: false, error: 'Failed to generate follow-up draft' });
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -1623,4 +1661,5 @@ module.exports = {
   generateShareLink,
   getMeetingAnalytics,
   getAllDecisions,
+  generateFollowUp,
 };

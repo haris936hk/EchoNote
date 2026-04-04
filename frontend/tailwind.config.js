@@ -1,11 +1,11 @@
-const { heroui } = require("@heroui/react");
+const { heroui } = require('@heroui/react');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html",
-    "./node_modules/@heroui/react/dist/**/*.{js,ts,jsx,tsx}"
+    './src/**/*.{js,jsx,ts,tsx}',
+    './public/index.html',
+    './node_modules/@heroui/react/dist/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -78,7 +78,7 @@ module.exports = {
           700: '#4338CA',
           800: '#3730A3',
           900: '#312E81',
-          foreground: '#FFFFFF'
+          foreground: '#FFFFFF',
         },
         secondary: {
           DEFAULT: '#A78BFA',
@@ -92,7 +92,7 @@ module.exports = {
           700: '#6D28D9',
           800: '#5B21B6',
           900: '#4C1D95',
-          foreground: '#FFFFFF'
+          foreground: '#FFFFFF',
         },
         success: {
           DEFAULT: '#22C55E',
@@ -106,7 +106,7 @@ module.exports = {
           700: '#15803D',
           800: '#166534',
           900: '#14532D',
-          foreground: '#FFFFFF'
+          foreground: '#FFFFFF',
         },
         warning: {
           DEFAULT: '#FBBF24',
@@ -120,7 +120,7 @@ module.exports = {
           700: '#A16207',
           800: '#854D0E',
           900: '#713F12',
-          foreground: '#000000'
+          foreground: '#000000',
         },
         danger: {
           DEFAULT: '#F87171',
@@ -134,7 +134,7 @@ module.exports = {
           700: '#B91C1C',
           800: '#991B1B',
           900: '#7F1D1D',
-          foreground: '#FFFFFF'
+          foreground: '#FFFFFF',
         },
       },
 
@@ -149,9 +149,9 @@ module.exports = {
         'slide-down': 'slideDown 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'gradient': 'gradient 3s ease infinite',
+        gradient: 'gradient 3s ease infinite',
         'halo-pulse': 'haloPulse 2s ease-in-out infinite',
-        'shimmer': 'shimmer 1.5s linear infinite',
+        shimmer: 'shimmer 1.5s linear infinite',
         'ai-glow': 'aiGlow 1.5s ease-in-out infinite',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
       },
@@ -159,23 +159,23 @@ module.exports = {
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
-          '100%': { opacity: '1' }
+          '100%': { opacity: '1' },
         },
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' }
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         slideDown: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' }
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         scaleIn: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' }
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
         gradient: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' }
+          '50%': { backgroundPosition: '100% 50%' },
         },
         haloPulse: {
           '0%, 100%': {
@@ -185,94 +185,94 @@ module.exports = {
           '50%': {
             transform: 'scale(1.05)',
             boxShadow: '0 0 30px rgba(129,140,248,0.5), 0 0 60px rgba(167,139,250,0.25)',
-          }
+          },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' }
+          '100%': { backgroundPosition: '200% 0' },
         },
         aiGlow: {
           '0%, 100%': {
             boxShadow: '0 0 8px rgba(129,140,248,0.4)',
-            opacity: '1'
+            opacity: '1',
           },
           '50%': {
             boxShadow: '0 0 16px rgba(129,140,248,0.6)',
-            opacity: '0.8'
-          }
+            opacity: '0.8',
+          },
         },
         glowPulse: {
           '0%, 100%': {
             boxShadow: '0 0 15px rgba(129,140,248,0.4), 0 0 25px rgba(167,139,250,0.3)',
-            transform: 'scale(1)'
+            transform: 'scale(1)',
           },
           '50%': {
             boxShadow: '0 0 25px rgba(129,140,248,0.6), 0 0 40px rgba(167,139,250,0.5)',
-            transform: 'scale(1.02)'
-          }
-        }
+            transform: 'scale(1.02)',
+          },
+        },
       },
 
       spacing: {
-        '128': '32rem',
-        '144': '36rem'
+        128: '32rem',
+        144: '36rem',
       },
       borderRadius: {
-        'card': '16px',
-        'btn': '10px',
-        'input': '10px',
-        'chip': '9999px',
+        card: '16px',
+        btn: '10px',
+        input: '10px',
+        chip: '9999px',
         '4xl': '2rem',
-        '5xl': '2.5rem'
+        '5xl': '2.5rem',
       },
       maxWidth: {
         '8xl': '88rem',
-        '9xl': '96rem'
+        '9xl': '96rem',
       },
       backgroundSize: {
-        '200': '200% 200%',
-        '300': '300% 300%'
-      }
-    }
+        200: '200% 200%',
+        300: '300% 300%',
+      },
+    },
   },
-  darkMode: "class",
+  darkMode: 'class',
   plugins: [
     heroui({
       themes: {
         dark: {
           colors: {
-            background: "#020617",
-            foreground: "#F8FAFC",
+            background: '#020617',
+            foreground: '#F8FAFC',
             primary: {
-              DEFAULT: "#818CF8",
-              foreground: "#FFFFFF"
+              DEFAULT: '#818CF8',
+              foreground: '#FFFFFF',
             },
             secondary: {
-              DEFAULT: "#A78BFA",
-              foreground: "#FFFFFF"
+              DEFAULT: '#A78BFA',
+              foreground: '#FFFFFF',
             },
             success: {
-              DEFAULT: "#22C55E",
-              foreground: "#FFFFFF"
+              DEFAULT: '#22C55E',
+              foreground: '#FFFFFF',
             },
             warning: {
-              DEFAULT: "#FBBF24",
-              foreground: "#000000"
+              DEFAULT: '#FBBF24',
+              foreground: '#000000',
             },
             danger: {
-              DEFAULT: "#F87171",
-              foreground: "#FFFFFF"
+              DEFAULT: '#F87171',
+              foreground: '#FFFFFF',
             },
-            content1: "#0F172A",
-            content2: "#1E293B",
-            content3: "#334155",
-            content4: "#475569",
-            divider: "rgba(255,255,255,0.06)",
-            focus: "#818CF8"
-          }
-        }
-      }
+            content1: '#0F172A',
+            content2: '#1E293B',
+            content3: '#334155',
+            content4: '#475569',
+            divider: 'rgba(255,255,255,0.06)',
+            focus: '#818CF8',
+          },
+        },
+      },
     }),
-    require('@tailwindcss/typography')
-  ]
+    require('@tailwindcss/typography'),
+  ],
 };

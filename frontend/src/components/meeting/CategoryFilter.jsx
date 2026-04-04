@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { categoryColors } from '../../styles/theme';
 
 const CATEGORIES = [
@@ -49,8 +50,15 @@ const CategoryFilter = ({
   );
 };
 
+CategoryFilter.propTypes = {
+  selectedCategory: PropTypes.string,
+  onCategoryChange: PropTypes.func,
+  showCount: PropTypes.bool,
+  counts: PropTypes.object,
+};
+
 // Badge component for displaying category
-export const CategoryBadge = ({ category, size = 'md' }) => {
+export const CategoryBadge = ({ category }) => {
   const catColors = categoryColors[category] || categoryColors.OTHER;
   const categoryData =
     CATEGORIES.find((c) => c.value === category) || CATEGORIES[CATEGORIES.length - 1];
@@ -62,6 +70,10 @@ export const CategoryBadge = ({ category, size = 'md' }) => {
       {categoryData.label}
     </span>
   );
+};
+
+CategoryBadge.propTypes = {
+  category: PropTypes.string.isRequired,
 };
 
 // Get category data by value

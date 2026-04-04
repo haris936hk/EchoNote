@@ -151,7 +151,7 @@ export default function Tasks() {
             />
           </div>
 
-          <div className="rounded-btn border border-echo-border bg-echo-surface p-1 flex items-center gap-1">
+          <div className="flex items-center gap-1 rounded-btn border border-echo-border bg-echo-surface p-1">
             <button
               onClick={() => setFilterPriority('all')}
               className={`rounded-md px-3 py-1 text-xs transition-all ${
@@ -177,7 +177,7 @@ export default function Tasks() {
           <select
             value={filterMeeting}
             onChange={(e) => setFilterMeeting(e.target.value)}
-            className="rounded-btn border border-echo-border bg-echo-surface px-3 py-1.5 text-sm text-slate-300 outline-none transition-all hover:border-accent-primary/50 focus:border-accent-primary/50 focus:ring-1 focus:ring-accent-primary/20 cursor-pointer max-w-[200px] truncate"
+            className="max-w-[200px] cursor-pointer truncate rounded-btn border border-echo-border bg-echo-surface px-3 py-1.5 text-sm text-slate-300 outline-none transition-all hover:border-accent-primary/50 focus:border-accent-primary/50 focus:ring-1 focus:ring-accent-primary/20"
           >
             <option value="all">All Meetings</option>
             {uniqueMeetings.map((m) => (

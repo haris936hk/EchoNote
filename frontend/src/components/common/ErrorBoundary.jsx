@@ -1,8 +1,5 @@
-// frontend/src/components/common/ErrorBoundary.jsx
-// Error boundary — Stitch "Luminous Archive" OLED design system
-// Pure Tailwind, no HeroUI Card/Button dependencies
-
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import { LuAlertTriangle as AlertTriangle, LuRefreshCw as RefreshCw } from 'react-icons/lu';
 
 class ErrorBoundary extends Component {
@@ -105,5 +102,9 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default ErrorBoundary;

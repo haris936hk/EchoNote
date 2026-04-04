@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   LuSparkles as Sparkles,
   LuCheckCircle as CheckCircle,
@@ -12,7 +13,32 @@ import {
 } from 'react-icons/lu';
 import { sentimentColors } from '../../styles/theme';
 
-const SummaryViewer = ({ summary, meetingId }) => {
+const CopyBtn = ({ section, content, copiedSection, onCopy }) => (
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      onCopy(content, section);
+    }}
+    className="text-slate-600 transition-colors hover:text-white"
+    type="button"
+    aria-label={`Copy ${section}`}
+  >
+    {copiedSection === section ? (
+      <Check size={12} className="text-emerald-400" />
+    ) : (
+      <Copy size={12} />
+    )}
+  </button>
+);
+
+CopyBtn.propTypes = {
+  section: PropTypes.string.isRequired,
+  content: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+  copiedSection: PropTypes.string,
+  onCopy: PropTypes.func.isRequired,
+};
+
+const SummaryViewer = ({ summary }) => {
   const [copiedSection, setCopiedSection] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
 
@@ -90,22 +116,6 @@ const SummaryViewer = ({ summary, meetingId }) => {
 
   const sentiment = sentimentColors[summaryData.sentiment] || sentimentColors.neutral;
 
-  const CopyBtn = ({ section, content }) => (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        copySection(content, section);
-      }}
-      className="text-slate-600 transition-colors hover:text-white"
-    >
-      {copiedSection === section ? (
-        <Check size={12} className="text-emerald-400" />
-      ) : (
-        <Copy size={12} />
-      )}
-    </button>
-  );
-
   return (
     <div className="space-y-4">
       {/* ── Executive Summary ── */}
@@ -117,7 +127,12 @@ const SummaryViewer = ({ summary, meetingId }) => {
               <h4 className="text-sm font-semibold text-white">Executive Summary</h4>
               <span className="ai-dot"></span>
             </div>
-            <CopyBtn section="executive" content={summaryData.executive} />
+            <CopyBtn
+              section="executive"
+              content={summaryData.executive}
+              copiedSection={copiedSection}
+              onCopy={copySection}
+            />
           </div>
           <p className="text-sm leading-relaxed text-slate-300">{summaryData.executive}</p>
         </div>
@@ -131,11 +146,16 @@ const SummaryViewer = ({ summary, meetingId }) => {
               <CheckCircle size={14} className="text-emerald-400" />
               <h4 className="text-sm font-semibold text-white">Key Decisions</h4>
             </div>
-            <CopyBtn section="decisions" content={summaryData.decisions} />
+            <CopyBtn
+              section="decisions"
+              content={summaryData.decisions}
+              copiedSection={copiedSection}
+              onCopy={copySection}
+            />
           </div>
           <div className="space-y-2">
             {summaryData.decisions.map((decision, i) => (
-              <div key={i} className="flex items-start gap-2.5 pl-1">
+              <div key={`${decision}-${i}`} className="flex items-start gap-2.5 pl-1">
                 <div className="mt-2 size-1 shrink-0 rounded-full bg-accent-primary"></div>
                 <p className="text-sm leading-relaxed text-slate-300">{decision}</p>
               </div>
@@ -155,24 +175,31 @@ const SummaryViewer = ({ summary, meetingId }) => {
                 {summaryData.actions.length}
               </span>
             </div>
-            <CopyBtn section="actions" content={summaryData.actions} />
+            <CopyBtn
+              section="actions"
+              content={summaryData.actions}
+              copiedSection={copiedSection}
+              onCopy={copySection}
+            />
           </div>
           <div className="space-y-2.5">
             {summaryData.actions.map((action, i) => {
               const isChecked = checkedItems[i];
               return (
                 <div
-                  key={i}
+                  key={`${action.task}-${i}`}
                   className={`space-y-2 rounded-btn border border-echo-border bg-echo-base p-3 ${isChecked ? 'opacity-50' : ''}`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <div
+                    <button
+                      type="button"
                       onClick={() => toggleActionItem(i)}
                       className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded border-2 transition-all ${
                         isChecked
                           ? 'border-emerald-500 bg-emerald-500'
                           : 'border-slate-600 hover:border-emerald-400'
                       }`}
+                      aria-label={isChecked ? 'Mark as incomplete' : 'Mark as complete'}
                     >
                       {isChecked && (
                         <svg
@@ -185,7 +212,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       )}
-                    </div>
+                    </button>
                     <p
                       className={`text-sm leading-relaxed text-slate-300 ${isChecked ? 'line-through' : ''}`}
                     >
@@ -232,7 +259,7 @@ const SummaryViewer = ({ summary, meetingId }) => {
           <div className="flex flex-wrap gap-2">
             {summaryData.keyTopics.map((topic, i) => (
               <span
-                key={i}
+                key={`${topic}-${i}`}
                 className="rounded-full bg-accent-primary/10 px-2.5 py-1 text-xs font-medium text-accent-primary"
               >
                 {topic}
@@ -259,11 +286,16 @@ const SummaryViewer = ({ summary, meetingId }) => {
               <ArrowRight size={14} className="text-emerald-400" />
               <h4 className="text-sm font-semibold text-white">Next Steps</h4>
             </div>
-            <CopyBtn section="nextSteps" content={summaryData.nextSteps} />
+            <CopyBtn
+              section="nextSteps"
+              content={summaryData.nextSteps}
+              copiedSection={copiedSection}
+              onCopy={copySection}
+            />
           </div>
           <div className="space-y-2">
             {summaryData.nextSteps.map((step, i) => (
-              <div key={i} className="flex items-start gap-2.5 pl-1">
+              <div key={`${step}-${i}`} className="flex items-start gap-2.5 pl-1">
                 <ArrowRight size={10} className="mt-1.5 shrink-0 text-emerald-400" />
                 <p className="text-sm leading-relaxed text-slate-300">{step}</p>
               </div>
@@ -273,6 +305,10 @@ const SummaryViewer = ({ summary, meetingId }) => {
       )}
     </div>
   );
+};
+
+SummaryViewer.propTypes = {
+  summary: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 
 export default SummaryViewer;

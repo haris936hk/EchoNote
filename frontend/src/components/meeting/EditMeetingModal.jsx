@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Modal,
   ModalContent,
@@ -37,8 +38,8 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
   };
 
   const handleTitleChange = (e) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
+    const newTitleValue = e.target.value;
+    setTitle(newTitleValue);
 
     // Clear error when user starts typing
     if (titleError) {
@@ -48,9 +49,9 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
 
   const handleSubmit = async () => {
     // Validate title
-    const error = validateTitle(title);
-    if (error) {
-      setTitleError(error);
+    const vError = validateTitle(title);
+    if (vError) {
+      setTitleError(vError);
       return;
     }
 
@@ -61,8 +62,8 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
         description: description.trim(),
       });
       onClose();
-    } catch (error) {
-      console.error('Failed to update meeting:', error);
+    } catch (err) {
+      console.error('Failed to update meeting:', err);
       setTitleError('Failed to update meeting. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -88,25 +89,25 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
       classNames={{
         wrapper: 'z-[999]',
         backdrop: 'bg-black/50 backdrop-blur-sm',
-        base: 'border border-divider/50 bg-content1/95 backdrop-blur-xl rounded-3xl',
-        header: 'border-b border-divider/50',
+        base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px]',
+        header: 'border-b border-white/5',
         body: 'py-6',
-        footer: 'border-t border-divider/50',
+        footer: 'border-t border-white/5',
       }}
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
-            <ModalHeader className="flex items-center gap-2 text-lg">
-              <FiEdit className="text-primary" size={20} />
+            <ModalHeader className="flex items-center gap-2 text-lg text-white">
+              <FiEdit className="text-accent-primary" size={20} />
               <span>Edit Meeting</span>
             </ModalHeader>
             <ModalBody>
               <div className="space-y-5">
                 {/* Title Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Meeting Title <span className="text-danger">*</span>
+                  <label className="text-sm font-medium text-slate-300">
+                    Meeting Title <span className="text-red-400">*</span>
                   </label>
                   <Input
                     value={title}
@@ -115,10 +116,10 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                     errorMessage={titleError}
                     variant="bordered"
                     classNames={{
-                      input: 'bg-transparent',
+                      input: 'bg-transparent text-white',
                       inputWrapper:
-                        'rounded-xl border-divider/50 bg-default-100/50 hover:bg-default-200/50 hover:border-primary/30 transition-all duration-200',
-                      errorMessage: 'text-xs mt-1',
+                        'rounded-xl border-white/10 bg-[#0F172A]/50 hover:bg-[#1E293B]/50 hover:border-accent-primary/30 transition-all duration-200',
+                      errorMessage: 'text-xs mt-1 text-red-400',
                     }}
                     autoFocus
                   />
@@ -126,7 +127,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
 
                 {/* Description Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Description</label>
+                  <label className="text-sm font-medium text-slate-300">Description</label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -134,29 +135,28 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                     maxRows={6}
                     variant="bordered"
                     classNames={{
-                      input: 'bg-transparent',
+                      input: 'bg-transparent text-white',
                       inputWrapper:
-                        'rounded-xl border-divider/50 bg-default-100/50 hover:bg-default-200/50 hover:border-primary/30 transition-all duration-200',
+                        'rounded-xl border-white/10 bg-[#0F172A]/50 hover:bg-[#1E293B]/50 hover:border-accent-primary/30 transition-all duration-200',
                     }}
                   />
                 </div>
               </div>
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter className="gap-3">
               <Button
                 variant="flat"
                 onPress={handleClose}
                 isDisabled={isSubmitting}
-                className="rounded-xl transition-all duration-200 hover:bg-default-200"
+                className="rounded-full bg-white/5 font-medium text-slate-300 transition-all duration-200 hover:bg-white/10"
                 startContent={<FiX size={16} />}
               >
                 Cancel
               </Button>
               <Button
-                color="primary"
                 onPress={handleSubmit}
                 isLoading={isSubmitting}
-                className="rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+                className="rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 font-bold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:scale-105 hover:shadow-indigo-500/40 active:scale-95"
               >
                 Save Changes
               </Button>
@@ -166,6 +166,16 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
       </ModalContent>
     </Modal>
   );
+};
+
+EditMeetingModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  meeting: PropTypes.shape({
+    title: PropTypes.string,
+    description: PropTypes.string,
+  }),
+  onSave: PropTypes.func.isRequired,
 };
 
 export default EditMeetingModal;

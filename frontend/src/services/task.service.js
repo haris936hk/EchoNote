@@ -18,8 +18,7 @@ export const getTasks = async () => {
       success: false,
       error: result.error || 'Failed to fetch tasks',
     };
-  } catch (error) {
-    console.error('Get tasks error:', error);
+  } catch {
     return {
       success: false,
       error: 'An unexpected error occurred',
@@ -52,8 +51,7 @@ export const updateTaskStatus = async (id, status) => {
       success: false,
       error: result.error || 'Failed to update task',
     };
-  } catch (error) {
-    console.error('Update task error:', error);
+  } catch {
     return {
       success: false,
       error: 'Failed to update task status',

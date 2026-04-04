@@ -17,7 +17,6 @@ export const setLocalItem = (key, value) => {
     localStorage.setItem(key, serializedValue);
     return { success: true };
   } catch (error) {
-    console.error('LocalStorage setItem error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -32,8 +31,7 @@ export const getLocalItem = (key, defaultValue = null) => {
       return defaultValue;
     }
     return JSON.parse(item);
-  } catch (error) {
-    console.error('LocalStorage getItem error:', error);
+  } catch {
     return defaultValue;
   }
 };
@@ -46,7 +44,6 @@ export const removeLocalItem = (key) => {
     localStorage.removeItem(key);
     return { success: true };
   } catch (error) {
-    console.error('LocalStorage removeItem error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -59,7 +56,6 @@ export const clearLocalStorage = () => {
     localStorage.clear();
     return { success: true };
   } catch (error) {
-    console.error('LocalStorage clear error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -70,8 +66,7 @@ export const clearLocalStorage = () => {
 export const hasLocalItem = (key) => {
   try {
     return localStorage.getItem(key) !== null;
-  } catch (error) {
-    console.error('LocalStorage hasItem error:', error);
+  } catch {
     return false;
   }
 };
@@ -82,8 +77,7 @@ export const hasLocalItem = (key) => {
 export const getLocalKeys = () => {
   try {
     return Object.keys(localStorage);
-  } catch (error) {
-    console.error('LocalStorage getKeys error:', error);
+  } catch {
     return [];
   }
 };
@@ -95,13 +89,12 @@ export const getLocalStorageSize = () => {
   try {
     let size = 0;
     for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         size += localStorage[key].length + key.length;
       }
     }
     return size;
-  } catch (error) {
-    console.error('LocalStorage size calculation error:', error);
+  } catch {
     return 0;
   }
 };
@@ -119,7 +112,6 @@ export const setSessionItem = (key, value) => {
     sessionStorage.setItem(key, serializedValue);
     return { success: true };
   } catch (error) {
-    console.error('SessionStorage setItem error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -134,8 +126,7 @@ export const getSessionItem = (key, defaultValue = null) => {
       return defaultValue;
     }
     return JSON.parse(item);
-  } catch (error) {
-    console.error('SessionStorage getItem error:', error);
+  } catch {
     return defaultValue;
   }
 };
@@ -148,7 +139,6 @@ export const removeSessionItem = (key) => {
     sessionStorage.removeItem(key);
     return { success: true };
   } catch (error) {
-    console.error('SessionStorage removeItem error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -161,7 +151,6 @@ export const clearSessionStorage = () => {
     sessionStorage.clear();
     return { success: true };
   } catch (error) {
-    console.error('SessionStorage clear error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -183,7 +172,6 @@ export const setItemWithExpiry = (key, value, ttlMs) => {
     localStorage.setItem(key, JSON.stringify(item));
     return { success: true };
   } catch (error) {
-    console.error('Set item with expiry error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -208,8 +196,7 @@ export const getItemWithExpiry = (key, defaultValue = null) => {
     }
 
     return item.value;
-  } catch (error) {
-    console.error('Get item with expiry error:', error);
+  } catch {
     return defaultValue;
   }
 };
@@ -241,7 +228,6 @@ export const updatePreference = (key, value) => {
     preferences[key] = value;
     return savePreferences(preferences);
   } catch (error) {
-    console.error('Update preference error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -288,7 +274,6 @@ export const clearAllCache = () => {
     cacheKeys.forEach((key) => localStorage.removeItem(key));
     return { success: true };
   } catch (error) {
-    console.error('Clear all cache error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -346,7 +331,6 @@ export const addToRecent = (listKey, item, maxItems = 10) => {
     setLocalItem(listKey, recent);
     return { success: true };
   } catch (error) {
-    console.error('Add to recent error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -387,7 +371,6 @@ export const addToFavorites = (item) => {
     setLocalItem('favorites', favorites);
     return { success: true };
   } catch (error) {
-    console.error('Add to favorites error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -402,7 +385,6 @@ export const removeFromFavorites = (itemId) => {
     setLocalItem('favorites', favorites);
     return { success: true };
   } catch (error) {
-    console.error('Remove from favorites error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -442,7 +424,7 @@ export const isLocalStorageAvailable = () => {
     localStorage.setItem(test, test);
     localStorage.removeItem(test);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -456,7 +438,7 @@ export const isSessionStorageAvailable = () => {
     sessionStorage.setItem(test, test);
     sessionStorage.removeItem(test);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -481,8 +463,7 @@ export const getStorageQuota = async () => {
       };
     }
     return null;
-  } catch (error) {
-    console.error('Get storage quota error:', error);
+  } catch {
     return null;
   }
 };
@@ -504,7 +485,6 @@ export const migrateData = (oldKey, newKey) => {
     }
     return { success: false, error: 'No data to migrate' };
   } catch (error) {
-    console.error('Migrate data error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -530,14 +510,13 @@ export const cleanupExpiredItems = () => {
             cleaned++;
           }
         }
-      } catch (e) {
+      } catch {
         // Skip items that aren't in expected format
       }
     });
 
     return { success: true, cleaned };
   } catch (error) {
-    console.error('Cleanup expired items error:', error);
     return { success: false, error: error.message };
   }
 };

@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
   LuFileText as FileText,
   LuCopy as Copy,
@@ -11,6 +12,7 @@ import {
   LuChevronDown as ChevronDown,
   LuSparkles as Sparkles,
   LuTag as Tag,
+  LuPlay as Play,
 } from 'react-icons/lu';
 
 // ─── Entity type → Luminous Archive color mapping ───
@@ -39,11 +41,16 @@ const SpeakerAvatar = ({ name, size = 5 }) => {
   const initial = (name || '?').charAt(0).toUpperCase();
   return (
     <span
-      className={`inline-flex size-${size} items-center justify-center rounded-full bg-accent-secondary/10 text-[10px] font-bold text-accent-secondary`}
+      className={`inline-flex items-center justify-center rounded-full bg-accent-secondary/10 text-[10px] font-bold text-accent-secondary h-${size} w-${size}`}
     >
       {initial}
     </span>
   );
+};
+
+SpeakerAvatar.propTypes = {
+  name: PropTypes.string,
+  size: PropTypes.number,
 };
 
 const TranscriptViewer = ({
@@ -51,10 +58,9 @@ const TranscriptViewer = ({
   transcriptSegments = [],
   speakerMap = {},
   title = 'Transcript',
-  meetingTitle = 'Meeting',
-  meetingId,
   nlpData,
   onRenameSpeaker,
+  onSeek,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
@@ -175,7 +181,7 @@ const TranscriptViewer = ({
       const regex = new RegExp(`(${escapeRegex(searchQuery)})`, 'gi');
       return text.split(regex).map((part, i) =>
         i % 2 === 1 ? (
-          <mark key={i} data-search="" className="rounded bg-amber-500/20 px-0.5">
+          <mark key={`search-${i}`} data-search="" className="rounded bg-amber-500/20 px-0.5">
             {part}
           </mark>
         ) : (
@@ -196,7 +202,7 @@ const TranscriptViewer = ({
           const style = getEntityStyle(entityColorMap[part.toLowerCase()]);
           return (
             <span
-              key={i}
+              key={`entity-${i}`}
               className={`cursor-default rounded-[3px] px-0.5 ${style.bg} ${style.text}`}
               title={style.label}
             >
@@ -286,6 +292,7 @@ const TranscriptViewer = ({
                   ? 'bg-accent-secondary/15 text-accent-secondary ring-1 ring-accent-secondary/20'
                   : 'btn-ghost'
               }`}
+              type="button"
             >
               <Tag size={11} />
               Entities
@@ -294,6 +301,7 @@ const TranscriptViewer = ({
           <button
             onClick={handleCopy}
             className="btn-ghost inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
+            type="button"
           >
             {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
             {copied ? 'Copied!' : 'Copy Text'}
@@ -341,6 +349,8 @@ const TranscriptViewer = ({
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+              type="button"
+              aria-label="Clear search"
             >
               <X size={12} />
             </button>
@@ -359,6 +369,7 @@ const TranscriptViewer = ({
                   onClick={handlePrevMatch}
                   className="flex size-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-echo-surface-hover hover:text-white"
                   title="Previous match"
+                  type="button"
                 >
                   <ChevronUp size={13} />
                 </button>
@@ -366,6 +377,7 @@ const TranscriptViewer = ({
                   onClick={handleNextMatch}
                   className="flex size-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-echo-surface-hover hover:text-white"
                   title="Next match"
+                  type="button"
                 >
                   <ChevronDown size={13} />
                 </button>
@@ -426,7 +438,13 @@ const TranscriptViewer = ({
               const isDefaultName = speakerName === speakerId;
 
               return (
-                <div key={idx} className="group flex flex-col gap-1">
+                <div
+                  key={`${speakerId}-${seg.start}-${idx}`}
+                  onClick={() => onSeek && seg.start !== undefined && onSeek(seg.start)}
+                  className={`group flex flex-col gap-1 rounded-lg transition-all duration-200 ${
+                    onSeek ? 'cursor-pointer hover:bg-white/[0.03] p-2 -mx-2' : ''
+                  }`}
+                >
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold ${
@@ -441,9 +459,13 @@ const TranscriptViewer = ({
                       {/* Rename on hover */}
                       {onRenameSpeaker && (
                         <button
-                          onClick={() => onRenameSpeaker(speakerId, speakerName)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRenameSpeaker(speakerId, speakerName);
+                          }}
                           className="ml-1 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
                           title="Rename speaker"
+                          type="button"
                         >
                           <PenLine size={10} />
                         </button>
@@ -451,9 +473,17 @@ const TranscriptViewer = ({
                     </span>
 
                     {seg.start !== undefined && (
-                      <span className="font-mono text-[10px] text-slate-500">
-                        {new Date(seg.start * 1000).toISOString().substr(14, 5)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] text-slate-500">
+                          {new Date(seg.start * 1000).toISOString().substr(14, 5)}
+                        </span>
+                        {onSeek && (
+                          <Play
+                            size={10}
+                            className="text-accent-primary opacity-0 transition-opacity group-hover:opacity-100"
+                          />
+                        )}
+                      </div>
                     )}
                   </div>
                   <p className="pl-1 leading-relaxed text-slate-300">
@@ -467,6 +497,30 @@ const TranscriptViewer = ({
       </div>
     </div>
   );
+};
+
+TranscriptViewer.propTypes = {
+  transcript: PropTypes.string,
+  transcriptSegments: PropTypes.arrayOf(
+    PropTypes.shape({
+      speaker: PropTypes.string,
+      text: PropTypes.string.isRequired,
+      start: PropTypes.number,
+      end: PropTypes.number,
+    })
+  ),
+  speakerMap: PropTypes.objectOf(PropTypes.string),
+  title: PropTypes.string,
+  nlpData: PropTypes.shape({
+    entities: PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string,
+        label: PropTypes.string,
+      })
+    ),
+  }),
+  onRenameSpeaker: PropTypes.func,
+  onSeek: PropTypes.func,
 };
 
 export default TranscriptViewer;

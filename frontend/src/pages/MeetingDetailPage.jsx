@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
 import {
@@ -34,10 +34,19 @@ const PIPELINE_STEPS = [
   { key: 'SUMMARIZING', label: 'Summarizing' },
 ];
 
+const PROCESSING_STATUSES = [
+  'UPLOADING',
+  'PROCESSING_AUDIO',
+  'TRANSCRIBING',
+  'PROCESSING_NLP',
+  'SUMMARIZING',
+];
+
 const MeetingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentMeeting, fetchMeeting, deleteMeeting, updateMeeting, loading } = useMeeting();
+  const audioRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
@@ -54,7 +63,7 @@ const MeetingDetailPage = () => {
           detail: { message: 'Link copied to clipboard!', type: 'success' },
         })
       );
-    } catch (_) {
+    } catch {
       // Fallback for browsers without clipboard API
       window.prompt('Copy this link:', `${window.location.origin}/meeting/${id}`);
     }
@@ -84,7 +93,7 @@ const MeetingDetailPage = () => {
         // Optimistic UI update or refresh meeting data
         fetchMeeting(id);
       }
-    } catch (error) {
+    } catch {
       window.alert('Failed to rename speaker.');
     }
   };
@@ -95,15 +104,8 @@ const MeetingDetailPage = () => {
 
   // Poll for processing status
   useEffect(() => {
-    if (!currentMeeting || !id) return;
-    const processingStates = [
-      'UPLOADING',
-      'PROCESSING_AUDIO',
-      'TRANSCRIBING',
-      'PROCESSING_NLP',
-      'SUMMARIZING',
-    ];
-    if (!processingStates.includes(currentMeeting.status)) return;
+    if (!currentMeeting || !id) return undefined;
+    if (!PROCESSING_STATUSES.includes(currentMeeting.status)) return undefined;
     const pollInterval = setInterval(() => fetchMeeting(id), 5000);
     return () => clearInterval(pollInterval);
   }, [currentMeeting, id, fetchMeeting]);
@@ -127,6 +129,13 @@ const MeetingDetailPage = () => {
   const handleSaveEdit = async (updates) => {
     const result = await updateMeeting(id, updates);
     if (result.success) fetchMeeting(id);
+  };
+
+  const handleSeek = (time) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      audioRef.current.play().catch(() => {});
+    }
   };
 
   // F1 — Retry failed meeting using original audio URL stored in DB
@@ -175,7 +184,7 @@ const MeetingDetailPage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       window.alert('Failed to download audio file.');
     }
   };
@@ -201,7 +210,7 @@ const MeetingDetailPage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       window.alert('Failed to download files.');
     } finally {
       setDownloadingAll(false);
@@ -258,20 +267,18 @@ const MeetingDetailPage = () => {
       <div className="py-20 text-center">
         <p className="mb-2 text-xl font-semibold text-white">Meeting Not Found</p>
         <p className="mb-6 text-slate-400">This meeting doesn't exist or has been deleted.</p>
-        <button onClick={handleBack} className="btn-cta rounded-btn px-6 py-2.5 text-sm font-bold">
+        <button
+          onClick={handleBack}
+          className="btn-cta rounded-btn px-6 py-2.5 text-sm font-bold"
+          type="button"
+        >
           Back to Dashboard
         </button>
       </div>
     );
   }
 
-  const isProcessing = [
-    'UPLOADING',
-    'PROCESSING_AUDIO',
-    'TRANSCRIBING',
-    'PROCESSING_NLP',
-    'SUMMARIZING',
-  ].includes(currentMeeting.status);
+  const isProcessing = PROCESSING_STATUSES.includes(currentMeeting.status);
   const isFailed = currentMeeting.status === 'FAILED';
   const isCompleted = currentMeeting.status === 'COMPLETED';
   const statusInfo = getStatusInfo(currentMeeting.status);
@@ -282,6 +289,7 @@ const MeetingDetailPage = () => {
       <button
         onClick={handleBack}
         className="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-white"
+        type="button"
       >
         <ArrowLeft size={14} />
         Back to Dashboard
@@ -306,7 +314,7 @@ const MeetingDetailPage = () => {
             >
               <span
                 className={`size-1.5 rounded-full ${statusInfo.dot} ${isProcessing ? 'animate-pulse' : ''}`}
-              ></span>
+              />
               {statusInfo.label}
             </span>
             <CategoryBadge category={currentMeeting.category} />
@@ -331,7 +339,7 @@ const MeetingDetailPage = () => {
                   return typeof currentMeeting.attendees === 'string'
                     ? JSON.parse(currentMeeting.attendees)
                     : currentMeeting.attendees;
-                } catch (_) {
+                } catch {
                   return [];
                 }
               })();
@@ -342,7 +350,7 @@ const MeetingDetailPage = () => {
                 <span className="inline-flex items-center -space-x-1.5">
                   {visible.map((a, i) => (
                     <span
-                      key={i}
+                      key={`${a.email || a.id || i}`}
                       title={a.name || a.email || 'Attendee'}
                       className="inline-flex size-5 items-center justify-center rounded-full border border-echo-border bg-echo-surface text-[9px] font-bold text-accent-secondary"
                     >
@@ -387,6 +395,7 @@ const MeetingDetailPage = () => {
             <button
               onClick={handleDownloadAudio}
               className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium"
+              type="button"
             >
               <Download size={14} />
               Download Audio
@@ -394,13 +403,24 @@ const MeetingDetailPage = () => {
           )}
           <Dropdown>
             <DropdownTrigger>
-              <button className="flex size-9 items-center justify-center rounded-btn border border-echo-border text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white">
+              <button
+                className="flex size-9 items-center justify-center rounded-btn border border-echo-border text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                type="button"
+                aria-label="More actions"
+              >
                 <MoreVertical size={16} />
               </button>
             </DropdownTrigger>
             <DropdownMenu
               aria-label="Meeting actions"
-              className="border border-echo-border bg-echo-elevated"
+              className="min-w-[200px]"
+              itemClasses={{
+                base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+                selected: 'bg-accent-primary/20 text-accent-primary font-bold',
+              }}
+              classNames={{
+                base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+              }}
             >
               <DropdownItem key="share" startContent={<Share2 size={14} />} onPress={handleShare}>
                 Copy Link
@@ -419,7 +439,7 @@ const MeetingDetailPage = () => {
               <DropdownItem
                 key="delete"
                 startContent={<Trash2 size={14} />}
-                className="text-red-400"
+                className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
                 onPress={handleDelete}
                 isDisabled={deleting}
               >
@@ -434,7 +454,7 @@ const MeetingDetailPage = () => {
       {isProcessing && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-6">
           <div className="mb-6 flex items-center gap-3">
-            <div className="ai-dot"></div>
+            <div className="ai-dot" />
             <p className="text-sm font-medium text-white">Your meeting is being processed…</p>
           </div>
 
@@ -474,7 +494,7 @@ const MeetingDetailPage = () => {
                   {index < PIPELINE_STEPS.length - 1 && (
                     <div
                       className={`-mt-5 h-px flex-1 ${isComplete ? 'bg-emerald-500/30' : 'bg-echo-border'}`}
-                    ></div>
+                    />
                   )}
                 </div>
               );
@@ -499,6 +519,7 @@ const MeetingDetailPage = () => {
             onClick={handleRetry}
             disabled={isRetrying}
             className="btn-cta inline-flex shrink-0 items-center gap-2 rounded-btn px-4 py-2 text-xs font-bold disabled:opacity-50"
+            type="button"
           >
             {isRetrying ? (
               <div className="size-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -523,7 +544,7 @@ const MeetingDetailPage = () => {
                     <Mic size={14} className="text-accent-primary" />
                     <span className="text-xs font-medium text-slate-400">Audio Recording</span>
                   </div>
-                  <audio controls src={currentMeeting.audioUrl} className="w-full" />
+                  <audio ref={audioRef} controls src={currentMeeting.audioUrl} className="w-full" />
                 </div>
               )}
 
@@ -535,6 +556,7 @@ const MeetingDetailPage = () => {
                   speakerMap={currentMeeting.speakerMap}
                   nlpData={currentMeeting.nlpAnalysis}
                   onRenameSpeaker={handleRenameSpeaker}
+                  onSeek={handleSeek}
                 />
               </div>
             </div>

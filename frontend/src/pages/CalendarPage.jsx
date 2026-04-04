@@ -1,33 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LuClock as Clock, 
-  LuCalendar as CalendarIcon, 
-  LuMapPin as MapPin, 
-  LuExternalLink as ExternalLink, 
-  LuVideo as Video, 
+import {
+  LuClock as Clock,
+  LuCalendar as CalendarIcon,
+  LuMapPin as MapPin,
+  LuExternalLink as ExternalLink,
+  LuVideo as Video,
   LuSearch as Search,
-  LuChevronRight as ChevronRight
+  LuChevronRight as ChevronRight,
 } from 'react-icons/lu';
-import { 
-  Button, 
-  Input, 
-  Tooltip, 
-  Spinner, 
-  Chip,
-  Card,
-  CardBody,
-  Divider
-} from '@heroui/react';
-import { 
-  format, 
-  isToday, 
-  isTomorrow, 
-  parseISO, 
-  addDays, 
-  startOfDay, 
-  isSameDay 
-} from 'date-fns';
+import { Button, Input, Tooltip, Spinner, Chip, Card, CardBody, Divider } from '@heroui/react';
+import { format, isToday, isTomorrow, parseISO, addDays, startOfDay, isSameDay } from 'date-fns';
 import { calendarAPI } from '../services/api';
 import LoginButton from '../components/auth/LoginButton';
 
@@ -70,9 +53,10 @@ const CalendarPage = () => {
     });
   };
 
-  const filteredEvents = events.filter(event => 
-    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredEvents = events.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Grouping logic for 30 days
@@ -81,14 +65,14 @@ const CalendarPage = () => {
 
   for (let i = 0; i < 30; i++) {
     const currentDay = addDays(today, i);
-    const dayEvents = filteredEvents.filter(event => 
+    const dayEvents = filteredEvents.filter((event) =>
       isSameDay(parseISO(event.start), currentDay)
     );
 
     if (dayEvents.length > 0) {
       groupedEvents.push({
         date: currentDay,
-        events: dayEvents
+        events: dayEvents,
       });
     }
   }
@@ -101,13 +85,15 @@ const CalendarPage = () => {
 
   if (errorStatus === 403 || errorStatus === 401) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto text-center px-4">
-        <div className="size-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6">
+      <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 text-center">
+        <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-emerald-500/10">
           <CalendarIcon size={40} className="text-emerald-400" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-4 font-plus-jakarta">Connect Your Calendar</h1>
-        <p className="text-slate-400 mb-8 leading-relaxed">
-          EchoNote needs access to your Google Calendar to sync meetings, pre-fill attendee lists, 
+        <h1 className="font-plus-jakarta mb-4 text-3xl font-bold text-white">
+          Connect Your Calendar
+        </h1>
+        <p className="mb-8 leading-relaxed text-slate-400">
+          EchoNote needs access to your Google Calendar to sync meetings, pre-fill attendee lists,
           and help you organize your productivity archive.
         </p>
         <div className="w-full max-w-sm">
@@ -118,14 +104,18 @@ const CalendarPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto pb-20">
+    <div className="mx-auto max-w-5xl pb-20">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+      <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-center">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2 font-plus-jakarta tracking-tight">Your Agenda</h1>
-          <p className="text-slate-400">Manage and record your upcoming meetings from the next 30 days.</p>
+          <h1 className="font-plus-jakarta mb-2 text-4xl font-bold tracking-tight text-white">
+            Your Agenda
+          </h1>
+          <p className="text-slate-400">
+            Manage and record your upcoming meetings from the next 30 days.
+          </p>
         </div>
-        
+
         <div className="w-full md:w-80">
           <Input
             placeholder="Search meetings..."
@@ -133,82 +123,90 @@ const CalendarPage = () => {
             value={searchQuery}
             onValueChange={setSearchQuery}
             classNames={{
-              inputWrapper: "bg-echo-surface/50 border-echo-border/50 hover:border-accent-primary/30 transition-colors !rounded-[10px]"
+              inputWrapper:
+                'bg-echo-surface/50 border-echo-border/50 hover:border-accent-primary/30 transition-colors !rounded-[10px]',
             }}
           />
         </div>
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <div className="flex h-64 flex-col items-center justify-center gap-4">
           <Spinner size="lg" color="primary" />
-          <p className="text-slate-500 font-mono text-sm animate-pulse">Syncing with Google Calendar...</p>
+          <p className="animate-pulse font-mono text-sm text-slate-500">
+            Syncing with Google Calendar...
+          </p>
         </div>
       ) : groupedEvents.length === 0 ? (
-        <div className="text-center py-20 bg-echo-surface/20 rounded-3xl border border-dashed border-echo-border/50">
+        <div className="rounded-3xl border border-dashed border-echo-border/50 bg-echo-surface/20 py-20 text-center">
           <CalendarIcon size={48} className="mx-auto mb-4 text-slate-600" />
-          <h3 className="text-xl font-semibold text-white mb-2">No meetings found</h3>
-          <p className="text-slate-400">Try adjusting your search or adding some events to your Google Calendar.</p>
+          <h3 className="mb-2 text-xl font-semibold text-white">No meetings found</h3>
+          <p className="text-slate-400">
+            Try adjusting your search or adding some events to your Google Calendar.
+          </p>
         </div>
       ) : (
-        <div className="space-y-12 relative before:absolute before:left-[21px] md:before:left-[35px] before:top-4 before:bottom-4 before:w-[2px] before:rounded-full before:bg-gradient-to-b before:from-accent-primary/40 before:via-accent-secondary/20 before:to-transparent">
+        <div className="relative space-y-12 before:absolute before:inset-y-4 before:left-[21px] before:w-[2px] before:rounded-full before:bg-gradient-to-b before:from-accent-primary/40 before:via-accent-secondary/20 before:to-transparent md:before:left-[35px]">
           {groupedEvents.map((group, groupIdx) => (
             <div key={groupIdx} className="relative z-10">
-              <div className="flex items-center gap-4 mb-6 sticky top-20 z-20 py-2">
-                <div className="flex size-11 md:size-[72px] items-center justify-center rounded-full bg-echo-base border border-echo-border/50 shadow-2xl overflow-hidden shrink-0 ring-4 ring-[#020617]">
+              <div className="sticky top-20 z-20 mb-6 flex items-center gap-4 py-2">
+                <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-echo-border/50 bg-echo-base shadow-2xl ring-4 ring-echo-base md:size-[72px]">
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-accent-primary leading-none mb-1">
+                    <span className="mb-1 text-[10px] font-bold uppercase leading-none tracking-widest text-accent-primary md:text-xs">
                       {format(group.date, 'MMM')}
                     </span>
-                    <span className="text-lg md:text-2xl font-bold text-white leading-none">
+                    <span className="text-lg font-bold leading-none text-white md:text-2xl">
                       {format(group.date, 'dd')}
                     </span>
                   </div>
                 </div>
-                <div className="px-5 py-2 rounded-full bg-echo-surface/50 border border-echo-border/30 backdrop-blur-md">
-                  <h2 className="text-sm md:text-base font-bold text-white font-plus-jakarta tracking-tight">
+                <div className="rounded-full border border-echo-border/30 bg-echo-surface/50 px-5 py-2 backdrop-blur-md">
+                  <h2 className="font-plus-jakarta text-sm font-bold tracking-tight text-white md:text-base">
                     {getDayLabel(group.date)}
                   </h2>
                 </div>
               </div>
 
-              <div className="space-y-6 ml-14 md:ml-24">
+              <div className="ml-14 space-y-6 md:ml-24">
                 {group.events.map((event) => (
-                  <Card 
-                    key={event.id} 
-                    className="bg-echo-surface/40 border-echo-border/50 hover:border-accent-primary/30 transition-all duration-500 group overflow-hidden !rounded-2xl"
+                  <Card
+                    key={event.id}
+                    className="group overflow-hidden !rounded-2xl border-echo-border/50 bg-echo-surface/40 transition-all duration-500 hover:border-accent-primary/30"
                     shadow="none"
                   >
                     <CardBody className="p-0">
                       <div className="flex flex-col md:flex-row">
                         {/* Time Section */}
-                        <div className="md:w-32 p-6 flex flex-col justify-center items-start md:items-center bg-accent-primary/5 md:border-r border-echo-border/30 shrink-0">
-                          <span className="text-sm font-bold text-white font-mono">
+                        <div className="flex shrink-0 flex-col items-start justify-center border-echo-border/30 bg-accent-primary/5 p-6 md:w-32 md:items-center md:border-r">
+                          <span className="font-mono text-sm font-bold text-white">
                             {format(parseISO(event.start), 'h:mm a')}
                           </span>
-                          <span className="text-[10px] text-slate-500 font-mono uppercase tracking-tighter">
+                          <span className="font-mono text-[10px] uppercase tracking-tighter text-slate-500">
                             Starts
                           </span>
                         </div>
 
                         {/* Content Section */}
-                        <div className="flex-grow p-6">
-                          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                        <div className="grow p-6">
+                          <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-start">
                             <div>
-                              <h3 className="text-xl font-bold text-white mb-2 tracking-tight group-hover:text-accent-primary transition-colors">
+                              <h3 className="mb-2 text-xl font-bold tracking-tight text-white transition-colors group-hover:text-accent-primary">
                                 {event.title}
                               </h3>
-                              
+
                               <div className="flex flex-wrap gap-3">
                                 {event.location && (
                                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
                                     <MapPin size={12} className="text-accent-secondary" />
-                                    <span className="truncate max-w-[200px]">{event.location}</span>
+                                    <span className="max-w-[200px] truncate">{event.location}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-1.5 text-xs text-slate-400">
                                   <Clock size={12} className="text-slate-500" />
-                                  <span>{format(parseISO(event.start), 'h:mm a')} – {format(parseISO(event.end), 'h:mm a')}</span>
+                                  <span>
+                                    {format(parseISO(event.start), 'h:mm a')} –{' '}
+                                    {format(parseISO(event.end), 'h:mm a')}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -221,7 +219,7 @@ const CalendarPage = () => {
                                   target="_blank"
                                   variant="flat"
                                   size="sm"
-                                  className="bg-accent-secondary/10 text-accent-secondary font-semibold !rounded-[10px]"
+                                  className="!rounded-[10px] bg-accent-secondary/10 font-semibold text-accent-secondary"
                                   startContent={<Video size={14} />}
                                 >
                                   Join Now
@@ -231,7 +229,7 @@ const CalendarPage = () => {
                                 onPress={() => handleRecord(event)}
                                 color="primary"
                                 size="sm"
-                                className="font-bold bg-accent-primary text-white shadow-lg shadow-accent-primary/20 !rounded-[10px]"
+                                className="!rounded-[10px] bg-accent-primary font-bold text-white shadow-lg shadow-accent-primary/20"
                                 endContent={<ChevronRight size={14} />}
                               >
                                 Record
@@ -240,31 +238,36 @@ const CalendarPage = () => {
                           </div>
 
                           {event.description && (
-                            <div className="mb-6 p-4 rounded-2xl bg-echo-base/50 text-sm text-slate-400 leading-relaxed max-h-24 overflow-y-auto custom-scrollbar border border-white/5 italic">
+                            <div className="custom-scrollbar mb-6 max-h-24 overflow-y-auto rounded-2xl border border-white/5 bg-echo-base/50 p-4 text-sm italic leading-relaxed text-slate-400">
                               <div dangerouslySetInnerHTML={{ __html: event.description }} />
                             </div>
                           )}
 
-                          <div className="flex items-center justify-between pt-4 border-t border-echo-border/30">
+                          <div className="flex items-center justify-between border-t border-echo-border/30 pt-4">
                             <div className="flex items-center -space-x-2">
-                              {event.attendees && event.attendees.map((attendee, idx) => (
-                                <Tooltip key={idx} content={attendee.name || attendee.email}>
-                                  <div className="flex size-8 items-center justify-center rounded-full bg-echo-surface border-2 border-echo-base text-[10px] font-bold text-accent-secondary shadow-xl ring-1 ring-white/5 transition-transform hover:-translate-y-1 cursor-default">
-                                    {(attendee.name || attendee.email || '?').charAt(0).toUpperCase()}
-                                  </div>
-                                </Tooltip>
-                              ))}
+                              {event.attendees &&
+                                event.attendees.map((attendee, idx) => (
+                                  <Tooltip key={idx} content={attendee.name || attendee.email}>
+                                    <div className="flex size-8 cursor-default items-center justify-center rounded-full border-2 border-echo-base bg-echo-surface text-[10px] font-bold text-accent-secondary shadow-xl ring-1 ring-white/5 transition-transform hover:-translate-y-1">
+                                      {(attendee.name || attendee.email || '?')
+                                        .charAt(0)
+                                        .toUpperCase()}
+                                    </div>
+                                  </Tooltip>
+                                ))}
                               {event.attendees && event.attendees.length === 0 && (
-                                <span className="text-[10px] text-slate-500 italic">No invitees found</span>
+                                <span className="text-[10px] italic text-slate-500">
+                                  No invitees found
+                                </span>
                               )}
                             </div>
 
                             {event.htmlLink && (
-                              <a 
-                                href={event.htmlLink} 
-                                target="_blank" 
+                              <a
+                                href={event.htmlLink}
+                                target="_blank"
                                 rel="noreferrer"
-                                className="text-[10px] uppercase tracking-widest font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+                                className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-white"
                               >
                                 Google Calendar <ExternalLink size={10} />
                               </a>

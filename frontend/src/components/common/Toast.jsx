@@ -1,8 +1,5 @@
-// frontend/src/components/common/Toast.jsx
-// Toast notification — Stitch "Luminous Archive" OLED design system
-// Glass card style, slides in from top-right, indigo/green/red semantics
-
 import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   LuCheckCircle as CheckCircle,
   LuXCircle as XCircle,
@@ -92,6 +89,13 @@ const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
   );
 };
 
+Toast.propTypes = {
+  message: PropTypes.string.isRequired,
+  type: PropTypes.oneOf(['success', 'error', 'info']),
+  duration: PropTypes.number,
+  onClose: PropTypes.func,
+};
+
 // ─── Toast Container ──────────────────────────────────────────────────────────
 export const ToastContainer = ({ toasts, removeToast }) => {
   return (
@@ -111,6 +115,18 @@ export const ToastContainer = ({ toasts, removeToast }) => {
       ))}
     </div>
   );
+};
+
+ToastContainer.propTypes = {
+  toasts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      message: PropTypes.string.isRequired,
+      type: PropTypes.oneOf(['success', 'error', 'info']),
+      duration: PropTypes.number,
+    })
+  ).isRequired,
+  removeToast: PropTypes.func.isRequired,
 };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────

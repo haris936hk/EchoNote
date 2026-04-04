@@ -16,6 +16,14 @@ import useDebounce from '../hooks/useDebounce';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
 import { showToast } from '../components/common/Toast';
 
+const PROCESSING_STATUSES = [
+  'UPLOADING',
+  'PROCESSING_AUDIO',
+  'TRANSCRIBING',
+  'PROCESSING_NLP',
+  'SUMMARIZING',
+];
+
 const MeetingsPage = () => {
   const navigate = useNavigate();
   const { meetings, fetchMeetings, deleteMeeting, updateMeeting, loading } = useMeeting();
@@ -48,15 +56,8 @@ const MeetingsPage = () => {
   useEffect(() => {
     let result = meetings;
     if (statusFilter !== 'ALL') {
-      const processingStatuses = [
-        'UPLOADING',
-        'PROCESSING_AUDIO',
-        'TRANSCRIBING',
-        'PROCESSING_NLP',
-        'SUMMARIZING',
-      ];
       if (statusFilter === 'PROCESSING') {
-        result = result.filter((m) => processingStatuses.includes(m.status));
+        result = result.filter((m) => PROCESSING_STATUSES.includes(m.status));
       } else {
         result = result.filter((m) => m.status === statusFilter);
       }
@@ -92,16 +93,9 @@ const MeetingsPage = () => {
   }, [meetings, statusFilter, selectedCategory, debouncedSearch]);
 
   // Status counts
-  const processingStatuses = [
-    'UPLOADING',
-    'PROCESSING_AUDIO',
-    'TRANSCRIBING',
-    'PROCESSING_NLP',
-    'SUMMARIZING',
-  ];
   const statusCounts = {
     ALL: meetings.length,
-    PROCESSING: meetings.filter((m) => processingStatuses.includes(m.status)).length,
+    PROCESSING: meetings.filter((m) => PROCESSING_STATUSES.includes(m.status)).length,
     COMPLETED: meetings.filter((m) => m.status === 'COMPLETED').length,
     FAILED: meetings.filter((m) => m.status === 'FAILED').length,
   };
@@ -208,6 +202,7 @@ const MeetingsPage = () => {
             onClick={handleExportAll}
             disabled={isExporting}
             className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium"
+            type="button"
           >
             {isExporting ? <Spinner size="sm" /> : <Download size={14} />}
             {isExporting ? 'Exporting...' : 'Export All'}
@@ -215,6 +210,7 @@ const MeetingsPage = () => {
           <button
             onClick={() => navigate('/record')}
             className="btn-cta inline-flex items-center gap-2 rounded-btn px-5 py-2 text-sm font-bold transition-all hover:brightness-110"
+            type="button"
           >
             <Plus size={16} />
             New Recording
@@ -238,6 +234,7 @@ const MeetingsPage = () => {
                   ? 'bg-accent-primary text-white'
                   : 'text-slate-400 hover:bg-echo-surface-hover hover:text-white'
               }`}
+              type="button"
             >
               {tab.label}
               <span
@@ -256,6 +253,7 @@ const MeetingsPage = () => {
               <button
                 onClick={handleClearFilters}
                 className="text-xs text-accent-primary hover:underline"
+                type="button"
               >
                 Clear filters
               </button>
@@ -267,7 +265,7 @@ const MeetingsPage = () => {
         <CategoryFilter
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
-          showCount={true}
+          showCount
           counts={categoryCounts}
         />
       </div>
@@ -288,12 +286,14 @@ const MeetingsPage = () => {
           <button
             onClick={() => setSelectedMeetings([])}
             className="text-sm text-slate-400 transition-colors hover:text-white"
+            type="button"
           >
             Cancel
           </button>
           <button
             onClick={handleBulkDelete}
             className="inline-flex items-center gap-1.5 rounded-btn bg-red-500 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-600"
+            type="button"
           >
             <Trash2 size={14} />
             Delete Selected

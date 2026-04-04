@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Card, CardBody, Button, Progress, Chip } from '@heroui/react';
 import { FiMic, FiSquare, FiAlertCircle } from 'react-icons/fi';
 import { useMeeting } from '../../contexts/MeetingContext';
@@ -162,6 +163,10 @@ const AudioRecorder = ({ onRecordingComplete }) => {
       </CardBody>
     </Card>
   );
+};
+
+AudioRecorder.propTypes = {
+  onRecordingComplete: PropTypes.func,
 };
 
 export default AudioRecorder;

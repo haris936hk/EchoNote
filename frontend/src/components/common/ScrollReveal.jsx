@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PropTypes from 'prop-types';
 
 /**
  * ScrollReveal — A wrapper component that handles scroll-hide and scroll-reveal
@@ -7,11 +8,12 @@ import { motion, AnimatePresence } from 'framer-motion';
  */
 const ScrollReveal = ({ children }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const lastScrollY = lastScrollYRef.current;
 
       // Threshold for reveal/hide
       const scrollThreshold = 5;
@@ -26,12 +28,12 @@ const ScrollReveal = ({ children }) => {
         setIsVisible(true);
       }
 
-      setLastScrollY(currentScrollY);
+      lastScrollYRef.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   return (
     <AnimatePresence>
@@ -44,13 +46,17 @@ const ScrollReveal = ({ children }) => {
             duration: 0.4,
             ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for a 'snappier' Linear-feel
           }}
-          className="fixed top-0 inset-x-0 z-50 pointer-events-none"
+          className="pointer-events-none fixed inset-x-0 top-0 z-50"
         >
           <div className="pointer-events-auto">{children}</div>
         </motion.div>
       )}
     </AnimatePresence>
   );
+};
+
+ScrollReveal.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default ScrollReveal;

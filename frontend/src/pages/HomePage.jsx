@@ -16,6 +16,16 @@ import Footer from '../components/common/Footer';
  * HomePage — Public landing page
  * Matches Stitch home_echonote_final design
  */
+const NAV_LINKS = [
+  { path: '#features', label: 'Features' },
+  { path: '#how-it-works', label: 'How It Works' },
+  { path: '#cta', label: 'Benefits' },
+];
+
+/**
+ * HomePage — Public landing page
+ * Matches Stitch home_echonote_final design
+ */
 const HomePage = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -27,12 +37,6 @@ const HomePage = () => {
       navigate('/login');
     }
   };
-
-  const navLinks = [
-    { path: '#features', label: 'Features' },
-    { path: '#how-it-works', label: 'How It Works' },
-    { path: '#cta', label: 'Benefits' },
-  ];
 
   const features = [
     {
@@ -75,7 +79,7 @@ const HomePage = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#0c1324', color: '#dce1fb' }}>
       {/* ── Navigation ── */}
       <ScrollReveal>
-        <Header navItems={navLinks} />
+        <Header navItems={NAV_LINKS} />
       </ScrollReveal>
 
       <main className="pb-20 pt-32">
@@ -92,6 +96,7 @@ const HomePage = () => {
               <button
                 onClick={handleGetStarted}
                 className="rounded-xl bg-gradient-to-br from-accent-primary to-primary-400 px-8 py-4 font-bold text-white shadow-lg shadow-accent-primary/10 transition-all hover:shadow-accent-primary/20 active:scale-95"
+                type="button"
               >
                 Get Started Free →
               </button>
@@ -100,37 +105,37 @@ const HomePage = () => {
 
           {/* Product mockup */}
           <div className="group relative">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 blur-2xl transition duration-1000 group-hover:opacity-40"></div>
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 blur-2xl transition duration-1000 group-hover:opacity-40" />
             <div className="glass-card relative rotate-2 rounded-2xl border border-[#454653]/10 p-2 shadow-2xl">
               <div className="flex aspect-video overflow-hidden rounded-xl border border-[#454653]/20 bg-[#23293c] shadow-2xl">
                 {/* Left panel - transcript mockup */}
                 <div className="w-1/2 space-y-3 border-r border-[#454653]/20 p-4">
-                  <div className="h-4 w-1/3 rounded bg-accent-primary/20"></div>
+                  <div className="h-4 w-1/3 rounded bg-accent-primary/20" />
                   <div className="space-y-2">
-                    <div className="h-2 w-full rounded bg-[#c6c5d5]/10"></div>
-                    <div className="h-2 w-5/6 rounded bg-[#c6c5d5]/10"></div>
-                    <div className="h-2 w-4/6 rounded bg-[#c6c5d5]/10"></div>
+                    <div className="h-2 w-full rounded bg-[#c6c5d5]/10" />
+                    <div className="h-2 w-5/6 rounded bg-[#c6c5d5]/10" />
+                    <div className="h-2 w-4/6 rounded bg-[#c6c5d5]/10" />
                   </div>
                   <div className="space-y-2 pt-4">
-                    <div className="h-2 w-full rounded bg-[#c6c5d5]/10"></div>
-                    <div className="h-2 w-3/4 rounded bg-[#c6c5d5]/10"></div>
+                    <div className="h-2 w-full rounded bg-[#c6c5d5]/10" />
+                    <div className="h-2 w-3/4 rounded bg-[#c6c5d5]/10" />
                   </div>
                 </div>
                 {/* Right panel - summary mockup */}
                 <div className="w-1/2 space-y-4 bg-[#070d1f]/50 p-4">
-                  <div className="h-4 w-1/2 rounded bg-accent-secondary/20"></div>
+                  <div className="h-4 w-1/2 rounded bg-accent-secondary/20" />
                   <div className="rounded-lg border border-[#454653]/10 bg-[#191f31] p-3">
-                    <div className="mb-2 h-2 w-full rounded bg-cta/20"></div>
-                    <div className="h-2 w-2/3 rounded bg-[#c6c5d5]/10"></div>
+                    <div className="mb-2 h-2 w-full rounded bg-cta/20" />
+                    <div className="h-2 w-2/3 rounded bg-[#c6c5d5]/10" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full bg-accent-primary"></div>
-                      <div className="h-2 w-1/2 rounded bg-[#c6c5d5]/10"></div>
+                      <div className="size-2 rounded-full bg-accent-primary" />
+                      <div className="h-2 w-1/2 rounded bg-[#c6c5d5]/10" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full bg-accent-primary"></div>
-                      <div className="h-2 w-2/3 rounded bg-[#c6c5d5]/10"></div>
+                      <div className="size-2 rounded-full bg-accent-primary" />
+                      <div className="h-2 w-2/3 rounded bg-[#c6c5d5]/10" />
                     </div>
                   </div>
                 </div>
@@ -148,14 +153,14 @@ const HomePage = () => {
                 Summary Accuracy
               </span>
             </div>
-            <div className="hidden h-8 w-px bg-[#454653]/10 md:block"></div>
+            <div className="hidden h-8 w-px bg-[#454653]/10 md:block" />
             <div className="flex items-center gap-3">
               <span className="font-mono text-3xl font-bold text-accent-primary">10 min</span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Max Recording
               </span>
             </div>
-            <div className="hidden h-8 w-px bg-[#454653]/10 md:block"></div>
+            <div className="hidden h-8 w-px bg-[#454653]/10 md:block" />
             <div className="flex items-center gap-3">
               <span className="font-mono text-3xl font-bold text-accent-primary">~70s</span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
@@ -173,11 +178,11 @@ const HomePage = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <div
-                  key={index}
+                  key={feature.title}
                   className="group rounded-2xl bg-[#151b2d] p-8 transition-colors hover:bg-[#191f31]"
                 >
                   <div className="mb-6 flex size-12 items-center justify-center rounded-lg bg-accent-primary/10">
@@ -198,7 +203,7 @@ const HomePage = () => {
           id="how-it-works"
           className="relative mx-auto max-w-7xl overflow-hidden px-6 py-20"
         >
-          <div className="absolute left-0 top-1/2 hidden h-px w-full bg-gradient-to-r from-transparent via-accent-primary/20 to-transparent lg:block"></div>
+          <div className="absolute left-0 top-1/2 hidden h-px w-full bg-gradient-to-r from-transparent via-accent-primary/20 to-transparent lg:block" />
           <div className="mb-20 text-center">
             <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-on-surface md:text-5xl">
               How It Works
@@ -258,6 +263,7 @@ const HomePage = () => {
               <button
                 onClick={handleGetStarted}
                 className="rounded-xl bg-gradient-to-br from-accent-primary to-primary-400 px-10 py-5 font-bold text-white shadow-2xl transition-transform hover:scale-105 active:scale-95"
+                type="button"
               >
                 Get Started For Free
               </button>

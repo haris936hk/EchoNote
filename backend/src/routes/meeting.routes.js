@@ -223,6 +223,22 @@ router.get(
 );
 
 /**
+ * @route   POST /api/meetings/:id/followup
+ * @desc    Generate AI follow-up email draft
+ * @access  Private (owner only)
+ * @query   tone=<formal|casual>
+ * @returns { success, data: { subject, body } }
+ */
+router.post(
+  '/:id/followup',
+  authenticate,
+  validateUUIDParam('id'),
+  authorize('meeting'),
+  requireCompletedMeeting,
+  meetingController.generateFollowUp
+);
+
+/**
  * @route   GET /api/meetings/:id/status
  * @desc    Get processing status of meeting
  * @access  Private (owner only)

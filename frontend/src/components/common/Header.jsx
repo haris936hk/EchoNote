@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { LuMic as Mic } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
@@ -97,7 +98,7 @@ const Header = ({ navItems = [] }) => {
                   alt={user?.name || 'User'}
                   className={`size-8 cursor-pointer rounded-full border transition-all duration-300 ${
                     activeItem === '/settings'
-                      ? 'border-accent-primary scale-110 shadow-[0_0_12px_rgba(129,140,248,0.4)]'
+                      ? 'scale-110 border-accent-primary shadow-[0_0_12px_rgba(129,140,248,0.4)]'
                       : 'border-white/10 hover:border-accent-primary/40'
                   }`}
                 />
@@ -118,7 +119,7 @@ const Header = ({ navItems = [] }) => {
           ) : (
             <Link
               to="/login"
-              className="rounded-full bg-cta px-4 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
+              className="rounded-full bg-cta px-4 py-1.5 text-xs font-bold text-white shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all hover:brightness-110 active:scale-95"
             >
               Get Started
             </Link>
@@ -127,6 +128,15 @@ const Header = ({ navItems = [] }) => {
       </div>
     </header>
   );
+};
+
+Header.propTypes = {
+  navItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      path: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ),
 };
 
 export default Header;

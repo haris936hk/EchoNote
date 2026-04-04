@@ -1,4 +1,5 @@
 import { Card, CardBody, CardHeader, Button, Divider, Chip, Tabs, Tab } from '@heroui/react';
+import PropTypes from 'prop-types';
 import { FiDownload, FiClock, FiCalendar, FiFileText, FiList, FiCheckCircle } from 'react-icons/fi';
 import { CategoryBadge } from './CategoryFilter';
 import { useState } from 'react';
@@ -225,9 +226,9 @@ const MeetingDetail = ({ meeting }) => {
                           Key Decisions
                         </h3>
                         <ul className="space-y-2">
-                          {summaryData.decisions.map((decision, index) => (
+                          {summaryData.decisions.map((decision) => (
                             <li
-                              key={index}
+                              key={decision}
                               className="flex items-start gap-3 rounded-lg bg-success/10 p-3"
                             >
                               <FiCheckCircle className="mt-0.5 shrink-0 text-success" size={16} />
@@ -248,9 +249,9 @@ const MeetingDetail = ({ meeting }) => {
                           Action Items
                         </h3>
                         <ul className="space-y-2">
-                          {summaryData.actions.map((action, index) => (
+                          {summaryData.actions.map((action) => (
                             <li
-                              key={index}
+                              key={action}
                               className="flex items-start gap-3 rounded-lg bg-warning/10 p-3"
                             >
                               <div className="mt-0.5 size-5 shrink-0 rounded border-2 border-warning" />
@@ -314,6 +315,21 @@ const MeetingDetail = ({ meeting }) => {
       </Card>
     </div>
   );
+};
+
+MeetingDetail.propTypes = {
+  meeting: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    status: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    createdAt: PropTypes.string.isRequired,
+    duration: PropTypes.number,
+    audioUrl: PropTypes.string,
+    transcript: PropTypes.string,
+    summary: PropTypes.string,
+  }).isRequired,
 };
 
 export default MeetingDetail;

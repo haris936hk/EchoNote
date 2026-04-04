@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import RecordRTC from 'recordrtc';
 import api from '../services/api';
 
@@ -24,11 +25,40 @@ export const MeetingProvider = ({ children }) => {
   const timerRef = useRef(null);
   const fetchingRef = useRef(false); // Prevent duplicate fetches
 
+  const stopRecordingInternal = useCallback(() => {
+    return new Promise((resolve) => {
+      if (!recorderRef.current) {
+        resolve({ success: false, error: 'No active recording' });
+        return;
+      }
+
+      recorderRef.current.stopRecording(() => {
+        const blob = recorderRef.current.getBlob();
+
+        // Stop timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+
+        // Stop stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+
+        setIsRecording(false);
+        recorderRef.current = null;
+
+        resolve({ success: true, blob });
+      });
+    });
+  }, []);
+
   // Fetch all meetings
   const fetchMeetings = useCallback(async (filters = {}) => {
     // Prevent multiple simultaneous fetches
     if (fetchingRef.current) {
-      console.log('[MeetingContext] Fetch already in progress, skipping');
       return { success: false, error: 'Fetch already in progress' };
     }
 
@@ -45,9 +75,9 @@ export const MeetingProvider = ({ children }) => {
       const { data } = await api.get(`/meetings?${params}`);
       setMeetings(data.data);
       return { success: true, data: data.data };
-    } catch (error) {
-      console.error('Fetch meetings failed:', error);
-      return { success: false, error: error.response?.data?.error || 'Failed to fetch meetings' };
+    } catch (err) {
+      console.error('Fetch meetings failed:', err);
+      return { success: false, error: err.response?.data?.error || 'Failed to fetch meetings' };
     } finally {
       fetchingRef.current = false;
       setLoading(false);
@@ -61,9 +91,9 @@ export const MeetingProvider = ({ children }) => {
       const { data } = await api.get(`/meetings/${id}`);
       setCurrentMeeting(data.data);
       return { success: true, data: data.data };
-    } catch (error) {
-      console.error('Fetch meeting failed:', error);
-      return { success: false, error: error.response?.data?.error || 'Failed to fetch meeting' };
+    } catch (err) {
+      console.error('Fetch meeting failed:', err);
+      return { success: false, error: err.response?.data?.error || 'Failed to fetch meeting' };
     } finally {
       setLoading(false);
     }
@@ -93,7 +123,7 @@ export const MeetingProvider = ({ children }) => {
         setRecordingTime((prev) => {
           if (prev >= 600) {
             // 10 minutes = 600 seconds
-            stopRecording();
+            stopRecordingInternal();
             return prev;
           }
           return prev + 1;
@@ -101,44 +131,13 @@ export const MeetingProvider = ({ children }) => {
       }, 1000);
 
       return { success: true };
-    } catch (error) {
-      console.error('Start recording failed:', error);
+    } catch (err) {
+      console.error('Start recording failed:', err);
       return {
         success: false,
         error: 'Failed to start recording. Please check microphone permissions.',
       };
     }
-  };
-
-  // Stop recording
-  const stopRecording = () => {
-    return new Promise((resolve) => {
-      if (!recorderRef.current) {
-        resolve({ success: false, error: 'No active recording' });
-        return;
-      }
-
-      recorderRef.current.stopRecording(() => {
-        const blob = recorderRef.current.getBlob();
-
-        // Stop timer
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
-
-        // Stop stream
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-        }
-
-        setIsRecording(false);
-        recorderRef.current = null;
-
-        resolve({ success: true, blob });
-      });
-    });
   };
 
   // Upload meeting
@@ -167,30 +166,19 @@ export const MeetingProvider = ({ children }) => {
         formData.append('attendees', JSON.stringify(attendees));
       }
 
-      console.log('🚀 Uploading meeting to /api/meetings/upload');
-      console.log('📦 FormData contents:', {
-        title,
-        category,
-        description,
-        audioFileSize: audioFile.size,
-      });
-
       const { data } = await api.post('/meetings/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('✅ Upload successful:', data);
-
       // Add to meetings list
       setMeetings((prev) => [data.data, ...prev]);
 
       return { success: true, data: data.data };
-    } catch (error) {
-      console.error('❌ Upload meeting failed:', error);
-      console.error('Error details:', error.response?.data);
-      return { success: false, error: error.response?.data?.error || 'Failed to upload meeting' };
+    } catch (err) {
+      console.error('❌ Upload meeting failed:', err);
+      return { success: false, error: err.response?.data?.error || 'Failed to upload meeting' };
     } finally {
       setLoading(false);
     }
@@ -212,9 +200,9 @@ export const MeetingProvider = ({ children }) => {
         }
 
         return { success: true, data: data.data };
-      } catch (error) {
-        console.error('Update meeting failed:', error);
-        return { success: false, error: error.response?.data?.error || 'Failed to update meeting' };
+      } catch (err) {
+        console.error('Update meeting failed:', err);
+        return { success: false, error: err.response?.data?.error || 'Failed to update meeting' };
       } finally {
         setLoading(false);
       }
@@ -238,9 +226,9 @@ export const MeetingProvider = ({ children }) => {
         }
 
         return { success: true };
-      } catch (error) {
-        console.error('Delete meeting failed:', error);
-        return { success: false, error: error.response?.data?.error || 'Failed to delete meeting' };
+      } catch (err) {
+        console.error('Delete meeting failed:', err);
+        return { success: false, error: err.response?.data?.error || 'Failed to delete meeting' };
       } finally {
         setLoading(false);
       }
@@ -265,7 +253,7 @@ export const MeetingProvider = ({ children }) => {
     fetchMeetings,
     fetchMeeting,
     startRecording,
-    stopRecording,
+    stopRecording: stopRecordingInternal,
     uploadMeeting,
     updateMeeting,
     deleteMeeting,
@@ -274,3 +262,9 @@ export const MeetingProvider = ({ children }) => {
 
   return <MeetingContext.Provider value={value}>{children}</MeetingContext.Provider>;
 };
+
+MeetingProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export default MeetingContext;

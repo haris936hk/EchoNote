@@ -224,8 +224,17 @@ const PreferencesContent = () => {
                 }}
                 size="sm"
                 classNames={{
-                  trigger: 'bg-echo-base border border-echo-border rounded-btn max-w-[160px]',
-                  popoverContent: 'bg-echo-elevated border border-echo-border',
+                  trigger:
+                    'bg-[#0F172A] border border-white/10 rounded-full max-w-[160px] h-10 px-4 transition-all hover:bg-[#1E293B] hover:border-white/20',
+                  popoverContent:
+                    'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+                  value: 'text-white text-xs',
+                }}
+                listboxProps={{
+                  itemClasses: {
+                    base: 'rounded-full px-4 py-2 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+                    selected: 'bg-accent-primary/20 text-accent-primary font-bold',
+                  },
                 }}
               >
                 <SelectItem key="7">7 days</SelectItem>
@@ -400,7 +409,8 @@ const PrivacyContent = () => {
 
   // B5 — Revoke all other sessions
   const handleRevokeSessions = async () => {
-    if (!window.confirm('Sign out all other devices? Your current session will remain active.')) return;
+    if (!window.confirm('Sign out all other devices? Your current session will remain active.'))
+      return;
     setIsRevokingSessions(true);
     try {
       const token = localStorage.getItem('token');

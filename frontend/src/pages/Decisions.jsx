@@ -126,7 +126,7 @@ export default function Decisions() {
                     </div>
 
                     {/* The Decision itself (Plus Jakarta Sans) */}
-                    <div className="group-hover:-translate-y-1 relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-echo-surface to-echo-surface/50 p-6 shadow-2xl transition-all hover:border-white/10 hover:bg-white/[0.03]">
+                    <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-echo-surface to-echo-surface/50 p-6 shadow-2xl transition-all hover:border-white/10 hover:bg-white/[0.03] group-hover:-translate-y-1">
                       <div className="absolute right-0 top-0 p-4 opacity-5">
                         <LuShieldCheck size={80} className="scale-125" />
                       </div>

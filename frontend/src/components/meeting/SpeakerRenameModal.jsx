@@ -7,6 +7,7 @@ import {
   Button,
   Input,
 } from '@heroui/react';
+import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { LuUserCog } from 'react-icons/lu';
 
@@ -69,11 +70,15 @@ const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave })
         </ModalHeader>
         <ModalBody>
           <p className="mb-6 text-sm leading-relaxed text-slate-400">
-            Enter a professional name for <code className="font-mono text-xs font-semibold text-accent-secondary bg-accent-secondary/10 px-1.5 py-0.5 rounded uppercase">{speakerId}</code> to update it throughout the session.
+            Enter a professional name for{' '}
+            <code className="rounded bg-accent-secondary/10 px-1.5 py-0.5 font-mono text-xs font-semibold uppercase text-accent-secondary">
+              {speakerId}
+            </code>{' '}
+            to update it throughout the session.
           </p>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 ml-1">
+            <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
               Speaker Identity
             </label>
             <Input
@@ -85,7 +90,8 @@ const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave })
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
               classNames={{
                 input: 'text-sm font-medium text-white placeholder:text-slate-600',
-                inputWrapper: 'bg-[#0F172A]/80 border-white/5 hover:border-white/10 group-data-[focus=true]:border-accent-primary/50 group-data-[focus=true]:bg-[#0F172A] transition-all h-12 px-4 shadow-inner',
+                inputWrapper:
+                  'bg-[#0F172A]/80 border-white/5 hover:border-white/10 group-data-[focus=true]:border-accent-primary/50 group-data-[focus=true]:bg-[#0F172A] transition-all h-12 px-4 shadow-inner',
               }}
             />
           </div>
@@ -94,12 +100,12 @@ const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave })
           <Button
             variant="light"
             onPress={onClose}
-            className="flex-1 order-2 sm:order-1 font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-all h-11"
+            className="order-2 h-11 flex-1 rounded-full font-semibold text-slate-400 transition-all hover:bg-white/5 hover:text-white sm:order-1"
           >
             Cancel
           </Button>
           <Button
-            className="flex-1 order-1 sm:order-2 bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] text-white font-bold h-11 shadow-[0_4px_15px_rgba(129,140,248,0.25)] hover:shadow-[0_8px_25px_rgba(129,140,248,0.35)] transition-all active:scale-95"
+            className="order-1 h-11 flex-1 rounded-full bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] font-bold text-white shadow-[0_4px_15px_rgba(129,140,248,0.25)] transition-all hover:shadow-[0_8px_25px_rgba(129,140,248,0.35)] active:scale-95 sm:order-2"
             onPress={handleSave}
           >
             Save Changes
@@ -108,6 +114,14 @@ const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave })
       </ModalContent>
     </Modal>
   );
+};
+
+SpeakerRenameModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  speakerId: PropTypes.string,
+  currentName: PropTypes.string,
+  onSave: PropTypes.func.isRequired,
 };
 
 export default SpeakerRenameModal;

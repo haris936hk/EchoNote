@@ -25,6 +25,14 @@ import useDebounce from '../hooks/useDebounce';
 import { showToast } from '../components/common/Toast';
 import CalendarSidebar from '../components/dashboard/CalendarSidebar';
 
+const PROCESSING_STATUSES = [
+  'UPLOADING',
+  'PROCESSING_AUDIO',
+  'TRANSCRIBING',
+  'PROCESSING_NLP',
+  'SUMMARIZING',
+];
+
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { meetings, fetchMeetings, deleteMeeting, updateMeeting, loading } = useMeeting();
@@ -50,14 +58,7 @@ const DashboardPage = () => {
 
   // Detect when meetings complete and show toast
   useEffect(() => {
-    const processingStatuses = [
-      'UPLOADING',
-      'PROCESSING_AUDIO',
-      'TRANSCRIBING',
-      'PROCESSING_NLP',
-      'SUMMARIZING',
-    ];
-    const currentlyProcessing = meetings.filter((m) => processingStatuses.includes(m.status));
+    const currentlyProcessing = meetings.filter((m) => PROCESSING_STATUSES.includes(m.status));
     const currentIds = new Set(currentlyProcessing.map((m) => m.id));
     const prevIds = processingIdsRef.current;
 
@@ -80,14 +81,7 @@ const DashboardPage = () => {
 
   // Polling effect
   useEffect(() => {
-    const processingStatuses = [
-      'UPLOADING',
-      'PROCESSING_AUDIO',
-      'TRANSCRIBING',
-      'PROCESSING_NLP',
-      'SUMMARIZING',
-    ];
-    const hasProcessingMeetings = meetings.some((m) => processingStatuses.includes(m.status));
+    const hasProcessingMeetings = meetings.some((m) => PROCESSING_STATUSES.includes(m.status));
 
     if (hasProcessingMeetings) {
       const interval = setInterval(() => {
@@ -95,6 +89,7 @@ const DashboardPage = () => {
       }, 20000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [meetings, fetchMeetings]);
 
   // Scroll to top button
@@ -129,11 +124,7 @@ const DashboardPage = () => {
   const stats = {
     total: meetings.length,
     completed: meetings.filter((m) => m.status === 'COMPLETED').length,
-    processing: meetings.filter((m) =>
-      ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'].includes(
-        m.status
-      )
-    ).length,
+    processing: meetings.filter((m) => PROCESSING_STATUSES.includes(m.status)).length,
     failed: meetings.filter((m) => m.status === 'FAILED').length,
     totalDuration: meetings.reduce((sum, m) => sum + (m.duration || 0), 0),
   };
@@ -210,12 +201,15 @@ const DashboardPage = () => {
           <button
             onClick={() => setShowMobileSidebar(!showMobileSidebar)}
             className="btn-secondary inline-flex items-center justify-center rounded-btn p-2.5 text-slate-400 transition-all hover:bg-echo-surface hover:text-white lg:hidden"
+            type="button"
+            aria-label="Toggle calendar sidebar"
           >
             <CalendarIcon size={20} />
           </button>
           <button
             onClick={handleNewRecording}
             className="btn-cta inline-flex w-fit items-center gap-2 rounded-btn px-5 py-2.5 text-sm font-bold transition-all hover:brightness-110"
+            type="button"
           >
             <Mic size={16} />
             <span className="hidden sm:inline">New Recording</span>
@@ -236,6 +230,7 @@ const DashboardPage = () => {
           <button
             onClick={handleNewRecording}
             className="btn-cta inline-flex items-center gap-2 rounded-btn px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
+            type="button"
           >
             <Plus size={16} />
             Record Your First Meeting
@@ -299,7 +294,7 @@ const DashboardPage = () => {
       {/* ── Processing Alert ── */}
       {stats.processing > 0 && (
         <div className="flex items-center gap-3 rounded-btn border border-accent-primary/10 bg-accent-primary/5 px-4 py-3">
-          <div className="ai-dot"></div>
+          <div className="ai-dot" />
           <p className="text-sm text-slate-300">
             {stats.processing} meeting{stats.processing !== 1 ? 's are' : ' is'} being processed…
           </p>
@@ -330,7 +325,7 @@ const DashboardPage = () => {
             <CategoryFilter
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
-              showCount={true}
+              showCount
               counts={categoryCounts}
             />
           </div>
@@ -359,6 +354,7 @@ const DashboardPage = () => {
               <button
                 onClick={handleNewRecording}
                 className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                type="button"
               >
                 <Plus size={16} className="text-accent-primary" />
                 New Recording
@@ -366,6 +362,7 @@ const DashboardPage = () => {
               <button
                 onClick={() => navigate('/meetings')}
                 className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                type="button"
               >
                 <List size={16} className="text-accent-primary" />
                 View All Meetings
@@ -373,6 +370,7 @@ const DashboardPage = () => {
               <button
                 onClick={() => navigate('/tasks')}
                 className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                type="button"
               >
                 <CheckCircle size={16} className="text-accent-primary" />
                 View Action Items
@@ -380,6 +378,7 @@ const DashboardPage = () => {
               <button
                 onClick={() => navigate('/settings')}
                 className="flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-sm text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+                type="button"
               >
                 <Settings size={16} className="text-accent-primary" />
                 Settings

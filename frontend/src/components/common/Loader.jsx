@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const Loader = ({ size = 'lg', label = 'Loading...', fullScreen = false, className = '' }) => {
   const sizeClass = size === 'sm' ? 'w-4 h-4' : size === 'md' ? 'w-6 h-6' : 'w-8 h-8';
 
@@ -26,12 +28,23 @@ const Loader = ({ size = 'lg', label = 'Loading...', fullScreen = false, classNa
   );
 };
 
+Loader.propTypes = {
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  label: PropTypes.string,
+  fullScreen: PropTypes.bool,
+  className: PropTypes.string,
+};
+
 // Page-level loader
 export const PageLoader = ({ label = 'Loading page...' }) => (
   <div className="flex min-h-screen items-center justify-center">
     <Loader size="lg" label={label} />
   </div>
 );
+
+PageLoader.propTypes = {
+  label: PropTypes.string,
+};
 
 // Card-level loader
 export const CardLoader = ({ label = 'Loading...' }) => (
@@ -40,6 +53,10 @@ export const CardLoader = ({ label = 'Loading...' }) => (
   </div>
 );
 
+CardLoader.propTypes = {
+  label: PropTypes.string,
+};
+
 // Inline loader
 export const InlineLoader = ({ label }) => (
   <div className="flex items-center gap-2">
@@ -47,6 +64,10 @@ export const InlineLoader = ({ label }) => (
     {label && <span className="text-xs text-slate-500">{label}</span>}
   </div>
 );
+
+InlineLoader.propTypes = {
+  label: PropTypes.string,
+};
 
 // Skeleton loader for list items
 export const SkeletonLoader = ({ count = 3 }) => (
@@ -67,5 +88,9 @@ export const SkeletonLoader = ({ count = 3 }) => (
     ))}
   </>
 );
+
+SkeletonLoader.propTypes = {
+  count: PropTypes.number,
+};
 
 export default Loader;

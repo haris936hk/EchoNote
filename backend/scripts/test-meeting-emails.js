@@ -31,14 +31,30 @@ async function testMeetingEmails() {
         category: 'STANDUP',
         createdAt: new Date(),
         audioDuration: 178,
-        summaryExecutive: 'This is a test summary of the meeting. We discussed project progress, blockers, and next steps for the upcoming sprint.',
+        summaryExecutive:
+          'This is a test summary of the meeting. We discussed project progress, blockers, and next steps for the upcoming sprint.',
         summaryActionItems: [
-          { task: 'Review pull request #42', assignee: 'John Doe', deadline: '2026-01-10', priority: 'high' },
-          { task: 'Update API documentation', assignee: 'Sarah Smith', deadline: null, priority: 'medium' },
-          { task: 'Schedule architecture review', assignee: null, deadline: '2026-01-15', priority: 'low' }
+          {
+            task: 'Review pull request #42',
+            assignee: 'John Doe',
+            deadline: '2026-01-10',
+            priority: 'high',
+          },
+          {
+            task: 'Update API documentation',
+            assignee: 'Sarah Smith',
+            deadline: null,
+            priority: 'medium',
+          },
+          {
+            task: 'Schedule architecture review',
+            assignee: null,
+            deadline: '2026-01-15',
+            priority: 'low',
+          },
         ],
-        transcriptText: 'This is a sample transcript text for testing purposes. '.repeat(50)
-      }
+        transcriptText: 'This is a sample transcript text for testing purposes. '.repeat(50),
+      },
     });
     console.log('   ✅ Meeting Completion Email sent\n');
     successCount++;
@@ -54,9 +70,9 @@ async function testMeetingEmails() {
       to: testRecipient,
       userName: 'Haris Khan',
       meeting: {
-        title: 'Failed Test Meeting'
+        title: 'Failed Test Meeting',
       },
-      error: 'Audio processing timeout - file size exceeded limits'
+      error: 'Audio processing timeout - file size exceeded limits',
     });
     console.log('   ✅ Meeting Failed Email sent\n');
     successCount++;
@@ -70,7 +86,7 @@ async function testMeetingEmails() {
     console.log('3️⃣ Testing Welcome Email...');
     await emailService.sendWelcomeEmail({
       to: testRecipient,
-      userName: 'Haris Khan'
+      userName: 'Haris Khan',
     });
     console.log('   ✅ Welcome Email sent\n');
     successCount++;

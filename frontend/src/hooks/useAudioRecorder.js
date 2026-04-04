@@ -12,8 +12,14 @@ const useAudioRecorder = () => {
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const timerRef = useRef(null);
+  const recordingTimeRef = useRef(0);
 
   const MAX_RECORDING_TIME = 600; // 10 minutes in seconds
+
+  // Sync state with ref
+  useEffect(() => {
+    recordingTimeRef.current = recordingTime;
+  }, [recordingTime]);
 
   // Check browser compatibility
   const checkCompatibility = useCallback(() => {
@@ -33,6 +39,40 @@ const useAudioRecorder = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
+
+  // Stop recording (defined earlier so it can be used in start/resume)
+  const stopRecording = useCallback(() => {
+    return new Promise((resolve) => {
+      if (!recorderRef.current || !isRecording) {
+        resolve({ success: false, error: 'No active recording' });
+        return;
+      }
+
+      recorderRef.current.stopRecording(() => {
+        const blob = recorderRef.current.getBlob();
+        setAudioBlob(blob);
+
+        // Stop timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+
+        // Stop stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+          setStream(null);
+        }
+
+        setIsRecording(false);
+        setIsPaused(false);
+        recorderRef.current = null;
+
+        resolve({ success: true, blob, duration: recordingTimeRef.current });
+      });
+    });
+  }, [isRecording]);
 
   // Start recording
   const startRecording = useCallback(async () => {
@@ -67,9 +107,6 @@ const useAudioRecorder = () => {
         numberOfAudioChannels: 1,
         desiredSampRate: 16000,
         timeSlice: 1000,
-        ondataavailable: (blob) => {
-          // Optional: handle data chunks
-        },
       });
 
       recorder.startRecording();
@@ -93,60 +130,10 @@ const useAudioRecorder = () => {
       }, 1000);
 
       return { success: true };
-    } catch (err) {
-      console.error('Start recording error:', err);
-
-      let errorMessage = 'Failed to start recording. ';
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        errorMessage +=
-          'Microphone permission was denied. Please allow microphone access in your browser settings.';
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        errorMessage += 'No microphone found. Please connect a microphone and try again.';
-      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-        errorMessage += 'Microphone is already in use by another application.';
-      } else {
-        errorMessage += err.message || 'Unknown error occurred.';
-      }
-
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+    } catch {
+      return { success: false, error: 'Failed to start recording' };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkCompatibility]);
-
-  // Stop recording
-  const stopRecording = useCallback(() => {
-    return new Promise((resolve) => {
-      if (!recorderRef.current || !isRecording) {
-        resolve({ success: false, error: 'No active recording' });
-        return;
-      }
-
-      recorderRef.current.stopRecording(() => {
-        const blob = recorderRef.current.getBlob();
-        setAudioBlob(blob);
-
-        // Stop timer
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
-
-        // Stop stream
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-          setStream(null);
-        }
-
-        setIsRecording(false);
-        setIsPaused(false);
-        recorderRef.current = null;
-
-        resolve({ success: true, blob, duration: recordingTime });
-      });
-    });
-  }, [isRecording, recordingTime]);
+  }, [checkCompatibility, stopRecording]);
 
   // Pause recording
   const pauseRecording = useCallback(() => {
@@ -200,8 +187,10 @@ const useAudioRecorder = () => {
     if (recorderRef.current) {
       try {
         recorderRef.current.stopRecording(() => {
-          recorderRef.current.destroy();
-          recorderRef.current = null;
+          if (recorderRef.current) {
+            recorderRef.current.destroy();
+            recorderRef.current = null;
+          }
         });
       } catch (err) {
         console.error('Cancel recording error:', err);
@@ -254,7 +243,6 @@ const useAudioRecorder = () => {
       }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
-        setStream(null);
       }
       if (recorderRef.current) {
         try {

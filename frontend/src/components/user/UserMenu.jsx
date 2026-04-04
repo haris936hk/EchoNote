@@ -66,51 +66,79 @@ const UserMenu = () => {
         />
       </DropdownTrigger>
 
-      <DropdownMenu aria-label="User menu actions" onAction={handleAction} variant="flat">
+      <DropdownMenu
+        aria-label="User menu actions"
+        onAction={handleAction}
+        variant="flat"
+        itemClasses={{
+          base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+          selected: 'bg-accent-primary/20 text-accent-primary font-bold',
+        }}
+        classNames={{
+          base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+        }}
+      >
         {/* User Info Section */}
-        <DropdownSection showDivider>
+        <DropdownSection
+          showDivider
+          classNames={{
+            divider: 'bg-white/5 mx-2 my-1',
+            group: 'p-0',
+          }}
+        >
           <DropdownItem
             key="user-info"
-            className="h-16 gap-2 py-3"
+            className="h-16 gap-2 rounded-2xl py-3 opacity-100"
             textValue={user.name}
             isReadOnly
           >
             <div className="flex flex-col gap-1">
-              <p className="max-w-[200px] truncate text-sm font-semibold">{user.name}</p>
-              <p className="max-w-[200px] truncate text-xs text-default-500">{user.email}</p>
+              <p className="max-w-[200px] truncate text-sm font-semibold text-white">{user.name}</p>
+              <p className="max-w-[200px] truncate font-mono text-xs text-slate-400">
+                {user.email}
+              </p>
             </div>
           </DropdownItem>
         </DropdownSection>
 
         {/* Navigation Section */}
-        <DropdownSection showDivider>
-          <DropdownItem key="profile" className="py-2" startContent={<FiUser size={16} />}>
+        <DropdownSection
+          showDivider
+          classNames={{
+            divider: 'bg-white/5 mx-2 my-1',
+            group: 'p-0',
+          }}
+        >
+          <DropdownItem key="profile" startContent={<FiUser size={16} />}>
             Profile
           </DropdownItem>
 
-          <DropdownItem key="settings" className="py-2" startContent={<FiSettings size={16} />}>
+          <DropdownItem key="settings" startContent={<FiSettings size={16} />}>
             Settings
           </DropdownItem>
 
           <DropdownItem
             key="theme"
-            className="py-2"
             startContent={isDark ? <FiSun size={16} /> : <FiMoon size={16} />}
           >
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </DropdownItem>
 
-          <DropdownItem key="refresh" className="py-2" startContent={<FiRefreshCw size={16} />}>
+          <DropdownItem key="refresh" startContent={<FiRefreshCw size={16} />}>
             Refresh Profile
           </DropdownItem>
         </DropdownSection>
 
         {/* Logout Section */}
-        <DropdownSection>
+        <DropdownSection
+          classNames={{
+            group: 'p-0',
+          }}
+        >
           <DropdownItem
             key="logout"
-            className="py-2"
             color="danger"
+            className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
             startContent={<FiLogOut size={16} />}
           >
             Logout
@@ -134,17 +162,30 @@ export const SimpleUserMenu = () => {
         <Avatar isBordered as="button" size="sm" src={user.picture} name={user.name} />
       </DropdownTrigger>
 
-      <DropdownMenu aria-label="User actions">
-        <DropdownItem key="profile" className="h-14" textValue="Profile">
-          <p className="font-semibold">{user.name}</p>
-          <p className="text-xs text-default-500">{user.email}</p>
+      <DropdownMenu
+        aria-label="User actions"
+        itemClasses={{
+          base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+        }}
+        classNames={{
+          base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+        }}
+      >
+        <DropdownItem key="profile" className="h-14 rounded-2xl" textValue="Profile">
+          <p className="font-semibold text-white">{user.name}</p>
+          <p className="font-mono text-xs text-slate-400">{user.email}</p>
         </DropdownItem>
 
         <DropdownItem key="settings" onPress={() => navigate('/settings')}>
           Settings
         </DropdownItem>
 
-        <DropdownItem key="logout" color="danger" onPress={logout}>
+        <DropdownItem
+          key="logout"
+          color="danger"
+          className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+          onPress={logout}
+        >
           Logout
         </DropdownItem>
       </DropdownMenu>
@@ -166,15 +207,26 @@ export const UserMenuWithBadge = ({ badgeContent }) => {
           <Avatar isBordered as="button" size="sm" src={user.picture} name={user.name} />
         </DropdownTrigger>
 
-        <DropdownMenu>
-          <DropdownItem key="profile" className="h-14">
-            <p className="font-semibold">{user.name}</p>
-            <p className="text-xs text-default-500">{user.email}</p>
+        <DropdownMenu
+          itemClasses={{
+            base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+          }}
+          classNames={{
+            base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+          }}
+        >
+          <DropdownItem key="profile" className="h-14 rounded-2xl">
+            <p className="font-semibold text-white">{user.name}</p>
+            <p className="font-mono text-xs text-slate-400">{user.email}</p>
           </DropdownItem>
 
           <DropdownItem onPress={() => navigate('/settings')}>Settings</DropdownItem>
 
-          <DropdownItem color="danger" onPress={logout}>
+          <DropdownItem
+            color="danger"
+            className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+            onPress={logout}
+          >
             Logout
           </DropdownItem>
         </DropdownMenu>
@@ -200,18 +252,29 @@ export const MobileUserButton = () => {
   return (
     <Dropdown placement="bottom">
       <DropdownTrigger>
-        <button className="flex w-full items-center gap-2 rounded-lg p-2 transition-colors hover:bg-default-100">
+        <button className="flex w-full items-center gap-2 rounded-full p-2 transition-colors hover:bg-white/5">
           <Avatar size="sm" src={user.picture} name={user.name} />
           <div className="min-w-0 flex-1 text-left">
-            <p className="truncate text-sm font-medium">{user.name}</p>
-            <p className="truncate text-xs text-default-500">{user.email}</p>
+            <p className="truncate text-sm font-medium text-white">{user.name}</p>
+            <p className="truncate font-mono text-xs text-slate-400">{user.email}</p>
           </div>
         </button>
       </DropdownTrigger>
 
-      <DropdownMenu>
+      <DropdownMenu
+        itemClasses={{
+          base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+        }}
+        classNames={{
+          base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+        }}
+      >
         <DropdownItem onPress={() => navigate('/settings')}>Settings</DropdownItem>
-        <DropdownItem color="danger" onPress={logout}>
+        <DropdownItem
+          color="danger"
+          className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+          onPress={logout}
+        >
           Logout
         </DropdownItem>
       </DropdownMenu>

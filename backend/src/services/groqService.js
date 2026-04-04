@@ -70,6 +70,28 @@ CRITICAL RULES & CONSTRAINTS:
 
 Output your valid JSON now:`;
 
+const FOLLOWUP_SYSTEM_PROMPT = `You are a professional communications assistant inside EchoNote. Your task is to draft a high-fidelity follow-up email based on meeting insights.
+ 
+You MUST respond with ONLY a single valid JSON object. Do NOT include markdown code blocks.
+ 
+Follow this EXACT JSON schema:
+{
+  "subject": "<string: a professional, concise email subject line starting with [EchoNote]>",
+  "body": "<string: the full email body, formatted with newlines (\\n)>"
+}
+ 
+TONE CONSTRAINTS:
+- FORMAL: Professional, structured, uses "Dear all", "Best regards", and objective language.
+- CASUAL: Friendly, energetic, uses "Hey everyone", "Cheers/Thanks", and accessible language.
+ 
+CONTENT STRUCTURE:
+1. Opening: Brief appreciation for the time and a 1-sentence summary of the meeting's goal.
+2. Decisions: A bulleted list of what was decided.
+3. Action Items: A clear list of tasks, assignees, and deadlines. Format as: "• [Task] - [Assignee] (by [Deadline])".
+4. Closing: Mention next steps and encourage follow-up.
+ 
+Output your valid JSON now:`;
+
 // ─── Class ────────────────────────────────────────────────────────────────────
 
 class GroqService {
@@ -127,6 +149,58 @@ class GroqService {
         stack: error.stack,
       });
 
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Generate a professional follow-up email draft.
+   *
+   * @param {object} meetingData - { title, summary, attendees }.
+   * @param {string} tone        - 'formal' | 'casual'.
+   * @returns {Promise<{success: boolean, data?: object, error?: string}>}
+   */
+  async generateFollowUpEmail(meetingData, tone = 'formal') {
+    try {
+      logger.info('[GroqService] Starting follow-up email generation', {
+        meetingId: meetingData.id,
+        tone,
+      });
+
+      const userMessage = `
+Meeting Title: ${meetingData.title}
+Tone Requested: ${tone.toUpperCase()}
+
+EXECUTIVE SUMMARY:
+${meetingData.summary?.executiveSummary || ''}
+
+KEY DECISIONS:
+${(meetingData.summary?.keyDecisions || []).join('\n')}
+
+ACTION ITEMS:
+${(meetingData.summary?.actionItems || [])
+  .map((a) => `- ${a.task} (Assignee: ${a.assignee || 'Unassigned'}, Due: ${a.deadline || 'TBD'})`)
+  .join('\n')}
+
+NEXT STEPS:
+${(meetingData.summary?.nextSteps || []).join('\n')}
+
+ATTENDEES:
+${JSON.stringify(meetingData.attendees || [])}
+`;
+
+      const rawJson = await this._callGroqWithRetry(userMessage, 1, FOLLOWUP_SYSTEM_PROMPT);
+      const parsed = JSON.parse(rawJson);
+
+      return {
+        success: true,
+        data: {
+          subject: parsed.subject || `Follow-up: ${meetingData.title}`,
+          body: parsed.body || 'Failed to generate email body.',
+        },
+      };
+    } catch (error) {
+      logger.error('[GroqService] Follow-up generation failed', { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -230,18 +304,19 @@ class GroqService {
   /**
    * POST to Groq's chat completions endpoint with exponential-backoff retry.
    *
-   * @param {string} userMessage - The assembled user message.
-   * @param {number} attempt     - Current attempt number (1-indexed).
-   * @returns {Promise<string>}  - Raw JSON string from the model.
+   * @param {string} userMessage   - The assembled user message.
+   * @param {number} attempt       - Current attempt number (1-indexed).
+   * @param {string} systemPrompt  - The system prompt to use.
+   * @returns {Promise<string>}    - Raw JSON string from the model.
    */
-  async _callGroqWithRetry(userMessage, attempt = 1) {
+  async _callGroqWithRetry(userMessage, attempt = 1, systemPrompt = SYSTEM_PROMPT) {
     try {
       const response = await axios.post(
         `${GROQ_BASE_URL}/chat/completions`,
         {
           model: this.model,
           messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: systemPrompt },
             { role: 'user', content: userMessage },
           ],
           response_format: { type: 'json_object' },

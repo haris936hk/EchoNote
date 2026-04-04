@@ -145,7 +145,7 @@ const RecordPage = () => {
         durationFormatted: `${Math.floor(durationValidation.duration / 60)}:${String(Math.floor(durationValidation.duration % 60)).padStart(2, '0')}`,
       });
       setFileValidating(false);
-    } catch (error) {
+    } catch {
       setUploadError('Failed to validate file. Please try again.');
       setFileValidating(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -200,7 +200,7 @@ const RecordPage = () => {
         setUploadError(result.error || 'Failed to upload meeting');
         setStep('details');
       }
-    } catch (error) {
+    } catch {
       setUploadError('An unexpected error occurred. Please try again.');
       setStep('details');
     }
@@ -334,6 +334,7 @@ const RecordPage = () => {
                   <button
                     onClick={handleStartRecording}
                     className="btn-cta inline-flex items-center gap-2 rounded-btn px-6 py-3 text-sm font-bold transition-all hover:brightness-110"
+                    type="button"
                   >
                     <Mic size={16} />
                     Start Recording
@@ -342,6 +343,7 @@ const RecordPage = () => {
                     onClick={handleUploadClick}
                     disabled={fileValidating}
                     className="btn-ghost inline-flex items-center gap-2 rounded-btn px-6 py-3 text-sm font-medium"
+                    type="button"
                   >
                     <Upload size={16} />
                     {fileValidating ? 'Validating...' : 'Upload File'}
@@ -352,6 +354,7 @@ const RecordPage = () => {
                   <button
                     onClick={handleResumeRecording}
                     className="inline-flex items-center gap-2 rounded-btn bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600"
+                    type="button"
                   >
                     <Play size={16} />
                     Resume
@@ -359,6 +362,7 @@ const RecordPage = () => {
                   <button
                     onClick={handleStopRecording}
                     className="inline-flex items-center gap-2 rounded-btn bg-red-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-red-600"
+                    type="button"
                   >
                     <Square size={16} />
                     Stop
@@ -369,6 +373,7 @@ const RecordPage = () => {
                   <button
                     onClick={handlePauseRecording}
                     className="inline-flex items-center gap-2 rounded-btn bg-amber-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-amber-600"
+                    type="button"
                   >
                     <Pause size={16} />
                     Pause
@@ -376,6 +381,7 @@ const RecordPage = () => {
                   <button
                     onClick={handleStopRecording}
                     className="inline-flex items-center gap-2 rounded-btn bg-red-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-red-600"
+                    type="button"
                   >
                     <Square size={16} />
                     Stop
@@ -431,26 +437,23 @@ const RecordPage = () => {
 
             {/* Form */}
             <div className="space-y-4">
-              {/* Title */}
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-300">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-300" htmlFor="meeting-title">
                   Session Title <span className="text-red-400">*</span>
                 </label>
                 <input
+                  id="meeting-title"
                   type="text"
                   className="input-echo w-full"
                   placeholder="e.g., Q1 Planning Session"
                   value={formData.title}
                   onChange={(e) => handleFormChange('title', e.target.value)}
                 />
-                {formErrors.title && (
-                  <p className="mt-1 text-xs text-red-400">{formErrors.title}</p>
-                )}
+                {formErrors.title && <p className="text-xs text-red-400">{formErrors.title}</p>}
               </div>
 
-              {/* Category */}
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-300">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-300">
                   Category <span className="text-red-400">*</span>
                 </label>
                 <Select
@@ -458,31 +461,43 @@ const RecordPage = () => {
                   selectedKeys={formData.category ? [formData.category] : []}
                   onSelectionChange={(keys) => {
                     const val = Array.from(keys)[0];
-                    if (val) handleFormChange('category', val);
+                    if (val) handleFormChange('category', val.toString());
                   }}
                   classNames={{
                     trigger:
-                      'bg-echo-surface border border-echo-border rounded-btn hover:border-accent-primary/30',
-                    popoverContent: 'bg-echo-elevated border border-echo-border',
+                      'bg-[#0F172A] border border-white/10 rounded-full h-12 px-5 transition-all hover:bg-[#1E293B] hover:border-white/20',
+                    popoverContent:
+                      'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
+                    value: 'text-white text-sm',
                   }}
+                  listboxProps={{
+                    itemClasses: {
+                      base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
+                      selected: 'bg-accent-primary/20 text-accent-primary font-bold',
+                    },
+                  }}
+                  aria-label="Select Category"
                 >
                   {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
+                    <SelectItem key={cat.value} textValue={cat.label}>
                       {cat.label}
                     </SelectItem>
                   ))}
                 </Select>
                 {formErrors.category && (
-                  <p className="mt-1 text-xs text-red-400">{formErrors.category}</p>
+                  <p className="text-xs text-red-400">{formErrors.category}</p>
                 )}
               </div>
 
-              {/* Description */}
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-300">
+              <div className="space-y-1.5">
+                <label
+                  className="block text-sm font-medium text-slate-300"
+                  htmlFor="meeting-description"
+                >
                   Description <span className="text-slate-600">(optional)</span>
                 </label>
                 <textarea
+                  id="meeting-description"
                   className="input-echo min-h-[100px] w-full resize-none"
                   placeholder="Brief notes about this meeting..."
                   value={formData.description}
@@ -499,11 +514,11 @@ const RecordPage = () => {
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex items-center justify-between pt-2">
               <button
                 onClick={handleBack}
                 className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2.5 text-sm font-medium"
+                type="button"
               >
                 <ArrowLeft size={16} />
                 Back to Recording
@@ -512,6 +527,7 @@ const RecordPage = () => {
                 onClick={handleSubmit}
                 disabled={uploadLoading}
                 className="btn-cta inline-flex items-center gap-2 rounded-btn px-6 py-2.5 text-sm font-bold transition-all hover:brightness-110 disabled:opacity-50"
+                type="button"
               >
                 <Upload size={16} />
                 {uploadLoading ? 'Uploading...' : 'Upload & Process'}
