@@ -678,6 +678,19 @@ export const generateFollowUp = async (id, tone = 'formal') => {
   }
 };
 
+/**
+ * Share meeting summary to Slack
+ */
+export const shareMeetingToSlack = async (id) => {
+  try {
+    if (!id) return { success: false, error: 'Meeting ID is required' };
+    const result = await meetingsAPI.shareToSlack(id);
+    return result;
+  } catch (error) {
+    return { success: false, error: 'An unexpected error occurred' };
+  }
+};
+
 const meetingService = {
   // CRUD operations
   getAllMeetings,
@@ -718,6 +731,7 @@ const meetingService = {
   exportMeetingsAsCSV,
   getDecisions,
   generateFollowUp,
+  shareMeetingToSlack,
 };
 
 export default meetingService;

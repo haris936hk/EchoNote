@@ -368,6 +368,14 @@ const validateUpdateSettings = (req, res, next) => {
     validator.isBoolean('emailNotifications');
   }
 
+  if (
+    req.body.slackWebhookUrl !== undefined &&
+    req.body.slackWebhookUrl !== null &&
+    req.body.slackWebhookUrl !== ''
+  ) {
+    validator.isString('slackWebhookUrl');
+  }
+
   if (!validator.isValid()) {
     return next(
       new AppError('Validation failed', 400, 'VALIDATION_ERROR').setDetails(validator.getErrors())

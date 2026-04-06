@@ -19,6 +19,7 @@ import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Tasks from './pages/Tasks';
 import Decisions from './pages/Decisions';
+import Analytics from './pages/Analytics';
 
 /**
  * Public Route Component
@@ -142,6 +143,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <MainLayout>
               <Tasks />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Analytics />
             </MainLayout>
           </ProtectedRoute>
         }

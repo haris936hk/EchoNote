@@ -76,6 +76,14 @@ router.patch(
 );
 
 /**
+ * @route   POST /api/users/settings/slack/test
+ * @desc    Test Slack Webhook Integration
+ * @access  Private
+ * @returns { success, message }
+ */
+router.post('/settings/slack/test', authenticate, userController.testSlackWebhook);
+
+/**
  * @route   GET /api/users/stats
  * @desc    Get user statistics
  * @access  Private

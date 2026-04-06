@@ -18,6 +18,7 @@ import {
   LuCalendar as Calendar,
   LuMonitor as Monitor,
   LuLink as Link,
+  LuSlack as Slack,
 } from 'react-icons/lu';
 import ProfileSettings from '../components/user/ProfileSettings';
 import { useAuth } from '../contexts/AuthContext';
@@ -110,6 +111,8 @@ const PreferencesContent = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
+  const [isCheckingSlack, setIsCheckingSlack] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -124,6 +127,7 @@ const PreferencesContent = () => {
           const data = await response.json();
           if (data.success && data.data) {
             setEmailNotifications(data.data.emailNotifications ?? true);
+            setSlackWebhookUrl(data.data.slackWebhookUrl || '');
             if (data.data.autoDeleteDays !== null && data.data.autoDeleteDays !== undefined) {
               setAutoDelete(true);
               setRetentionDays(String(data.data.autoDeleteDays));
@@ -148,6 +152,7 @@ const PreferencesContent = () => {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           emailNotifications,
+          slackWebhookUrl,
           autoDeleteDays: autoDelete ? parseInt(retentionDays) : null,
         }),
       });
@@ -161,6 +166,28 @@ const PreferencesContent = () => {
       showToast('Failed to save preferences.', 'error');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleTestSlack = async () => {
+    setIsCheckingSlack(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/users/settings/slack/test', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slackWebhookUrl }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showToast('Slack test successful!', 'success');
+      } else {
+        showToast(data.error || 'Slack test failed', 'error');
+      }
+    } catch (error) {
+      showToast('Failed to test Slack integration.', 'error');
+    } finally {
+      setIsCheckingSlack(false);
     }
   };
 
@@ -248,7 +275,55 @@ const PreferencesContent = () => {
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="space-y-5 rounded-card border border-echo-border bg-echo-surface p-6 mt-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+          <Slack className="text-accent-primary" size={18} /> Slack Integration
+        </h2>
+
+        <div className="flex items-center justify-between py-3">
+          <div>
+            <p className="flex items-center gap-2 text-sm font-medium text-white">
+              Webhook URL
+              {slackWebhookUrl ? (
+                <span className="flex size-2 rounded-full bg-emerald-500"></span>
+              ) : (
+                <span className="flex size-2 rounded-full bg-slate-500"></span>
+              )}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">Receive meeting summaries in a designated Slack channel</p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <input
+            type="text"
+            className="flex-1 w-full rounded-[10px] border border-echo-border bg-[#020617] p-2.5 text-sm text-white placeholder-slate-500 shadow-inner focus:border-accent-primary focus:outline-none"
+            placeholder="https://hooks.slack.com/services/..."
+            value={slackWebhookUrl}
+            onChange={(e) => setSlackWebhookUrl(e.target.value)}
+          />
+          {slackWebhookUrl && (
+            <div className="flex w-full sm:w-auto items-center gap-2">
+              <button
+                type="button"
+                onClick={handleTestSlack}
+                disabled={isCheckingSlack}
+                className="btn-ghost flex-1 sm:flex-none whitespace-nowrap rounded-[10px] px-4 py-2.5 text-sm font-medium hover:bg-echo-surface-hover transition-colors disabled:opacity-50"
+              >
+                {isCheckingSlack ? 'Testing...' : 'Test Connection'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSlackWebhookUrl('')}
+                className="btn-ghost flex-1 sm:flex-none text-red-400 hover:bg-red-500/10 whitespace-nowrap rounded-[10px] px-4 py-2.5 text-sm font-medium transition-colors"
+              >
+                Disconnect
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex justify-end mt-4">
         <button
           onClick={handleSavePreferences}
           disabled={isSaving}

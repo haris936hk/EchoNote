@@ -5,6 +5,7 @@ const nlpService = require('./nlp.service');
 const summarizationService = require('./summarization.service');
 const emailService = require('./email.service');
 const supabaseStorage = require('./supabase-storage.service');
+const slackService = require('./slack.service');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -357,6 +358,20 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       // Meeting is still marked as COMPLETED
     }
 
+    // --- NEW: Send Slack Notification ---
+    try {
+      const userWithWebhook = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { slackWebhookUrl: true },
+      });
+      if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
+        console.log(`\n💬 Sending Slack notification...`);
+        await slackService.sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, updatedMeeting);
+      }
+    } catch (slackError) {
+      console.error(`⚠️ Slack send failed:`, slackError.message);
+    }
+
     console.log(`\n🎉 Meeting processing complete! ID: ${meetingId}\n`);
 
     return updatedMeeting;
@@ -609,6 +624,21 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     });
 
     console.log(`✅ Email sent to ${meeting.user.email}`);
+
+    // --- NEW: Send Slack Notification ---
+    try {
+      const userWithWebhook = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { slackWebhookUrl: true },
+      });
+      if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
+        console.log(`\n💬 Sending Slack notification...`);
+        await slackService.sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, meeting);
+      }
+    } catch (slackError) {
+      console.error(`⚠️ Slack send failed:`, slackError.message);
+    }
+
     console.log(`\n🎉 Meeting processing complete! ID: ${meeting.id}\n`);
 
     return {
@@ -937,17 +967,56 @@ async function deleteMeeting(meetingId, userId) {
  */
 async function getMeetingStatistics(userId) {
   try {
-    const [totalMeetings, completedMeetings, processingMeetings, failedMeetings, totalDuration] =
-      await Promise.all([
-        prisma.meeting.count({ where: { userId } }),
-        prisma.meeting.count({ where: { userId, status: 'COMPLETED' } }),
-        prisma.meeting.count({ where: { userId, status: 'PROCESSING_AUDIO' } }),
-        prisma.meeting.count({ where: { userId, status: 'FAILED' } }),
-        prisma.meeting.aggregate({
-          where: { userId, status: 'COMPLETED' },
-          _sum: { audioDuration: true },
-        }),
-      ]);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const [
+      totalMeetings,
+      completedMeetings,
+      processingMeetings,
+      failedMeetings,
+      totalDuration,
+      actionItemsStatus,
+      meetingsLast30Days,
+    ] = await Promise.all([
+      prisma.meeting.count({ where: { userId } }),
+      prisma.meeting.count({ where: { userId, status: 'COMPLETED' } }),
+      prisma.meeting.count({
+        where: {
+          userId,
+          status: { in: ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'] },
+        },
+      }),
+      prisma.meeting.count({ where: { userId, status: 'FAILED' } }),
+      prisma.meeting.aggregate({
+        where: { userId, status: 'COMPLETED' },
+        _sum: { audioDuration: true },
+      }),
+      prisma.actionItem.groupBy({
+        by: ['status'],
+        where: { userId },
+        _count: true,
+      }),
+      prisma.meeting.findMany({
+        where: {
+          userId,
+          status: 'COMPLETED',
+          createdAt: { gte: thirtyDaysAgo },
+        },
+        select: {
+          createdAt: true,
+          nlpSentimentScore: true,
+          nlpEntities: true,
+          audioDuration: true,
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    // Calculate productivity score: (Done Items / Total Items) * 100
+    const totalItems = actionItemsStatus.reduce((acc, item) => acc + item._count, 0);
+    const doneItems = actionItemsStatus.find((item) => item.status === 'DONE')?._count || 0;
+    const productivityScore = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
 
     // Get meetings by category
     const categoryCounts = await prisma.meeting.groupBy({
@@ -955,6 +1024,49 @@ async function getMeetingStatistics(userId) {
       where: { userId, status: 'COMPLETED' },
       _count: true,
     });
+
+    // Process Sentiment Trends & Entities
+    const sentimentTrend = [];
+    const entityCounts = {};
+    const dailyData = {};
+
+    meetingsLast30Days.forEach((meeting) => {
+      const date = meeting.createdAt.toISOString().split('T')[0];
+      if (!dailyData[date]) {
+        dailyData[date] = { sum: 0, count: 0 };
+      }
+      if (meeting.nlpSentimentScore !== null) {
+        dailyData[date].sum += meeting.nlpSentimentScore;
+        dailyData[date].count += 1;
+      }
+
+      // Aggregate Entities
+      if (meeting.nlpEntities) {
+        // Split by comma and handle types like "Company (ORG)"
+        const entities = meeting.nlpEntities.split(',').map((e) => e.trim());
+        entities.forEach((entity) => {
+          if (entity && entity !== 'None') {
+            entityCounts[entity] = (entityCounts[entity] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    // Fill in sentiment trend array
+    Object.keys(dailyData)
+      .sort()
+      .forEach((date) => {
+        sentimentTrend.push({
+          date,
+          score: dailyData[date].count > 0 ? parseFloat((dailyData[date].sum / dailyData[date].count).toFixed(2)) : 0,
+        });
+      });
+
+    // Sort and limit top entities
+    const topEntities = Object.entries(entityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([name, count]) => ({ name, count }));
 
     // Get recent activity (last 7 days)
     const sevenDaysAgo = new Date();
@@ -985,7 +1097,10 @@ async function getMeetingStatistics(userId) {
             ? Math.round((totalDuration._sum.audioDuration || 0) / completedMeetings)
             : 0,
         recentActivity: recentMeetings,
+        productivityScore,
       },
+      sentimentTrend,
+      topEntities,
     };
   } catch (error) {
     console.error('Get meeting statistics error:', error.message);

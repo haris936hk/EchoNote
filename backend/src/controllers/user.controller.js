@@ -159,6 +159,7 @@ const getUserSettings = async (req, res) => {
       select: {
         autoDeleteDays: true,
         emailNotifications: true,
+        slackWebhookUrl: true,
       },
     });
 
@@ -190,7 +191,7 @@ const getUserSettings = async (req, res) => {
 const updateUserSettings = async (req, res) => {
   try {
     const userId = req.userId;
-    const { autoDeleteDays, emailNotifications } = req.body;
+    const { autoDeleteDays, emailNotifications, slackWebhookUrl } = req.body;
 
     const updateData = {};
 
@@ -253,6 +254,20 @@ const updateUserSettings = async (req, res) => {
       updateData.emailNotifications = emailNotifications;
     }
 
+    if (slackWebhookUrl !== undefined) {
+      if (slackWebhookUrl === '') {
+        updateData.slackWebhookUrl = null;
+      } else if (typeof slackWebhookUrl === 'string') {
+        if (!slackWebhookUrl.startsWith('https://hooks.slack.com/')) {
+          return res.status(400).json({
+            success: false,
+            error: 'Slack Webhook URL must start with https://hooks.slack.com/',
+          });
+        }
+        updateData.slackWebhookUrl = slackWebhookUrl;
+      }
+    }
+
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
         success: false,
@@ -266,6 +281,7 @@ const updateUserSettings = async (req, res) => {
       select: {
         autoDeleteDays: true,
         emailNotifications: true,
+        slackWebhookUrl: true,
       },
     });
 
@@ -681,6 +697,66 @@ const logUserActivity = async (req, res) => {
   }
 };
 
+/**
+ * Test Slack Webhook Integration
+ * POST /api/users/settings/slack/test
+ */
+const testSlackWebhook = async (req, res) => {
+  try {
+    const userId = req.userId;
+    let targetWebhookUrl = req.body?.slackWebhookUrl;
+
+    if (!targetWebhookUrl) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { slackWebhookUrl: true },
+      });
+      targetWebhookUrl = user?.slackWebhookUrl;
+    }
+
+    if (!targetWebhookUrl) {
+      return res.status(400).json({
+        success: false,
+        error: 'No Slack Webhook configured',
+      });
+    }
+
+    const mockMeeting = {
+      title: 'EchoNote Slack Integration Test',
+      category: 'OTHER',
+      audioDuration: 305, // 5:05
+      transcriptConfidence: 95,
+      nlpSentiment: 'positive',
+      nlpSentimentScore: 0.85,
+      nlpTopics: ['Integrations', 'Testing', 'Productivity'],
+      summaryExecutive:
+        'This is a test notification from EchoNote to verify your Slack Block Kit integration is correctly formatted and successfully routing messages.',
+      summaryKeyDecisions: ['Approved new webhook configuration', 'Validated Block Kit layout'],
+      summaryActionItems: [
+        { priority: 'high', task: 'Review new Slack notification format', assignee: 'Team' },
+        { priority: 'medium', task: 'Deploy Slack integration to production', assignee: null },
+        { priority: 'low', task: 'Check Winston logs for payload delivery', assignee: null },
+      ],
+      user: { name: 'EchoNote User' },
+    };
+
+    const slackService = require('../services/slack.service');
+    await slackService.sendMeetingCompletedNotification(targetWebhookUrl, mockMeeting);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Test notification sent successfully',
+    });
+  } catch (error) {
+    logger.error(`Error sending test Slack notification: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to send test notification',
+      details: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCurrentUser,
   updateUserProfile,
@@ -692,4 +768,5 @@ module.exports = {
   exportUserData,
   updateLastLogin,
   logUserActivity,
+  testSlackWebhook,
 };

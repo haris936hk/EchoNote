@@ -25,6 +25,7 @@ model User {
   // Settings
   autoDeleteDays     Int? // Auto-delete audio after X days (null = never delete)
   emailNotifications Boolean @default(true)
+  slackWebhookUrl    String? @db.Text // Slack integration endpoint
 
   // Timestamps
   createdAt   DateTime @default(now())

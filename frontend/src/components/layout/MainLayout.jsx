@@ -19,6 +19,7 @@ const MainLayout = ({ children }) => {
     { path: '/meetings', label: 'Meetings' },
     { path: '/tasks', label: 'Tasks' },
     { path: '/decisions', label: 'Decisions' },
+    { path: '/analytics', label: 'Insights' },
   ];
 
   return (

@@ -136,7 +136,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
                 size="sm"
                 variant="flat"
                 color="primary"
-                className="h-7 border border-accent-primary/20 bg-accent-primary/10 text-[11px] font-medium text-accent-primary hover:bg-accent-primary/20"
+                className="h-7 rounded-full border border-accent-primary/20 bg-accent-primary/10 px-4 text-[11px] font-medium text-accent-primary hover:bg-accent-primary/20"
                 startContent={<MailPlus size={14} />}
                 onPress={() => setIsFollowUpOpen(true)}
               >

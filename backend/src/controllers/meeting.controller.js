@@ -8,6 +8,9 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
+const slackService = require('../services/slack.service');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 const { convertWavToMp3, cleanupTempMp3 } = require('../utils/audioConverter');
 const { generateDownloadFilename, ensureDirectoryExists } = require('../utils/fileUtils');
 
@@ -1637,6 +1640,58 @@ const generateFollowUp = async (req, res) => {
   }
 };
 
+/**
+ * Manually share a meeting summary to Slack
+ * POST /api/meetings/:id/share/slack
+ */
+const shareToSlack = async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { slackWebhookUrl: true },
+    });
+
+    if (!user || !user.slackWebhookUrl) {
+      return res.status(400).json({
+        success: false,
+        error: 'No Slack Webhook configured. Please add one in Settings.',
+      });
+    }
+
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+    if (!meeting) {
+      return res.status(404).json({
+        success: false,
+        error: 'Meeting not found',
+      });
+    }
+
+    if (meeting.status !== 'COMPLETED') {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot share meeting that is not fully processed yet',
+      });
+    }
+
+    await slackService.sendMeetingCompletedNotification(user.slackWebhookUrl, meeting);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Meeting successfully shared to Slack',
+    });
+  } catch (error) {
+    logger.error(`Error sharing meeting to Slack: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to share meeting to Slack',
+      details: error.message,
+    });
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -1662,4 +1717,5 @@ module.exports = {
   getMeetingAnalytics,
   getAllDecisions,
   generateFollowUp,
+  shareToSlack,
 };

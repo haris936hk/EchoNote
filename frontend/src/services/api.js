@@ -392,11 +392,26 @@ export const meetingsAPI = {
   },
 
   /**
+   * Get meeting statistics for the current user
+   */
+  getStatistics: async () => {
+    try {
+      const response = await api.get('/meetings/stats');
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch statistics',
+      };
+    }
+  },
+
+  /**
    * Generate AI follow-up email draft
    */
   generateFollowUp: async (id, tone = 'formal') => {
     try {
-      const response = await api.post(`/meetings/${id}/followup`, null, {
+      const response = await api.post(`/meetings/${id}/followup`, {}, {
         params: { tone },
       });
       return { success: true, data: response.data.data };
@@ -404,6 +419,20 @@ export const meetingsAPI = {
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to generate follow-up',
+      };
+    }
+  },
+  /**
+   * Share meeting to Slack
+   */
+  shareToSlack: async (id) => {
+    try {
+      const response = await api.post(`/meetings/${id}/share/slack`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Failed to share to Slack',
       };
     }
   },

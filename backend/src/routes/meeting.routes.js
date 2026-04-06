@@ -347,6 +347,21 @@ router.post(
 );
 
 /**
+ * @route   POST /api/meetings/:id/share/slack
+ * @desc    Share meeting summary to configured Slack webhook
+ * @access  Private (owner only)
+ * @returns { success, message }
+ */
+router.post(
+  '/:id/share/slack',
+  authenticate,
+  validateUUIDParam('id'),
+  authorize('meeting'),
+  requireCompletedMeeting,
+  meetingController.shareToSlack
+);
+
+/**
  * @route   POST /api/meetings/:id/share
  * @desc    Generate shareable link for meeting (future feature)
  * @access  Private (owner only)
