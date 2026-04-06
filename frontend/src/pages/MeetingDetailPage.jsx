@@ -564,7 +564,11 @@ const MeetingDetailPage = () => {
             {/* Right Column — AI Insights (40%, sticky) */}
             <div className="lg:col-span-2">
               <div className="space-y-4 lg:sticky lg:top-[88px]">
-                <SummaryViewer summary={currentMeeting.summary} />
+                <SummaryViewer
+                  summary={currentMeeting.summary}
+                  meetingId={currentMeeting.id}
+                  meetingTitle={currentMeeting.title}
+                />
               </div>
             </div>
           </div>

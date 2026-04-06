@@ -10,7 +10,10 @@ import {
   LuUser as User,
   LuCalendar as Calendar,
   LuTag as Tag,
+  LuMailPlus as MailPlus,
 } from 'react-icons/lu';
+import { Button } from '@heroui/react';
+import FollowUpModal from './FollowUpModal';
 import { sentimentColors } from '../../styles/theme';
 
 const CopyBtn = ({ section, content, copiedSection, onCopy }) => (
@@ -38,9 +41,10 @@ CopyBtn.propTypes = {
   onCopy: PropTypes.func.isRequired,
 };
 
-const SummaryViewer = ({ summary }) => {
+const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
   const [copiedSection, setCopiedSection] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
 
   if (!summary) {
     return (
@@ -127,12 +131,24 @@ const SummaryViewer = ({ summary }) => {
               <h4 className="text-sm font-semibold text-white">Executive Summary</h4>
               <span className="ai-dot"></span>
             </div>
-            <CopyBtn
-              section="executive"
-              content={summaryData.executive}
-              copiedSection={copiedSection}
-              onCopy={copySection}
-            />
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="flat"
+                color="primary"
+                className="h-7 border border-accent-primary/20 bg-accent-primary/10 text-[11px] font-medium text-accent-primary hover:bg-accent-primary/20"
+                startContent={<MailPlus size={14} />}
+                onPress={() => setIsFollowUpOpen(true)}
+              >
+                AI Follow-up
+              </Button>
+              <CopyBtn
+                section="executive"
+                content={summaryData.executive}
+                copiedSection={copiedSection}
+                onCopy={copySection}
+              />
+            </div>
           </div>
           <p className="text-sm leading-relaxed text-slate-300">{summaryData.executive}</p>
         </div>
@@ -303,12 +319,22 @@ const SummaryViewer = ({ summary }) => {
           </div>
         </div>
       )}
+
+      {/* ── AI Follow-up Modal ── */}
+      <FollowUpModal
+        isOpen={isFollowUpOpen}
+        onClose={() => setIsFollowUpOpen(false)}
+        meetingId={meetingId}
+        meetingTitle={meetingTitle}
+      />
     </div>
   );
 };
 
 SummaryViewer.propTypes = {
   summary: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  meetingId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  meetingTitle: PropTypes.string,
 };
 
 export default SummaryViewer;
