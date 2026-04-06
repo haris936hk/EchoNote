@@ -172,11 +172,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       duration: audioDuration,
       // Pass NLP features to guide AI summary generation (matches echonote_dataset.json format)
       entities: nlpResult.success ? nlpResult.entities : [],
-      keyPhrases: nlpResult.success ? nlpResult.keyPhrases : [],
       svoTriplets: nlpResult.success ? nlpResult.svoTriplets : [],
       questions: nlpResult.success ? nlpResult.questions : [],
       sentiment: nlpResult.success ? nlpResult.sentiment : null,
-      topics: nlpResult.success ? nlpResult.topics : [],
     });
 
     if (!summaryResult.success) {
@@ -241,9 +239,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         ? nlpResult.entities.map((e) => `${e.text} (${e.label})`).join(', ')
         : null;
 
-    const nlpKeyPhrasesText =
-      nlpResult.success && nlpResult.keyPhrases ? nlpResult.keyPhrases.join(', ') : null;
-
     const nlpActionPatternsText =
       nlpResult.success && nlpResult.svoTriplets
         ? '  • ' +
@@ -261,14 +256,13 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         transcriptSegments: transcriptionSegments,
         speakerMap: {},
         transcriptWordCount: wordCount,
+        transcriptConfidence: transcriptionConfidence,
 
         // NLP Features
         nlpEntities: nlpEntitiesText,
-        nlpKeyPhrases: nlpKeyPhrasesText,
         nlpActionPatterns: nlpActionPatternsText,
         nlpSentiment: nlpResult.success ? nlpResult.sentiment?.label : null,
         nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
-        nlpTopics: nlpResult.success ? nlpResult.topics : null,
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -366,7 +360,10 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       });
       if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
         console.log(`\n💬 Sending Slack notification...`);
-        await slackService.sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, updatedMeeting);
+        await slackService.sendMeetingCompletedNotification(
+          userWithWebhook.slackWebhookUrl,
+          updatedMeeting
+        );
       }
     } catch (slackError) {
       console.error(`⚠️ Slack send failed:`, slackError.message);
@@ -547,14 +544,13 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         transcriptSegments: transcriptionSegments,
         speakerMap: {},
         transcriptWordCount: wordCount,
+        transcriptConfidence: transcriptionConfidence,
 
         // NLP Features
         nlpEntities: nlpEntitiesText,
-        nlpKeyPhrases: null,
         nlpActionPatterns: nlpActionPatternsText,
         nlpSentiment: nlpResult.success ? nlpResult.sentiment?.label : null,
         nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
-        nlpTopics: null,
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -633,7 +629,10 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       });
       if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
         console.log(`\n💬 Sending Slack notification...`);
-        await slackService.sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, meeting);
+        await slackService.sendMeetingCompletedNotification(
+          userWithWebhook.slackWebhookUrl,
+          meeting
+        );
       }
     } catch (slackError) {
       console.error(`⚠️ Slack send failed:`, slackError.message);
@@ -984,7 +983,9 @@ async function getMeetingStatistics(userId) {
       prisma.meeting.count({
         where: {
           userId,
-          status: { in: ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'] },
+          status: {
+            in: ['UPLOADING', 'PROCESSING_AUDIO', 'TRANSCRIBING', 'PROCESSING_NLP', 'SUMMARIZING'],
+          },
         },
       }),
       prisma.meeting.count({ where: { userId, status: 'FAILED' } }),
@@ -1058,7 +1059,10 @@ async function getMeetingStatistics(userId) {
       .forEach((date) => {
         sentimentTrend.push({
           date,
-          score: dailyData[date].count > 0 ? parseFloat((dailyData[date].sum / dailyData[date].count).toFixed(2)) : 0,
+          score:
+            dailyData[date].count > 0
+              ? parseFloat((dailyData[date].sum / dailyData[date].count).toFixed(2))
+              : 0,
         });
       });
 

@@ -52,19 +52,14 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Fetch user from database
+    // Fetch user from database with minimal fields
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
         id: true,
         email: true,
         name: true,
-        picture: true,
-        googleId: true,
-        autoDeleteDays: true,
-        emailNotifications: true,
-        createdAt: true,
-        lastLoginAt: true,
+        // Only fetch fields actually needed for every authenticated request
       },
     });
 
@@ -159,7 +154,7 @@ const authorize = (resourceType) => {
         case 'meeting':
           resource = await prisma.meeting.findUnique({
             where: { id: resourceId },
-            select: { userId: true, id: true, title: true },
+            select: { userId: true }, // ONLY need userId for ownership check
           });
           break;
 

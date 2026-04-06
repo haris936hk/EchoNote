@@ -16,8 +16,11 @@ import {
   LuExternalLink as ExternalLink,
   LuFileText as FileText,
   LuShare2 as Share2,
+  LuSlack as Slack,
 } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
+import { shareMeetingToSlack } from '../services/meeting.service';
+import { showToast } from '../components/common/Toast';
 import SummaryViewer from '../components/meeting/SummaryViewer';
 import TranscriptViewer from '../components/meeting/TranscriptViewer';
 import ProcessingLogAccordion from '../components/meeting/ProcessingLogAccordion';
@@ -53,6 +56,7 @@ const MeetingDetailPage = () => {
   const [isSpeakerModalOpen, setIsSpeakerModalOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState({ id: '', name: '' });
   const [isRetrying, setIsRetrying] = useState(false);
+  const [isSendingToSlack, setIsSendingToSlack] = useState(false);
 
   // B2 — Copy meeting URL to clipboard
   const handleShare = async () => {
@@ -186,6 +190,22 @@ const MeetingDetailPage = () => {
       window.URL.revokeObjectURL(url);
     } catch {
       window.alert('Failed to download audio file.');
+    }
+  };
+
+  const handleSendToSlack = async () => {
+    setIsSendingToSlack(true);
+    try {
+      const result = await shareMeetingToSlack(id);
+      if (result.success) {
+        showToast('✅ Sent to Slack!', 'success');
+      } else {
+        showToast(result.error || 'Failed to send to Slack', 'error');
+      }
+    } catch (err) {
+      showToast('An unexpected error occurred', 'error');
+    } finally {
+      setIsSendingToSlack(false);
     }
   };
 
@@ -391,6 +411,17 @@ const MeetingDetailPage = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {isCompleted && (
+            <button
+              onClick={handleSendToSlack}
+              disabled={isSendingToSlack}
+              className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
+              type="button"
+            >
+              <Slack size={14} className={isSendingToSlack ? 'animate-pulse' : ''} />
+              {isSendingToSlack ? 'Sending...' : 'Send to Slack'}
+            </button>
+          )}
           {currentMeeting.audioUrl && (
             <button
               onClick={handleDownloadAudio}

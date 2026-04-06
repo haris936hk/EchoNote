@@ -11,6 +11,7 @@ import os
 import time
 import torch
 import warnings
+import multiprocessing
 
 # Use whisperx instead of standard whisper
 from whisperx import load_model, load_audio, load_align_model, align
@@ -20,23 +21,17 @@ from utils import Logger
 warnings.filterwarnings('ignore')
 
 # ── CPU thread tuning ────────────────────────────────────────────────────────
-# Set BEFORE any CTranslate2/torch imports take effect.
-# Half of physical cores avoids hyperthread contention on OMP workloads.
-import multiprocessing
 _PHYSICAL_CORES = multiprocessing.cpu_count()
-_OMP_THREADS = str(max(1, _PHYSICAL_CORES // 2))  # e.g. 8 on a 16-core box
+_OMP_THREADS = str(max(2, _PHYSICAL_CORES // 4))
 os.environ.setdefault("OMP_NUM_THREADS", _OMP_THREADS)
 os.environ.setdefault("MKL_NUM_THREADS", _OMP_THREADS)
-# ─────────────────────────────────────────────────────────────────────────────
 
 # WhisperX configuration
-MODEL_NAME = "base.en"  # Options: tiny.en, base.en, small.en, medium.en, large
+MODEL_NAME = "base.en"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 COMPUTE_TYPE = "float16" if DEVICE == "cuda" else "int8"
-# BATCH_SIZE: 16 is GPU-optimal; CPU int8 performs best at 4-8 (avoids memory pressure)
 BATCH_SIZE = 4 if DEVICE == "cpu" else 16
-# CTranslate2 cpu_threads: use half of physical cores (same as OMP)
-CPU_THREADS = max(1, _PHYSICAL_CORES // 2)
+CPU_THREADS = int(_OMP_THREADS)
 
 class WhisperXTranscriber:
     """WhisperX transcription with alignment and diarization"""
@@ -46,7 +41,36 @@ class WhisperXTranscriber:
         self.model_name = MODEL_NAME
         self.device = DEVICE
         self.compute_type = COMPUTE_TYPE
+        self.align_models = {}  # Cache for alignment models by language
+        self.diarize_model = None
         
+    def load_models(self):
+        """Pre-load the main transcription model"""
+        if self.model is None:
+            print(f"🤖 Loading WhisperX model: {self.model_name} ({self.device}, {self.compute_type}, threads={CPU_THREADS})", file=sys.stderr)
+            with Logger.suppress_stdout():
+                self.model = load_model(
+                    self.model_name,
+                    self.device,
+                    compute_type=self.compute_type,
+                    threads=CPU_THREADS,
+                    download_root=None,
+                )
+        
+        if self.diarize_model is None:
+            print(f"🗣️ Loading Diarization model...", file=sys.stderr)
+            with Logger.suppress_stdout():
+                self.diarize_model = DiarizationPipeline(device=self.device)
+
+    def get_align_model(self, language_code):
+        """Get or load alignment model for language"""
+        if language_code not in self.align_models:
+            print(f"⏱️ Loading Alignment model for '{language_code}'...", file=sys.stderr)
+            with Logger.suppress_stdout():
+                model_a, metadata = load_align_model(language_code=language_code, device=self.device)
+                self.align_models[language_code] = (model_a, metadata)
+        return self.align_models[language_code]
+
     def transcribe(self, audio_path: str) -> dict:
         """
         Transcribe audio file, align timestamps, and assign speakers.
@@ -56,6 +80,9 @@ class WhisperXTranscriber:
         try:
             if not os.path.exists(audio_path):
                 raise FileNotFoundError(f"Audio file not found: {audio_path}")
+            
+            # Ensure models are loaded
+            self.load_models()
             
             # Check HF_TOKEN
             hf_token = os.environ.get("HF_TOKEN")
@@ -68,16 +95,6 @@ class WhisperXTranscriber:
             start_time = time.time()
             
             # 1. Load audio and transcribe
-            print(f"🤖 Loading WhisperX model: {self.model_name} ({DEVICE}, {COMPUTE_TYPE}, threads={CPU_THREADS})", file=sys.stderr)
-            with Logger.suppress_stdout():
-                self.model = load_model(
-                    self.model_name,
-                    self.device,
-                    compute_type=self.compute_type,
-                    threads=CPU_THREADS,
-                    download_root=None,
-                )
-            
             audio = load_audio(audio_path)
             
             print(f"🎙️ Running base transcription...", file=sys.stderr)
@@ -85,16 +102,17 @@ class WhisperXTranscriber:
                 result = self.model.transcribe(audio, batch_size=BATCH_SIZE)
             
             # 2. Align
-            print(f"⏱️ Aligning words...", file=sys.stderr)
+            language_code = result["language"]
+            print(f"⏱️ Aligning words ({language_code})...", file=sys.stderr)
+            model_a, metadata = self.get_align_model(language_code)
             with Logger.suppress_stdout():
-                model_a, metadata = load_align_model(language_code=result["language"], device=self.device)
                 result = align(result["segments"], model_a, metadata, audio, self.device, return_char_alignments=False)
             
             # 3. Diarize
             print(f"🗣️ Diarizing speakers...", file=sys.stderr)
             with Logger.suppress_stdout():
-                diarize_model = DiarizationPipeline(device=self.device)
-                diarize_segments = diarize_model(audio)
+                # self.diarize_model is already loaded
+                diarize_segments = self.diarize_model(audio)
             
             # 4. Assign Speakers
             print(f"🔗 Assigning speakers to words...", file=sys.stderr)
@@ -130,9 +148,9 @@ class WhisperXTranscriber:
             
             return {
                 'success': True,
-                'text': combined_text,  # Clean text without speaker tags, just appended
-                'segments': formatted_segments, # Has speaker mapping
-                'language': result.get("language", "en"),
+                'text': combined_text,
+                'segments': formatted_segments,
+                'language': language_code,
                 'transcription_time': float(transcription_time)
             }
             
@@ -146,7 +164,7 @@ class WhisperXTranscriber:
             }
 
 def main():
-    """Main entry point"""
+    """Main entry point for CLI usage (still reload every time if called this way)"""
     if len(sys.argv) < 2:
         result = {
             'success': False,

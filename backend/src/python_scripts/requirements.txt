@@ -16,5 +16,10 @@ pyannote.audio
 numpy
 pandas
 
+# Microservice Integration
+fastapi
+uvicorn
+pydantic
+
 # Download spaCy model after installation:
 # python -m spacy download en_core_web_lg

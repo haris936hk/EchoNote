@@ -9,8 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
 const slackService = require('../services/slack.service');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('../config/database');
 const { convertWavToMp3, cleanupTempMp3 } = require('../utils/audioConverter');
 const { generateDownloadFilename, ensureDirectoryExists } = require('../utils/fileUtils');
 
@@ -1365,14 +1364,13 @@ const updateSpeakerMap = async (req, res) => {
     }
 
     // Fetch the meeting to verify it belongs to the user
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    // Use shared prisma instance from config
     const meeting = await prisma.meeting.findFirst({
       where: { id: meetingId, userId },
     });
 
     if (!meeting) {
-      await prisma.$disconnect();
+      // Remove disconnect - handled by singleton lifecycle
       return res.status(404).json({
         success: false,
         error: 'Meeting not found',
@@ -1396,7 +1394,7 @@ const updateSpeakerMap = async (req, res) => {
       data: { speakerMap: currentMap },
     });
 
-    await prisma.$disconnect();
+    // Remove manual disconnect
 
     logger.info(`✅ Speaker map updated for meeting: ${meetingId}`);
 
@@ -1425,20 +1423,20 @@ const reprocessMeeting = async (req, res) => {
     const meetingId = req.params.id;
     const userId = req.userId;
 
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    // Use shared prisma instance from config
+    // (Local PrismaClient removed)
 
     const meeting = await prisma.meeting.findFirst({
       where: { id: meetingId, userId },
     });
 
     if (!meeting) {
-      await prisma.$disconnect();
+      // Remove manual disconnect
       return res.status(404).json({ success: false, error: 'Meeting not found' });
     }
 
     if (meeting.status !== 'FAILED') {
-      await prisma.$disconnect();
+      // Remove manual disconnect
       return res.status(400).json({
         success: false,
         error: 'Only failed meetings can be reprocessed',
@@ -1446,7 +1444,7 @@ const reprocessMeeting = async (req, res) => {
     }
 
     if (!meeting.audioUrl) {
-      await prisma.$disconnect();
+      // Remove manual disconnect
       return res.status(400).json({
         success: false,
         error: 'No audio file found for this meeting. Please upload a new recording.',
@@ -1467,7 +1465,7 @@ const reprocessMeeting = async (req, res) => {
       },
     });
 
-    await prisma.$disconnect();
+    // Remove manual disconnect
 
     // Re-queue for processing
     queueService.addToQueue(meetingId);
@@ -1517,8 +1515,7 @@ const getMeetingAnalytics = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
 
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    // Use shared prisma instance from config
 
     const meeting = await prisma.meeting.findFirst({
       where: { id, userId },
@@ -1535,7 +1532,7 @@ const getMeetingAnalytics = async (req, res) => {
       },
     });
 
-    await prisma.$disconnect();
+    // Remove manual disconnect
 
     if (!meeting) {
       return res.status(404).json({ success: false, error: 'Meeting not found' });

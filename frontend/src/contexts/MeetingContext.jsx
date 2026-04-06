@@ -107,7 +107,7 @@ export const MeetingProvider = ({ children }) => {
 
       const recorder = new RecordRTC(stream, {
         type: 'audio',
-        mimeType: 'audio/webm',
+        mimeType: 'audio/wav',
         recorderType: RecordRTC.StereoAudioRecorder,
         numberOfAudioChannels: 1,
         desiredSampRate: 16000,
@@ -153,7 +153,7 @@ export const MeetingProvider = ({ children }) => {
       }
 
       const formData = new FormData();
-      formData.append('audio', audioFile, 'meeting.webm');
+      formData.append('audio', audioFile, 'meeting.wav');
       formData.append('title', title);
       formData.append('category', category);
       if (description) {

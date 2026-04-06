@@ -92,14 +92,13 @@ model Meeting {
   transcriptSegments  Json? // Structured arrays of [{start, end, text, speaker}]
   speakerMap          Json? // User-defined speaker names e.g., {"SPEAKER_00": "John"}
   transcriptWordCount Int?
+  transcriptConfidence Float? // Average confidence score from transcription model
 
   // NLP Features (extracted from transcript)
   nlpEntities       String? @db.Text // Named entities (e.g., "John Doe (PERSON), Q4 2024 (DATE)")
-  nlpKeyPhrases     String? @db.Text // Key phrases (e.g., "you guys, all ages, a deal")
   nlpActionPatterns String? @db.Text // Action patterns (e.g., "cut: it, love: you")
   nlpSentiment      String? // Sentiment label (positive/negative/neutral)
   nlpSentimentScore Float? // Sentiment polarity score
-  nlpTopics         Json? // Array of main topics
 
   // AI Summary (structured format matching dataset)
   summaryExecutive    String? @db.Text // Executive summary (2-3 sentences)

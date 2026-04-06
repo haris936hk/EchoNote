@@ -24,6 +24,7 @@
   "author": "EchoNote Team",
   "license": "MIT",
   "dependencies": {
+    "@deepgram/sdk": "^5.0.0",
     "@prisma/client": "^5.7.1",
     "@supabase/supabase-js": "^2.89.0",
     "archiver": "^7.0.1",

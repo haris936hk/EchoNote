@@ -25,6 +25,7 @@ const { prisma } = require('./config/database');
 // Import services
 const storageService = require('./services/storage.service');
 const queueService = require('./services/queue.service');
+const transcriptionService = require('./services/transcription.service');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -305,6 +306,19 @@ async function initializeServer() {
       console.log(
         '👉 Please install FFmpeg and add it to PATH, or set FFMPEG_PATH and FFPROBE_PATH in .env'
       );
+    }
+
+    // Step 6: Initialize transcription microservice
+    console.log('🤖 Initializing transcription service...');
+    try {
+      const result = await transcriptionService.initialize();
+      if (result) {
+        console.log('✅ Transcription service ready');
+      } else {
+        console.log('⚠️  Transcription service initialization failed. It will try again on use.');
+      }
+    } catch (err) {
+      console.log('⚠️  Transcription service initialization error:', err.message);
     }
 
     console.log('\n' + '='.repeat(60));

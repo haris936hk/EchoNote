@@ -1,12 +1,50 @@
 // backend/src/services/transcription.service.js
 // Transcription service using Whisper ASR
 
-const { PythonShell } = require('python-shell');
+const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 const winston = require('winston');
+const axios = require('axios');
+const { DeepgramClient } = require('@deepgram/sdk');
 
-const safePythonRun = async (scriptName, options) => {
-  // Ensure FFmpeg is in the PATH so WhisperX can run load_audio internally
+// Persistent transcription server state
+let transcriptionServerProcess = null;
+const SERVER_URL = process.env.TRANSCRIPTION_SERVER_URL || 'http://127.0.0.1:8765';
+const SERVER_PORT = parseInt(process.env.TRANSCRIPTION_SERVER_PORT || '8765');
+
+/**
+ * Health check for the transcription microservice
+ */
+const checkHealth = async () => {
+  try {
+    const response = await axios.get(`${SERVER_URL}/health`, { timeout: 2000 });
+    return response.status === 200 && response.data.status === 'ready';
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
+ * Start the long-lived Python transcription server if not already running
+ */
+const ensureServer = async () => {
+  // 1. Check if already healthy
+  const isHealthy = await checkHealth();
+  if (isHealthy) return true;
+
+  if (transcriptionServerProcess) {
+    logger.warn('⚠️ Transcription server process exists but is unresponsive. Attempting restart.');
+    transcriptionServerProcess.kill();
+    transcriptionServerProcess = null;
+  }
+
+  logger.info('🚀 Spawning FastAPI Transcription Server...');
+
+  const serverPath = path.join(__dirname, '../python_scripts/transcription_server.py');
+  const pythonPath = process.env.PYTHON_PATH || 'python3';
+
+  // Ensure FFmpeg is in the PATH for the Python process
   let envPath = process.env.PATH || '';
   if (process.env.FFMPEG_PATH) {
     const ffmpegDir = path.dirname(process.env.FFMPEG_PATH);
@@ -16,31 +54,71 @@ const safePythonRun = async (scriptName, options) => {
     }
   }
 
-  const textOptions = {
-    ...options,
-    mode: 'text',
-    env: { ...process.env, ...(options.env || {}), PATH: envPath },
-  };
-  const resultsText = await PythonShell.run(scriptName, textOptions);
+  // Spawn as a persistent child process
+  transcriptionServerProcess = spawn(pythonPath, [serverPath], {
+    env: {
+      ...process.env,
+      TRANSCRIPTION_SERVER_PORT: SERVER_PORT.toString(),
+      PYTHONPATH: path.join(__dirname, '../python_scripts'),
+      PATH: envPath,
+    },
+    stdio: 'inherit', // Pipe logs to our stdout/stderr
+  });
 
-  if (!resultsText || resultsText.length === 0) {
-    throw new Error('Python script returned empty output');
-  }
+  transcriptionServerProcess.on('error', (err) => {
+    logger.error(`❌ Failed to start transcription server: ${err.message}`);
+    transcriptionServerProcess = null;
+  });
 
-  for (let i = resultsText.length - 1; i >= 0; i--) {
-    try {
-      const parsed = JSON.parse(resultsText[i]);
-      if (parsed !== null && typeof parsed === 'object') {
-        return [parsed]; // Return matching format
-      }
-    } catch (e) {
-      // Continue searching
+  transcriptionServerProcess.on('close', (code) => {
+    logger.warn(`⚠️ Transcription server exited with code ${code}`);
+    transcriptionServerProcess = null;
+  });
+
+  // 2. Poll for readiness (max 60s for first-time model load)
+  logger.info('⏳ Waiting for models to load (this can take up to 60s)...');
+  const maxRetries = 30;
+  for (let i = 0; i < maxRetries; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    if (await checkHealth()) {
+      logger.info('✅ Transcription server is ready!');
+      return true;
     }
+    if (i % 5 === 0) logger.info(`... still loading (${i * 2}s)`);
   }
 
-  throw new Error(
-    `Python script ${scriptName} returned malformed output without valid JSON arrays.`
-  );
+  throw new Error('Transcription server failed to become ready within timeout');
+};
+
+// Cleanup on exit
+process.on('exit', () => {
+  if (transcriptionServerProcess) transcriptionServerProcess.kill();
+});
+
+/**
+ * Initialize the transcription service (pre-warms the server)
+ */
+const initialize = async () => {
+  const provider = process.env.TRANSCRIPTION_PROVIDER || 'local';
+
+  try {
+    logger.info(`🎬 Initializing transcription service (Provider: ${provider})...`);
+
+    if (provider === 'deepgram') {
+      logger.info('🚀 Deepgram selected. Local server will start in background as fallback.');
+      // Start in background, don't await
+      ensureServer().catch((err) =>
+        logger.warn(`⚠️ Fallback transcription server failed to start: ${err.message}`)
+      );
+      return true;
+    }
+
+    await ensureServer();
+    return true;
+  } catch (error) {
+    logger.error(`❌ Failed to initialize transcription service: ${error.message}`);
+    return false;
+  }
 };
 
 // Initialize logger
@@ -71,14 +149,105 @@ const TRANSCRIPTION_CONFIG = {
 };
 
 /**
+ * Transcribe audio using Deepgram API
+ * @param {string} audioPath - Path to audio file
+ * @param {Object} options - Transcription options
+ * @returns {Object} Transcription result
+ */
+const transcribeWithDeepgram = async (audioPath, options = {}) => {
+  try {
+    const apiKey = process.env.DEEPGRAM_API_KEY;
+    if (!apiKey || apiKey === 'your_deepgram_api_key_here') {
+      throw new Error('Deepgram API key not configured in .env');
+    }
+
+    const deepgram = new DeepgramClient(apiKey);
+    const startTime = Date.now();
+
+    logger.info(`🚀 Sending to Deepgram: ${path.basename(audioPath)}`);
+
+    const audioBuffer = fs.readFileSync(audioPath);
+
+    const response = await deepgram.listen.v1.media.transcribeFile(audioBuffer, {
+      model: options.model || 'nova-2',
+      smart_format: true,
+      diarize: true,
+      utterances: true,
+      punctuate: true,
+      paragraphs: true,
+      language: options.language || 'en',
+    });
+
+    // In SDK v5+, the result is directly available on the response object
+    const result = response.result;
+
+    if (!result || response.error) {
+      logger.error(`❌ Deepgram Response Error: ${JSON.stringify(response)}`);
+      throw new Error(
+        `Deepgram API error: ${response.error?.message || 'Unknown transcription error'}`
+      );
+    }
+
+    const alternative = result.results?.channels?.[0]?.alternatives?.[0];
+    const paragraphsTranscript = result.results?.paragraphs?.transcript;
+    const rawTranscript = alternative?.transcript || '';
+
+    // Prefer the paragraph-formatted transcript if it contains speaker labels
+    const transcript = paragraphsTranscript || rawTranscript;
+
+    const utterances = result.results?.utterances || [];
+
+    // Map Deepgram utterances to our internal segments format
+    const segments = utterances.map((u) => ({
+      start: u.start,
+      end: u.end,
+      text: u.transcript.trim(),
+      speaker:
+        u.speaker !== undefined ? `SPEAKER_${u.speaker.toString().padStart(2, '0')}` : 'SPEAKER_00',
+      confidence: u.confidence,
+    }));
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    logger.info(`✅ Deepgram transcription completed in ${duration}s`);
+
+    return {
+      success: true,
+      text: transcript,
+      segments: segments,
+      language: result.metadata?.language || 'en',
+      wordCount: countWords(transcript),
+      confidence: alternative?.confidence || 1.0,
+      processingTime: parseFloat(duration),
+      model: result.metadata?.model_info?.name || 'nova-2',
+      method: 'deepgram',
+    };
+  } catch (error) {
+    logger.error(`❌ Deepgram transcription failed: ${error.message}`);
+    throw error;
+  }
+};
+
+/**
  * Transcribe audio using Whisper model
  * @param {string} audioPath - Path to audio file (WAV, 16kHz mono)
  * @param {Object} options - Transcription options
  * @returns {Object} Transcription result
  */
 const transcribeAudio = async (audioPath, options = {}) => {
+  const provider = process.env.TRANSCRIPTION_PROVIDER || 'local';
+
+  // Try Deepgram if selected
+  if (provider === 'deepgram') {
+    try {
+      return await transcribeWithDeepgram(audioPath, options);
+    } catch (error) {
+      logger.warn(`⚠️ Deepgram failed, falling back to local processing: ${error.message}`);
+      // Continue to local transcription
+    }
+  }
+
   try {
-    logger.info(`🎙️ Starting transcription: ${path.basename(audioPath)}`);
+    logger.info(`🎙️ Starting local transcription: ${path.basename(audioPath)}`);
     const startTime = Date.now();
 
     // Merge options with defaults
@@ -90,40 +259,19 @@ const transcribeAudio = async (audioPath, options = {}) => {
       beamSize: options.beamSize || TRANSCRIPTION_CONFIG.beamSize,
     };
 
-    // Calculate optimal thread count (half of logical cores avoids hyperthread contention)
-    const cpuCores = require('os').cpus().length;
-    const optimalThreads = String(Math.max(1, Math.floor(cpuCores / 2)));
+    // Ensure microservice is up
+    await ensureServer();
 
-    // Python script options
-    const pythonOptions = {
-      mode: 'json',
-      pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
-      scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      env: {
-        ...process.env,
-        HF_TOKEN: process.env.HF_TOKEN,
-        // Must be set before ctranslate2 / OMP initialise — passing via env
-        // is more reliable than os.environ.setdefault inside the subprocess.
-        OMP_NUM_THREADS: process.env.OMP_NUM_THREADS || optimalThreads,
-        MKL_NUM_THREADS: process.env.MKL_NUM_THREADS || optimalThreads,
+    // Call external transcription API
+    const response = await axios.post(
+      `${SERVER_URL}/transcribe`,
+      {
+        audio_path: audioPath,
       },
-      args: [audioPath],
-    };
+      { timeout: 600000 }
+    );
 
-    // Run Whisper transcription
-    const results = await safePythonRun('transcribe.py', pythonOptions).catch((err) => {
-      logger.error(`❌ Transcription script failed: ${err.message}`);
-      if (err.message.includes('JSON') || err.message.includes('malformed')) {
-        return [
-          {
-            success: false,
-            error: 'Internal error: Python transcription script returned malformed output.',
-          },
-        ];
-      }
-      throw err;
-    });
-    const result = results[0];
+    const result = response.data;
 
     // Check if the Python script itself reported a failure
     if (!result.success) {
@@ -164,20 +312,18 @@ const transcribeWithTimestamps = async (audioPath) => {
     logger.info(`🎙️ Starting transcription with timestamps: ${path.basename(audioPath)}`);
     const startTime = Date.now();
 
-    const pythonOptions = {
-      mode: 'json',
-      pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
-      scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      args: [
-        audioPath,
-        TRANSCRIPTION_CONFIG.whisperModel,
-        TRANSCRIPTION_CONFIG.language,
-        'timestamps', // Special flag for timestamp mode
-      ],
-    };
+    await ensureServer();
 
-    const results = await safePythonRun('transcribe.py', pythonOptions);
-    const result = results[0];
+    const response = await axios.post(
+      `${SERVER_URL}/transcribe`,
+      {
+        audio_path: audioPath,
+        mode: 'timestamps',
+      },
+      { timeout: 0 }
+    );
+
+    const result = response.data;
 
     if (!result.success) {
       throw new Error(result.error || 'Transcription script returned an unsuccessful result');
@@ -194,19 +340,12 @@ const transcribeWithTimestamps = async (audioPath) => {
       success: true,
       text: result.text,
       segments: result.segments.map((seg) => ({
-        id: seg.id,
         start: seg.start,
         end: seg.end,
         text: seg.text,
-        tokens: seg.tokens,
-        temperature: seg.temperature,
-        avgLogprob: seg.avg_logprob,
-        compressionRatio: seg.compression_ratio,
-        noSpeechProb: seg.no_speech_prob,
+        speaker: seg.speaker,
       })),
       language: result.language,
-      duration: result.duration,
-      wordCount: countWords(result.text),
       processingTime: parseFloat(duration),
     };
   } catch (error) {
@@ -262,21 +401,19 @@ const transcribeWithContext = async (audioPath, contextTerms = []) => {
     logger.info(`🎙️ Transcribing with context: ${contextTerms.length} terms`);
     const startTime = Date.now();
 
-    const pythonOptions = {
-      mode: 'json',
-      pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
-      scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      args: [
-        audioPath,
-        TRANSCRIPTION_CONFIG.whisperModel,
-        TRANSCRIPTION_CONFIG.language,
-        'context',
-        JSON.stringify(contextTerms),
-      ],
-    };
+    await ensureServer();
 
-    const results = await safePythonRun('transcribe.py', pythonOptions);
-    const result = results[0];
+    const response = await axios.post(
+      `${SERVER_URL}/transcribe`,
+      {
+        audio_path: audioPath,
+        mode: 'context',
+        context_terms: contextTerms,
+      },
+      { timeout: 0 }
+    );
+
+    const result = response.data;
 
     if (!result.success) {
       throw new Error(result.error || 'Transcription script returned an unsuccessful result');
@@ -293,7 +430,6 @@ const transcribeWithContext = async (audioPath, contextTerms = []) => {
       success: true,
       text: result.text,
       segments: result.segments || [],
-      contextTermsFound: result.context_terms_found || [],
       language: result.language,
       wordCount: countWords(result.text),
       processingTime: parseFloat(duration),
@@ -522,28 +658,23 @@ const checkCompleteness = (text) => {
  */
 const testWhisperInstallation = async () => {
   try {
-    logger.info('🧪 Testing Whisper installation...');
+    logger.info('🧪 Testing Whisper installation via microservice...');
 
-    const pythonOptions = {
-      mode: 'json',
-      pythonPath: TRANSCRIPTION_CONFIG.pythonPath,
-      scriptPath: TRANSCRIPTION_CONFIG.scriptsDir,
-      args: ['test'],
-    };
+    await ensureServer();
 
-    const results = await safePythonRun('transcribe.py', pythonOptions);
-    const result = results[0];
+    const response = await axios.get(`${SERVER_URL}/test`);
+    const result = response.data;
 
-    logger.info('✅ Whisper installation test passed');
+    logger.info('✅ Whisper microservice responded correctly');
 
     return {
       success: true,
       whisperVersion: result.version,
-      availableModels: result.models,
-      pythonVersion: result.python_version,
+      python_version: result.python_version,
+      device: result.device,
     };
   } catch (error) {
-    logger.error(`❌ Whisper installation test failed: ${error.message}`);
+    logger.error(`❌ Whisper microservice test failed: ${error.message}`);
     return {
       success: false,
       error: error.message,
@@ -562,5 +693,6 @@ module.exports = {
   extractSpeakers,
   countWords,
   testWhisperInstallation,
+  initialize,
   TRANSCRIPTION_CONFIG,
 };

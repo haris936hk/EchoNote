@@ -28,10 +28,14 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
     // Priority to emoji
     const getPriorityEmoji = (priority) => {
       switch ((priority || '').toLowerCase()) {
-        case 'high': return '🔴';
-        case 'medium': return '🟡';
-        case 'low': return '⚪';
-        default: return '⚪';
+        case 'high':
+          return '🔴';
+        case 'medium':
+          return '🟡';
+        case 'low':
+          return '⚪';
+        default:
+          return '⚪';
       }
     };
 
@@ -96,7 +100,10 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
 
     // Key Decisions
     const keyDecisionsRaw = meetingData.summaryKeyDecisions || meetingData.keyDecisions;
-    const keyDecisions = typeof keyDecisionsRaw === 'string' && keyDecisionsRaw.startsWith('[') ? JSON.parse(keyDecisionsRaw) : keyDecisionsRaw;
+    const keyDecisions =
+      typeof keyDecisionsRaw === 'string' && keyDecisionsRaw.startsWith('[')
+        ? JSON.parse(keyDecisionsRaw)
+        : keyDecisionsRaw;
     if (Array.isArray(keyDecisions) && keyDecisions.length > 0) {
       const decisionsText = keyDecisions.map((decision) => `• ${decision}`).join('\n');
       blocks.push({
@@ -110,10 +117,14 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
 
     // Context: NLP Stats
     const sentiment = meetingData.nlpSentiment || meetingData.sentiment || 'N/A';
-    const confidence = meetingData.transcriptConfidence ? `${meetingData.transcriptConfidence}%` : 'N/A';
-    const topicsRaw = meetingData.nlpTopics || meetingData.topicKeywords;
+    const confidence =
+      meetingData.transcriptConfidence != null
+        ? `${Math.round(meetingData.transcriptConfidence)}%`
+        : 'N/A';
+    const topicsRaw =
+      meetingData.summaryKeyTopics || meetingData.nlpTopics || meetingData.topicKeywords;
     const topics = Array.isArray(topicsRaw) ? topicsRaw.join(', ') : 'N/A';
-    
+
     blocks.push({
       type: 'context',
       elements: [
@@ -144,14 +155,13 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
     await axios.post(webhookUrl, payload, {
       headers: { 'Content-Type': 'application/json' },
     });
-    
-    logger.info(`Successfully sent Slack notification for meeting: ${meetingData.title}`);
 
+    logger.info(`Successfully sent Slack notification for meeting: ${meetingData.title}`);
   } catch (error) {
     const errorMsg = error.response
       ? `Slack API error: ${error.response.status} - ${JSON.stringify(error.response.data)}`
       : `Failed to send to Slack webhook: ${error.message}`;
-    
+
     logger.error(errorMsg);
     throw new Error(errorMsg);
   }

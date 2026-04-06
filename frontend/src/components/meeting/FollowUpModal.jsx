@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { LuMail, LuRotateCw, LuSparkles, LuCheck, LuCopy, LuX, LuSlack } from 'react-icons/lu';
+import { LuMail, LuRotateCw, LuSparkles, LuCheck, LuCopy, LuX } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../common/Toast';
-import { generateFollowUp, shareMeetingToSlack } from '../../services/meeting.service';
+import { generateFollowUp } from '../../services/meeting.service';
 
 const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
   const [tone, setTone] = useState('formal');
@@ -12,7 +12,6 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
   const [copiedSubject, setCopiedSubject] = useState(false);
   const [copiedBody, setCopiedBody] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [isSendingToSlack, setIsSendingToSlack] = useState(false);
 
   const fetchDraft = useCallback(
     async (selectedTone) => {
@@ -103,22 +102,6 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
   const handleRegenerate = () => {
     setIsRegenerating(true);
     fetchDraft(tone);
-  };
-
-  const handleSendToSlack = async () => {
-    setIsSendingToSlack(true);
-    try {
-      const result = await shareMeetingToSlack(meetingId);
-      if (result.success) {
-        showToast('✅ Sent to Slack!', 'success');
-      } else {
-        showToast(result.error || 'Failed to send to Slack', 'error');
-      }
-    } catch (err) {
-      showToast('An unexpected error occurred', 'error');
-    } finally {
-      setIsSendingToSlack(false);
-    }
   };
 
   const modalContent = (
@@ -351,20 +334,12 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                 <span className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold">Regenerate</span>
               </button>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-8">
                 <button
                   onClick={onClose}
-                  className="mr-2 font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-[#64748b] transition-all hover:text-[#94a3b8]"
+                  className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-[#64748b] transition-all hover:text-[#94a3b8]"
                 >
                   Cancel
-                </button>
-                <button
-                  disabled={isSendingToSlack}
-                  onClick={handleSendToSlack}
-                  className="group relative flex h-11 items-center gap-2.5 rounded-[10px] bg-[#151b2d] px-6 font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-[#f8fafc] ring-1 ring-white/[0.06] shadow-sm transition-all hover:bg-[#1e253c] hover:ring-white/[0.12] disabled:pointer-events-none disabled:opacity-50"
-                >
-                  <LuSlack size={18} className="text-[#a78bfa] transition-transform group-hover:scale-110" />
-                  <span>{isSendingToSlack ? 'Sending...' : 'Send to Slack'}</span>
                 </button>
                 <button
                   disabled={loading || !draft.body}

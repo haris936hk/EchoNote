@@ -13,10 +13,8 @@ def process_text(text, model_name):
     Returns: {
         "success": true,
         "entities": [{"text": "Ky", "label": "PERSON"}, ...],
-        "keyPhrases": ["you guys", "all ages", "a deal"],
-        "actionPatterns": [{"action": "cut", "object": "it"}, ...],
-        "sentiment": {"label": "positive", "score": 0.18},
-        "topics": ["kid", "cardboard", "offer"]
+        "svoTriplets": [{"subject": "...", "verb": "...", "object": "..."}, ...],
+        "sentiment": {"label": "positive", "score": 0.18}
     }
     """
     try:
@@ -97,128 +95,11 @@ def process_text(text, model_name):
             'sentiment': {'label': 'neutral', 'score': 0.0}
         }
 
-def extract_entities(text, model_name):
-    nlp = spacy.load(model_name)
-    doc = nlp(text)
-    
-    entities = []
-    for ent in doc.ents:
-        entities.append({
-            'text': ent.text,
-            'label': ent.label_,
-            'start': ent.start_char,
-            'end': ent.end_char
-        })
-    
-    return {'entities': entities}
-
-def extract_key_phrases(text, model_name, top_n):
-    nlp = spacy.load(model_name)
-    doc = nlp(text)
-    
-    phrase_freq = {}
-    for chunk in doc.noun_chunks:
-        if chunk.root.pos_ in ['PRON', 'DET'] or chunk.root.is_stop:
-            continue
-        phrase = chunk.text.lower().strip()
-        if len(phrase.split()) > 1:  # Multi-word phrases only
-            phrase_freq[phrase] = phrase_freq.get(phrase, 0) + 1
-    
-    key_phrases = []
-    total_chunks = len(list(doc.noun_chunks))
-    for phrase, freq in sorted(phrase_freq.items(), key=lambda x: x[1], reverse=True)[:top_n]:
-        key_phrases.append({
-            'phrase': phrase,
-            'score': min(freq / max(total_chunks / 10, 1), 1.0),
-            'frequency': freq
-        })
-    
-    return {'key_phrases': key_phrases}
-
-def extract_actions(text, model_name):
-    nlp = spacy.load(model_name)
-    doc = nlp(text)
-    
-    actions = []
-    action_verbs = ['deploy', 'review', 'update', 'create', 'implement', 'test', 'fix', 'merge', 'schedule', 'send', 'prepare', 'discuss', 'analyze']
-    
-    for sent in doc.sents:
-        for token in sent:
-            if token.pos_ == 'VERB' and (token.dep_ == 'ROOT' or token.lemma_ in action_verbs):
-                # Find direct objects
-                objects = []
-                context = []
-                
-                for child in token.children:
-                    if child.dep_ in ['dobj', 'pobj', 'attr']:
-                        objects.append(child.text)
-                        # Get compounds
-                        for subchild in child.children:
-                            if subchild.dep_ == 'compound':
-                                objects.insert(0, subchild.text)
-                    elif child.dep_ in ['prep', 'advmod', 'aux']:
-                        context.append(child.text)
-                        # Get prep objects
-                        for subchild in child.children:
-                            if subchild.dep_ == 'pobj':
-                                context.append(subchild.text)
-                
-                if objects:
-                    actions.append({
-                        'text': sent.text.strip(),
-                        'verb': token.lemma_,
-                        'object': ' '.join(objects),
-                        'context': ' '.join(context) if context else None,
-                        'confidence': 0.7 + (0.15 if context else 0)
-                    })
-    
-    return {'actions': actions}
-
-def analyze_sentiment(text):
-    blob = TextBlob(text)
-    return {
-        'polarity': blob.sentiment.polarity,
-        'subjectivity': blob.sentiment.subjectivity
-    }
-
-def extract_topics(text, model_name, top_n):
-    nlp = spacy.load(model_name)
-    doc = nlp(text)
-    
-    word_freq = {}
-    for token in doc:
-        if token.pos_ in ['NOUN', 'PROPN'] and not token.is_stop and len(token.text) > 2:
-            word = token.lemma_.lower()
-            word_freq[word] = word_freq.get(word, 0) + 1
-    
-    topics = []
-    max_freq = max(word_freq.values()) if word_freq else 1
-    for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:top_n]:
-        topics.append({
-            'term': word,
-            'score': freq / max_freq,
-            'category': 'general'
-        })
-    
-    return {'topics': topics}
-
-def extract_dates(text, model_name):
-    nlp = spacy.load(model_name)
-    doc = nlp(text)
-    
-    dates = []
-    for ent in doc.ents:
-        if ent.label_ in ['DATE', 'TIME']:
-            date_type = 'DATE' if ent.label_ == 'DATE' else 'TIME'
-            dates.append({
-                'text': ent.text,
-                'normalized': ent.text,  # Would use dateparser for actual normalization
-                'type': date_type
-            })
-    
-    return {'dates': dates}
-
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print(json.dumps({'success': False, 'error': 'No input text provided'}))
+        sys.exit(1)
+
     if sys.argv[1] == 'test':
         # Test mode
         import platform
@@ -239,19 +120,7 @@ if __name__ == '__main__':
         
         if mode == 'full':
             result = process_text(text, model_name)
-        elif mode == 'entities':
-            result = extract_entities(text, model_name)
-        elif mode == 'keyphrases':
-            top_n = int(sys.argv[3]) if len(sys.argv) > 3 else 10
-            result = extract_key_phrases(text, model_name, top_n)
-        elif mode == 'actions':
-            result = extract_actions(text, model_name)
-        elif mode == 'sentiment':
-            result = analyze_sentiment(text)
-        elif mode == 'topics':
-            top_n = int(sys.argv[3]) if len(sys.argv) > 3 else 5
-            result = extract_topics(text, model_name, top_n)
-        elif mode == 'dates':
-            result = extract_dates(text, model_name)
+        else:
+            result = {'success': False, 'error': f'Unsupported mode: {mode}'}
         
         print(json.dumps(result))

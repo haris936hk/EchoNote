@@ -117,13 +117,7 @@ router.post(
  * @access  Private (owner only)
  * @returns { success, data: meeting }
  */
-router.get(
-  '/:id',
-  authenticate,
-  validateUUIDParam('id'),
-  authorize('meeting'),
-  meetingController.getMeetingById
-);
+router.get('/:id', authenticate, validateUUIDParam('id'), meetingController.getMeetingById);
 
 /**
  * @route   PATCH /api/meetings/:id
@@ -202,7 +196,6 @@ router.get(
   '/:id/transcript',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   requireCompletedMeeting,
   meetingController.getTranscript
 );
@@ -217,7 +210,6 @@ router.get(
   '/:id/summary',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   requireCompletedMeeting,
   meetingController.getSummary
 );
@@ -248,7 +240,6 @@ router.get(
   '/:id/status',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   meetingController.getProcessingStatus
 );
 
@@ -277,7 +268,6 @@ router.get(
   '/:id/download/audio',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   meetingController.downloadAudio
 );
 
@@ -292,7 +282,6 @@ router.get(
   '/:id/download/transcript',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   requireCompletedMeeting,
   validateDownloadFormat,
   meetingController.downloadTranscript
@@ -309,7 +298,6 @@ router.get(
   '/:id/download/summary',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   requireCompletedMeeting,
   validateDownloadFormat,
   meetingController.downloadSummary
@@ -325,7 +313,6 @@ router.get(
   '/:id/download/all',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   requireCompletedMeeting,
   meetingController.downloadAll
 );
@@ -386,7 +373,6 @@ router.get(
   '/:id/analytics',
   authenticate,
   validateUUIDParam('id'),
-  authorize('meeting'),
   requireCompletedMeeting,
   meetingController.getMeetingAnalytics
 );
