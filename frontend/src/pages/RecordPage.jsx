@@ -619,14 +619,14 @@ const RecordPage = () => {
             STEP 3.5: PROCESSING
             ════════════════════════════════════════════ */}
         {step === 'processing' && processingStatus && (
-          <div className="flex flex-col items-center space-y-8 w-full">
-            <div className="rounded-card border border-white/10 bg-[#0F172A] p-8 w-full max-w-2xl shadow-[0_0_50px_rgba(129,140,248,0.08)]">
+          <div className="flex w-full flex-col items-center space-y-8">
+            <div className="w-full max-w-2xl rounded-card border border-white/10 bg-echo-surface p-8 shadow-[0_0_50px_rgba(129,140,248,0.08)]">
               <div className="mb-8 flex flex-col items-center gap-3">
                 <div className="ai-dot size-3" />
-                <h3 className="text-xl font-bold tracking-tight text-white mb-1">
+                <h3 className="mb-1 text-xl font-bold tracking-tight text-white">
                   {processingStatus.currentStage || 'Initializing AI...'}
                 </h3>
-                <p className="text-sm text-slate-400 font-medium tracking-wide">
+                <p className="text-sm font-medium tracking-wide text-slate-400">
                   {processingStatus.estimatedTimeRemaining > 0
                     ? `Estimated ~${processingStatus.estimatedTimeRemaining}s remaining`
                     : 'Finalizing intelligence...'}
@@ -639,9 +639,9 @@ const RecordPage = () => {
                   value={processingStatus.progress || 0}
                   size="md"
                   classNames={{
-                    track: 'bg-[#020617] border border-white/5 h-2',
+                    track: 'h-2 border border-white/5 bg-echo-base',
                     indicator:
-                      'bg-gradient-to-r from-accent-primary to-accent-secondary shadow-[0_0_20px_rgba(167,139,250,0.5)]',
+                      'shadow-[0_0_20px_rgba(167,139,250,0.5)] bg-gradient-to-r from-accent-primary to-accent-secondary',
                   }}
                   className="w-full"
                 />
@@ -663,16 +663,16 @@ const RecordPage = () => {
                         <div
                           className={`flex size-11 items-center justify-center rounded-full text-sm font-bold shadow-lg transition-all duration-500 ease-out ${
                             isComplete
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                              ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
                               : isActive
-                                ? 'bg-accent-primary/10 text-accent-primary border border-accent-primary/50 shadow-[0_0_30px_rgba(129,140,248,0.3)] animate-pulse'
-                                : 'bg-[#020617]/50 text-slate-600 border border-white/5'
+                                ? 'animate-pulse border border-accent-primary/50 bg-accent-primary/10 text-accent-primary shadow-[0_0_30px_rgba(129,140,248,0.3)]'
+                                : 'border border-white/5 bg-echo-base/50 text-slate-600'
                           }`}
                         >
                           {isComplete ? <CheckCircle size={18} /> : index + 1}
                         </div>
                         <span
-                          className={`text-center text-[10px] break-words uppercase tracking-wider font-semibold transition-colors duration-300 max-w-[80px] ${
+                          className={`max-w-[80px] break-words text-center text-[10px] font-semibold uppercase tracking-wider transition-colors duration-300 ${
                             isComplete
                               ? 'text-emerald-400'
                               : isActive
@@ -685,7 +685,7 @@ const RecordPage = () => {
                       </div>
                       {index < PIPELINE_STEPS.length - 1 && (
                         <div
-                          className={`-mt-8 h-[2px] w-full max-w-[40px] flex-shrink-0 rounded-full transition-colors duration-500 mx-2 ${
+                          className={`mx-2 -mt-8 h-[2px] w-full max-w-[40px] shrink-0 rounded-full transition-colors duration-500 ${
                             isComplete
                               ? 'bg-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
                               : 'bg-white/5'
@@ -714,7 +714,7 @@ const RecordPage = () => {
                 AI intelligence generated successfully.
               </p>
             </div>
-            <p className="text-xs text-slate-500 animate-pulse mt-4">
+            <p className="mt-4 animate-pulse text-xs text-slate-500">
               Redirecting to meeting dashboard...
             </p>
           </div>

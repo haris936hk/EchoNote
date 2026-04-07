@@ -411,9 +411,13 @@ export const meetingsAPI = {
    */
   generateFollowUp: async (id, tone = 'formal') => {
     try {
-      const response = await api.post(`/meetings/${id}/followup`, {}, {
-        params: { tone },
-      });
+      const response = await api.post(
+        `/meetings/${id}/followup`,
+        {},
+        {
+          params: { tone },
+        }
+      );
       return { success: true, data: response.data.data };
     } catch (error) {
       return {

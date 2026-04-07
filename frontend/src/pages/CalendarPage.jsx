@@ -9,7 +9,7 @@ import {
   LuSearch as Search,
   LuChevronRight as ChevronRight,
 } from 'react-icons/lu';
-import { Button, Input, Tooltip, Spinner, Chip, Card, CardBody, Divider } from '@heroui/react';
+import { Button, Input, Tooltip, Spinner, Card, CardBody } from '@heroui/react';
 import { format, isToday, isTomorrow, parseISO, addDays, startOfDay, isSameDay } from 'date-fns';
 import { calendarAPI } from '../services/api';
 import LoginButton from '../components/auth/LoginButton';
@@ -124,7 +124,7 @@ const CalendarPage = () => {
             onValueChange={setSearchQuery}
             classNames={{
               inputWrapper:
-                'bg-echo-surface/50 border-echo-border/50 hover:border-accent-primary/30 transition-colors !rounded-[10px]',
+                'transition-colors !rounded-btn border-echo-border/50 bg-echo-surface/50 hover:border-accent-primary/30',
             }}
           />
         </div>
@@ -219,7 +219,7 @@ const CalendarPage = () => {
                                   target="_blank"
                                   variant="flat"
                                   size="sm"
-                                  className="!rounded-[10px] bg-accent-secondary/10 font-semibold text-accent-secondary"
+                                  className="!rounded-btn bg-accent-secondary/10 font-semibold text-accent-secondary"
                                   startContent={<Video size={14} />}
                                 >
                                   Join Now
@@ -229,7 +229,7 @@ const CalendarPage = () => {
                                 onPress={() => handleRecord(event)}
                                 color="primary"
                                 size="sm"
-                                className="!rounded-[10px] bg-accent-primary font-bold text-white shadow-lg shadow-accent-primary/20"
+                                className="!rounded-btn bg-accent-primary font-bold text-white shadow-lg shadow-accent-primary/20"
                                 endContent={<ChevronRight size={14} />}
                               >
                                 Record

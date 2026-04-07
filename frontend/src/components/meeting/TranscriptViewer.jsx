@@ -41,7 +41,7 @@ const SpeakerAvatar = ({ name, size = 5 }) => {
   const initial = (name || '?').charAt(0).toUpperCase();
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full bg-accent-secondary/10 text-[10px] font-bold text-accent-secondary h-${size} w-${size}`}
+      className={`w- inline-flex items-center justify-center rounded-full bg-accent-secondary/10 text-[10px] font-bold text-accent-secondary${size} h-${size}`}
     >
       {initial}
     </span>
@@ -442,7 +442,7 @@ const TranscriptViewer = ({
                   key={`${speakerId}-${seg.start}-${idx}`}
                   onClick={() => onSeek && seg.start !== undefined && onSeek(seg.start)}
                   className={`group flex flex-col gap-1 rounded-lg transition-all duration-200 ${
-                    onSeek ? 'cursor-pointer hover:bg-white/[0.03] p-2 -mx-2' : ''
+                    onSeek ? '-mx-2 cursor-pointer p-2 hover:bg-white/[0.03]' : ''
                   }`}
                 >
                   <div className="flex items-center gap-2">

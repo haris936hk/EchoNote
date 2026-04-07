@@ -275,7 +275,7 @@ const PreferencesContent = () => {
         </div>
       </div>
 
-      <div className="space-y-5 rounded-card border border-echo-border bg-echo-surface p-6 mt-4">
+      <div className="mt-4 space-y-5 rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
           <Slack className="text-accent-primary" size={18} /> Slack Integration
         </h2>
@@ -290,31 +290,33 @@ const PreferencesContent = () => {
                 <span className="flex size-2 rounded-full bg-slate-500"></span>
               )}
             </p>
-            <p className="mt-1 text-xs text-slate-500">Receive meeting summaries in a designated Slack channel</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Receive meeting summaries in a designated Slack channel
+            </p>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
           <input
             type="text"
-            className="flex-1 w-full rounded-[10px] border border-echo-border bg-[#020617] p-2.5 text-sm text-white placeholder-slate-500 shadow-inner focus:border-accent-primary focus:outline-none"
+            className="w-full flex-1 rounded-btn border border-echo-border bg-echo-base p-2.5 text-sm text-white shadow-inner placeholder:text-slate-500 focus:border-accent-primary focus:outline-none"
             placeholder="https://hooks.slack.com/services/..."
             value={slackWebhookUrl}
             onChange={(e) => setSlackWebhookUrl(e.target.value)}
           />
           {slackWebhookUrl && (
-            <div className="flex w-full sm:w-auto items-center gap-2">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <button
                 type="button"
                 onClick={handleTestSlack}
                 disabled={isCheckingSlack}
-                className="btn-ghost flex-1 sm:flex-none whitespace-nowrap rounded-[10px] px-4 py-2.5 text-sm font-medium hover:bg-echo-surface-hover transition-colors disabled:opacity-50"
+                className="btn-ghost flex-1 whitespace-nowrap rounded-btn px-4 py-2.5 text-sm font-medium transition-colors hover:bg-echo-surface-hover disabled:opacity-50 sm:flex-none"
               >
                 {isCheckingSlack ? 'Testing...' : 'Test Connection'}
               </button>
               <button
                 type="button"
                 onClick={() => setSlackWebhookUrl('')}
-                className="btn-ghost flex-1 sm:flex-none text-red-400 hover:bg-red-500/10 whitespace-nowrap rounded-[10px] px-4 py-2.5 text-sm font-medium transition-colors"
+                className="btn-ghost flex-1 whitespace-nowrap rounded-btn px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 sm:flex-none"
               >
                 Disconnect
               </button>
@@ -323,7 +325,7 @@ const PreferencesContent = () => {
         </div>
       </div>
 
-      <div className="flex justify-end mt-4">
+      <div className="mt-4 flex justify-end">
         <button
           onClick={handleSavePreferences}
           disabled={isSaving}

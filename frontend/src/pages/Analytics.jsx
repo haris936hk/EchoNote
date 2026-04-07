@@ -36,7 +36,7 @@ const StatCard = ({ title, value, icon: Icon, trend, description, color = 'indig
         <h3 className="text-2xl font-bold tracking-tight text-white">{value}</h3>
       </div>
       <div
-        className={`flex size-10 items-center justify-center rounded-xl bg-${color}-500/10 text-${color}-400`}
+        className={`bg- flex size-10 items-center justify-center rounded-xl${color}-500/10 text-${color}-400`}
       >
         <Icon size={20} />
       </div>
@@ -125,7 +125,7 @@ const Analytics = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-7xl pb-12 duration-700">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -273,7 +273,7 @@ const Analytics = () => {
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               {categoryData.map((c, i) => (
-                <div key={c.name} className="flex items-center gap-2 px-2 py-1 overflow-hidden">
+                <div key={c.name} className="flex items-center gap-2 overflow-hidden px-2 py-1">
                   <div
                     className="size-2 shrink-0 rounded-full"
                     style={{ backgroundColor: COLORS[i % COLORS.length] }}

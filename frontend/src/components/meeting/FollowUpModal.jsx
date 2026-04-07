@@ -77,7 +77,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
     const subject = draft.subject || '';
     const body = draft.body || '';
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
+
     // Always copy to clipboard as a reliable backup
     try {
       await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
@@ -91,11 +91,11 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
       setTimeout(() => {
         showToast('Email too long for auto-open. Please paste from clipboard!', 'warning');
       }, 500);
-      const shortMailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("Please paste the email draft from your clipboard here.")}`;
+      const shortMailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent('Please paste the email draft from your clipboard here.')}`;
       window.location.href = shortMailto;
       return;
     }
-    
+
     window.location.href = mailtoUrl;
   };
 
@@ -124,13 +124,13 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 10, opacity: 0, scale: 0.98 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative flex w-full max-w-2xl max-h-[min(85vh,800px)] flex-col rounded-[16px] bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(189,194,255,0.15)] ring-1 ring-white/[0.06] overflow-hidden"
+            className="relative flex max-h-[min(85vh,800px)] w-full max-w-2xl flex-col overflow-hidden rounded-card bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(189,194,255,0.15)] ring-1 ring-white/[0.06]"
           >
             {/* Outline Glow Fallback / Additional ambient light */}
-            <div className="absolute inset-0 pointer-events-none rounded-[16px] shadow-[inset_0_1px_rgba(255,255,255,0.05)]" />
+            <div className="pointer-events-none absolute inset-0 rounded-card shadow-[inset_0_1px_rgba(255,255,255,0.05)]" />
 
             {/* Header (Fixed) */}
-            <div className="flex-none p-8 pb-6 z-10 bg-[#0c1324]">
+            <div className="z-10 flex-none bg-[#0c1324] p-8 pb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-5">
                   {/* AI Living Indicator */}
@@ -149,7 +149,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                       <span className="font-['Plus_Jakarta_Sans'] text-[13px] font-medium text-[#94a3b8]">
                         Context:
                       </span>
-                      <span className="rounded-full bg-white/[0.03] ring-1 ring-white/[0.06] px-3 py-1 font-['JetBrains_Mono'] text-[11px] font-medium tracking-tight text-[#818cf8]">
+                      <span className="rounded-full bg-white/[0.03] px-3 py-1 font-['JetBrains_Mono'] text-[11px] font-medium tracking-tight text-[#818cf8] ring-1 ring-white/[0.06]">
                         {meetingTitle || 'Meeting Context'}
                       </span>
                     </div>
@@ -166,7 +166,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto px-8 pb-4 scrollbar-hide relative z-0">
+            <div className="relative z-0 flex-1 overflow-y-auto px-8 pb-4 scrollbar-hide">
               <div className="space-y-8">
                 {/* Email Tone Selector */}
                 <div className="space-y-3.5">
@@ -184,7 +184,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                     <button
                       onClick={() => handleToneChange('formal')}
                       className={`relative flex-1 py-2 font-['Plus_Jakarta_Sans'] text-[13px] font-bold transition-all duration-300 ${
-                        tone === 'formal' ? 'text-[#020617]' : 'text-[#94a3b8] hover:text-[#f8fafc]'
+                        tone === 'formal' ? 'text-echo-base' : 'text-[#94a3b8] hover:text-[#f8fafc]'
                       }`}
                     >
                       Formal
@@ -192,7 +192,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                     <button
                       onClick={() => handleToneChange('casual')}
                       className={`relative flex-1 py-2 font-['Plus_Jakarta_Sans'] text-[13px] font-bold transition-all duration-300 ${
-                        tone === 'casual' ? 'text-[#020617]' : 'text-[#94a3b8] hover:text-[#f8fafc]'
+                        tone === 'casual' ? 'text-echo-base' : 'text-[#94a3b8] hover:text-[#f8fafc]'
                       }`}
                     >
                       Casual
@@ -214,7 +214,11 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                           onClick={() => copyToClipboard(draft.subject, 'subject')}
                           className="rounded-full bg-white/[0.03] p-2 text-[#94a3b8] ring-1 ring-white/[0.06] transition-all hover:bg-white/[0.08] hover:text-[#f8fafc]"
                         >
-                          {copiedSubject ? <LuCheck size={14} className="text-[#22C55E]" /> : <LuCopy size={14} />}
+                          {copiedSubject ? (
+                            <LuCheck size={14} className="text-[#22C55E]" />
+                          ) : (
+                            <LuCopy size={14} />
+                          )}
                         </motion.button>
                       )}
                     </AnimatePresence>
@@ -240,7 +244,11 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                           </div>
                         </motion.div>
                       ) : (
-                        <motion.div key="content-subject" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+                        <motion.div
+                          key="content-subject"
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                        >
                           <input
                             value={draft.subject}
                             onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
@@ -267,7 +275,11 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                           onClick={() => copyToClipboard(draft.body, 'body')}
                           className="rounded-full bg-white/[0.03] p-2 text-[#94a3b8] ring-1 ring-white/[0.06] transition-all hover:bg-white/[0.08] hover:text-[#f8fafc]"
                         >
-                          {copiedBody ? <LuCheck size={14} className="text-[#22C55E]" /> : <LuCopy size={14} />}
+                          {copiedBody ? (
+                            <LuCheck size={14} className="text-[#22C55E]" />
+                          ) : (
+                            <LuCopy size={14} />
+                          )}
                         </motion.button>
                       )}
                     </AnimatePresence>
@@ -300,7 +312,11 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                           </div>
                         </motion.div>
                       ) : (
-                        <motion.div key="content-body" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+                        <motion.div
+                          key="content-body"
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                        >
                           <textarea
                             value={draft.body}
                             onChange={(e) => setDraft({ ...draft, body: e.target.value })}
@@ -316,9 +332,9 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
             </div>
 
             {/* Footer (Fixed) */}
-            <div className="flex-none flex items-center justify-between p-8 pt-6 relative z-10 bg-[#0c1324]">
+            <div className="relative z-10 flex flex-none items-center justify-between bg-[#0c1324] p-8 pt-6">
               {/* Tonal Transition instead of border line */}
-              <div className="absolute inset-x-0 top-0 h-10 -translate-y-full bg-gradient-to-b from-transparent to-[#0c1324] pointer-events-none" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-10 -translate-y-full bg-gradient-to-b from-transparent to-[#0c1324]" />
 
               <button
                 onClick={handleRegenerate}
@@ -344,7 +360,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                 <button
                   disabled={loading || !draft.body}
                   onClick={openInMailClient}
-                  className="group relative flex h-11 items-center gap-3 rounded-[10px] bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] pl-6 pr-7 font-['Plus_Jakarta_Sans'] text-[13px] font-extrabold text-[#020617] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_24px_-8px_rgba(129,140,248,0.5)] transition-all hover:-translate-y-0.5 hover:shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_12px_32px_-8px_rgba(129,140,248,0.6)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
+                  className="group relative flex h-11 items-center gap-3 rounded-[10px] bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] pl-6 pr-7 font-['Plus_Jakarta_Sans'] text-[13px] font-extrabold text-echo-base shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_24px_-8px_rgba(129,140,248,0.5)] transition-all hover:-translate-y-0.5 hover:shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_12px_32px_-8px_rgba(129,140,248,0.6)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
                 >
                   <LuMail size={18} className="transition-transform group-hover:scale-110" />
                   <span>Open in Mail Client</span>

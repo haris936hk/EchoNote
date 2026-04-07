@@ -274,7 +274,9 @@ async function initializeServer() {
       console.log('📧 Checking email service (Gmail OAuth2)...');
       console.log('✅ Email service configured');
     } else {
-      console.log('⚠️  Email service not fully configured (GMAIL_USER or GMAIL_REFRESH_TOKEN missing)');
+      console.log(
+        '⚠️  Email service not fully configured (GMAIL_USER or GMAIL_REFRESH_TOKEN missing)'
+      );
     }
 
     // Step 4: Verify Python dependencies

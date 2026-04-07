@@ -1,9 +1,13 @@
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
   "eslint.workingDirectories": ["./frontend", "./backend"],
-  "prettier.documentSelectors": ["**/*.{js,jsx,ts,tsx,css,json,md,html}"]
+  "prettier.documentSelectors": ["**/*.{js,jsx,ts,tsx,css,json,md,html}"],
+  "css.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "globals.css": "tailwindcss"
+  }
 }

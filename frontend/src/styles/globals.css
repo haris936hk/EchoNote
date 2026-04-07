@@ -1,17 +1,7 @@
-/**
- * EchoNote Global Styles — OLED Dark Mode Design System
- * Redesigned to match Stitch UI screens
- * Fonts: Plus Jakarta Sans (UI) + JetBrains Mono (data/code)
- * Primary: Indigo #818CF8 | CTA: Green #22C55E | Background: #020617
- */
-
-/* ============================================
-   TAILWIND BASE, COMPONENTS, UTILITIES
-   ============================================ */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* stylelint-disable */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* ============================================
    CSS VARIABLES — OLED Dark Mode
@@ -137,9 +127,7 @@
 
   /* Focus visible */
   *:focus-visible {
-    @apply outline-none ring-2 ring-offset-2;
-    ring-color: #818cf8;
-    ring-offset-color: #020617;
+    @apply outline-none ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950;
   }
 
   /* Override focus for inputs */
@@ -189,6 +177,9 @@
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     mask-composite: exclude;
     pointer-events: none;
   }
@@ -398,6 +389,7 @@
   .truncate-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -405,6 +397,7 @@
   .truncate-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -653,6 +646,7 @@ audio::-webkit-media-controls-panel {
 .truncate-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
