@@ -13,16 +13,13 @@
  *                          actionItems, nextSteps, keyTopics, sentiment } }
  */
 
-const axios = require('axios');
+const { Groq } = require('groq-sdk');
 const logger = require('../utils/logger');
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
-const DEFAULT_MODEL = 'openai/gpt-oss-120b';
+const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
 const DEFAULT_TIMEOUT_MS = 30_000; // 30 s — Groq is typically <5 s
-const MAX_RETRIES = 3;
-const RETRY_BASE_DELAY_MS = 1_000;
 
 // ─── JSON Schema (strict constrained decoding) ──────────────────────────────
 
@@ -85,9 +82,10 @@ const VERIFICATION_JSON_SCHEMA = {
           properties: {
             field: { type: 'string' },
             issue: { type: 'string' },
+            reasoning: { type: 'string' },
             correction: { type: 'string' },
           },
-          required: ['field', 'issue', 'correction'],
+          required: ['field', 'issue', 'reasoning', 'correction'],
           additionalProperties: false,
         },
       },
@@ -199,7 +197,11 @@ FOR THE EXECUTIVE SUMMARY:
 FOR KEY DECISIONS:
 1. Were these actually decided, or just discussed?
 
-Return a JSON object with "verified" (boolean) and "corrections" (array of issues found). If everything is accurate, return {"verified": true, "corrections": []}.`;
+Return a JSON object with "verified" (boolean) and "corrections" (array of issues found). If everything is accurate, return {"verified": true, "corrections": []}.
+
+CRITICAL JSON RULES FOR CORRECTIONS:
+1. "reasoning": Use this field FIRST to step-by-step explain your logical deduction about why the original value is incorrect and what the correct value should be based on the transcript.
+2. "correction": This field MUST NOT contain any sentences. It MUST be exclusively the EXACT primitive replacement value (e.g., 'null', 'Marcus', 'Friday').`;
 
 const FOLLOWUP_SYSTEM_PROMPT = `You are a professional communications assistant inside EchoNote. Your task is to draft a high-fidelity follow-up email based on meeting insights.
  
@@ -228,8 +230,13 @@ Output your valid JSON now:`;
 class GroqService {
   constructor() {
     this.apiKey = process.env.GROQ_API_KEY || '';
-    this.model = process.env.GROQ_MODEL || DEFAULT_MODEL;
+    this.model = DEFAULT_MODEL; // Forcing Llama 3.3, ignoring legacy .env variable
     this.timeout = parseInt(process.env.GROQ_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
+
+    this.groq = new Groq({
+      apiKey: this.apiKey,
+      timeout: this.timeout,
+    });
 
     if (!this.apiKey) {
       logger.warn(
@@ -364,12 +371,9 @@ ${JSON.stringify(meetingData.attendees || [])}
    */
   async healthCheck() {
     try {
-      const response = await axios.get(`${GROQ_BASE_URL}/models`, {
-        headers: this._authHeaders(),
-        timeout: 5_000,
-      });
+      const response = await this.groq.models.list();
 
-      const models = response.data?.data ?? [];
+      const models = response.data ?? [];
       const modelAvailable = models.some((m) => m.id === this.model);
 
       return {
@@ -533,12 +537,13 @@ ${JSON.stringify(meetingData.attendees || [])}
   }
 
   /**
-   * POST to Groq's chat completions endpoint with exponential-backoff retry.
+   * Send chat completion request to Groq via the SDK.
+   * Uses built-in SDK retries, bypassing custom exponential backoff wrapper.
    *
    * @param {string} userMessage   - The assembled user message.
-   * @param {number} attempt       - Current attempt number (1-indexed).
+   * @param {number} attempt       - (Deprecated) previously attempt number.
    * @param {string} systemPrompt  - The system prompt to use.
-   * @param {object|null} jsonSchema - JSON schema for strict mode (null for best-effort).
+   * @param {object|null} jsonSchema - JSON schema for explicit format adherence.
    * @param {number} maxTokens     - Max output tokens.
    * @returns {Promise<string>}    - Raw JSON string from the model.
    */
@@ -550,40 +555,32 @@ ${JSON.stringify(meetingData.attendees || [])}
     maxTokens = 4096
   ) {
     try {
-      // Use strict json_schema when provided, fall back to json_object
-      const responseFormat = jsonSchema
-        ? { type: 'json_schema', json_schema: jsonSchema }
-        : { type: 'json_object' };
+      // For JSON mode without explicit strict schema inputs,
+      // appending the schema to the prompt ensures the model follows the necessary structure.
+      const finalSystemPrompt = jsonSchema
+        ? `${systemPrompt}\n\nStrict JSON Format required:\n${JSON.stringify(jsonSchema, null, 2)}`
+        : systemPrompt;
 
-      const response = await axios.post(
-        `${GROQ_BASE_URL}/chat/completions`,
-        {
-          model: this.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userMessage },
-          ],
-          response_format: responseFormat,
-          temperature: 0.1, // Very low temperature for deterministic, factual extraction
-          max_tokens: maxTokens,
-        },
-        {
-          headers: {
-            ...this._authHeaders(),
-            'Content-Type': 'application/json',
-          },
-          timeout: this.timeout,
-        }
-      );
+      const response = await this.groq.chat.completions.create({
+        model: this.model,
+        messages: [
+          { role: 'system', content: finalSystemPrompt },
+          { role: 'user', content: userMessage },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.1, // Very low temperature for deterministic, factual extraction
+        max_tokens: maxTokens,
+        stream: false, // Explicitly no streaming
+      });
 
-      const content = response.data?.choices?.[0]?.message?.content;
+      const content = response.choices?.[0]?.message?.content;
 
       if (!content) {
         throw new Error('Groq API returned an empty response body');
       }
 
       // Log token usage for monitoring
-      const usage = response.data?.usage;
+      const usage = response.usage;
       if (usage) {
         logger.info('[GroqService] Token usage', {
           promptTokens: usage.prompt_tokens,
@@ -594,43 +591,13 @@ ${JSON.stringify(meetingData.attendees || [])}
 
       return content;
     } catch (error) {
-      const status = error.response?.status;
-      const isRetryable =
-        !status || // network error / timeout
-        status === 429 || // rate limit
-        status === 500 || // server error
-        status === 502 ||
-        status === 503;
-
-      logger.warn(`[GroqService] API call failed (attempt ${attempt}/${MAX_RETRIES})`, {
-        error: error.message,
-        status,
-        retrying: isRetryable && attempt < MAX_RETRIES,
-      });
-
-      if (isRetryable && attempt < MAX_RETRIES) {
-        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1); // 1 s, 2 s, 4 s
-        logger.info(`[GroqService] Retrying in ${delay}ms...`);
-        // eslint-disable-next-line no-undef
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        return this._callGroqWithRetry(
-          userMessage,
-          attempt + 1,
-          systemPrompt,
-          jsonSchema,
-          maxTokens
-        );
-      }
-
-      // Surface a clean, user-friendly error for auth failures
-      if (status === 401) {
+      if (error.status === 401) {
         throw new Error('Invalid Groq API key. Please set a valid GROQ_API_KEY in your .env file.');
       }
-      if (status === 429) {
+      if (error.status === 429) {
         throw new Error('Groq API rate limit exceeded. Please try again in a moment.');
       }
-
-      throw new Error(`Groq API failed after ${MAX_RETRIES} attempts: ${error.message}`);
+      throw new Error(`Groq API failed: ${error.message}`);
     }
   }
 
@@ -844,11 +811,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       .toLowerCase()
       .trim();
     return valid.includes(normalised) ? normalised : 'medium';
-  }
-
-  /** Return Bearer auth headers for Groq requests. */
-  _authHeaders() {
-    return { Authorization: `Bearer ${this.apiKey}` };
   }
 }
 

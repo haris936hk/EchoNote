@@ -1,1 +1,0 @@
-﻿C:\Users\HK\Desktop\GitHub\EchoNote\backend\node_modules\@deepgram\sdk\dist\cjs\index.js

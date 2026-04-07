@@ -1,3 +1,0 @@
-then(onfulfilled, onrejected) {
-        return this.unwrap().then(onfulfilled, onrejected);
-    }
