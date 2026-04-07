@@ -131,7 +131,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
 
     console.log(`✅ Audio processed: ${audioDuration}s duration`);
 
-    // Step 3: Transcribe audio using Whisper
+    // Step 3: Transcribe audio using Deepgram
     await updateMeetingStatus(meetingId, 'TRANSCRIBING');
     console.log(`\n📝 Step 2/4: Transcribing audio...`);
     const transcriptionResult = await transcriptionService.transcribeAudio(processedAudioPath);
@@ -144,39 +144,58 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
     const transcriptionSegments = transcriptionResult.segments || [];
     const diarizedTranscriptText =
       transcriptionSegments.length > 0
-        ? transcriptionSegments.map((s) => `[${s.speaker}]: ${s.text}`).join('\n')
+        ? transcriptionSegments
+            .map((s) => {
+              const mins = Math.floor(s.start / 60);
+              const secs = Math.floor(s.start % 60)
+                .toString()
+                .padStart(2, '0');
+              return `[${mins}:${secs}] [${s.speaker}]: ${s.text}`;
+            })
+            .join('\n')
         : transcript;
     const transcriptionConfidence = transcriptionResult.confidence;
+    const deepgramEntities = transcriptionResult.deepgramEntities || [];
+    const deepgramTopics = transcriptionResult.deepgramTopics || [];
+    const deepgramIntents = transcriptionResult.deepgramIntents || [];
+    const lowConfidenceWords = transcriptionResult.lowConfidenceWords || [];
 
     console.log(
-      `✅ Transcription complete: ${transcript.length} characters, ${transcriptionConfidence}% confidence`
+      `✅ Transcription complete: ${transcript.length} characters, ${(transcriptionConfidence * 100).toFixed(1)}% confidence`
     );
 
     // Step 4: Process transcript with NLP (SpaCy)
     await updateMeetingStatus(meetingId, 'PROCESSING_NLP');
     console.log(`\n🧠 Step 3/4: Processing NLP...`);
-    const nlpResult = await nlpService.processMeetingTranscript(transcript);
+    const nlpResult = await nlpService.processMeetingTranscript(diarizedTranscriptText);
 
     if (!nlpResult.success) {
       console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
     }
 
     console.log(
-      `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`
+      `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.svoTriplets?.length || 0} SVOs, ${nlpResult.actionSignals?.length || 0} action signals, ${nlpResult.questions?.length || 0} questions`
     );
 
-    // Step 5: Generate AI summary using Custom Model
+    // Step 5: Generate AI summary using Groq
     await updateMeetingStatus(meetingId, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
       title: meeting.title,
       category: meeting.category,
       duration: audioDuration,
-      // Pass NLP features to guide AI summary generation (matches echonote_dataset.json format)
+      // SpaCy NLP features
       entities: nlpResult.success ? nlpResult.entities : [],
       svoTriplets: nlpResult.success ? nlpResult.svoTriplets : [],
+      actionSignals: nlpResult.success ? nlpResult.actionSignals : [],
       questions: nlpResult.success ? nlpResult.questions : [],
-      sentiment: nlpResult.success ? nlpResult.sentiment : null,
+      speakerEntityMap: nlpResult.success ? nlpResult.speakerEntityMap : {},
+      nlpMetadata: nlpResult.success ? nlpResult.nlpMetadata : {},
+      // Deepgram native intelligence (high-confidence ASR-derived data)
+      deepgramEntities,
+      deepgramTopics,
+      deepgramIntents,
+      lowConfidenceWords,
     });
 
     if (!summaryResult.success) {
@@ -263,8 +282,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         // NLP Features
         nlpEntities: nlpEntitiesText,
         nlpActionPatterns: nlpActionPatternsText,
-        nlpSentiment: nlpResult.success ? nlpResult.sentiment?.label : null,
-        nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
+        // Sentiment is now derived from Groq summary output (authoritative, full-context)
+        nlpSentiment: enhancedSummary.sentiment || null,
+        nlpSentimentScore: null,
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -303,6 +323,8 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         assignee: item.assignee || null,
         deadline: item.deadline || null,
         priority: item.priority || 'medium',
+        confidence: item.confidence || 'medium',
+        sourceQuote: item.sourceQuote || null,
         status: 'TODO',
         meetingId: updatedMeeting.id,
         userId: userId,
@@ -460,7 +482,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
     console.log(`✅ Audio processed: ${audioDuration}s duration`);
 
-    // Step 4: Transcribe audio using Whisper
+    // Step 4: Transcribe audio using Deepgram
     await updateMeetingStatus(meeting.id, 'TRANSCRIBING');
     console.log(`\n📝 Step 2/4: Transcribing audio...`);
     const transcriptionResult = await transcriptionService.transcribeAudio(processedAudioPath);
@@ -473,18 +495,30 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     const transcriptionSegments = transcriptionResult.segments || [];
     const diarizedTranscriptText =
       transcriptionSegments.length > 0
-        ? transcriptionSegments.map((s) => `[${s.speaker}]: ${s.text}`).join('\n')
+        ? transcriptionSegments
+            .map((s) => {
+              const mins = Math.floor(s.start / 60);
+              const secs = Math.floor(s.start % 60)
+                .toString()
+                .padStart(2, '0');
+              return `[${mins}:${secs}] [${s.speaker}]: ${s.text}`;
+            })
+            .join('\n')
         : transcript;
     const transcriptionConfidence = transcriptionResult.confidence;
+    const deepgramEntities = transcriptionResult.deepgramEntities || [];
+    const deepgramTopics = transcriptionResult.deepgramTopics || [];
+    const deepgramIntents = transcriptionResult.deepgramIntents || [];
+    const lowConfidenceWords = transcriptionResult.lowConfidenceWords || [];
 
     console.log(
-      `✅ Transcription complete: ${transcript.length} characters, ${transcriptionConfidence}% confidence`
+      `✅ Transcription complete: ${transcript.length} characters, ${(transcriptionConfidence * 100).toFixed(1)}% confidence`
     );
 
     // Step 5: Process transcript with NLP (SpaCy)
     await updateMeetingStatus(meeting.id, 'PROCESSING_NLP');
     console.log(`\n🧠 Step 3/4: Processing NLP...`);
-    const nlpResult = await nlpService.processMeetingTranscript(transcript);
+    const nlpResult = await nlpService.processMeetingTranscript(diarizedTranscriptText);
 
     if (!nlpResult.success) {
       console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
@@ -492,23 +526,43 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     }
 
     console.log(
-      `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.actionItems?.length || 0} actions`
+      `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.svoTriplets?.length || 0} SVOs, ${nlpResult.actionSignals?.length || 0} action signals, ${nlpResult.questions?.length || 0} questions`
     );
 
-    // Step 6: Generate AI summary using Custom Model
+    // Step 6: Generate AI summary using Groq
     await updateMeetingStatus(meeting.id, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
       title,
       category,
       audioDuration,
+      // SpaCy NLP features
+      entities: nlpResult.success ? nlpResult.entities : [],
+      svoTriplets: nlpResult.success ? nlpResult.svoTriplets : [],
+      actionSignals: nlpResult.success ? nlpResult.actionSignals : [],
+      questions: nlpResult.success ? nlpResult.questions : [],
+      speakerEntityMap: nlpResult.success ? nlpResult.speakerEntityMap : {},
+      nlpMetadata: nlpResult.success ? nlpResult.nlpMetadata : {},
+      // Deepgram native intelligence
+      deepgramEntities,
+      deepgramTopics,
+      deepgramIntents,
+      lowConfidenceWords,
     });
 
     if (!summaryResult.success) {
       throw new Error(`Summary generation failed: ${summaryResult.error}`);
     }
 
-    const summary = summaryResult.summary;
+    // Extract summary fields (they're at top level of summaryResult, not nested)
+    const summary = {
+      executiveSummary: summaryResult.executiveSummary,
+      keyDecisions: summaryResult.keyDecisions,
+      actionItems: summaryResult.actionItems,
+      nextSteps: summaryResult.nextSteps,
+      keyTopics: summaryResult.keyTopics,
+      sentiment: summaryResult.sentiment,
+    };
 
     // Enhance summary with NLP data if available
     const enhancedSummary = nlpResult.success
@@ -551,8 +605,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         // NLP Features
         nlpEntities: nlpEntitiesText,
         nlpActionPatterns: nlpActionPatternsText,
-        nlpSentiment: nlpResult.success ? nlpResult.sentiment?.label : null,
-        nlpSentimentScore: nlpResult.success ? nlpResult.sentiment?.score : null,
+        // Sentiment from Groq summary output (authoritative, full-context)
+        nlpSentiment: enhancedSummary.sentiment || null,
+        nlpSentimentScore: null,
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -588,6 +643,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         assignee: item.assignee || null,
         deadline: item.deadline || null,
         priority: item.priority || 'medium',
+        confidence: item.confidence || 'medium',
+        sourceQuote: item.sourceQuote || null,
         status: 'TODO',
         meetingId: meeting.id,
         userId: userId,

@@ -32,7 +32,7 @@ const AUDIO_CONFIG = {
   pythonPath: process.env.PYTHON_PATH || 'python3',
   scriptsDir: path.join(__dirname, '../python_scripts'),
   maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 180, // 3 minutes
-  targetSampleRate: 16000, // 16kHz for Whisper
+  targetSampleRate: 48000, // Deepgram handles natively, preserve quality
   targetChannels: 1, // Mono
   targetFormat: 'wav',
   useFfmpegFallback: process.env.USE_FFMPEG_FALLBACK === 'true',

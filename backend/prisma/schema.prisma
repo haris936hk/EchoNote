@@ -59,6 +59,8 @@ enum MeetingCategory {
   PLANNING
   STANDUP
   ONE_ON_ONE
+  RETROSPECTIVE
+  INTERVIEW
   OTHER
 }
 
@@ -179,12 +181,14 @@ model UserActivity {
 
 // ActionItem model - Linked to Meetings and Users for Kanban board
 model ActionItem {
-  id       String     @id @default(uuid())
-  task     String     @db.Text
-  assignee String?
-  deadline String?
-  priority String?    @default("medium")
-  status   TaskStatus @default(TODO)
+  id          String     @id @default(uuid())
+  task        String     @db.Text
+  assignee    String?
+  deadline    String?
+  priority    String?    @default("medium")
+  status      TaskStatus @default(TODO)
+  confidence  String?    @default("medium") // Extraction confidence: high, medium, low
+  sourceQuote String?    @db.Text // Transcript citation for grounding verification
 
   meetingId String
   meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)

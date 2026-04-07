@@ -17,7 +17,7 @@ const logger = winston.createLogger({
 
 /**
  * Generate comprehensive meeting summary
- * Uses Custom Fine-Tuned Qwen2.5-7B Model via NGROK API
+ * Uses Groq-hosted openai/gpt-oss-120b with strict schema enforcement
  * @param {string} transcript - Meeting transcript
  * @param {Object} metadata - Meeting metadata (title, category, duration)
  * @param {Object} nlpData - NLP analysis results (optional)
@@ -28,25 +28,46 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     logger.info(`📝 Generating summary for: ${metadata.title || 'Untitled Meeting'}`);
     const startTime = Date.now();
 
-    // STEP 1: Extract NLP features from metadata (FIXED: Critical bug - was never passing NLP features!)
+    // Build NLP features for the Groq prompt
     const nlpFeatures = nlpData || {
-      // Format entities as strings with labels to match training format
       entities: (metadata.entities || []).map((e) =>
         typeof e === 'string' ? e : `${e.text} (${e.label})`
       ),
-      keyPhrases: metadata.keyPhrases || [],
-      topics: metadata.topics || [],
-      // Extract sentiment label (handle both string and object format)
-      sentiment: metadata.sentiment?.label || metadata.sentiment || null,
+      svoTriplets: metadata.svoTriplets || [],
     };
 
-    // STEP 2: Add sentiment polarity if available (for training format: "positive (polarity: 0.17)")
-    if (metadata.sentiment?.score !== undefined) {
-      nlpFeatures.sentimentPolarity = metadata.sentiment.score;
+    // Forward enriched NLP signals (action signals, questions, speaker map)
+    if (metadata.actionSignals?.length > 0) {
+      nlpFeatures.actionSignals = metadata.actionSignals;
+    }
+    if (metadata.questions?.length > 0) {
+      nlpFeatures.questions = metadata.questions;
+    }
+    if (metadata.speakerEntityMap && Object.keys(metadata.speakerEntityMap).length > 0) {
+      nlpFeatures.speakerEntityMap = metadata.speakerEntityMap;
+    }
+    if (metadata.nlpMetadata && Object.keys(metadata.nlpMetadata).length > 0) {
+      nlpFeatures.nlpMetadata = metadata.nlpMetadata;
     }
 
-    // STEP 3: Call Groq model with NLP features
-    const result = await groqService.generateSummary(transcript, nlpFeatures);
+    // Forward Deepgram native intelligence (high-confidence ASR-derived data)
+    if (metadata.deepgramEntities?.length > 0) {
+      nlpFeatures.deepgramEntities = metadata.deepgramEntities;
+    }
+    if (metadata.deepgramTopics?.length > 0) {
+      nlpFeatures.deepgramTopics = metadata.deepgramTopics;
+    }
+    if (metadata.deepgramIntents?.length > 0) {
+      nlpFeatures.deepgramIntents = metadata.deepgramIntents;
+    }
+    if (metadata.lowConfidenceWords?.length > 0) {
+      nlpFeatures.lowConfidenceWords = metadata.lowConfidenceWords;
+    }
+
+    // Call Groq model with NLP features + category for dynamic prompting
+    const result = await groqService.generateSummary(transcript, nlpFeatures, {
+      category: metadata.category || null,
+    });
 
     if (!result.success) {
       throw new Error(result.error || 'Summary generation failed');
@@ -55,15 +76,13 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Summary generated in ${duration}s`);
 
-    // Validate and structure the response (match echonote_dataset.json format)
+    // Validate and structure the response
     const summary = {
       executiveSummary: result.data.executiveSummary || '',
-      // FIXED: keyDecisions must ALWAYS be array (training schema requirement)
       keyDecisions: Array.isArray(result.data.keyDecisions) ? result.data.keyDecisions : [],
       actionItems: Array.isArray(result.data.actionItems)
         ? validateActionItems(result.data.actionItems)
         : [],
-      // FIXED: nextSteps must ALWAYS be array (training schema requirement)
       nextSteps: Array.isArray(result.data.nextSteps) ? result.data.nextSteps : [],
       keyTopics: Array.isArray(result.data.keyTopics) ? result.data.keyTopics : [],
       sentiment: result.data.sentiment || 'neutral',
@@ -200,47 +219,6 @@ const enhanceSummaryWithNLP = (summary, nlpData) => {
 
   const enhanced = { ...summary };
 
-  // Add detected action items from NLP if AI missed them
-  if (nlpData.actions && nlpData.actions.length > 0) {
-    const nlpActions = nlpData.actions
-      .filter((action) => action.confidence > 0.7)
-      .map((action) => ({
-        task: action.text,
-        assignee: extractAssignee(action.context),
-        deadline: extractDeadline(action.context),
-        priority: 'medium',
-        source: 'nlp',
-      }));
-
-    // Merge with AI-detected actions, avoiding duplicates
-    enhanced.actionItems = mergeActionItems(summary.actionItems || [], nlpActions);
-  }
-
-  // Add key phrases if not in topics
-  if (nlpData.keyPhrases && nlpData.keyPhrases.length > 0) {
-    const existingTopics = new Set(
-      (enhanced.keyTopics || []).filter((t) => t).map((t) => t.toLowerCase())
-    );
-
-    nlpData.keyPhrases.slice(0, 5).forEach((kp) => {
-      // Handle both string and object formats
-      const phrase = typeof kp === 'string' ? kp : kp.phrase;
-      if (!phrase) return;
-
-      const phraseLower = phrase.toLowerCase();
-      if (!existingTopics.has(phraseLower)) {
-        enhanced.keyTopics = enhanced.keyTopics || [];
-        enhanced.keyTopics.push(phrase);
-      }
-    });
-  }
-
-  // Enhance sentiment if available
-  if (nlpData.sentiment) {
-    enhanced.sentimentScore = nlpData.sentiment.polarity;
-    enhanced.sentimentConfidence = nlpData.sentiment.confidence;
-  }
-
   // Add entity metadata
   if (nlpData.entities) {
     enhanced.metadata = enhanced.metadata || {};
@@ -323,7 +301,26 @@ const validateActionItems = (actionItems) => {
       assignee: item.assignee || null,
       deadline: item.deadline || null,
       priority: validatePriority(item.priority),
+      confidence: validateConfidence(item.confidence),
+      sourceQuote: item.sourceQuote || null,
     }));
+};
+
+/**
+ * Validate confidence level
+ * @param {string} confidence - Confidence value
+ * @returns {string} Valid confidence
+ */
+const validateConfidence = (confidence) => {
+  const validLevels = ['high', 'medium', 'low'];
+  if (
+    confidence &&
+    typeof confidence === 'string' &&
+    validLevels.includes(confidence.toLowerCase())
+  ) {
+    return confidence.toLowerCase();
+  }
+  return 'medium'; // Default
 };
 
 /**
@@ -341,95 +338,6 @@ const validatePriority = (priority) => {
     return priority.toLowerCase();
   }
   return 'medium'; // Default
-};
-
-/**
- * Extract assignee from context text
- * @param {string} context - Context text
- * @returns {string|null} Assignee name
- */
-const extractAssignee = (context) => {
-  if (!context) return null;
-
-  // Look for patterns like "John will", "assigned to Sarah", "Mike should"
-  const patterns = [/(\w+)\s+will/i, /assigned to (\w+)/i, /(\w+)\s+should/i, /(\w+)\s+needs to/i];
-
-  for (const pattern of patterns) {
-    const match = context.match(pattern);
-    if (match) return match[1];
-  }
-
-  return null;
-};
-
-/**
- * Extract deadline from context text
- * @param {string} context - Context text
- * @returns {string|null} Deadline
- */
-const extractDeadline = (context) => {
-  if (!context) return null;
-
-  // Look for date patterns
-  const datePatterns = [
-    /by (monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i,
-    /by (tomorrow|today|next week|this week)/i,
-    /by (\d{1,2}\/\d{1,2})/,
-    /deadline:?\s*(\w+)/i,
-  ];
-
-  for (const pattern of datePatterns) {
-    const match = context.match(pattern);
-    if (match) return match[1];
-  }
-
-  return null;
-};
-
-/**
- * Merge action items from multiple sources, removing duplicates
- * @param {Array} aiActions - AI-detected actions
- * @param {Array} nlpActions - NLP-detected actions
- * @returns {Array} Merged action items
- */
-const mergeActionItems = (aiActions, nlpActions) => {
-  const merged = [...aiActions];
-  const existingTasks = new Set(
-    aiActions.filter((a) => a.task).map((a) => a.task.toLowerCase().trim())
-  );
-
-  nlpActions.forEach((action) => {
-    if (!action.task) return; // Skip actions without task
-
-    const task = action.task.toLowerCase().trim();
-    // Check for similarity (not just exact match)
-    const isDuplicate = Array.from(existingTasks).some((existingTask) => {
-      return calculateSimilarity(task, existingTask) > 0.7;
-    });
-
-    if (!isDuplicate) {
-      merged.push(action);
-      existingTasks.add(task);
-    }
-  });
-
-  return merged;
-};
-
-/**
- * Calculate similarity between two strings (Jaccard similarity)
- * @param {string} str1 - First string
- * @param {string} str2 - Second string
- * @returns {number} Similarity score (0-1)
- */
-const calculateSimilarity = (str1, str2) => {
-  const words1 = new Set(str1.toLowerCase().split(/\s+/));
-  const words2 = new Set(str2.toLowerCase().split(/\s+/));
-
-  const intersection = new Set([...words1].filter((x) => words2.has(x)));
-  const union = new Set([...words1, ...words2]);
-
-  return intersection.size / union.size;
 };
 
 /**
@@ -518,7 +426,6 @@ module.exports = {
   regenerateSummary,
   compareSummaries,
   validateActionItems,
-  mergeActionItems,
   formatSummaryForEmail,
   getSummaryQuality,
 };

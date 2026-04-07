@@ -7,6 +7,7 @@ pydub
 
 # NLP Processing
 spacy
+# NOTE: textblob is NOT required — sentiment is handled by the Groq LLM
 
 # Utilities
 numpy

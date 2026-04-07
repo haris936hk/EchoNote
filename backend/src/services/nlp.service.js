@@ -28,6 +28,10 @@ const NLP_CONFIG = {
  * Complete NLP pipeline for meeting transcripts
  * Runs all NLP analyses in sequence
  * Returns data in dataset format
+ *
+ * NOTE: Sentiment is NOT extracted by SpaCy/TextBlob anymore.
+ * It is derived from the Groq LLM which has full transcript context.
+ *
  * @param {string} text - Transcript text
  * @returns {Object} Complete NLP analysis in dataset format
  */
@@ -61,12 +65,15 @@ const processMeetingTranscript = async (text) => {
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Complete NLP pipeline finished in ${totalTime}s`);
 
-    // Return in dataset format
+    // Return in enriched format for Groq LLM
     return {
       success: result.success || true,
-      entities: result.entities || [], // [{text, label}]
+      entities: result.entities || [], // [{text, label, count}]
       svoTriplets: result.svoTriplets || [], // [{subject, verb, object}]
-      sentiment: result.sentiment || { label: 'neutral', score: 0 }, // {label, score}
+      actionSignals: result.actionSignals || [], // [{text, verb, speaker}]
+      questions: result.questions || [], // [{text, type}]
+      speakerEntityMap: result.speakerEntityMap || {}, // {SPEAKER_00: ["John (PERSON)"]}
+      nlpMetadata: result.metadata || {}, // {sentenceCount, wordCount, avgSentenceLength}
       processingTime: parseFloat(totalTime),
     };
   } catch (error) {
@@ -76,36 +83,13 @@ const processMeetingTranscript = async (text) => {
       error: error.message,
       entities: [],
       svoTriplets: [],
-      sentiment: { label: 'neutral', score: 0 },
+      actionSignals: [],
+      questions: [],
+      speakerEntityMap: {},
+      nlpMetadata: {},
       processingTime: 0,
     };
   }
-};
-
-/**
- * Clean and preprocess text for NLP
- * @param {string} text - Raw text
- * @returns {string} Cleaned text
- */
-const preprocessText = (text) => {
-  if (!text) return '';
-
-  let cleaned = text;
-
-  // Remove extra whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ');
-
-  // Remove special characters but keep punctuation
-  cleaned = cleaned.replace(/[^\w\s.,!?;:\-'"]/g, '');
-
-  // Normalize quotes
-  cleaned = cleaned.replace(/['']/g, "'");
-  cleaned = cleaned.replace(/[""]/g, '"');
-
-  // Trim
-  cleaned = cleaned.trim();
-
-  return cleaned;
 };
 
 const testSpacyInstallation = async () => {
@@ -143,7 +127,6 @@ const testSpacyInstallation = async () => {
 
 module.exports = {
   processMeetingTranscript,
-  preprocessText,
   testSpacyInstallation,
   NLP_CONFIG,
 };

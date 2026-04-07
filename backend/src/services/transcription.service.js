@@ -44,51 +44,6 @@ const countWords = (text) => {
 };
 
 /**
- * Helper: Estimate transcription accuracy
- * Based on heuristics (words per second, average word length)
- * @param {number} wps - Words per second
- * @param {number} awl - Average word length
- * @returns {number} Estimated accuracy percentage
- */
-const estimateAccuracy = (wps, awl) => {
-  let accuracy = 90; // Base accuracy
-
-  // Adjust for speech rate
-  if (wps < 1.5 || wps > 4) accuracy -= 5;
-  if (wps < 1 || wps > 5) accuracy -= 10;
-
-  // Adjust for word length
-  if (awl < 3 || awl > 8) accuracy -= 5;
-  if (awl < 2 || awl > 10) accuracy -= 10;
-
-  return Math.max(50, Math.min(95, accuracy));
-};
-
-/**
- * Helper: Calculate confidence score
- * @param {string} text - Transcript text
- * @returns {number} Confidence score (0-1)
- */
-const calculateConfidence = (text) => {
-  if (!text) return 0;
-
-  const wordCount = countWords(text);
-  const words = text.toLowerCase().split(/\s+/);
-  const uniqueWords = new Set(words);
-  const repetitionRatio = uniqueWords.size / wordCount;
-
-  let confidence = 0.8;
-
-  if (wordCount < 10) confidence -= 0.2;
-  if (wordCount < 5) confidence -= 0.3;
-
-  if (repetitionRatio < 0.4) confidence -= 0.2;
-  if (repetitionRatio < 0.2) confidence -= 0.3;
-
-  return Math.max(0, Math.min(1, confidence));
-};
-
-/**
  * Helper: Check transcript completeness
  * @param {string} text - Transcript text
  * @returns {string} Completeness status
@@ -100,6 +55,120 @@ const checkCompleteness = (text) => {
   if (wordCount < 50) return 'short';
   if (wordCount < 200) return 'medium';
   return 'complete';
+};
+
+/**
+ * Compute weighted average confidence from Deepgram per-word data
+ * @param {Array} words - Deepgram words array [{word, confidence, start, end}, ...]
+ * @returns {number} Weighted average confidence (0-1)
+ */
+const computeWordConfidence = (words) => {
+  if (!words || words.length === 0) return 0;
+
+  let totalWeight = 0;
+  let weightedSum = 0;
+
+  for (const w of words) {
+    // Weight by word duration (longer words carry more weight)
+    const duration = (w.end || 0) - (w.start || 0);
+    const weight = Math.max(duration, 0.01); // minimum weight to avoid zero
+    weightedSum += (w.confidence || 0) * weight;
+    totalWeight += weight;
+  }
+
+  return totalWeight > 0 ? weightedSum / totalWeight : 0;
+};
+
+/**
+ * Extract unique entities from Deepgram detect_entities response
+ * @param {Object} result - Deepgram result object
+ * @returns {Array} Deduplicated entities [{text, label, confidence}, ...]
+ */
+const extractDeepgramEntities = (result) => {
+  const entityResults = result.results?.entities?.segments || [];
+  const entityMap = new Map();
+
+  for (const segment of entityResults) {
+    if (!segment.detected_entities) continue;
+    for (const entity of segment.detected_entities) {
+      const key = `${entity.value}::${entity.entity_type}`;
+      if (!entityMap.has(key)) {
+        entityMap.set(key, {
+          text: entity.value,
+          label: entity.entity_type,
+          confidence: entity.confidence || 1.0,
+        });
+      }
+    }
+  }
+
+  return Array.from(entityMap.values());
+};
+
+/**
+ * Extract topics from Deepgram topics response
+ * @param {Object} result - Deepgram result object
+ * @returns {Array} Topics [{topic, confidence}, ...]
+ */
+const extractDeepgramTopics = (result) => {
+  const topicSegments = result.results?.topics?.segments || [];
+  const topicMap = new Map();
+
+  for (const segment of topicSegments) {
+    if (!segment.topics) continue;
+    for (const topicGroup of segment.topics) {
+      const topic = topicGroup.topic;
+      if (topic && !topicMap.has(topic)) {
+        topicMap.set(topic, {
+          topic,
+          confidence: topicGroup.confidence || 1.0,
+        });
+      }
+    }
+  }
+
+  return Array.from(topicMap.values());
+};
+
+/**
+ * Extract intents from Deepgram intents response
+ * @param {Object} result - Deepgram result object
+ * @returns {Array} Intents [{intent, confidence}, ...]
+ */
+const extractDeepgramIntents = (result) => {
+  const intentSegments = result.results?.intents?.segments || [];
+  const intentMap = new Map();
+
+  for (const segment of intentSegments) {
+    if (!segment.intents) continue;
+    for (const intentGroup of segment.intents) {
+      const intent = intentGroup.intent;
+      if (intent && !intentMap.has(intent)) {
+        intentMap.set(intent, {
+          intent,
+          confidence: intentGroup.confidence || 1.0,
+        });
+      }
+    }
+  }
+
+  return Array.from(intentMap.values());
+};
+
+/**
+ * Extract individual low confidence words for downstream LLM awareness
+ * @param {Array} words - Deepgram words array
+ * @returns {Array} Low confidence words
+ */
+const extractLowConfidenceWords = (words) => {
+  if (!words || words.length === 0) return [];
+  return words
+    .filter((w) => w.confidence < 0.7 && w.word && w.word.length > 2)
+    .map((w) => ({
+      word: w.word,
+      confidence: w.confidence,
+      start: w.start,
+    }));
 };
 
 /**
@@ -123,13 +192,34 @@ const transcribeAudio = async (audioPath, options = {}) => {
     const audioStream = fs.createReadStream(audioPath);
 
     const response = await deepgram.listen.v1.media.transcribeFile(audioStream, {
-      model: options.model || 'nova-2',
+      model: options.model || 'nova-3',
       smart_format: true,
       diarize: true,
       utterances: true,
       punctuate: true,
       paragraphs: true,
       language: options.language || 'en',
+      // Intelligence features for accuracy
+      detect_entities: true,
+      topics: true,
+      intents: true,
+      // Let smart_format handle fillers; don't inject them into output
+      filler_words: false,
+      // Boost domain terminology
+      keywords: [
+        'EchoNote',
+        'Supabase',
+        'Prisma',
+        'Deepgram',
+        'LLM',
+        'standup',
+        'retrospective',
+        'backlog',
+        'blocker',
+        'escalation',
+        'dependency',
+        ...(options.keywords || []),
+      ],
     });
 
     const result = response;
@@ -146,6 +236,16 @@ const transcribeAudio = async (audioPath, options = {}) => {
     const transcript = paragraphsTranscript || rawTranscript;
     const utterances = result.results?.utterances || [];
 
+    // Compute real per-word confidence from Deepgram word data
+    const words = alternative?.words || [];
+    const wordConfidence = computeWordConfidence(words);
+
+    // Extract Deepgram native intelligence
+    const deepgramEntities = extractDeepgramEntities(result);
+    const deepgramTopics = extractDeepgramTopics(result);
+    const deepgramIntents = extractDeepgramIntents(result);
+    const lowConfidenceWords = extractLowConfidenceWords(words);
+
     // Map Deepgram utterances to our internal segments format
     const segments = utterances.map((u) => ({
       start: u.start,
@@ -158,6 +258,9 @@ const transcribeAudio = async (audioPath, options = {}) => {
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Deepgram transcription completed in ${duration}s`);
+    logger.info(
+      `📊 Confidence: ${(wordConfidence * 100).toFixed(1)}%, Entities: ${deepgramEntities.length}, Topics: ${deepgramTopics.length}`
+    );
 
     return {
       success: true,
@@ -165,10 +268,15 @@ const transcribeAudio = async (audioPath, options = {}) => {
       segments: segments,
       language: result.metadata?.language || 'en',
       wordCount: countWords(transcript),
-      confidence: alternative?.confidence || 1.0,
+      confidence: wordConfidence || alternative?.confidence || 0,
       processingTime: parseFloat(duration),
-      model: result.metadata?.model_info?.name || 'nova-2',
+      model: result.metadata?.model_info?.name || 'nova-3',
       method: 'deepgram',
+      // Native Deepgram intelligence — passed downstream to summarizer
+      deepgramEntities,
+      deepgramTopics,
+      deepgramIntents,
+      lowConfidenceWords,
     };
   } catch (error) {
     logger.error(`❌ Deepgram transcription failed: ${error.message}`);
@@ -187,51 +295,19 @@ const getTranscriptionQuality = async (audioPath, transcriptText) => {
     logger.info(`📊 Analyzing transcription quality`);
 
     const wordCount = countWords(transcriptText);
-    const characterCount = transcriptText.length;
-    const averageWordLength = characterCount / wordCount;
-
-    const audioMetadata = require('./audio.service').getAudioMetadata;
-    const metadata = await audioMetadata(audioPath);
-    const wordsPerSecond = wordCount / metadata.duration;
 
     const quality = {
       wordCount,
-      characterCount,
-      averageWordLength: averageWordLength.toFixed(2),
-      wordsPerSecond: wordsPerSecond.toFixed(2),
-      estimatedAccuracy: estimateAccuracy(wordsPerSecond, averageWordLength),
-      confidence: calculateConfidence(transcriptText),
+      characterCount: transcriptText.length,
       completeness: checkCompleteness(transcriptText),
     };
 
-    logger.info(`✅ Quality analysis complete: ${quality.estimatedAccuracy}% estimated accuracy`);
+    logger.info(`✅ Quality analysis complete`);
     return quality;
   } catch (error) {
     logger.error(`❌ Quality analysis failed: ${error.message}`);
     return null;
   }
-};
-
-/**
- * Clean and format transcript text
- * @param {string} text - Raw transcript text
- * @returns {string} Cleaned text
- */
-const cleanTranscript = (text) => {
-  if (!text) return '';
-
-  let cleaned = text;
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-  cleaned = cleaned.replace(/(^\w|\.\s+\w)/g, (letter) => letter.toUpperCase());
-
-  const fillers = [' um ', ' uh ', ' like ', ' you know '];
-  fillers.forEach((filler) => {
-    const regex = new RegExp(filler, 'gi');
-    cleaned = cleaned.replace(regex, ' ');
-  });
-
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-  return cleaned;
 };
 
 /**
@@ -283,7 +359,6 @@ const extractSpeakers = async (audioPath) => {
 module.exports = {
   transcribeAudio,
   getTranscriptionQuality,
-  cleanTranscript,
   formatTranscriptWithParagraphs,
   extractSpeakers,
   countWords,
