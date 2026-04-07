@@ -269,12 +269,12 @@ async function initializeServer() {
       throw new Error(`Storage initialization failed: ${storageResult.error}`);
     }
 
-    // Step 3: Test email service (optional, won't fail if not configured)
-    if (process.env.RESEND_API_KEY) {
-      console.log('📧 Testing email service...');
+    // Step 3: Test email service (Gmail OAuth2)
+    if (process.env.GMAIL_USER && process.env.GMAIL_REFRESH_TOKEN) {
+      console.log('📧 Checking email service (Gmail OAuth2)...');
       console.log('✅ Email service configured');
     } else {
-      console.log('⚠️  Email service not configured (RESEND_API_KEY missing)');
+      console.log('⚠️  Email service not fully configured (GMAIL_USER or GMAIL_REFRESH_TOKEN missing)');
     }
 
     // Step 4: Verify Python dependencies

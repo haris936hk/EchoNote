@@ -4,7 +4,7 @@
   "description": "EchoNote AI Meeting Transcription Frontend",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set NODE_OPTIONS=--no-deprecation && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
     "autoprefixer": "^10.4.16",
+    "caniuse-lite": "^1.0.30001786",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-react-app": "^7.0.1",
