@@ -16,6 +16,45 @@ const logger = winston.createLogger({
   ],
 });
 
+// ============================================
+// USER CACHE — eliminates 1 DB round-trip per request
+// ============================================
+const USER_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+const _userCache = new Map(); // Map<userId, { user, expiresAt }>
+
+function _getCachedUser(userId) {
+  const entry = _userCache.get(userId);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    _userCache.delete(userId);
+    return null;
+  }
+  return entry.user;
+}
+
+function _setCachedUser(userId, user) {
+  _userCache.set(userId, { user, expiresAt: Date.now() + USER_CACHE_TTL_MS });
+}
+
+/**
+ * Evict this user from the cache immediately.
+ * Call when user record is mutated (logout, account deletion).
+ */
+function evictUserFromCache(userId) {
+  _userCache.delete(userId);
+}
+
+// Evict fully stale entries every 5 minutes
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, entry] of _userCache.entries()) {
+      if (now > entry.expiresAt) _userCache.delete(key);
+    }
+  },
+  5 * 60 * 1000
+);
+
 /**
  * Authenticate user with JWT token
  * Validates token and attaches user to request
@@ -52,16 +91,19 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Fetch user from database with minimal fields
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        // Only fetch fields actually needed for every authenticated request
-      },
-    });
+    // Fetch user — cache-first to avoid a DB round-trip on every request
+    let user = _getCachedUser(decoded.id);
+    if (!user) {
+      user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      });
+      if (user) _setCachedUser(user.id, user);
+    }
 
     if (!user) {
       return res.status(401).json({
@@ -106,15 +148,19 @@ const optionalAuth = async (req, res, next) => {
 
     try {
       const decoded = verifyToken(token);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          picture: true,
-        },
-      });
+      let user = _getCachedUser(decoded.id);
+      if (!user) {
+        user = await prisma.user.findUnique({
+          where: { id: decoded.id },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            picture: true,
+          },
+        });
+        if (user) _setCachedUser(user.id, user);
+      }
 
       req.user = user;
       req.userId = user?.id || null;
@@ -462,21 +508,25 @@ const authenticateMedia = async (req, res, next) => {
       });
     }
 
-    // Fetch user from database
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        picture: true,
-        googleId: true,
-        autoDeleteDays: true,
-        emailNotifications: true,
-        createdAt: true,
-        lastLoginAt: true,
-      },
-    });
+    // Fetch user — cache-first (note: media auth needs all fields, so bypass cache types)
+    let user = _getCachedUser(decoded.id);
+    if (!user) {
+      user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          picture: true,
+          googleId: true,
+          autoDeleteDays: true,
+          emailNotifications: true,
+          createdAt: true,
+          lastLoginAt: true,
+        },
+      });
+      if (user) _setCachedUser(user.id, user);
+    }
 
     if (!user) {
       return res.status(401).json({
@@ -512,4 +562,5 @@ module.exports = {
   corsMiddleware,
   securityHeaders,
   requireCompletedMeeting,
+  evictUserFromCache,
 };

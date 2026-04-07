@@ -137,6 +137,8 @@ model Meeting {
   actionItems ActionItem[]
 
   @@index([userId])
+  @@index([userId, createdAt]) // composite: list queries sorted by date
+  @@index([userId, status])   // composite: count queries filtered by status per user
   @@index([status])
   @@index([category])
   @@index([createdAt])

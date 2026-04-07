@@ -3,6 +3,7 @@
 
 const { prisma } = require('../config/database');
 const winston = require('winston');
+const { getStats, setStats } = require('../utils/statsCache');
 
 // Initialize logger
 const logger = winston.createLogger({
@@ -48,6 +49,7 @@ const getCurrentUser = async (req, res) => {
       });
     }
 
+    res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
     return res.status(200).json({
       success: true,
       data: {
@@ -309,6 +311,14 @@ const updateUserSettings = async (req, res) => {
 const getUserStats = async (req, res) => {
   try {
     const userId = req.userId;
+    const cacheKey = `user-stats:${userId}`;
+
+    // Return cached result if still fresh (avoids 9 DB queries on repeated loads)
+    const cached = getStats(cacheKey);
+    if (cached) {
+      res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+      return res.status(200).json({ success: true, data: cached });
+    }
 
     // Get meeting counts by status and category
     const [
@@ -419,6 +429,10 @@ const getUserStats = async (req, res) => {
       },
     };
 
+    // Cache the result
+    setStats(cacheKey, stats);
+
+    res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
     return res.status(200).json({
       success: true,
       data: stats,

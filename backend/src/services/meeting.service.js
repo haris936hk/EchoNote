@@ -8,6 +8,7 @@ const supabaseStorage = require('./supabase-storage.service');
 const slackService = require('./slack.service');
 const path = require('path');
 const fs = require('fs').promises;
+const { getStats, setStats, invalidateUserStats } = require('../utils/statsCache');
 
 /**
  * Helper function to deserialize JSON string fields back to arrays
@@ -63,6 +64,7 @@ async function createMeeting({ userId, title, description, category }) {
     });
 
     console.log(`✅ Meeting created: ${meeting.id}`);
+    invalidateUserStats(userId);
 
     return meeting;
   } catch (error) {
@@ -784,28 +786,28 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
       ];
     }
 
-    // Get total count
-    const total = await prisma.meeting.count({ where });
-
-    // Get paginated meetings
-    const meetings = await prisma.meeting.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit,
-      select: {
-        id: true,
-        title: true,
-        description: true, // A3: needed for MeetingCard description
-        category: true,
-        status: true,
-        audioDuration: true,
-        createdAt: true,
-        summaryExecutive: true, // Include summary for preview
-        summaryKeyTopics: true, // A3: feeds topic chips in MeetingCard
-        processingError: true, // A3: needed for failed state card text
-      },
-    });
+    // Run count and findMany in parallel — they are independent queries
+    const [total, meetings] = await Promise.all([
+      prisma.meeting.count({ where }),
+      prisma.meeting.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          status: true,
+          audioDuration: true,
+          createdAt: true,
+          summaryExecutive: true,
+          summaryKeyTopics: true,
+          processingError: true,
+        },
+      }),
+    ]);
 
     // Transform meetings for frontend
     const transformedMeetings = meetings.map((m) => transformMeetingForFrontend(m));
@@ -897,6 +899,8 @@ async function updateMeeting(meetingId, userId, updates) {
       return null; // Meeting not found or unauthorized
     }
 
+    invalidateUserStats(userId);
+
     // Return the updated meeting
     return await getMeetingById(meetingId, userId);
   } catch (error) {
@@ -953,6 +957,7 @@ async function deleteMeeting(meetingId, userId) {
     });
 
     console.log(`✅ Meeting deleted: ${meetingId}`);
+    invalidateUserStats(userId);
   } catch (error) {
     console.error('Delete meeting error:', error.message);
     throw error;
@@ -966,9 +971,17 @@ async function deleteMeeting(meetingId, userId) {
  */
 async function getMeetingStatistics(userId) {
   try {
+    const cacheKey = `meeting-stats:${userId}`;
+    const cached = getStats(cacheKey);
+    if (cached) return cached;
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // All queries run in parallel — 0 serial DB round-trips
     const [
       totalMeetings,
       completedMeetings,
@@ -977,6 +990,8 @@ async function getMeetingStatistics(userId) {
       totalDuration,
       actionItemsStatus,
       meetingsLast30Days,
+      categoryCounts,
+      recentMeetings,
     ] = await Promise.all([
       prisma.meeting.count({ where: { userId } }),
       prisma.meeting.count({ where: { userId, status: 'COMPLETED' } }),
@@ -1012,19 +1027,21 @@ async function getMeetingStatistics(userId) {
         },
         orderBy: { createdAt: 'asc' },
       }),
+      // Previously serial — now parallel
+      prisma.meeting.groupBy({
+        by: ['category'],
+        where: { userId, status: 'COMPLETED' },
+        _count: true,
+      }),
+      prisma.meeting.count({
+        where: { userId, createdAt: { gte: sevenDaysAgo } },
+      }),
     ]);
 
     // Calculate productivity score: (Done Items / Total Items) * 100
     const totalItems = actionItemsStatus.reduce((acc, item) => acc + item._count, 0);
     const doneItems = actionItemsStatus.find((item) => item.status === 'DONE')?._count || 0;
     const productivityScore = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
-
-    // Get meetings by category
-    const categoryCounts = await prisma.meeting.groupBy({
-      by: ['category'],
-      where: { userId, status: 'COMPLETED' },
-      _count: true,
-    });
 
     // Process Sentiment Trends & Entities
     const sentimentTrend = [];
@@ -1043,7 +1060,6 @@ async function getMeetingStatistics(userId) {
 
       // Aggregate Entities
       if (meeting.nlpEntities) {
-        // Split by comma and handle types like "Company (ORG)"
         const entities = meeting.nlpEntities.split(',').map((e) => e.trim());
         entities.forEach((entity) => {
           if (entity && entity !== 'None') {
@@ -1072,18 +1088,7 @@ async function getMeetingStatistics(userId) {
       .slice(0, 10)
       .map(([name, count]) => ({ name, count }));
 
-    // Get recent activity (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const recentMeetings = await prisma.meeting.count({
-      where: {
-        userId,
-        createdAt: { gte: sevenDaysAgo },
-      },
-    });
-
-    return {
+    const result = {
       overview: {
         total: totalMeetings,
         completed: completedMeetings,
@@ -1106,6 +1111,9 @@ async function getMeetingStatistics(userId) {
       sentimentTrend,
       topEntities,
     };
+
+    setStats(cacheKey, result);
+    return result;
   } catch (error) {
     console.error('Get meeting statistics error:', error.message);
     throw error;
@@ -1479,11 +1487,15 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
       updateData.processingCompletedAt = new Date();
     }
 
-    await prisma.meeting.update({
+    const updatedMeeting = await prisma.meeting.update({
       where: { id: meetingId },
       data: updateData,
+      select: { userId: true },
     });
     console.log(`📊 Meeting status updated: ${status}`);
+    if (updatedMeeting && updatedMeeting.userId) {
+      invalidateUserStats(updatedMeeting.userId);
+    }
   } catch (error) {
     console.error('Update status error:', error.message);
   }

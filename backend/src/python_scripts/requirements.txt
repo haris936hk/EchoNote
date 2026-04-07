@@ -8,18 +8,9 @@ pydub
 # NLP Processing
 spacy
 
-# Transcription (if running locally)
-whisperx
-pyannote.audio
-
 # Utilities
 numpy
 pandas
-
-# Microservice Integration
-fastapi
-uvicorn
-pydantic
 
 # Download spaCy model after installation:
 # python -m spacy download en_core_web_lg

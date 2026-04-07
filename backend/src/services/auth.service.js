@@ -1,6 +1,7 @@
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../config/database');
+const crypto = require('crypto');
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
@@ -58,6 +59,12 @@ async function authenticateWithGoogle(authCode) {
     });
 
     const googleTokenExpiry = tokens.expiry_date ? new Date(tokens.expiry_date) : null;
+    const userId = user ? user.id : crypto.randomUUID();
+
+    // Pre-generate tokens to avoid a second database query later
+    const tokenUser = { id: userId, email: googleProfile.email, name: googleProfile.name };
+    const accessToken = generateAccessToken(tokenUser);
+    const refreshToken = generateRefreshToken(tokenUser);
 
     if (user) {
       // Update existing user's info and last login
@@ -73,6 +80,8 @@ async function authenticateWithGoogle(authCode) {
         updates.googleRefreshToken = tokens.refresh_token;
       }
 
+      updates.refreshToken = refreshToken;
+
       user = await prisma.user.update({
         where: { id: user.id },
         data: updates,
@@ -82,6 +91,7 @@ async function authenticateWithGoogle(authCode) {
       // Create new user
       user = await prisma.user.create({
         data: {
+          id: userId,
           email: googleProfile.email,
           name: googleProfile.name,
           picture: googleProfile.picture,
@@ -90,6 +100,7 @@ async function authenticateWithGoogle(authCode) {
           googleAccessToken: tokens.access_token,
           googleRefreshToken: tokens.refresh_token,
           googleTokenExpiry,
+          refreshToken,
         },
       });
       console.log(`✅ New user created: ${user.email}`);
@@ -107,16 +118,6 @@ async function authenticateWithGoogle(authCode) {
         console.error('Failed to send welcome email:', error.message);
       }
     }
-
-    // Step 3: Generate JWT tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    // Step 4: Store refresh token in database
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    });
 
     return {
       success: true,
