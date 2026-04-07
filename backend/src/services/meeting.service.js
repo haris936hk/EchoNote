@@ -28,6 +28,19 @@ function deserializeArrayField(value) {
   }
   return value; // Already an array or other value
 }
+/**
+ * Helper function to map string sentiment (Groq) to numeric score (Analytics)
+ * @param {string} sentiment - 'positive', 'neutral', 'negative'
+ * @returns {number|null} Score between 0 and 1
+ */
+function mapSentimentToScore(sentiment) {
+  if (!sentiment) return 0.5;
+  const s = String(sentiment).toLowerCase();
+  if (s === 'positive') return 0.85;
+  if (s === 'negative') return 0.15;
+  return 0.5; // neutral
+}
+
 
 /**
  * Create new meeting without audio (separate from processing)
@@ -285,7 +298,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         nlpActionPatterns: nlpActionPatternsText,
         // Sentiment is now derived from Groq summary output (authoritative, full-context)
         nlpSentiment: enhancedSummary.sentiment || null,
-        nlpSentimentScore: null,
+        nlpSentimentScore: mapSentimentToScore(enhancedSummary.sentiment),
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -611,7 +624,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         nlpActionPatterns: nlpActionPatternsText,
         // Sentiment from Groq summary output (authoritative, full-context)
         nlpSentiment: enhancedSummary.sentiment || null,
-        nlpSentimentScore: null,
+        nlpSentimentScore: mapSentimentToScore(enhancedSummary.sentiment),
 
         // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
@@ -1118,7 +1131,7 @@ async function getMeetingStatistics(userId) {
       if (!dailyData[date]) {
         dailyData[date] = { sum: 0, count: 0 };
       }
-      if (meeting.nlpSentimentScore !== null) {
+      if (meeting.nlpSentimentScore !== null && meeting.nlpSentimentScore !== undefined) {
         dailyData[date].sum += meeting.nlpSentimentScore;
         dailyData[date].count += 1;
       }
