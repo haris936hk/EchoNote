@@ -10,12 +10,14 @@ import {
   LuAlertCircle as AlertCircle,
   LuPause as Pause,
   LuPlay as Play,
+  LuCheckCircle as CheckCircle,
 } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import useAudioRecorder from '../hooks/useAudioRecorder';
 import AudioVisualizer from '../components/AudioVisualizer';
 import { validateAudioFileDuration } from '../utils/validators';
 import { SUPPORTED_AUDIO_TYPES } from '../utils/constants';
+import api from '../services/api';
 
 const CATEGORIES = [
   { value: 'SALES', label: 'Sales' },
@@ -56,10 +58,22 @@ const RecordPage = () => {
   const [uploadError, setUploadError] = useState(null);
   const [step, setStep] = useState('record');
 
+  // Processing state
+  const [processingMeetingId, setProcessingMeetingId] = useState(null);
+  const [processingStatus, setProcessingStatus] = useState(null);
+
   // File upload state
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileValidating, setFileValidating] = useState(false);
   const fileInputRef = useRef(null);
+
+  const PIPELINE_STEPS = [
+    { key: 'UPLOADING', label: 'Upload' },
+    { key: 'PROCESSING_AUDIO', label: 'Audio Optimization' },
+    { key: 'TRANSCRIBING', label: 'Transcribing' },
+    { key: 'PROCESSING_NLP', label: 'NLP Analysis' },
+    { key: 'SUMMARIZING', label: 'Generating Summary' },
+  ];
 
   const MAX_RECORDING_TIME = 600;
   const progress = (recordingTime / MAX_RECORDING_TIME) * 100;
@@ -81,6 +95,41 @@ const RecordPage = () => {
       setStep('details');
     }
   }, [uploadedFile, step]);
+
+  // Polling for processing status
+  useEffect(() => {
+    if (step !== 'processing' || !processingMeetingId) return;
+
+    let pollInterval;
+    const checkStatus = async () => {
+      try {
+        const { data } = await api.get(`/meetings/${processingMeetingId}/status`);
+        if (data.success) {
+          setProcessingStatus(data.data);
+
+          if (data.data.status === 'COMPLETED') {
+            clearInterval(pollInterval);
+            setStep('success');
+            setTimeout(() => navigate(`/meeting/${processingMeetingId}`), 2000);
+          } else if (data.data.status === 'FAILED') {
+            clearInterval(pollInterval);
+            setUploadError(data.data.error || 'Processing failed. Please try again.');
+            setStep('details');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to get processing status', err);
+      }
+    };
+
+    // Initial check
+    checkStatus();
+
+    // Poll every 3 seconds
+    pollInterval = setInterval(checkStatus, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, [step, processingMeetingId, navigate]);
 
   const handleStartRecording = async () => {
     const result = await startRecording();
@@ -194,8 +243,14 @@ const RecordPage = () => {
       });
 
       if (result.success) {
-        setStep('success');
-        setTimeout(() => navigate(`/meeting/${result.data.id}`), 2000);
+        setProcessingMeetingId(result.data.id);
+        setProcessingStatus({
+          status: result.data.status || 'UPLOADING',
+          progress: 10,
+          estimatedTimeRemaining: -1,
+          currentStage: 'Uploading audio file...',
+        });
+        setStep('processing');
       } else {
         setUploadError(result.error || 'Failed to upload meeting');
         setStep('details');
@@ -213,6 +268,8 @@ const RecordPage = () => {
     setUploadError(null);
     setUploadedFile(null);
     setFileValidating(false);
+    setProcessingMeetingId(null);
+    setProcessingStatus(null);
     setStep('record');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -559,6 +616,91 @@ const RecordPage = () => {
         )}
 
         {/* ════════════════════════════════════════════
+            STEP 3.5: PROCESSING
+            ════════════════════════════════════════════ */}
+        {step === 'processing' && processingStatus && (
+          <div className="flex flex-col items-center space-y-8 w-full">
+            <div className="rounded-card border border-white/10 bg-[#0F172A] p-8 w-full max-w-2xl shadow-[0_0_50px_rgba(129,140,248,0.08)]">
+              <div className="mb-8 flex flex-col items-center gap-3">
+                <div className="ai-dot size-3" />
+                <h3 className="text-xl font-bold tracking-tight text-white mb-1">
+                  {processingStatus.currentStage || 'Initializing AI...'}
+                </h3>
+                <p className="text-sm text-slate-400 font-medium tracking-wide">
+                  {processingStatus.estimatedTimeRemaining > 0
+                    ? `Estimated ~${processingStatus.estimatedTimeRemaining}s remaining`
+                    : 'Finalizing intelligence...'}
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mb-12 px-2">
+                <Progress
+                  value={processingStatus.progress || 0}
+                  size="md"
+                  classNames={{
+                    track: 'bg-[#020617] border border-white/5 h-2',
+                    indicator:
+                      'bg-gradient-to-r from-accent-primary to-accent-secondary shadow-[0_0_20px_rgba(167,139,250,0.5)]',
+                  }}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Pipeline Steps */}
+              <div className="flex w-full items-center justify-between gap-1 px-1">
+                {PIPELINE_STEPS.map((pipelineStep, index) => {
+                  const currentIdx = PIPELINE_STEPS.findIndex(
+                    (s) => s.key === processingStatus.status
+                  );
+                  const mappedIdx = currentIdx === -1 ? 0 : currentIdx;
+                  const isComplete = index < mappedIdx || processingStatus.status === 'COMPLETED';
+                  const isActive = index === mappedIdx && processingStatus.status !== 'COMPLETED';
+
+                  return (
+                    <div key={pipelineStep.key} className="flex flex-1 items-center">
+                      <div className="flex flex-1 flex-col items-center gap-3">
+                        <div
+                          className={`flex size-11 items-center justify-center rounded-full text-sm font-bold shadow-lg transition-all duration-500 ease-out ${
+                            isComplete
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                              : isActive
+                                ? 'bg-accent-primary/10 text-accent-primary border border-accent-primary/50 shadow-[0_0_30px_rgba(129,140,248,0.3)] animate-pulse'
+                                : 'bg-[#020617]/50 text-slate-600 border border-white/5'
+                          }`}
+                        >
+                          {isComplete ? <CheckCircle size={18} /> : index + 1}
+                        </div>
+                        <span
+                          className={`text-center text-[10px] break-words uppercase tracking-wider font-semibold transition-colors duration-300 max-w-[80px] ${
+                            isComplete
+                              ? 'text-emerald-400'
+                              : isActive
+                                ? 'text-accent-primary drop-shadow-[0_0_8px_rgba(129,140,248,0.5)]'
+                                : 'text-slate-600'
+                          }`}
+                        >
+                          {pipelineStep.label}
+                        </span>
+                      </div>
+                      {index < PIPELINE_STEPS.length - 1 && (
+                        <div
+                          className={`-mt-8 h-[2px] w-full max-w-[40px] flex-shrink-0 rounded-full transition-colors duration-500 mx-2 ${
+                            isComplete
+                              ? 'bg-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                              : 'bg-white/5'
+                          }`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════
             STEP 4: SUCCESS
             ════════════════════════════════════════════ */}
         {step === 'success' && (
@@ -566,13 +708,15 @@ const RecordPage = () => {
             <div className="flex size-20 items-center justify-center rounded-full bg-emerald-500/15">
               <Check size={40} className="text-emerald-400" />
             </div>
-            <div>
-              <h3 className="mb-2 text-2xl font-bold text-white">Meeting uploaded successfully!</h3>
-              <p className="text-sm text-slate-400">
-                Your meeting is now being processed. We'll email you when it's ready.
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold tracking-tight text-white">Processing Complete!</h3>
+              <p className="text-sm font-medium text-emerald-400/80">
+                AI intelligence generated successfully.
               </p>
             </div>
-            <p className="text-xs text-slate-600">Redirecting to meeting details...</p>
+            <p className="text-xs text-slate-500 animate-pulse mt-4">
+              Redirecting to meeting dashboard...
+            </p>
           </div>
         )}
       </div>

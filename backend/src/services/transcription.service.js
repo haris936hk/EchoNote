@@ -189,9 +189,7 @@ const transcribeAudio = async (audioPath, options = {}) => {
 
     logger.info(`🚀 Sending to Deepgram: ${path.basename(audioPath)}`);
 
-    const audioStream = fs.createReadStream(audioPath);
-
-    const response = await deepgram.listen.v1.media.transcribeFile(audioStream, {
+    const deepgramOptions = {
       model: options.model || 'nova-3',
       smart_format: true,
       diarize: true,
@@ -205,8 +203,8 @@ const transcribeAudio = async (audioPath, options = {}) => {
       intents: true,
       // Let smart_format handle fillers; don't inject them into output
       filler_words: false,
-      // Boost domain terminology
-      keywords: [
+      // Boost domain terminology (Nova-3 uses keyterm instead of keywords)
+      keyterm: [
         'EchoNote',
         'Supabase',
         'Prisma',
@@ -218,9 +216,43 @@ const transcribeAudio = async (audioPath, options = {}) => {
         'blocker',
         'escalation',
         'dependency',
-        ...(options.keywords || []),
+        ...(options.keywords || options.keyterm || []),
       ],
-    });
+    };
+
+    let response = null;
+    let attempt = 1;
+    const maxRetries = 3;
+
+    while (attempt <= maxRetries) {
+      try {
+        // Must recreate stream on each attempt
+        const audioStream = fs.createReadStream(audioPath);
+        response = await deepgram.listen.v1.media.transcribeFile(audioStream, deepgramOptions);
+
+        // Deepgram sometimes successfully returns an error payload
+        if (response.error) {
+          throw new Error(response.error.message || 'Deepgram API error');
+        }
+
+        break; // Success
+      } catch (error) {
+        const status = error.response?.status || error.status;
+        const isRetryable = !status || status === 429 || status >= 500;
+
+        if (!isRetryable || attempt >= maxRetries) {
+          throw error;
+        }
+
+        const delayMs = 1000 * Math.pow(2, attempt - 1);
+        logger.warn(
+          `Deepgram API call failed (attempt ${attempt}/${maxRetries}): ${error.message}. Retrying in ${delayMs}ms...`
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        attempt++;
+      }
+    }
 
     const result = response;
 

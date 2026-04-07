@@ -62,31 +62,18 @@ export const MeetingProvider = ({ children }) => {
       return { success: false, error: 'Fetch already in progress' };
     }
 
-    const params = new URLSearchParams();
-    if (filters.search) params.append('search', filters.search);
-    if (filters.category) params.append('category', filters.category);
-    if (filters.startDate) params.append('startDate', filters.startDate);
-    if (filters.endDate) params.append('endDate', filters.endDate);
-
-    const cacheKey = `echo-meetings-${params.toString()}`;
-
-    // Stale-while-revalidate: Load from local cache instantly
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-      try {
-        setMeetings(JSON.parse(cachedData));
-      } catch (e) {
-        console.error('Failed to parse cached meetings', e);
-      }
-    }
-
     try {
       fetchingRef.current = true;
-      if (!cachedData) setLoading(true);
+      setLoading(true);
+      const params = new URLSearchParams();
+
+      if (filters.search) params.append('search', filters.search);
+      if (filters.category) params.append('category', filters.category);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
 
       const { data } = await api.get(`/meetings?${params}`);
       setMeetings(data.data);
-      localStorage.setItem(cacheKey, JSON.stringify(data.data)); // Update cache
       return { success: true, data: data.data };
     } catch (err) {
       console.error('Fetch meetings failed:', err);
@@ -99,23 +86,10 @@ export const MeetingProvider = ({ children }) => {
 
   // Fetch single meeting
   const fetchMeeting = useCallback(async (id) => {
-    const cacheKey = `echo-meeting-${id}`;
-
-    // Stale-while-revalidate
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-      try {
-        setCurrentMeeting(JSON.parse(cachedData));
-      } catch (e) {
-        console.error('Failed to parse cached meeting', e);
-      }
-    }
-
     try {
-      if (!cachedData) setLoading(true);
+      setLoading(true);
       const { data } = await api.get(`/meetings/${id}`);
       setCurrentMeeting(data.data);
-      localStorage.setItem(cacheKey, JSON.stringify(data.data));
       return { success: true, data: data.data };
     } catch (err) {
       console.error('Fetch meeting failed:', err);

@@ -83,6 +83,7 @@ async function createMeeting({ userId, title, description, category }) {
  */
 async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {}) {
   let tempPath = null;
+  let processedAudioPath = null;
 
   try {
     console.log(`\n🎬 Starting audio processing for meeting: ${meetingId}`);
@@ -126,7 +127,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       throw new Error(`Audio processing failed: ${audioResult.error}`);
     }
 
-    const processedAudioPath = audioResult.outputPath;
+    processedAudioPath = audioResult.outputPath;
     const audioDuration = audioResult.duration;
 
     console.log(`✅ Audio processed: ${audioDuration}s duration`);
@@ -404,7 +405,9 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
 
     // Clean up temp file if exists and not keeping it for retries
     if (tempPath && !options.keepTempOnError) {
-      await cleanupTempFiles([tempPath]);
+      const pathsToClean = [tempPath];
+      if (processedAudioPath) pathsToClean.push(processedAudioPath);
+      await cleanupTempFiles(pathsToClean);
     }
 
     // Send failure email
@@ -445,6 +448,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
  */
 async function createAndProcessMeeting({ userId, title, category, audioPath, originalFilename }) {
   let meeting = null;
+  let processedAudioPath = null;
 
   try {
     console.log(`\n🎬 Starting meeting processing pipeline for: ${title}`);
@@ -477,7 +481,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       throw new Error(`Audio processing failed: ${audioResult.error}`);
     }
 
-    const processedAudioPath = audioResult.outputPath;
+    processedAudioPath = audioResult.outputPath;
     const audioDuration = audioResult.duration;
 
     console.log(`✅ Audio processed: ${audioDuration}s duration`);
@@ -725,9 +729,13 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       }
     }
 
-    // Clean up temp file if exists
-    if (audioPath) {
-      await cleanupTempFiles([audioPath]);
+    // Clean up temp files if they exist
+    const pathsToClean = [];
+    if (audioPath) pathsToClean.push(audioPath);
+    if (processedAudioPath) pathsToClean.push(processedAudioPath);
+
+    if (pathsToClean.length > 0) {
+      await cleanupTempFiles(pathsToClean);
     }
 
     return {
