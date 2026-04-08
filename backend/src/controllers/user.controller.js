@@ -548,12 +548,20 @@ const exportUserData = async (req, res) => {
 
       prisma.meeting.findMany({
         where: { userId },
-        include: {
-          _count: {
-            select: {
-              // Add related counts if needed
-            },
-          },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          status: true,
+          createdAt: true,
+          audioDuration: true,
+          transcriptText: true,
+          transcriptWordCount: true,
+          summaryExecutive: true,
+          summaryKeyDecisions: true,
+          summaryActionItems: true,
+          summaryNextSteps: true,
         },
       }),
 
@@ -728,7 +736,6 @@ const testSlackWebhook = async (req, res) => {
       transcriptConfidence: 95,
       nlpSentiment: 'positive',
       nlpSentimentScore: 0.85,
-      nlpTopics: ['Integrations', 'Testing', 'Productivity'],
       summaryExecutive:
         'This is a test notification from EchoNote to verify your Slack Block Kit integration is correctly formatted and successfully routing messages.',
       summaryKeyDecisions: ['Approved new webhook configuration', 'Validated Block Kit layout'],

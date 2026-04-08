@@ -570,7 +570,10 @@ const downloadTranscript = async (req, res) => {
     const userId = req.userId;
     const format = req.query.format || 'txt'; // txt, json
 
-    const transcriptData = await meetingService.getTranscript(meetingId, userId);
+    const [transcriptData, meeting] = await Promise.all([
+      meetingService.getTranscript(meetingId, userId),
+      meetingService.getMeetingById(meetingId, userId),
+    ]);
 
     if (!transcriptData) {
       return res.status(404).json({
@@ -579,7 +582,6 @@ const downloadTranscript = async (req, res) => {
       });
     }
 
-    const meeting = await meetingService.getMeetingById(meetingId, userId);
     const filename = generateDownloadFilename(
       meeting.title,
       meeting.createdAt,
@@ -618,7 +620,10 @@ const downloadSummary = async (req, res) => {
     const userId = req.userId;
     const format = req.query.format || 'txt'; // txt, json
 
-    const summary = await meetingService.getSummary(meetingId, userId);
+    const [summary, meeting] = await Promise.all([
+      meetingService.getSummary(meetingId, userId),
+      meetingService.getMeetingById(meetingId, userId),
+    ]);
 
     if (!summary) {
       return res.status(404).json({
@@ -627,7 +632,6 @@ const downloadSummary = async (req, res) => {
       });
     }
 
-    const meeting = await meetingService.getMeetingById(meetingId, userId);
     const filename = generateDownloadFilename(meeting.title, meeting.createdAt, 'summary', format);
 
     if (format === 'json') {
@@ -968,8 +972,13 @@ const downloadAll = async (req, res) => {
       'zip'
     );
 
-    // Get audio data and convert to MP3
-    const audioData = await meetingService.getAudioDownloadUrl(meetingId, userId);
+    // Fetch related data in parallel
+    const [audioData, transcriptData, summary] = await Promise.all([
+      meetingService.getAudioDownloadUrl(meetingId, userId),
+      meetingService.getTranscript(meetingId, userId),
+      meetingService.getSummary(meetingId, userId),
+    ]);
+
     let audioAvailable = false;
 
     if (audioData && audioData.url && fs.existsSync(audioData.url)) {
@@ -981,11 +990,7 @@ const downloadAll = async (req, res) => {
       }
     }
 
-    // Get transcript
-    const transcriptData = await meetingService.getTranscript(meetingId, userId);
-
     // Get summary and format as text
-    const summary = await meetingService.getSummary(meetingId, userId);
     let summaryText = '';
     if (summary) {
       summaryText = `Meeting Summary: ${meeting.title}\n`;
@@ -1526,7 +1531,6 @@ const getMeetingAnalytics = async (req, res) => {
         audioDuration: true,
         nlpSentiment: true,
         nlpSentimentScore: true,
-        nlpTopics: true,
         summaryKeyTopics: true,
         summarySentiment: true,
       },
@@ -1566,7 +1570,7 @@ const getMeetingAnalytics = async (req, res) => {
           label: meeting.nlpSentiment || meeting.summarySentiment || null,
           score: meeting.nlpSentimentScore || null,
         },
-        topics: meeting.summaryKeyTopics || meeting.nlpTopics || [],
+        topics: meeting.summaryKeyTopics || [],
         wordCount: meeting.transcriptWordCount || null,
         audioDuration: meeting.audioDuration || null,
       },
@@ -1646,10 +1650,13 @@ const shareToSlack = async (req, res) => {
     const meetingId = req.params.id;
     const userId = req.userId;
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { slackWebhookUrl: true },
-    });
+    const [user, meeting] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { slackWebhookUrl: true },
+      }),
+      meetingService.getMeetingById(meetingId, userId),
+    ]);
 
     if (!user || !user.slackWebhookUrl) {
       return res.status(400).json({
@@ -1658,7 +1665,6 @@ const shareToSlack = async (req, res) => {
       });
     }
 
-    const meeting = await meetingService.getMeetingById(meetingId, userId);
     if (!meeting) {
       return res.status(404).json({
         success: false,

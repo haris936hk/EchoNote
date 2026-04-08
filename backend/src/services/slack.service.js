@@ -121,8 +121,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       meetingData.transcriptConfidence != null
         ? `${Math.round(meetingData.transcriptConfidence)}%`
         : 'N/A';
-    const topicsRaw =
-      meetingData.summaryKeyTopics || meetingData.nlpTopics || meetingData.topicKeywords;
+    const topicsRaw = meetingData.summaryKeyTopics || meetingData.topicKeywords;
     const topics = Array.isArray(topicsRaw) ? topicsRaw.join(', ') : 'N/A';
 
     blocks.push({

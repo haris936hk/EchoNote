@@ -176,6 +176,7 @@ model UserActivity {
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+  @@index([userId, createdAt])
   @@map("user_activities")
 }
 
@@ -202,5 +203,6 @@ model ActionItem {
   @@index([meetingId])
   @@index([userId])
   @@index([status])
+  @@index([userId, status])
   @@map("action_items")
 }
