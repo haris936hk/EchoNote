@@ -13,12 +13,12 @@
     "format": "prettier --write \"src/**/*.{js,jsx,css,html}\""
   },
   "dependencies": {
-    "@heroui/react": "^2.6.11",
-    "@heroui/theme": "^2.4.26",
+    "@heroui/react": "2.6.11",
+    "@heroui/theme": "2.4.15",
     "@react-oauth/google": "^0.12.1",
     "axios": "^1.6.2",
     "date-fns": "^4.1.0",
-    "framer-motion": "^11.18.2",
+    "framer-motion": "^11.11.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -30,18 +30,17 @@
     "web-vitals": "^3.5.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.0",
     "@tailwindcss/typography": "^0.5.10",
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.4.16",
     "caniuse-lite": "^1.0.30001786",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^5.5.5",
-    "eslint-plugin-tailwindcss": "^4.0.0-alpha.0",
-    "postcss": "^8.5.1",
+    "eslint-plugin-tailwindcss": "^3.18.2",
+    "postcss": "^8.4.32",
     "prettier": "^3.8.1",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^3.4.17"
   },
   "browserslist": {
     "production": [

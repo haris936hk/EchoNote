@@ -1,93 +1,77 @@
-@import "tailwindcss";
+/* stylelint-disable */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* ============================================
    CSS VARIABLES — OLED Dark Mode
    ============================================ */
 
-@theme {
-  /* EchoNote OLED Dark Mode Palette */
-  --color-echo-base: #020617;
-  --color-echo-surface: #0f172a;
-  --color-echo-surface-hover: #1e293b;
-  --color-echo-elevated: #1e293b;
+:root {
+  /* Background surfaces */
+  --echo-base: #020617;
+  --echo-surface: #0f172a;
+  --echo-surface-hover: #1e293b;
+  --echo-elevated: #1e293b;
 
   /* Accents */
-  --color-accent-primary: #818cf8;
-  --color-accent-secondary: #a78bfa;
-  --color-accent-glow: rgba(129, 140, 248, 0.12);
-  --color-cta: #22c55e;
-  --color-cta-hover: #16a34a;
+  --accent-primary: #818cf8;
+  --accent-secondary: #a78bfa;
+  --accent-glow: rgba(129, 140, 248, 0.12);
+  --cta-color: #22c55e;
 
-  /* Status Colors */
-  --color-status-success: #34d399;
-  --color-status-warning: #fbbf24;
-  --color-status-danger: #f87171;
-  --color-status-info: #60a5fa;
+  /* Text hierarchy */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 
-  /* Sentiment Colors */
-  --color-sentiment-positive: #34d399;
-  --color-sentiment-neutral: #818cf8;
-  --color-sentiment-negative: #f87171;
-  --color-sentiment-mixed: #fbbf24;
+  /* Borders */
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
 
-  /* Text Hierarchy */
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
+  /* Status */
+  --status-success: #34d399;
+  --status-warning: #fbbf24;
+  --status-danger: #f87171;
+  --status-info: #60a5fa;
 
-  /* Fonts */
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* Sentiment */
+  --sentiment-positive: #34d399;
+  --sentiment-neutral: #818cf8;
+  --sentiment-negative: #f87171;
+  --sentiment-mixed: #fbbf24;
 
-  /* Border Radius */
-  --radius-card: 16px;
-  --radius-btn: 10px;
-  --radius-input: 10px;
+  /* HeroUI overrides */
+  --color-primary: 129 140 248;
+  --color-primary-foreground: 255 255 255;
+  --color-secondary: 167 139 250;
+  --color-secondary-foreground: 255 255 255;
+  --color-success: 34 197 94;
+  --color-success-foreground: 255 255 255;
+  --color-warning: 251 191 36;
+  --color-warning-foreground: 0 0 0;
+  --color-danger: 248 113 113;
+  --color-danger-foreground: 255 255 255;
 
-  /* Spacing */
-  --spacing-128: 32rem;
-  --spacing-144: 36rem;
+  --color-background: 2 6 23;
+  --color-foreground: 248 250 252;
+  --color-content1: 15 23 42;
+  --color-content2: 30 41 59;
+  --color-content3: 51 65 85;
+  --color-content4: 71 85 105;
 
-  /* Max Width */
-  --max-width-8xl: 88rem;
-  --max-width-9xl: 96rem;
+  --color-default: 51 65 85;
+  --color-default-foreground: 248 250 252;
+  --color-default-100: 15 23 42;
+  --color-default-200: 30 41 59;
+  --color-default-300: 51 65 85;
+  --color-default-400: 100 116 139;
+  --color-default-500: 148 163 184;
+  --color-default-600: 203 213 225;
 
-  /* Background Size */
-  --background-size-200: 200% 200%;
-  --background-size-300: 300% 300%;
-
-  /* Animations & Keyframes */
-  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-halo-pulse: halo-pulse 2s ease-in-out infinite;
-  --animate-ai-glow: ai-glow 1.5s ease-in-out infinite;
-  --animate-shimmer: shimmer 1.5s linear infinite;
-
-  @keyframes halo-pulse {
-    0%, 100% {
-      transform: scale(1);
-      box-shadow: 0 0 20px rgba(129, 140, 248, 0.3), 0 0 40px rgba(167, 139, 250, 0.15);
-    }
-    50% {
-      transform: scale(1.05);
-      box-shadow: 0 0 30px rgba(129, 140, 248, 0.5), 0 0 60px rgba(167, 139, 250, 0.25);
-    }
-  }
-
-  @keyframes ai-glow {
-    0%, 100% {
-      box-shadow: 0 0 8px rgba(129, 140, 248, 0.4);
-      opacity: 1;
-    }
-    50% {
-      box-shadow: 0 0 16px rgba(129, 140, 248, 0.6);
-      opacity: 0.8;
-    }
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
+  --color-divider: 255 255 255;
+  --color-focus: 129 140 248;
+  --overlay-opacity: 0.6;
 }
 
 /* ============================================
