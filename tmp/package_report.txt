@@ -1,0 +1,85 @@
+
+--- Backend ---
+All used packages are listed in package.json.
+POTENTIALLY UNUSED (In package.json but not found in src):
+  - bcryptjs
+  - eslint
+  - eslint-config-prettier
+  - eslint-plugin-prettier
+  - express-fileupload
+  - jest
+  - nodemon
+  - prettier
+  - prisma
+  - supertest
+  - uuid
+
+--- Frontend ---
+All used packages are listed in package.json.
+POTENTIALLY UNUSED (In package.json but not found in src):
+  - @heroui/theme
+  - @nextui-org/react
+  - @tailwindcss/typography
+  - autoprefixer
+  - caniuse-lite
+  - eslint
+  - eslint-config-prettier
+  - eslint-config-react-app
+  - eslint-plugin-prettier
+  - eslint-plugin-tailwindcss
+  - lucide-react
+  - postcss
+  - prettier
+  - tailwindcss
+
+--- Root ---
+MISSING (Used but not in package.json):
+  - ,
+
+  - : I() }],
+
+  - : N() }],
+
+  - : [{ from: N() }],
+
+  - @deepgram/sdk
+  - @emotion/is-prop-valid
+  - @eslint/js
+  - @heroui/react
+  - @prisma/client
+  - @react-oauth/google
+  - @supabase/supabase-js
+  - @tailwindcss/typography
+  - archiver
+  - axios
+  - cors
+  - date-fns
+  - dotenv
+  - eslint-config-prettier
+  - eslint-plugin-prettier
+  - express
+  - express-rate-limit
+  - fluent-ffmpeg
+  - framer-motion
+  - getAllResponseHeaders
+  - google-auth-library
+  - googleapis
+  - groq-sdk
+  - helmet
+  - jsonwebtoken
+  - morgan
+  - multer
+  - node-cron
+  - nodemailer
+  - prop-types
+  - python-shell
+  - react
+  - react-dom
+  - react-icons
+  - react-router-dom
+  - recharts
+  - recordrtc
+  - tailwindcss
+  - winston
+POTENTIALLY UNUSED (In package.json but not found in src):
+  - lucide-react
