@@ -8,12 +8,12 @@ This file serves as the primary instructional context for Gemini CLI when workin
 ### Tech Stack
 - **Frontend:** React 18, HeroUI (NextUI), Tailwind CSS, RecordRTC (Audio), Axios, Framer Motion.
 - **Backend:** Node.js 18 (Express), Prisma ORM (PostgreSQL via Supabase), Supabase Storage.
-- **AI/ML Pipeline (Python):** 
-  - Audio Processing: `librosa`, `noisereduce`.
-  - Transcription: OpenAI Whisper (`base.en`).
+- **AI/ML Pipeline (Python & APIs):** 
+  - Audio Processing: `librosa`, `noisereduce` (Python).
+  - Transcription: Deepgram (Nova-3 model).
   - NLP Analysis: SpaCy (`en_core_web_lg`).
-  - Summarization: openai/gpt-oss-120b via Groq API (cloud-hosted, no NGROK required).
-- **Notifications:** Gmail OAuth2 with Nodemailer.
+  - Summarization: `llama-3.3-70b-versatile` via Groq API.
+- **Notifications:** Gmail OAuth2 with Nodemailer, Slack Webhooks.
 
 ---
 
@@ -59,7 +59,7 @@ npm start
 
 ### 1. Sequential Processing Pipeline (Critical)
 The AI pipeline MUST be sequential. Never attempt to parallelize these stages:
-`Audio Optimization → Transcription (Whisper) → NLP Analysis (SpaCy) → Summarization (Qwen2.5) → Email`
+`Audio Optimization → Transcription (Deepgram) → NLP Analysis (SpaCy) → Summarization (Llama 3.3) → Notifications (Email/Slack)`
 
 ### 2. UI & Design Standards (The Luminous Archive)
 - **Theme:** OLED Dark Mode (Primary). Absolute black foundations (`#020617`).
@@ -106,16 +106,17 @@ The AI pipeline MUST be sequential. Never attempt to parallelize these stages:
 - **API Responses:** Return structured `{ success: boolean, data?: any, error?: string }`.
 - **Logging:** Use Winston (`backend/src/utils/logger.js`) for server-side logging.
 - **Database:** Prisma is the source of truth for schema changes.
+- **Real-time Data:** Caching is avoided for real-time data (including meeting statistics). This is important to ensure data integrity across the platform.
 
 ---
 
 ## Key Project Structure
 
 ### Backend (`/backend`)
-- `src/python_scripts/`: Core AI logic (Audio, Whisper, SpaCy).
+- `src/python_scripts/`: Core AI logic (Audio Optimization, SpaCy NLP).
 - `src/services/meeting.service.js`: The "Orchestrator" for the AI pipeline.
 - `src/controllers/`: Request handlers for Auth, Meetings, and Users.
-- `prisma/schema.prisma`: Data models for Users, Meetings, and Processing Logs.
+- `prisma/schema.prisma`: Data models for Users, Meetings, Action Items, and Processing Logs.
 
 ### Frontend (`/frontend`)
 - `src/components/meeting/`: UI for recording, transcripts, and summaries.
@@ -126,9 +127,9 @@ The AI pipeline MUST be sequential. Never attempt to parallelize these stages:
 
 ## Critical Constraints
 - **Recording Limit:** Hard 10-minute limit (600 seconds).
-- **Audio Format:** Whisper requires 16kHz mono PCM WAV.
+- **Audio Format:** Deepgram handles multiple formats; preferred is 16kHz mono PCM WAV for maximum clarity.
 - **Storage:** Audio files are temporary; delete local copies after Supabase upload.
-- **Model API:** Summarization uses the Groq API (no local NGROK tunnel needed).
+- **Model API:** Summarization uses the Groq API (SDK v5+) with `llama-3.3-70b-versatile`.
 
 ## Troubleshooting & Verification
 - **Test Scripts:** Use `backend/scripts/test-*.js` for email and transport verification.

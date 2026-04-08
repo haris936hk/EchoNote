@@ -8,7 +8,6 @@ const supabaseStorage = require('./supabase-storage.service');
 const slackService = require('./slack.service');
 const path = require('path');
 const fs = require('fs').promises;
-const { getStats, setStats, invalidateUserStats } = require('../utils/statsCache');
 
 /**
  * Helper function to deserialize JSON string fields back to arrays
@@ -77,7 +76,6 @@ async function createMeeting({ userId, title, description, category }) {
     });
 
     console.log(`✅ Meeting created: ${meeting.id}`);
-    invalidateUserStats(userId);
 
     return meeting;
   } catch (error) {
@@ -977,7 +975,6 @@ async function updateMeeting(meetingId, userId, updates) {
       return null; // Meeting not found or unauthorized
     }
 
-    invalidateUserStats(userId);
 
     // Return the updated meeting
     return await getMeetingById(meetingId, userId);
@@ -1035,7 +1032,6 @@ async function deleteMeeting(meetingId, userId) {
     });
 
     console.log(`✅ Meeting deleted: ${meetingId}`);
-    invalidateUserStats(userId);
   } catch (error) {
     console.error('Delete meeting error:', error.message);
     throw error;
@@ -1049,10 +1045,6 @@ async function deleteMeeting(meetingId, userId) {
  */
 async function getMeetingStatistics(userId) {
   try {
-    const cacheKey = `meeting-stats:${userId}`;
-    const cached = getStats(cacheKey);
-    if (cached) return cached;
-
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -1190,7 +1182,6 @@ async function getMeetingStatistics(userId) {
       topEntities,
     };
 
-    setStats(cacheKey, result);
     return result;
   } catch (error) {
     console.error('Get meeting statistics error:', error.message);
@@ -1565,15 +1556,11 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
       updateData.processingCompletedAt = new Date();
     }
 
-    const updatedMeeting = await prisma.meeting.update({
+    await prisma.meeting.update({
       where: { id: meetingId },
       data: updateData,
-      select: { userId: true },
     });
     console.log(`📊 Meeting status updated: ${status}`);
-    if (updatedMeeting && updatedMeeting.userId) {
-      invalidateUserStats(updatedMeeting.userId);
-    }
   } catch (error) {
     console.error('Update status error:', error.message);
   }

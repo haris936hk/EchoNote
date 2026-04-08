@@ -243,7 +243,6 @@ const getMeetings = async (req, res) => {
 
     const result = await meetingService.getMeetings(filters);
 
-    res.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
     return res.status(200).json({
       success: true,
       data: result.meetings,
@@ -282,7 +281,6 @@ const getMeetingById = async (req, res) => {
       });
     }
 
-    res.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
     return res.status(200).json({
       success: true,
       data: meeting,
