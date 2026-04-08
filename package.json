@@ -12,9 +12,6 @@
     "lint": "npm run frontend:lint && npm run backend:lint",
     "format": "npm run frontend:format && npm run backend:format"
   },
-  "dependencies": {
-    "lucide-react": "^1.7.0"
-  },
   "devDependencies": {
     "concurrently": "^9.2.1"
   }
