@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuListChecks, LuX, LuUser, LuCalendar, LuAlertCircle } from 'react-icons/lu';
+import EtherealDatePicker from './EtherealDatePicker';
 
 const PRIORITIES = [
   { value: 'high', label: 'High', color: 'text-red-400', bg: 'bg-red-400' },
@@ -143,16 +144,14 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
                     />
                   </div>
 
-                  {/* Deadline */}
+                  {/* Deadline (Custom Ethereal Date Picker) */}
                   <div className="space-y-3.5">
                     <label className="flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
                       <LuCalendar size={14} /> DEADLINE
                     </label>
-                    <input
+                    <EtherealDatePicker
                       value={formData.deadline}
-                      onChange={(e) => handleChange('deadline', e.target.value)}
-                      className="h-12 w-full rounded-input bg-[#151b2d] px-4 font-['Plus_Jakarta_Sans'] text-[14px] text-[#f8fafc] ring-1 ring-white/[0.06] transition-all hover:ring-white/[0.12] focus:bg-[#1e253c] focus:outline-none focus:ring-[#818cf8]/50"
-                      placeholder="e.g. Next Friday"
+                      onChange={(date) => handleChange('deadline', date)}
                     />
                   </div>
                 </div>

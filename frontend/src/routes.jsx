@@ -20,6 +20,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import Tasks from './pages/Tasks';
 import Decisions from './pages/Decisions';
 import Analytics from './pages/Analytics';
+import SpeakerCoachPage from './pages/SpeakerCoachPage';
 
 /**
  * Public Route Component
@@ -153,6 +154,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <MainLayout>
               <Analytics />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/speaker-coach"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SpeakerCoachPage />
             </MainLayout>
           </ProtectedRoute>
         }
