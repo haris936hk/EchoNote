@@ -23,6 +23,11 @@ const getEvents = async (req, res) => {
     // Get user from DB
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        googleRefreshToken: true,
+        googleAccessToken: true,
+        googleTokenExpiry: true,
+      },
     });
 
     if (!user) {

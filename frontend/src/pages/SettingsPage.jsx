@@ -23,6 +23,7 @@ import {
 import ProfileSettings from '../components/user/ProfileSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
+import notificationService from '../services/notification.service';
 import { showToast } from '../components/common/Toast';
 
 const TABS = [
@@ -109,6 +110,7 @@ const Toggle = ({ enabled, onToggle, color = 'bg-accent-primary' }) => (
 // ─── Preferences ───
 const PreferencesContent = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
   const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
@@ -127,6 +129,7 @@ const PreferencesContent = () => {
           const data = await response.json();
           if (data.success && data.data) {
             setEmailNotifications(data.data.emailNotifications ?? true);
+            setPushNotifications(data.data.pushNotifications ?? true);
             setSlackWebhookUrl(data.data.slackWebhookUrl || '');
             if (data.data.autoDeleteDays !== null && data.data.autoDeleteDays !== undefined) {
               setAutoDelete(true);
@@ -152,6 +155,7 @@ const PreferencesContent = () => {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           emailNotifications,
+          pushNotifications,
           slackWebhookUrl,
           autoDeleteDays: autoDelete ? parseInt(retentionDays) : null,
         }),
@@ -211,6 +215,36 @@ const PreferencesContent = () => {
             <p className="text-xs text-slate-500">Always enabled for optimal viewing</p>
           </div>
           <Toggle enabled={true} onToggle={() => {}} />
+        </div>
+
+        {/* Push Notifications */}
+        <div className="flex items-center justify-between border-b border-echo-border py-3">
+          <div>
+            <p className="text-sm font-medium text-white">Browser Push Notifications</p>
+            <p className="text-xs text-slate-500">Receive native alerts on this device</p>
+          </div>
+          <Toggle
+            enabled={pushNotifications}
+            onToggle={async () => {
+              if (!pushNotifications) {
+                try {
+                  const granted = await notificationService.requestPermission();
+                  if (granted) {
+                    await notificationService.subscribeUser();
+                    setPushNotifications(true);
+                  } else {
+                    showToast('Notification permission denied', 'warning');
+                  }
+                } catch (err) {
+                  showToast('Failed to enable push notifications', 'error');
+                }
+              } else {
+                setPushNotifications(false);
+                // We keep the subscription in DB but disable preference
+              }
+            }}
+            color="bg-indigo-500"
+          />
         </div>
 
         {/* Email Notifications */}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   LuSparkles as Sparkles,
@@ -14,7 +14,11 @@ import {
 } from 'react-icons/lu';
 import { Button } from '@heroui/react';
 import FollowUpModal from './FollowUpModal';
+import EditTaskModal from './EditTaskModal';
 import { sentimentColors } from '../../styles/theme';
+import { taskService } from '../../services/task.service';
+import { showToast } from '../../components/common/Toast';
+import { LuPencil } from 'react-icons/lu';
 
 const CopyBtn = ({ section, content, copiedSection, onCopy }) => (
   <button
@@ -45,6 +49,14 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
   const [copiedSection, setCopiedSection] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [localActions, setLocalActions] = useState([]);
+  const [editingTask, setEditingTask] = useState(null);
+
+  useEffect(() => {
+    if (summary && typeof summary === 'object' && Array.isArray(summary.actionItems)) {
+      setLocalActions(summary.actionItems);
+    }
+  }, [summary]);
 
   if (!summary) {
     return (
@@ -61,7 +73,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
       ? {
           executive: summary.executiveSummary || '',
           decisions: Array.isArray(summary.keyDecisions) ? summary.keyDecisions : [],
-          actions: Array.isArray(summary.actionItems) ? summary.actionItems : [],
+          actions: localActions,
           nextSteps: Array.isArray(summary.nextSteps) ? summary.nextSteps : [],
           keyTopics: Array.isArray(summary.keyTopics) ? summary.keyTopics : [],
           sentiment: summary.sentiment || 'neutral',
@@ -69,7 +81,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
       : {
           executive: '',
           decisions: [],
-          actions: [],
+          actions: localActions,
           nextSteps: [],
           keyTopics: [],
           sentiment: 'neutral',
@@ -99,6 +111,40 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
     } catch (err) {
       console.error('Failed to copy:', err);
     }
+  };
+
+  const handleEditSave = async (updatedTask) => {
+    if (!updatedTask.id) {
+      showToast(
+        'Cannot edit legacy tasks via this interface directly. Please try the Tasks page.',
+        'error'
+      );
+      setEditingTask(null);
+      return;
+    }
+
+    const previousActions = [...localActions];
+    // Optimistic UI
+    setLocalActions((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+
+    try {
+      const res = await taskService.updateTask(updatedTask.id, {
+        task: updatedTask.task,
+        assignee: updatedTask.assignee,
+        deadline: updatedTask.deadline,
+        priority: updatedTask.priority,
+      });
+      if (!res.success) {
+        setLocalActions(previousActions);
+        showToast(res.error || 'Failed to update action item', 'error');
+      } else {
+        showToast('Action item updated successfully', 'success');
+      }
+    } catch (error) {
+      setLocalActions(previousActions);
+      showToast('Network error occurred', 'error');
+    }
+    setEditingTask(null);
   };
 
   const toggleActionItem = (index) => {
@@ -229,11 +275,23 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
                         </svg>
                       )}
                     </button>
-                    <p
-                      className={`text-sm leading-relaxed text-slate-300 ${isChecked ? 'line-through' : ''}`}
-                    >
-                      {action.task}
-                    </p>
+                    <div className="flex flex-1 items-start justify-between gap-3">
+                      <p
+                        className={`text-sm font-medium leading-relaxed text-slate-200 ${isChecked ? 'text-slate-400 line-through' : ''}`}
+                      >
+                        {action.task}
+                      </p>
+                      {action.id && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingTask(action)}
+                          aria-label="Edit Task"
+                          className="mt-0.5 shrink-0 text-slate-500 transition-colors hover:text-accent-primary"
+                        >
+                          <LuPencil size={14} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {(action.assignee || action.deadline || action.priority) && (
                     <div className="flex flex-wrap items-center gap-1.5 pl-6">
@@ -326,6 +384,14 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
         onClose={() => setIsFollowUpOpen(false)}
         meetingId={meetingId}
         meetingTitle={meetingTitle}
+      />
+
+      {/* ── Edit Task Modal ── */}
+      <EditTaskModal
+        isOpen={!!editingTask}
+        onClose={() => setEditingTask(null)}
+        task={editingTask}
+        onSave={handleEditSave}
       />
     </div>
   );

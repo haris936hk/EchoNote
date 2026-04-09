@@ -44,6 +44,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^7.0.12",
     "python-shell": "^5.0.0",
+    "web-push": "^3.6.7",
     "winston": "^3.11.0"
   },
   "devDependencies": {

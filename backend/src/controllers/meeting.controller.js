@@ -570,7 +570,10 @@ const downloadTranscript = async (req, res) => {
     const userId = req.userId;
     const format = req.query.format || 'txt'; // txt, json
 
-    const transcriptData = await meetingService.getTranscript(meetingId, userId);
+    const [transcriptData, meeting] = await Promise.all([
+      meetingService.getTranscript(meetingId, userId),
+      meetingService.getMeetingById(meetingId, userId),
+    ]);
 
     if (!transcriptData) {
       return res.status(404).json({
@@ -579,7 +582,6 @@ const downloadTranscript = async (req, res) => {
       });
     }
 
-    const meeting = await meetingService.getMeetingById(meetingId, userId);
     const filename = generateDownloadFilename(
       meeting.title,
       meeting.createdAt,
@@ -618,7 +620,10 @@ const downloadSummary = async (req, res) => {
     const userId = req.userId;
     const format = req.query.format || 'txt'; // txt, json
 
-    const summary = await meetingService.getSummary(meetingId, userId);
+    const [summary, meeting] = await Promise.all([
+      meetingService.getSummary(meetingId, userId),
+      meetingService.getMeetingById(meetingId, userId),
+    ]);
 
     if (!summary) {
       return res.status(404).json({
@@ -627,7 +632,6 @@ const downloadSummary = async (req, res) => {
       });
     }
 
-    const meeting = await meetingService.getMeetingById(meetingId, userId);
     const filename = generateDownloadFilename(meeting.title, meeting.createdAt, 'summary', format);
 
     if (format === 'json') {
@@ -968,8 +972,13 @@ const downloadAll = async (req, res) => {
       'zip'
     );
 
-    // Get audio data and convert to MP3
-    const audioData = await meetingService.getAudioDownloadUrl(meetingId, userId);
+    // Fetch related data in parallel
+    const [audioData, transcriptData, summary] = await Promise.all([
+      meetingService.getAudioDownloadUrl(meetingId, userId),
+      meetingService.getTranscript(meetingId, userId),
+      meetingService.getSummary(meetingId, userId),
+    ]);
+
     let audioAvailable = false;
 
     if (audioData && audioData.url && fs.existsSync(audioData.url)) {
@@ -981,11 +990,7 @@ const downloadAll = async (req, res) => {
       }
     }
 
-    // Get transcript
-    const transcriptData = await meetingService.getTranscript(meetingId, userId);
-
     // Get summary and format as text
-    const summary = await meetingService.getSummary(meetingId, userId);
     let summaryText = '';
     if (summary) {
       summaryText = `Meeting Summary: ${meeting.title}\n`;
@@ -1488,21 +1493,97 @@ const reprocessMeeting = async (req, res) => {
 };
 
 /**
- * Generate share link for a meeting (Phase 1: canonical app URL)
+ * Generate shareable link for meeting
  * POST /api/meetings/:id/share
  */
 const generateShareLink = async (req, res) => {
   try {
-    const { id } = req.params;
-    const appUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    if (meeting.status !== 'COMPLETED') {
+      return res.status(400).json({ success: false, error: 'Meeting processing not yet complete' });
+    }
+
+    let shareToken = meeting.shareToken;
+    let isNewToken = false;
+
+    if (!shareToken) {
+      const crypto = require('crypto');
+      shareToken = crypto.randomUUID();
+      isNewToken = true;
+
+      await meetingService.updateMeeting(meetingId, userId, {
+        shareToken,
+        shareEnabled: true,
+        sharedAt: new Date()
+      });
+    } else if (!meeting.shareEnabled) {
+      await meetingService.updateMeeting(meetingId, userId, {
+        shareEnabled: true,
+        sharedAt: new Date()
+      });
+    }
+
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const shareUrl = `${FRONTEND_URL}/share/${shareToken}`;
+
     return res.status(200).json({
       success: true,
-      data: { shareUrl: `${appUrl}/meeting/${id}` },
-      message: 'Share link generated',
+      data: {
+        shareToken,
+        shareUrl
+      },
+      message: isNewToken ? 'Share link generated' : 'Existing share link retrieved'
     });
   } catch (error) {
     logger.error(`Error generating share link: ${error.message}`);
-    return res.status(500).json({ success: false, error: 'Failed to generate share link' });
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate share link',
+      details: error.message,
+    });
+  }
+};
+
+/**
+ * Revoke shareable link for meeting
+ * DELETE /api/meetings/:id/share
+ */
+const revokeShareLink = async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    await meetingService.updateMeeting(meetingId, userId, {
+      shareEnabled: false,
+      shareToken: null,
+      sharedAt: null
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Share link revoked successfully'
+    });
+  } catch (error) {
+    logger.error(`Error revoking share link: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to revoke share link',
+      details: error.message,
+    });
   }
 };
 
@@ -1526,7 +1607,6 @@ const getMeetingAnalytics = async (req, res) => {
         audioDuration: true,
         nlpSentiment: true,
         nlpSentimentScore: true,
-        nlpTopics: true,
         summaryKeyTopics: true,
         summarySentiment: true,
       },
@@ -1566,7 +1646,7 @@ const getMeetingAnalytics = async (req, res) => {
           label: meeting.nlpSentiment || meeting.summarySentiment || null,
           score: meeting.nlpSentimentScore || null,
         },
-        topics: meeting.summaryKeyTopics || meeting.nlpTopics || [],
+        topics: meeting.summaryKeyTopics || [],
         wordCount: meeting.transcriptWordCount || null,
         audioDuration: meeting.audioDuration || null,
       },
@@ -1646,10 +1726,13 @@ const shareToSlack = async (req, res) => {
     const meetingId = req.params.id;
     const userId = req.userId;
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { slackWebhookUrl: true },
-    });
+    const [user, meeting] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { slackWebhookUrl: true },
+      }),
+      meetingService.getMeetingById(meetingId, userId),
+    ]);
 
     if (!user || !user.slackWebhookUrl) {
       return res.status(400).json({
@@ -1658,7 +1741,6 @@ const shareToSlack = async (req, res) => {
       });
     }
 
-    const meeting = await meetingService.getMeetingById(meetingId, userId);
     if (!meeting) {
       return res.status(404).json({
         success: false,
@@ -1711,6 +1793,7 @@ module.exports = {
   updateSpeakerMap,
   reprocessMeeting,
   generateShareLink,
+  revokeShareLink,
   getMeetingAnalytics,
   getAllDecisions,
   generateFollowUp,

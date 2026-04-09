@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { taskService } from '../services/task.service';
 import { PageLoader } from '../components/common/Loader';
 import { showToast } from '../components/common/Toast';
+import EditTaskModal from '../components/meeting/EditTaskModal';
+import { LuPencil } from 'react-icons/lu';
 
 const COLUMNS = [
   {
@@ -44,6 +46,7 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
   const [filterMeeting, setFilterMeeting] = useState('all');
+  const [editingTask, setEditingTask] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,10 +96,32 @@ export default function Tasks() {
     setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status } : t)));
 
     try {
-      const res = await taskService.updateTaskStatus(taskId, status);
+      const res = await taskService.updateTask(taskId, { status });
       if (!res.success) {
         setTasks(oldTasks);
         showToast(res.error || 'Failed to update task', 'error');
+      }
+    } catch (error) {
+      setTasks(oldTasks);
+      showToast('Network error occurred', 'error');
+    }
+  };
+
+  const handleEditSave = async (updatedTask) => {
+    const oldTasks = [...tasks];
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+    try {
+      const res = await taskService.updateTask(updatedTask.id, {
+        task: updatedTask.task,
+        assignee: updatedTask.assignee,
+        deadline: updatedTask.deadline,
+        priority: updatedTask.priority,
+      });
+      if (!res.success) {
+        setTasks(oldTasks);
+        showToast(res.error || 'Failed to save task update', 'error');
+      } else {
+        showToast('Action item updated successfully', 'success');
       }
     } catch (error) {
       setTasks(oldTasks);
@@ -230,14 +255,24 @@ export default function Tasks() {
                         className="card-hover group cursor-grab rounded-xl border border-echo-border bg-echo-surface p-4 shadow-sm transition-all hover:border-accent-primary/30 active:cursor-grabbing"
                       >
                         <div className="mb-3 flex items-start justify-between gap-4">
-                          <p className="text-sm font-medium leading-relaxed text-slate-200 transition-colors group-hover:text-white">
+                          <p className="flex-1 text-sm font-medium leading-relaxed text-slate-200 transition-colors group-hover:text-white">
                             {task.task}
                           </p>
-                          {task.priority === 'high' && (
-                            <div className="mt-1 shrink-0">
+                          <div className="mt-1 flex shrink-0 items-center gap-2">
+                            <button
+                              aria-label="Edit Task"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingTask(task);
+                              }}
+                              className="text-slate-400 opacity-0 transition-opacity hover:text-accent-primary group-hover:opacity-100"
+                            >
+                              <LuPencil size={14} />
+                            </button>
+                            {task.priority === 'high' && (
                               <div className="size-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex flex-col gap-2.5">
@@ -286,6 +321,13 @@ export default function Tasks() {
           ))}
         </div>
       </div>
+
+      <EditTaskModal
+        isOpen={!!editingTask}
+        onClose={() => setEditingTask(null)}
+        task={editingTask}
+        onSave={handleEditSave}
+      />
     </div>
   );
 }

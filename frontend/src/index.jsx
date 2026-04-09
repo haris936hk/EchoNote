@@ -13,9 +13,14 @@ window.addEventListener('error', (e) => {
   }
 });
 
+import notificationService from './services/notification.service';
+
 // Mount React app
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
+
+// Register Service Worker for Push Notifications
+notificationService.registerServiceWorker();

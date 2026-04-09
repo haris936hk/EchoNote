@@ -6,6 +6,7 @@ const summarizationService = require('./summarization.service');
 const emailService = require('./email.service');
 const supabaseStorage = require('./supabase-storage.service');
 const slackService = require('./slack.service');
+const notificationService = require('./notification.service');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -39,7 +40,6 @@ function mapSentimentToScore(sentiment) {
   if (s === 'negative') return 0.15;
   return 0.5; // neutral
 }
-
 
 /**
  * Create new meeting without audio (separate from processing)
@@ -346,64 +346,94 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         data: actionItemsData,
       });
       console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
+
+      // Sync IDs back into the meeting summaryActionItems
+      const allActionItems1 = await prisma.actionItem.findMany({
+        where: { meetingId: updatedMeeting.id },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      const summaryActionItems1 = allActionItems1.map((item) => ({
+        id: item.id,
+        task: item.task,
+        assignee: item.assignee,
+        deadline: item.deadline,
+        priority: item.priority,
+        confidence: item.confidence,
+        status: item.status,
+      }));
+
+      await prisma.meeting.update({
+        where: { id: updatedMeeting.id },
+        data: { summaryActionItems: summaryActionItems1 },
+      });
     }
 
     // Step 8: Clean up temporary files
     await cleanupTempFiles([tempPath, processedAudioPath]);
 
-    // Step 9: Send completion email to user
-    try {
-      console.log(`\n📧 Sending completion email...`);
-      await emailService.sendMeetingCompletedEmail({
-        to: meeting.user.email,
-        userName: meeting.user.name,
-        meeting: {
-          id: updatedMeeting.id,
-          title: updatedMeeting.title,
-          createdAt: updatedMeeting.createdAt,
-          audioDuration: updatedMeeting.audioDuration,
-          category: updatedMeeting.category,
-          processingDuration: updatedMeeting.processingDuration,
-          summaryExecutive: updatedMeeting.summaryExecutive,
-          summaryKeyDecisions: updatedMeeting.summaryKeyDecisions,
-          summaryActionItems: updatedMeeting.summaryActionItems,
-          summaryNextSteps: updatedMeeting.summaryNextSteps,
-          transcriptText: updatedMeeting.transcriptText,
-        },
-      });
+    // Step 9: Post-Pipeline Notifications (Parallelized)
+    console.log(`\n📧💬 Sending notifications in parallel...`);
 
-      console.log(`✅ Email sent to ${meeting.user.email}`);
+    const notificationPromises = [];
 
-      // Update email tracking fields
-      await prisma.meeting.update({
-        where: { id: meetingId },
-        data: {
-          emailSent: true,
-          emailSentAt: new Date(),
-        },
-      });
-    } catch (emailError) {
-      console.error(`⚠️ Email send failed:`, emailError.message);
-      // Don't fail the entire processing if email fails
-      // Meeting is still marked as COMPLETED
+    // Email Promise
+    notificationPromises.push(
+      emailService
+        .sendMeetingCompletedEmail({
+          to: meeting.user.email,
+          userName: meeting.user.name,
+          meeting: {
+            id: updatedMeeting.id,
+            title: updatedMeeting.title,
+            createdAt: updatedMeeting.createdAt,
+            audioDuration: updatedMeeting.audioDuration,
+            category: updatedMeeting.category,
+            processingDuration: updatedMeeting.processingDuration,
+            summaryExecutive: updatedMeeting.summaryExecutive,
+            summaryKeyDecisions: updatedMeeting.summaryKeyDecisions,
+            summaryActionItems: updatedMeeting.summaryActionItems,
+            summaryNextSteps: updatedMeeting.summaryNextSteps,
+            transcriptText: updatedMeeting.transcriptText,
+          },
+        })
+        .then(async () => {
+          console.log(`✅ Email sent to ${meeting.user.email}`);
+          await prisma.meeting.update({
+            where: { id: meetingId },
+            data: { emailSent: true, emailSentAt: new Date() },
+          });
+        })
+        .catch((err) => console.error(`⚠️ Email send failed:`, err.message))
+    );
+
+    // Slack Promise
+    const userWithWebhook = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { slackWebhookUrl: true },
+    });
+    if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
+      notificationPromises.push(
+        slackService
+          .sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, updatedMeeting)
+          .then(() => console.log(`✅ Slack notification sent`))
+          .catch((err) => console.error(`⚠️ Slack send failed:`, err.message))
+      );
     }
 
-    // --- NEW: Send Slack Notification ---
-    try {
-      const userWithWebhook = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { slackWebhookUrl: true },
-      });
-      if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
-        console.log(`\n💬 Sending Slack notification...`);
-        await slackService.sendMeetingCompletedNotification(
-          userWithWebhook.slackWebhookUrl,
-          updatedMeeting
-        );
-      }
-    } catch (slackError) {
-      console.error(`⚠️ Slack send failed:`, slackError.message);
-    }
+    // Web Push Promise
+    notificationPromises.push(
+      notificationService
+        .sendMeetingCompletedPush(userId, updatedMeeting)
+        .then((res) => {
+          if (res.success) console.log(`✅ Web Push notification sent`);
+          else logger.debug(`ℹ️ Web Push skipped: ${res.message || res.error}`);
+        })
+        .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
+    );
+
+    // Wait for all notifications to finish
+    await Promise.allSettled(notificationPromises);
 
     console.log(`\n🎉 Meeting processing complete! ID: ${meetingId}\n`);
 
@@ -669,48 +699,93 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         data: actionItemsData,
       });
       console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
+
+      // Sync IDs back into the meeting summaryActionItems
+      const allActionItems2 = await prisma.actionItem.findMany({
+        where: { meetingId: meeting.id },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      const summaryActionItems2 = allActionItems2.map((item) => ({
+        id: item.id,
+        task: item.task,
+        assignee: item.assignee,
+        deadline: item.deadline,
+        priority: item.priority,
+        confidence: item.confidence,
+        status: item.status,
+      }));
+
+      await prisma.meeting.update({
+        where: { id: meeting.id },
+        data: { summaryActionItems: summaryActionItems2 },
+      });
     }
 
     // Step 9: Clean up temporary files
     await cleanupTempFiles([audioPath, processedAudioPath]);
 
-    // Step 10: Send completion email to user
-    console.log(`\n📧 Sending completion email...`);
-    await emailService.sendMeetingCompletedEmail({
-      to: meeting.user.email,
-      userName: meeting.user.name,
-      meeting: {
-        id: meeting.id,
-        title: meeting.title,
-        createdAt: meeting.createdAt,
-        audioDuration: meeting.audioDuration,
-        category: meeting.category,
-        summaryExecutive: meeting.summaryExecutive,
-        summaryKeyDecisions: meeting.summaryKeyDecisions,
-        summaryActionItems: meeting.summaryActionItems,
-        summaryNextSteps: meeting.summaryNextSteps,
-        transcriptText: meeting.transcriptText,
-      },
+    // Step 10: Post-Pipeline Notifications (Parallelized)
+    console.log(`\n📧💬 Sending notifications in parallel...`);
+
+    const notificationPromises = [];
+
+    // Email Promise
+    notificationPromises.push(
+      emailService
+        .sendMeetingCompletedEmail({
+          to: meeting.user.email,
+          userName: meeting.user.name,
+          meeting: {
+            id: meeting.id,
+            title: meeting.title,
+            createdAt: meeting.createdAt,
+            audioDuration: meeting.audioDuration,
+            category: meeting.category,
+            summaryExecutive: meeting.summaryExecutive,
+            summaryKeyDecisions: meeting.summaryKeyDecisions,
+            summaryActionItems: meeting.summaryActionItems,
+            summaryNextSteps: meeting.summaryNextSteps,
+            transcriptText: meeting.transcriptText,
+          },
+        })
+        .then(async () => {
+          console.log(`✅ Email sent to ${meeting.user.email}`);
+          await prisma.meeting.update({
+            where: { id: meeting.id },
+            data: { emailSent: true, emailSentAt: new Date() },
+          });
+        })
+        .catch((err) => console.error(`⚠️ Email send failed:`, err.message))
+    );
+
+    // Slack Promise
+    const userWithWebhook = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { slackWebhookUrl: true },
     });
-
-    console.log(`✅ Email sent to ${meeting.user.email}`);
-
-    // --- NEW: Send Slack Notification ---
-    try {
-      const userWithWebhook = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { slackWebhookUrl: true },
-      });
-      if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
-        console.log(`\n💬 Sending Slack notification...`);
-        await slackService.sendMeetingCompletedNotification(
-          userWithWebhook.slackWebhookUrl,
-          meeting
-        );
-      }
-    } catch (slackError) {
-      console.error(`⚠️ Slack send failed:`, slackError.message);
+    if (userWithWebhook && userWithWebhook.slackWebhookUrl) {
+      notificationPromises.push(
+        slackService
+          .sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, meeting)
+          .then(() => console.log(`✅ Slack notification sent`))
+          .catch((err) => console.error(`⚠️ Slack send failed:`, err.message))
+      );
     }
+
+    // Web Push Promise
+    notificationPromises.push(
+      notificationService
+        .sendMeetingCompletedPush(userId, meeting)
+        .then((res) => {
+          if (res.success) console.log(`✅ Web Push notification sent`);
+          else console.log(`ℹ️ Web Push skipped: ${res.message || res.error}`);
+        })
+        .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
+    );
+
+    // Wait for all notifications to finish
+    await Promise.allSettled(notificationPromises);
 
     console.log(`\n🎉 Meeting processing complete! ID: ${meeting.id}\n`);
 
@@ -957,11 +1032,15 @@ async function searchMeetings(userId, query, options = {}) {
  */
 async function updateMeeting(meetingId, userId, updates) {
   try {
-    // Only allow updating title, description, and category
+    // Only allow updating specific fields
     const allowedUpdates = {};
     if (updates.title !== undefined) allowedUpdates.title = updates.title;
     if (updates.description !== undefined) allowedUpdates.description = updates.description;
     if (updates.category) allowedUpdates.category = updates.category;
+    
+    if (updates.shareToken !== undefined) allowedUpdates.shareToken = updates.shareToken;
+    if (updates.shareEnabled !== undefined) allowedUpdates.shareEnabled = updates.shareEnabled;
+    if (updates.sharedAt !== undefined) allowedUpdates.sharedAt = updates.sharedAt;
 
     const updatedMeeting = await prisma.meeting.updateMany({
       where: {
@@ -974,7 +1053,6 @@ async function updateMeeting(meetingId, userId, updates) {
     if (updatedMeeting.count === 0) {
       return null; // Meeting not found or unauthorized
     }
-
 
     // Return the updated meeting
     return await getMeetingById(meetingId, userId);
@@ -1360,11 +1438,9 @@ async function getMeetingWithNLP(meetingId, userId) {
         transcriptText: true,
         transcriptWordCount: true,
         nlpEntities: true,
-        nlpKeyPhrases: true,
         nlpActionPatterns: true,
         nlpSentiment: true,
         nlpSentimentScore: true,
-        nlpTopics: true,
         summaryExecutive: true,
         summaryKeyDecisions: true,
         summaryActionItems: true,
@@ -1382,7 +1458,7 @@ async function getMeetingWithNLP(meetingId, userId) {
     // Format the response to match dataset structure
     const response = {
       transcript: meeting.transcriptText
-        ? `MEETING TRANSCRIPT:\n${meeting.transcriptText}\n\nNLP FEATURES:\n**Entities:** ${meeting.nlpEntities || 'None'}\n\n**Key Phrases:** ${meeting.nlpKeyPhrases || 'None'}\n\n**Action Patterns:**\n  • ${meeting.nlpActionPatterns || 'None'}\n\n**Sentiment:** ${meeting.nlpSentiment || 'Unknown'} (polarity: ${meeting.nlpSentimentScore || 0})\n\n**Topics:** ${meeting.nlpTopics ? meeting.nlpTopics.join(', ') : 'None'}`
+        ? `MEETING TRANSCRIPT:\n${meeting.transcriptText}\n\nNLP FEATURES:\n**Entities:** ${meeting.nlpEntities || 'None'}\n\n**Action Patterns:**\n  • ${meeting.nlpActionPatterns || 'None'}\n\n**Sentiment:** ${meeting.nlpSentiment || 'Unknown'} (polarity: ${meeting.nlpSentimentScore || 0})`
         : null,
       summary: {
         executiveSummary: meeting.summaryExecutive,
@@ -1623,6 +1699,7 @@ async function getGlobalDecisions(userId) {
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
 
     const allDecisions = [];
