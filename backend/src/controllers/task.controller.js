@@ -27,7 +27,7 @@ const updateTask = async (req, res) => {
       }
       dataToUpdate.status = status;
     }
-    
+
     if (task !== undefined) dataToUpdate.task = task;
     if (assignee !== undefined) dataToUpdate.assignee = assignee;
     if (deadline !== undefined) dataToUpdate.deadline = deadline;
@@ -42,23 +42,23 @@ const updateTask = async (req, res) => {
     if (updatedTask.meetingId) {
       const allActionItems = await prisma.actionItem.findMany({
         where: { meetingId: updatedTask.meetingId },
-        orderBy: { createdAt: 'asc' }
+        orderBy: { createdAt: 'asc' },
       });
-      
+
       // Filter out fields we don't necessarily want in the JSON array, or just keep them
-      const summaryActionItems = allActionItems.map(item => ({
+      const summaryActionItems = allActionItems.map((item) => ({
         id: item.id,
         task: item.task,
         assignee: item.assignee,
         deadline: item.deadline,
         priority: item.priority,
         confidence: item.confidence,
-        status: item.status
+        status: item.status,
       }));
 
       await prisma.meeting.update({
         where: { id: updatedTask.meetingId },
-        data: { summaryActionItems }
+        data: { summaryActionItems },
       });
     }
 

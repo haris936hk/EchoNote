@@ -110,13 +110,12 @@ export default function Tasks() {
   const handleEditSave = async (updatedTask) => {
     const oldTasks = [...tasks];
     setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
-    
     try {
       const res = await taskService.updateTask(updatedTask.id, {
         task: updatedTask.task,
         assignee: updatedTask.assignee,
         deadline: updatedTask.deadline,
-        priority: updatedTask.priority
+        priority: updatedTask.priority,
       });
       if (!res.success) {
         setTasks(oldTasks);
@@ -256,25 +255,25 @@ export default function Tasks() {
                         className="card-hover group cursor-grab rounded-xl border border-echo-border bg-echo-surface p-4 shadow-sm transition-all hover:border-accent-primary/30 active:cursor-grabbing"
                       >
                         <div className="mb-3 flex items-start justify-between gap-4">
-                          <p className="text-sm font-medium leading-relaxed text-slate-200 transition-colors group-hover:text-white flex-1">
-                              {task.task}
-                            </p>
-                            <div className="mt-1 flex shrink-0 items-center gap-2">
-                              <button
-                                aria-label="Edit Task"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingTask(task);
-                                }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-accent-primary"
-                              >
-                                <LuPencil size={14} />
-                              </button>
-                              {task.priority === 'high' && (
-                                <div className="size-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
-                              )}
-                            </div>
+                          <p className="flex-1 text-sm font-medium leading-relaxed text-slate-200 transition-colors group-hover:text-white">
+                            {task.task}
+                          </p>
+                          <div className="mt-1 flex shrink-0 items-center gap-2">
+                            <button
+                              aria-label="Edit Task"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingTask(task);
+                              }}
+                              className="text-slate-400 opacity-0 transition-opacity hover:text-accent-primary group-hover:opacity-100"
+                            >
+                              <LuPencil size={14} />
+                            </button>
+                            {task.priority === 'high' && (
+                              <div className="size-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
+                            )}
                           </div>
+                        </div>
 
                         <div className="flex flex-col gap-2.5">
                           <div className="flex flex-wrap gap-2">
@@ -322,9 +321,9 @@ export default function Tasks() {
           ))}
         </div>
       </div>
-      
-      <EditTaskModal 
-        isOpen={!!editingTask} 
+
+      <EditTaskModal
+        isOpen={!!editingTask}
         onClose={() => setEditingTask(null)}
         task={editingTask}
         onSave={handleEditSave}

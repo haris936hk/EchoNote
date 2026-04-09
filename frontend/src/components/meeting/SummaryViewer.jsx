@@ -115,7 +115,10 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
 
   const handleEditSave = async (updatedTask) => {
     if (!updatedTask.id) {
-      showToast('Cannot edit legacy tasks via this interface directly. Please try the Tasks page.', 'error');
+      showToast(
+        'Cannot edit legacy tasks via this interface directly. Please try the Tasks page.',
+        'error'
+      );
       setEditingTask(null);
       return;
     }
@@ -129,7 +132,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
         task: updatedTask.task,
         assignee: updatedTask.assignee,
         deadline: updatedTask.deadline,
-        priority: updatedTask.priority
+        priority: updatedTask.priority,
       });
       if (!res.success) {
         setLocalActions(previousActions);
@@ -274,7 +277,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
                     </button>
                     <div className="flex flex-1 items-start justify-between gap-3">
                       <p
-                        className={`text-sm font-medium leading-relaxed text-slate-200 ${isChecked ? 'line-through text-slate-400' : ''}`}
+                        className={`text-sm font-medium leading-relaxed text-slate-200 ${isChecked ? 'text-slate-400 line-through' : ''}`}
                       >
                         {action.task}
                       </p>
@@ -283,7 +286,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
                           type="button"
                           onClick={() => setEditingTask(action)}
                           aria-label="Edit Task"
-                          className="mt-0.5 text-slate-500 hover:text-accent-primary transition-colors shrink-0"
+                          className="mt-0.5 shrink-0 text-slate-500 transition-colors hover:text-accent-primary"
                         >
                           <LuPencil size={14} />
                         </button>
@@ -384,7 +387,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
       />
 
       {/* ── Edit Task Modal ── */}
-      <EditTaskModal 
+      <EditTaskModal
         isOpen={!!editingTask}
         onClose={() => setEditingTask(null)}
         task={editingTask}
