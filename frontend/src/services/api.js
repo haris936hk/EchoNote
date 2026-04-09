@@ -533,16 +533,16 @@ export const tasksAPI = {
   },
 
   /**
-   * Update task status
+   * Update task details (status, text, deadline, etc.)
    */
-  updateTaskStatus: async (id, status) => {
+  updateTask: async (id, updates) => {
     try {
-      const response = await api.patch(`/tasks/${id}`, { status });
+      const response = await api.patch(`/tasks/${id}`, updates);
       return { success: true, data: response.data };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to update task status',
+        error: error.response?.data?.message || 'Failed to update task',
       };
     }
   },

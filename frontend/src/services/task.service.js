@@ -27,18 +27,18 @@ export const getTasks = async () => {
 };
 
 /**
- * Update task status
+ * Update task status or details
  */
-export const updateTaskStatus = async (id, status) => {
+export const updateTask = async (id, updates) => {
   try {
-    if (!id || !status) {
+    if (!id || !updates) {
       return {
         success: false,
-        error: 'Task ID and status are required',
+        error: 'Task ID and updates are required',
       };
     }
 
-    const result = await tasksAPI.updateTaskStatus(id, status);
+    const result = await tasksAPI.updateTask(id, updates);
 
     if (result.success) {
       return {
@@ -54,14 +54,14 @@ export const updateTaskStatus = async (id, status) => {
   } catch {
     return {
       success: false,
-      error: 'Failed to update task status',
+      error: 'Failed to update task',
     };
   }
 };
 
 export const taskService = {
   getTasks,
-  updateTaskStatus,
+  updateTask,
 };
 
 export default taskService;

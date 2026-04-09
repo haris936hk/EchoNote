@@ -345,6 +345,27 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         data: actionItemsData,
       });
       console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
+
+      // Sync IDs back into the meeting summaryActionItems
+      const allActionItems1 = await prisma.actionItem.findMany({
+        where: { meetingId: updatedMeeting.id },
+        orderBy: { createdAt: 'asc' }
+      });
+      
+      const summaryActionItems1 = allActionItems1.map(item => ({
+        id: item.id,
+        task: item.task,
+        assignee: item.assignee,
+        deadline: item.deadline,
+        priority: item.priority,
+        confidence: item.confidence,
+        status: item.status
+      }));
+
+      await prisma.meeting.update({
+        where: { id: updatedMeeting.id },
+        data: { summaryActionItems: summaryActionItems1 }
+      });
     }
 
     // Step 8: Clean up temporary files
@@ -666,6 +687,27 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         data: actionItemsData,
       });
       console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
+
+      // Sync IDs back into the meeting summaryActionItems
+      const allActionItems2 = await prisma.actionItem.findMany({
+        where: { meetingId: meeting.id },
+        orderBy: { createdAt: 'asc' }
+      });
+      
+      const summaryActionItems2 = allActionItems2.map(item => ({
+        id: item.id,
+        task: item.task,
+        assignee: item.assignee,
+        deadline: item.deadline,
+        priority: item.priority,
+        confidence: item.confidence,
+        status: item.status
+      }));
+
+      await prisma.meeting.update({
+        where: { id: meeting.id },
+        data: { summaryActionItems: summaryActionItems2 }
+      });
     }
 
     // Step 9: Clean up temporary files
