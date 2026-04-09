@@ -35,6 +35,7 @@ const storageRoutes = require('./routes/storage.routes');
 const calendarRoutes = require('./routes/calendar.routes');
 const taskRoutes = require('./routes/task.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const publicRoutes = require('./routes/public.routes');
 
 // Import middleware
 const { errorHandler } = require('./middleware/error.middleware');
@@ -123,6 +124,7 @@ app.get('/health', async (req, res) => {
 // ============================================
 
 // Mount routes
+app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/meetings', meetingRoutes);

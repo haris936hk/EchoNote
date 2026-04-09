@@ -350,10 +350,9 @@ router.post(
 
 /**
  * @route   POST /api/meetings/:id/share
- * @desc    Generate shareable link for meeting (future feature)
+ * @desc    Generate shareable link for meeting
  * @access  Private (owner only)
- * @body    { expiresIn?, password? }
- * @returns { success, data: { shareUrl, expiresAt } }
+ * @returns { success, data: { shareToken, shareUrl } }
  */
 router.post(
   '/:id/share',
@@ -361,6 +360,20 @@ router.post(
   validateUUIDParam('id'),
   authorize('meeting'),
   meetingController.generateShareLink
+);
+
+/**
+ * @route   DELETE /api/meetings/:id/share
+ * @desc    Revoke share link for meeting
+ * @access  Private (owner only)
+ * @returns { success, message }
+ */
+router.delete(
+  '/:id/share',
+  authenticate,
+  validateUUIDParam('id'),
+  authorize('meeting'),
+  meetingController.revokeShareLink
 );
 
 /**

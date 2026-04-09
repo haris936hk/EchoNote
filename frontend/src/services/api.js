@@ -12,6 +12,15 @@ const api = axios.create({
   },
 });
 
+// Create public axios instance that bypasses auth interceptors
+export const publicAPI = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 // Request deduplication map - Track pending requests
 const pendingRequests = new Map();
 

@@ -21,6 +21,7 @@ import Tasks from './pages/Tasks';
 import Decisions from './pages/Decisions';
 import Analytics from './pages/Analytics';
 import SpeakerCoachPage from './pages/SpeakerCoachPage';
+import PublicMeetingSummary from './pages/PublicMeetingSummary';
 
 /**
  * Public Route Component
@@ -58,6 +59,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
+      <Route path="/share/:token" element={<PublicMeetingSummary />} />
       <Route
         path="/login"
         element={
