@@ -33,6 +33,7 @@ const getCurrentUser = async (req, res) => {
         googleId: true,
         autoDeleteDays: true,
         emailNotifications: true,
+        pushNotifications: true,
         createdAt: true,
         lastLoginAt: true,
         _count: {
@@ -125,6 +126,7 @@ const updateUserProfile = async (req, res) => {
         picture: true,
         autoDeleteDays: true,
         emailNotifications: true,
+        pushNotifications: true,
         updatedAt: true,
       },
     });
@@ -159,6 +161,7 @@ const getUserSettings = async (req, res) => {
       select: {
         autoDeleteDays: true,
         emailNotifications: true,
+        pushNotifications: true,
         slackWebhookUrl: true,
       },
     });
@@ -254,6 +257,16 @@ const updateUserSettings = async (req, res) => {
       updateData.emailNotifications = emailNotifications;
     }
 
+    if (req.body.pushNotifications !== undefined) {
+      if (typeof req.body.pushNotifications !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          error: 'Push notifications must be true or false',
+        });
+      }
+      updateData.pushNotifications = req.body.pushNotifications;
+    }
+
     if (slackWebhookUrl !== undefined) {
       if (slackWebhookUrl === '') {
         updateData.slackWebhookUrl = null;
@@ -281,6 +294,7 @@ const updateUserSettings = async (req, res) => {
       select: {
         autoDeleteDays: true,
         emailNotifications: true,
+        pushNotifications: true,
         slackWebhookUrl: true,
       },
     });
@@ -582,6 +596,7 @@ const exportUserData = async (req, res) => {
         settings: {
           autoDeleteDays: user.autoDeleteDays,
           emailNotifications: user.emailNotifications,
+          pushNotifications: user.pushNotifications,
         },
       },
       meetings: meetings.map((m) => ({

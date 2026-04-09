@@ -11,6 +11,7 @@ import { MeetingProvider } from './contexts/MeetingContext';
 // Components
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { ToastContainer, useToast } from './components/common/Toast';
+import NotificationPromptBanner from './components/common/NotificationPromptBanner';
 
 // Routes
 import AppRoutes from './routes';
@@ -46,6 +47,7 @@ function App() {
               <MeetingProvider>
                 <Router>
                   <ToastWrapper>
+                    <NotificationPromptBanner />
                     <AppRoutes />
                   </ToastWrapper>
                 </Router>

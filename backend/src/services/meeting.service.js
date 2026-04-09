@@ -6,6 +6,7 @@ const summarizationService = require('./summarization.service');
 const emailService = require('./email.service');
 const supabaseStorage = require('./supabase-storage.service');
 const slackService = require('./slack.service');
+const notificationService = require('./notification.service');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -420,6 +421,17 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       );
     }
 
+    // Web Push Promise
+    notificationPromises.push(
+      notificationService
+        .sendMeetingCompletedPush(userId, updatedMeeting)
+        .then((res) => {
+          if (res.success) console.log(`✅ Web Push notification sent`);
+          else logger.debug(`ℹ️ Web Push skipped: ${res.message || res.error}`);
+        })
+        .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
+    );
+
     // Wait for all notifications to finish
     await Promise.allSettled(notificationPromises);
 
@@ -760,6 +772,17 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
           .catch((err) => console.error(`⚠️ Slack send failed:`, err.message))
       );
     }
+
+    // Web Push Promise
+    notificationPromises.push(
+      notificationService
+        .sendMeetingCompletedPush(userId, meeting)
+        .then((res) => {
+          if (res.success) console.log(`✅ Web Push notification sent`);
+          else console.log(`ℹ️ Web Push skipped: ${res.message || res.error}`);
+        })
+        .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
+    );
 
     // Wait for all notifications to finish
     await Promise.allSettled(notificationPromises);

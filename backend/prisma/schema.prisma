@@ -25,6 +25,7 @@ model User {
   // Settings
   autoDeleteDays     Int? // Auto-delete audio after X days (null = never delete)
   emailNotifications Boolean @default(true)
+  pushNotifications  Boolean @default(true)
   slackWebhookUrl    String? @db.Text // Slack integration endpoint
 
   // Timestamps
@@ -33,8 +34,9 @@ model User {
   lastLoginAt DateTime @default(now())
 
   // Relations
-  meetings    Meeting[]
-  actionItems ActionItem[]
+  meetings          Meeting[]
+  actionItems       ActionItem[]
+  pushSubscriptions PushSubscription[]
 
   @@index([email])
   @@index([googleId])
@@ -205,4 +207,20 @@ model ActionItem {
   @@index([status])
   @@index([userId, status])
   @@map("action_items")
+}
+
+// Push subscription for web/mobile notifications
+model PushSubscription {
+  id        String @id @default(uuid())
+  endpoint  String @unique
+  p256dh    String
+  auth      String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
