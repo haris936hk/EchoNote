@@ -1032,11 +1032,15 @@ async function searchMeetings(userId, query, options = {}) {
  */
 async function updateMeeting(meetingId, userId, updates) {
   try {
-    // Only allow updating title, description, and category
+    // Only allow updating specific fields
     const allowedUpdates = {};
     if (updates.title !== undefined) allowedUpdates.title = updates.title;
     if (updates.description !== undefined) allowedUpdates.description = updates.description;
     if (updates.category) allowedUpdates.category = updates.category;
+    
+    if (updates.shareToken !== undefined) allowedUpdates.shareToken = updates.shareToken;
+    if (updates.shareEnabled !== undefined) allowedUpdates.shareEnabled = updates.shareEnabled;
+    if (updates.sharedAt !== undefined) allowedUpdates.sharedAt = updates.sharedAt;
 
     const updatedMeeting = await prisma.meeting.updateMany({
       where: {

@@ -1493,21 +1493,97 @@ const reprocessMeeting = async (req, res) => {
 };
 
 /**
- * Generate share link for a meeting (Phase 1: canonical app URL)
+ * Generate shareable link for meeting
  * POST /api/meetings/:id/share
  */
 const generateShareLink = async (req, res) => {
   try {
-    const { id } = req.params;
-    const appUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    if (meeting.status !== 'COMPLETED') {
+      return res.status(400).json({ success: false, error: 'Meeting processing not yet complete' });
+    }
+
+    let shareToken = meeting.shareToken;
+    let isNewToken = false;
+
+    if (!shareToken) {
+      const crypto = require('crypto');
+      shareToken = crypto.randomUUID();
+      isNewToken = true;
+
+      await meetingService.updateMeeting(meetingId, userId, {
+        shareToken,
+        shareEnabled: true,
+        sharedAt: new Date()
+      });
+    } else if (!meeting.shareEnabled) {
+      await meetingService.updateMeeting(meetingId, userId, {
+        shareEnabled: true,
+        sharedAt: new Date()
+      });
+    }
+
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const shareUrl = `${FRONTEND_URL}/share/${shareToken}`;
+
     return res.status(200).json({
       success: true,
-      data: { shareUrl: `${appUrl}/meeting/${id}` },
-      message: 'Share link generated',
+      data: {
+        shareToken,
+        shareUrl
+      },
+      message: isNewToken ? 'Share link generated' : 'Existing share link retrieved'
     });
   } catch (error) {
     logger.error(`Error generating share link: ${error.message}`);
-    return res.status(500).json({ success: false, error: 'Failed to generate share link' });
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate share link',
+      details: error.message,
+    });
+  }
+};
+
+/**
+ * Revoke shareable link for meeting
+ * DELETE /api/meetings/:id/share
+ */
+const revokeShareLink = async (req, res) => {
+  try {
+    const meetingId = req.params.id;
+    const userId = req.userId;
+
+    const meeting = await meetingService.getMeetingById(meetingId, userId);
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
+    }
+
+    await meetingService.updateMeeting(meetingId, userId, {
+      shareEnabled: false,
+      shareToken: null,
+      sharedAt: null
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Share link revoked successfully'
+    });
+  } catch (error) {
+    logger.error(`Error revoking share link: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to revoke share link',
+      details: error.message,
+    });
   }
 };
 
@@ -1717,6 +1793,7 @@ module.exports = {
   updateSpeakerMap,
   reprocessMeeting,
   generateShareLink,
+  revokeShareLink,
   getMeetingAnalytics,
   getAllDecisions,
   generateFollowUp,

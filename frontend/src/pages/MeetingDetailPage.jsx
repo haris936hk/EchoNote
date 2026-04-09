@@ -28,6 +28,7 @@ import { CategoryBadge } from '../components/meeting/CategoryFilter';
 import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
 import SpeakerRenameModal from '../components/meeting/SpeakerRenameModal';
+import ShareMeetingModal from '../components/meeting/ShareMeetingModal';
 
 const PIPELINE_STEPS = [
   { key: 'UPLOADING', label: 'Upload' },
@@ -57,20 +58,11 @@ const MeetingDetailPage = () => {
   const [selectedSpeaker, setSelectedSpeaker] = useState({ id: '', name: '' });
   const [isRetrying, setIsRetrying] = useState(false);
   const [isSendingToSlack, setIsSendingToSlack] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  // B2 — Copy meeting URL to clipboard
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText(`${window.location.origin}/meeting/${id}`);
-      window.dispatchEvent(
-        new CustomEvent('echonote-toast', {
-          detail: { message: 'Link copied to clipboard!', type: 'success' },
-        })
-      );
-    } catch {
-      // Fallback for browsers without clipboard API
-      window.prompt('Copy this link:', `${window.location.origin}/meeting/${id}`);
-    }
+  // Open share modal
+  const handleShare = () => {
+    setIsShareModalOpen(true);
   };
 
   const handleRenameSpeaker = (speakerId, currentName) => {
@@ -412,15 +404,25 @@ const MeetingDetailPage = () => {
         {/* Actions */}
         <div className="flex items-center gap-2">
           {isCompleted && (
-            <button
-              onClick={handleSendToSlack}
-              disabled={isSendingToSlack}
-              className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
-              type="button"
-            >
-              <Slack size={14} className={isSendingToSlack ? 'animate-pulse' : ''} />
-              {isSendingToSlack ? 'Sending...' : 'Send to Slack'}
-            </button>
+            <>
+              <button
+                onClick={handleShare}
+                className={`btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium transition-colors ${currentMeeting.shareToken && currentMeeting.shareEnabled ? 'text-[#22C55E] bg-[#22C55E]/10' : ''}`}
+                type="button"
+              >
+                <Share2 size={14} />
+                {currentMeeting.shareToken && currentMeeting.shareEnabled ? 'Shared' : 'Share'}
+              </button>
+              <button
+                onClick={handleSendToSlack}
+                disabled={isSendingToSlack}
+                className="btn-ghost inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
+                type="button"
+              >
+                <Slack size={14} className={isSendingToSlack ? 'animate-pulse' : ''} />
+                {isSendingToSlack ? 'Sending...' : 'Send to Slack'}
+              </button>
+            </>
           )}
           {currentMeeting.audioUrl && (
             <button
@@ -453,9 +455,6 @@ const MeetingDetailPage = () => {
                 base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
               }}
             >
-              <DropdownItem key="share" startContent={<Share2 size={14} />} onPress={handleShare}>
-                Copy Link
-              </DropdownItem>
               <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
                 Edit Meeting
               </DropdownItem>
@@ -629,6 +628,14 @@ const MeetingDetailPage = () => {
         speakerId={selectedSpeaker.id}
         currentName={selectedSpeaker.name}
         onSave={handleSaveSpeaker}
+      />
+
+      {/* Share Modal */}
+      <ShareMeetingModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        meeting={currentMeeting}
+        onShareUpdate={() => fetchMeeting(id)}
       />
     </div>
   );

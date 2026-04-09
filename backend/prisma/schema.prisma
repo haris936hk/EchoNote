@@ -135,6 +135,11 @@ model Meeting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Share link feature
+  shareToken    String?   @unique
+  shareEnabled  Boolean   @default(false)
+  sharedAt      DateTime?
+
   // Relations
   userId      String
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
