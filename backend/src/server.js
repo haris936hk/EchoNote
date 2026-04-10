@@ -36,6 +36,8 @@ const calendarRoutes = require('./routes/calendar.routes');
 const taskRoutes = require('./routes/task.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const publicRoutes = require('./routes/public.routes');
+const workspaceRoutes = require('./routes/workspace.routes');
+const liveblocksRoutes = require('./routes/liveblocks.routes');
 
 // Import middleware
 const { errorHandler } = require('./middleware/error.middleware');
@@ -132,6 +134,8 @@ app.use('/api/storage', storageRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/workspaces', workspaceRoutes);
+app.use('/api/liveblocks', liveblocksRoutes);
 
 // API root endpoint
 app.get('/api', (req, res) => {

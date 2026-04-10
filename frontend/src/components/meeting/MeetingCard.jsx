@@ -1,4 +1,4 @@
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Chip } from '@heroui/react';
 import PropTypes from 'prop-types';
 import {
   LuClock as Clock,
@@ -8,6 +8,7 @@ import {
   LuDownload as Download,
   LuPenLine as Edit3,
   LuCalendar as Calendar,
+  LuLayout,
 } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import { CategoryBadge } from './CategoryFilter';
@@ -138,6 +139,16 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <CategoryBadge category={meeting.category} />
+            {meeting.workspaceMeeting && (
+              <Chip
+                size="sm"
+                variant="flat"
+                startContent={<LuLayout size={10} />}
+                className="h-5 border border-accent-primary/20 bg-accent-primary/10 text-[9px] text-accent-primary"
+              >
+                {meeting.workspaceMeeting.workspace?.name || 'Workspace'}
+              </Chip>
+            )}
             <span
               className={`inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider ${statColors.text}`}
             >

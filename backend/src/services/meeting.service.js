@@ -840,6 +840,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 function transformMeetingForFrontend(meeting) {
   if (!meeting) return null;
 
+  // Prioritize relational action items if they were included in the query
+  const actionItems = meeting.actionItems || meeting.summaryActionItems || [];
+
   return {
     ...meeting,
     // Map transcript fields
@@ -854,12 +857,12 @@ function transformMeetingForFrontend(meeting) {
     summary:
       meeting.summaryExecutive ||
       meeting.summaryKeyDecisions ||
-      meeting.summaryActionItems ||
+      actionItems.length > 0 ||
       meeting.summaryNextSteps
         ? {
             executiveSummary: meeting.summaryExecutive,
             keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
-            actionItems: meeting.summaryActionItems,
+            actionItems: actionItems,
             nextSteps: deserializeArrayField(meeting.summaryNextSteps),
             keyTopics: meeting.summaryKeyTopics,
             sentiment: meeting.summarySentiment,
@@ -889,6 +892,9 @@ async function getMeetingById(meetingId, userId) {
             email: true,
           },
         },
+        actionItems: {
+          orderBy: { createdAt: 'asc' }
+        }
       },
     });
 
@@ -1382,18 +1388,11 @@ async function getSummary(meetingId, userId) {
         id: meetingId,
         userId,
       },
-      select: {
-        summaryExecutive: true,
-        summaryKeyDecisions: true,
-        summaryActionItems: true,
-        summaryNextSteps: true,
-        summaryKeyTopics: true,
-        summarySentiment: true,
-        status: true,
-        title: true,
-        category: true,
-        createdAt: true,
-      },
+      include: {
+        actionItems: {
+          orderBy: { createdAt: 'asc' }
+        }
+      }
     });
 
     if (!meeting) {
@@ -1407,7 +1406,7 @@ async function getSummary(meetingId, userId) {
     return {
       executiveSummary: meeting.summaryExecutive,
       keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
-      actionItems: meeting.summaryActionItems || [],
+      actionItems: meeting.actionItems.length > 0 ? meeting.actionItems : (meeting.summaryActionItems || []),
       nextSteps: deserializeArrayField(meeting.summaryNextSteps),
       keyTopics: meeting.summaryKeyTopics || [],
       sentiment: meeting.summarySentiment,
@@ -1768,4 +1767,8 @@ module.exports = {
   // Advanced features
   regenerateSummary,
   getGlobalDecisions,
+
+  // Utils
+  transformMeetingForFrontend,
+  deserializeArrayField,
 };

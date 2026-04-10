@@ -37,10 +37,18 @@ model User {
   meetings          Meeting[]
   actionItems       ActionItem[]
   pushSubscriptions PushSubscription[]
+  workspaceMemberships WorkspaceMember[]
 
   @@index([email])
   @@index([googleId])
   @@map("users")
+}
+
+// Workspace role enum
+enum WorkspaceRole {
+  OWNER
+  EDITOR
+  VIEWER
 }
 
 // Meeting status enum
@@ -144,6 +152,7 @@ model Meeting {
   userId      String
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   actionItems ActionItem[]
+  workspaceMeeting WorkspaceMeeting?
 
   @@index([userId])
   @@index([userId, createdAt]) // composite: list queries sorted by date
@@ -154,6 +163,45 @@ model Meeting {
   @@index([shouldDeleteAudioAt]) // For cron job cleanup
   @@index([status, queuedAt]) // For queue processing
   @@map("meetings")
+}
+
+// Workspace model
+model Workspace {
+  id          String             @id @default(uuid())
+  name        String
+  description String?            @db.Text
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  members     WorkspaceMember[]
+  meetings    WorkspaceMeeting[]
+
+  @@map("workspaces")
+}
+
+// Workspace member model
+model WorkspaceMember {
+  id          String        @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(VIEWER)
+  joinedAt    DateTime      @default(now())
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+// Workspace meeting link model
+model WorkspaceMeeting {
+  id          String    @id @default(uuid())
+  workspaceId String
+  meetingId   String    @unique
+  addedAt     DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  meeting     Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_meetings")
 }
 
 // Processing log for debugging and analytics

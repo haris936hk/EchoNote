@@ -22,6 +22,9 @@ import Decisions from './pages/Decisions';
 import Analytics from './pages/Analytics';
 import SpeakerCoachPage from './pages/SpeakerCoachPage';
 import PublicMeetingSummary from './pages/PublicMeetingSummary';
+import WorkspacesPage from './pages/WorkspacesPage';
+import WorkspaceDetailPage from './pages/WorkspaceDetailPage';
+import WorkspaceMeetingDetail from './pages/WorkspaceMeetingDetail';
 
 /**
  * Public Route Component
@@ -166,6 +169,36 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <MainLayout>
               <SpeakerCoachPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <WorkspacesPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <WorkspaceDetailPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces/:id/meeting/:meetingId"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <WorkspaceMeetingDetail />
             </MainLayout>
           </ProtectedRoute>
         }

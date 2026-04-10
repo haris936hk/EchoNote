@@ -1771,6 +1771,91 @@ const shareToSlack = async (req, res) => {
   }
 };
 
+/**
+ * Update meeting summary (Workspace context)
+ * PATCH /api/meetings/:id/summary
+ */
+const updateMeetingSummary = async (req, res) => {
+  const meetingId = req.params.id;
+  const userId = req.userId;
+  const { executiveSummary, actionItems, keyDecisions, nextSteps } = req.body;
+
+  try {
+    // Strict authorization: Only OWNER or EDITOR of the specific workspace containing this meeting
+    const workspaceMeeting = await prisma.workspaceMeeting.findUnique({
+      where: { meetingId },
+      include: {
+        workspace: {
+          include: {
+            members: {
+              where: { userId },
+            },
+          },
+        },
+      },
+    });
+
+    if (!workspaceMeeting) {
+      return res.status(403).json({
+        success: false,
+        error: 'This meeting does not belong to a workspace or is not editable via this endpoint',
+      });
+    }
+
+    const membership = workspaceMeeting.workspace.members[0];
+    const isAuthorized = membership && (membership.role === 'OWNER' || membership.role === 'EDITOR');
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        error: 'You must be a workspace OWNER or EDITOR to edit the summary',
+      });
+    }
+
+    // Helper to normalize input to array
+    const normalizeToArray = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'string') {
+        return val.split('\n').map(s => s.trim()).filter(Boolean);
+      }
+      return [val];
+    };
+
+    const keyDecisionsArray = normalizeToArray(keyDecisions);
+    const nextStepsArray = normalizeToArray(nextSteps);
+    const actionItemsArray = normalizeToArray(actionItems);
+
+    const updatedMeeting = await prisma.meeting.update({
+      where: { id: meetingId },
+      data: {
+        summaryExecutive: executiveSummary,
+        summaryActionItems: actionItemsArray, // Now stored as array of strings (simplified)
+        summaryKeyDecisions: JSON.stringify(keyDecisionsArray),
+        summaryNextSteps: JSON.stringify(nextStepsArray),
+      },
+    });
+
+    logger.info(`Meeting summary updated: ${meetingId} by user ${userId} in workspace ${workspaceMeeting.workspaceId}`);
+
+    // Transform for frontend (deserializes JSON strings back to arrays)
+    const transformedMeeting = meetingService.transformMeetingForFrontend(updatedMeeting);
+
+    return res.status(200).json({
+      success: true,
+      data: transformedMeeting,
+      message: 'Summary updated successfully',
+    });
+  } catch (error) {
+    logger.error(`Error updating meeting summary: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to update summary',
+      details: error.message,
+    });
+  }
+};
+
 module.exports = {
   createMeeting,
   createMeetingWithAudio,
@@ -1798,4 +1883,6 @@ module.exports = {
   getAllDecisions,
   generateFollowUp,
   shareToSlack,
+  updateMeetingSummary,
 };
+

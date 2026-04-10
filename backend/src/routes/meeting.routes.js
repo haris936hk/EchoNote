@@ -153,6 +153,22 @@ router.patch(
 );
 
 /**
+ * @route   PATCH /api/meetings/:id/summary
+ * @desc    Update meeting summary (Workspace context)
+ * @access  Private (Workspace OWNER/EDITOR only)
+ * @body    { executiveSummary?, actionItems?, keyDecisions?, nextSteps? }
+ * @returns { success, data: meeting, message }
+ */
+router.patch(
+  '/:id/summary',
+  authenticate,
+  validateUUIDParam('id'),
+  sanitizeBody,
+  meetingController.updateMeetingSummary
+);
+
+
+/**
  * @route   DELETE /api/meetings/:id
  * @desc    Delete meeting and associated data
  * @access  Private (owner only)

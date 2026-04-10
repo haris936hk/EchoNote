@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
 import {
   LuArrowLeft as ArrowLeft,
@@ -17,6 +17,7 @@ import {
   LuFileText as FileText,
   LuShare2 as Share2,
   LuSlack as Slack,
+  LuLock as Lock,
 } from 'react-icons/lu';
 import { useMeeting } from '../contexts/MeetingContext';
 import { shareMeetingToSlack } from '../services/meeting.service';
@@ -297,6 +298,36 @@ const MeetingDetailPage = () => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
+      {/* ── Workspace Read-only Banner ── */}
+      {currentMeeting.workspaceMeeting && (
+        <div className="flex flex-col gap-4 rounded-card border border-accent-primary/20 bg-accent-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-accent-primary/10 text-accent-primary shadow-[0_0_20px_rgba(129,140,248,0.1)]">
+              <Lock size={24} />
+            </div>
+            <div>
+              <p className="text-base font-bold text-white">Project Workspace Active</p>
+              <p className="text-sm text-slate-400">
+                This meeting is managed by{' '}
+                <span className="font-semibold text-accent-primary">
+                  {currentMeeting.workspaceMeeting.workspace?.name || 'a workspace'}
+                </span>
+                . Personal editing is locked.
+              </p>
+            </div>
+          </div>
+          <Button
+            as={Link}
+            to={`/workspaces/${currentMeeting.workspaceMeeting.workspaceId}/meeting/${id}`}
+            size="md"
+            className="rounded-xl bg-accent-primary font-bold text-white shadow-lg shadow-accent-primary/20"
+            endContent={<ExternalLink size={18} />}
+          >
+            Collaborate
+          </Button>
+        </div>
+      )}
+
       {/* ── Back Link ── */}
       <button
         onClick={handleBack}
@@ -455,8 +486,13 @@ const MeetingDetailPage = () => {
                 base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
               }}
             >
-              <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
-                Edit Meeting
+              <DropdownItem
+                key="edit"
+                startContent={<Edit3 size={14} />}
+                onPress={handleEdit}
+                isDisabled={!!currentMeeting.workspaceMeeting}
+              >
+                Edit Meeting {currentMeeting.workspaceMeeting ? '(Managed by Workspace)' : ''}
               </DropdownItem>
               <DropdownItem
                 key="download-all"

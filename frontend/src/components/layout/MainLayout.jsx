@@ -14,6 +14,7 @@ export const ScrollContext = createContext({
 const MainLayout = ({ children }) => {
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard' },
+    { path: '/workspaces', label: 'Workspaces' },
     { path: '/calendar', label: 'Calendar' },
     { path: '/record', label: 'Record' },
     { path: '/meetings', label: 'Meetings' },

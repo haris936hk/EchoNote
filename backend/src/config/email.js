@@ -762,6 +762,148 @@ Need help? Reply to this email or visit our Help Center.
 };
 
 /**
+ * Send workspace invitation email
+ * @param {Object} params - Email parameters
+ */
+const sendWorkspaceInvitationEmail = async ({ to, inviterName, workspaceName, role }) => {
+  const subject = `🤝 ${inviterName} invited you to join "${workspaceName}"`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workspace Invitation</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #020617; color: #f8fafc;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #020617; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #0f172a; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+
+          <!-- Header with Luminous Gradient -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%); padding: 50px 30px; text-align: center;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size: 56px; line-height: 1; padding-bottom: 16px;">🏢</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 28px; font-weight: 800; color: #020617; padding-bottom: 8px; letter-spacing: -1px;">EchoNote Workspace</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 14px; font-weight: 600; color: #020617; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8;">Collaborative Intelligence</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td style="padding: 40px 40px;">
+
+              <!-- Greeting -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size: 24px; font-weight: 800; color: #f8fafc; padding-bottom: 16px; letter-spacing: -0.5px;">
+                    Invitation to Collaborate
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 16px; color: #94a3b8; line-height: 1.6; padding-bottom: 32px;">
+                    Hi there, <strong>${inviterName}</strong> has invited you to join the <strong>${workspaceName}</strong> workspace on EchoNote.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Workspace Info Card -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #1e293b; border-radius: 16px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.05);">
+                <tr>
+                  <td style="padding: 24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size: 11px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 1.5px; padding-bottom: 8px;">
+                          ASSIGNED ROLE
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 20px; font-weight: 700; color: #f8fafc; padding-bottom: 4px;">
+                          ${role}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px; color: #64748b;">
+                          ${role === 'EDITOR' ? 'You can edit meeting summaries and manage action items.' : 'You have read-only access to workspace archives.'}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 8px 0 40px 0;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%); border-radius: 12px; box-shadow: 0 8px 20px rgba(129, 140, 248, 0.3);">
+                          <a href="${EMAIL_CONFIG.frontendUrl}/workspaces" style="display: inline-block; padding: 16px 40px; font-size: 15px; font-weight: 800; color: #020617; text-decoration: none; letter-spacing: 0.5px;">
+                            Enter Workspace →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Footer Note -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 32px;">
+                <tr>
+                  <td style="font-size: 13px; color: #475569; text-align: center; line-height: 1.6;">
+                    You are receiving this because you were invited through your verified EchoNote account. No action is required to accept; access is already active on your dashboard.
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Branding Footer -->
+          <tr>
+            <td style="padding: 30px; text-align: center; background-color: #020617;">
+              <span style="font-size: 12px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 3px;">
+                EchoNote . System Archive
+              </span>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const text = `
+Hi there,
+
+${inviterName} has invited you to join the "${workspaceName}" workspace on EchoNote.
+
+Role Assigned: ${role}
+${role === 'EDITOR' ? 'You can edit meeting summaries and manage action items.' : 'You have read-only access to workspace archives.'}
+
+Access your new workspace here: ${EMAIL_CONFIG.frontendUrl}/workspaces
+
+---
+EchoNote Collaborative Intelligence
+  `;
+
+  return sendEmail({ to, subject, html, text, skipPreferenceCheck: true });
+};
+
+/**
  * Test email configuration
  * @param {string} to - Test recipient email
  */
@@ -780,5 +922,6 @@ module.exports = {
   sendMeetingCompletedEmail,
   sendMeetingFailedEmail,
   sendWelcomeEmail,
+  sendWorkspaceInvitationEmail,
   testEmailConfig,
 };
