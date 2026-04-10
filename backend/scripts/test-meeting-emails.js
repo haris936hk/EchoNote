@@ -1,14 +1,3 @@
-/**
- * Test Meeting Email Templates
- *
- * This script tests all three email templates:
- * - Meeting Completion Email
- * - Meeting Failed Email
- * - Welcome Email
- *
- * Run: node backend/scripts/test-meeting-emails.js
- */
-
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const emailService = require('../src/config/email');
 

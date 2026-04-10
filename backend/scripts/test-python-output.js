@@ -33,12 +33,10 @@ async function runTests() {
   console.log('🚀 Starting Python Output Verification Tests');
   console.log('-------------------------------------------');
 
-  // Test NLP Processor (test mode)
+  
   const nlpTest = await testScript('nlp_processor.py', ['test']);
 
-  // Test Audio Processor (help/error mode - should now yield valid error JSON instead of usage string)
-  // Wait, if I pass no args, audio_processor.py currently prints a usage string TO STDERR and exits 1.
-  // PythonShell.run mode: 'json' will fail if there is NO json on stdout.
+ 
   const audioTest = await testScript('audio_processor.py', []);
 
   console.log('\n-------------------------------------------');

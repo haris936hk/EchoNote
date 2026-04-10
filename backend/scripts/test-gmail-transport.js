@@ -1,9 +1,4 @@
-/**
- * Test Gmail OAuth2 Transport Creation
- *
- * This script tests the Gmail transport initialization and verification.
- * Run: node backend/scripts/test-gmail-transport.js
- */
+
 
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const { getGmailTransport, closeGmailTransport } = require('../src/utils/emailTransport');
