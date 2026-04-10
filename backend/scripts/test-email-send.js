@@ -1,9 +1,4 @@
-/**
- * Test Simple Email Sending
- *
- * This script sends a test email via Gmail OAuth2 to verify email sending works.
- * Run: node backend/scripts/test-email-send.js
- */
+
 
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const emailService = require('../src/config/email');

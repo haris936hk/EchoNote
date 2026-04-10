@@ -1,4 +1,4 @@
-// backend/scripts/verify-stats.js
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const meetingService = require('../src/services/meeting.service');
@@ -6,7 +6,7 @@ const meetingService = require('../src/services/meeting.service');
 async function verify() {
   console.log('🧪 Starting verification...');
   try {
-    // Get a user with meetings
+    
     const user = await prisma.user.findFirst({
       where: { meetings: { some: {} } }
     });
