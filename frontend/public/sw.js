@@ -1,6 +1,4 @@
-/*
- * EchoNote Service Worker
- */
+
 
 self.addEventListener('push', function(event) {
   if (event.data) {
@@ -33,9 +31,9 @@ self.addEventListener('notificationclick', function(event) {
 
   let targetUrl = event.notification.data.url;
   
-  // Ensure the URL is absolute or properly prefixed
+  
   if (targetUrl && !targetUrl.startsWith('http')) {
-    // We assume the URL is relative to the root
+    
     targetUrl = new URL(targetUrl, self.location.origin).href;
   }
 
