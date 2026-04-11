@@ -5,7 +5,7 @@ import { Spinner } from '@heroui/react';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  // Show loading spinner while checking authentication
+  
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -14,12 +14,12 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
+ 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Render protected content
+  
   return children;
 };
 
