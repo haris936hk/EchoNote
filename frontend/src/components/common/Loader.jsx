@@ -69,7 +69,7 @@ InlineLoader.propTypes = {
   label: PropTypes.string,
 };
 
-// Skeleton loader for list items
+
 export const SkeletonLoader = ({ count = 3 }) => (
   <>
     {Array.from({ length: count }).map((_, index) => (
