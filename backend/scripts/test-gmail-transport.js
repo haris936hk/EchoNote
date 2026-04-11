@@ -17,7 +17,7 @@ async function testTransport() {
     const isValid = await transport.verify();
     console.log('   ✅ Gmail connection verified\n');
 
-    // Test 3: Close transport
+    
     console.log('3️⃣ Closing transport...');
     await closeGmailTransport();
     console.log('   ✅ Transport closed\n');
