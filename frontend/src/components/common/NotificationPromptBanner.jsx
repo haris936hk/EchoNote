@@ -1,4 +1,3 @@
-// frontend/src/components/common/NotificationPromptBanner.jsx
 import React, { useState, useEffect } from 'react';
 import { LuBell, LuX, LuSparkles } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,12 +10,10 @@ const NotificationPromptBanner = () => {
 
   useEffect(() => {
     const checkStatus = async () => {
-      // Don't show if user dismissed it recently
       const dismissed = localStorage.getItem('push_prompt_dismissed');
       if (dismissed) {
         const dismissedAt = parseInt(dismissed);
         const now = Date.now();
-        // Show again after 3 days
         if (now - dismissedAt < 3 * 24 * 60 * 60 * 1000) return;
       }
 
@@ -26,7 +23,6 @@ const NotificationPromptBanner = () => {
       }
     };
 
-    // Small delay before showing
     const timer = setTimeout(checkStatus, 3000);
     return () => clearTimeout(timer);
   }, []);
