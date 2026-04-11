@@ -36,7 +36,7 @@ async function testEmail() {
         </div>
       `,
       text: 'Success! Gmail OAuth2 SMTP is working correctly for EchoNote.',
-      skipPreferenceCheck: true, // Skip preference check for test email
+      skipPreferenceCheck: true, 
     });
 
     if (result.success) {
