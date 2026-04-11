@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom';
 
-/**
- * Footer — Public marketing page footer (HomePage only)
- * 4-column grid matching Stitch home_echonote_final design
- */
+
 const Footer = () => {
   return (
     <footer
