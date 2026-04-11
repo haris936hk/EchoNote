@@ -7,12 +7,12 @@ async function testTransport() {
   try {
     console.log('🧪 Testing Gmail transport creation...\n');
 
-    // Test 1: Transport creation
+    
     console.log('1️⃣ Creating Gmail transport...');
     const transport = await getGmailTransport();
     console.log('   ✅ Transport created successfully\n');
 
-    // Test 2: Transport verification
+    
     console.log('2️⃣ Verifying Gmail connection...');
     const isValid = await transport.verify();
     console.log('   ✅ Gmail connection verified\n');
