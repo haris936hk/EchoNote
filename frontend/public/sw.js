@@ -39,14 +39,14 @@ self.addEventListener('notificationclick', function(event) {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      // If a window is already open with the URL, focus it
+      
       for (const client of clientList) {
         if (client.url === targetUrl && 'focus' in client) {
           return client.focus();
         }
       }
       
-      // Otherwise open a new window
+      
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
