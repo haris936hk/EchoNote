@@ -14,7 +14,6 @@ const LoginButton = ({ size = 'lg', fullWidth = false }) => {
     onSuccess: async (codeResponse) => {
       try {
         setError(null);
-        // Explicitly pass the code payload. AuthContext handles exchanging it via backend
         const result = await loginWithGoogle(codeResponse);
 
         if (result.success) {
