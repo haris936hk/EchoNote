@@ -5,16 +5,13 @@ import { motion } from 'framer-motion';
 import { LuMic as Mic } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 
-/**
- * Header — Shared navigation bar for authenticated pages
- * Matches Stitch design: floating pill, glass bg, logo | nav | user
- */
+
 const Header = ({ navItems = [] }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [activeItem, setActiveItem] = useState(location.pathname);
 
-  // Sync activeItem with URL changes
+ 
   useEffect(() => {
     setActiveItem(location.pathname);
   }, [location.pathname]);
