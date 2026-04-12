@@ -14,7 +14,6 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
   const endIndex = startIndex + itemsPerPage;
   const currentMeetings = meetings.slice(startIndex, endIndex);
 
-  // Reset to page 1 when meetings change
   useEffect(() => {
     setCurrentPage(1);
   }, [meetings.length]);

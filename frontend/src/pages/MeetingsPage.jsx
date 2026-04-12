@@ -52,7 +52,6 @@ const MeetingsPage = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Filter meetings
   useEffect(() => {
     let result = meetings;
     if (statusFilter !== 'ALL') {
@@ -92,7 +91,6 @@ const MeetingsPage = () => {
     setFilteredMeetings(result);
   }, [meetings, statusFilter, selectedCategory, debouncedSearch]);
 
-  // Status counts
   const statusCounts = {
     ALL: meetings.length,
     PROCESSING: meetings.filter((m) => PROCESSING_STATUSES.includes(m.status)).length,

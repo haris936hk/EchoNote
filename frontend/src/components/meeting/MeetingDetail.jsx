@@ -36,7 +36,6 @@ const MeetingDetail = ({ meeting }) => {
   };
 
   const handleDownload = (type) => {
-    // Handle download logic
     switch (type) {
       case 'audio':
         if (meeting.audioUrl) {
@@ -78,7 +77,6 @@ const MeetingDetail = ({ meeting }) => {
       nextSteps: '',
     };
 
-    // Simple parsing logic - adjust based on your LLM output format
     const lines = summaryText.split('\n');
     let currentSection = '';
 

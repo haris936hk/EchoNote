@@ -39,7 +39,6 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
     }
   }, [isOpen, meetingId, fetchDraft, tone, draft.subject]);
 
-  // Handle body scroll locking
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -78,15 +77,12 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
     const body = draft.body || '';
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-    // Always copy to clipboard as a reliable backup
     try {
       await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
       showToast('Draft copied to clipboard!', 'success');
     } catch (e) {
-      // ignore clipboard error silently
     }
 
-    // Browsers silently block mailto: URLs longer than ~2000 characters
     if (mailtoUrl.length > 2000) {
       setTimeout(() => {
         showToast('Email too long for auto-open. Please paste from clipboard!', 'warning');

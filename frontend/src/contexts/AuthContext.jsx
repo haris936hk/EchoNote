@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Helper function to fetch fresh user data from backend
   const fetchFreshUserData = useCallback(async () => {
     try {
       const { data } = await api.get('/auth/me');
@@ -31,7 +30,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Check for existing token on mount
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
 
@@ -40,7 +38,6 @@ export const AuthProvider = ({ children }) => {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
 
-        // Migration: If user data doesn't have picture field, fetch fresh user data
         if (!parsedUser.picture) {
           fetchFreshUserData();
         }
@@ -54,18 +51,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [fetchFreshUserData]);
 
-  // Login with Google Auth Code (from useGoogleLogin hook)
   const loginWithGoogle = useCallback(async (codeResponse) => {
     try {
       setLoading(true);
       setError(null);
 
-      // Send auth code to backend
       const { data } = await api.post('/auth/google', {
         code: codeResponse.code,
       });
 
-      // Store tokens and user data
       localStorage.setItem('token', data.data.accessToken);
       localStorage.setItem('refreshToken', data.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.data.user));

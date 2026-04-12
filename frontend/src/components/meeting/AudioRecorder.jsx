@@ -10,7 +10,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
 
   const [error, setError] = useState(null);
 
-  const MAX_RECORDING_TIME = 600; // 10 minutes in seconds
+  const MAX_RECORDING_TIME = 600;
 
   const handleStartRecording = async () => {
     setError(null);

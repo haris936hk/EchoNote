@@ -2,10 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 
-/**
- * ScrollReveal — A wrapper component that handles scroll-hide and scroll-reveal
- * using Framer Motion for premium 'slide-down' and 'slide-up' effects.
- */
+
 const ScrollReveal = ({ children }) => {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollYRef = useRef(0);
@@ -44,7 +41,7 @@ const ScrollReveal = ({ children }) => {
           exit={{ y: -100, opacity: 0 }}
           transition={{
             duration: 0.4,
-            ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for a 'snappier' Linear-feel
+            ease: [0.22, 1, 0.36, 1], 
           }}
           className="pointer-events-none fixed inset-x-0 top-0 z-50"
         >

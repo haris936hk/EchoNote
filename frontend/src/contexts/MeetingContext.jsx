@@ -23,7 +23,7 @@ export const MeetingProvider = ({ children }) => {
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const timerRef = useRef(null);
-  const fetchingRef = useRef(false); // Prevent duplicate fetches
+  const fetchingRef = useRef(false); 
 
   const stopRecordingInternal = useCallback(() => {
     return new Promise((resolve) => {
@@ -35,13 +35,11 @@ export const MeetingProvider = ({ children }) => {
       recorderRef.current.stopRecording(() => {
         const blob = recorderRef.current.getBlob();
 
-        // Stop timer
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
 
-        // Stop stream
         if (streamRef.current) {
           streamRef.current.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
@@ -55,9 +53,7 @@ export const MeetingProvider = ({ children }) => {
     });
   }, []);
 
-  // Fetch all meetings
   const fetchMeetings = useCallback(async (filters = {}) => {
-    // Prevent multiple simultaneous fetches
     if (fetchingRef.current) {
       return { success: false, error: 'Fetch already in progress' };
     }
@@ -84,7 +80,6 @@ export const MeetingProvider = ({ children }) => {
     }
   }, []);
 
-  // Fetch single meeting
   const fetchMeeting = useCallback(async (id) => {
     try {
       setLoading(true);
@@ -99,7 +94,6 @@ export const MeetingProvider = ({ children }) => {
     }
   }, []);
 
-  // Start recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -118,11 +112,9 @@ export const MeetingProvider = ({ children }) => {
       setIsRecording(true);
       setRecordingTime(0);
 
-      // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
           if (prev >= 600) {
-            // 10 minutes = 600 seconds
             stopRecordingInternal();
             return prev;
           }
@@ -140,12 +132,10 @@ export const MeetingProvider = ({ children }) => {
     }
   };
 
-  // Upload meeting
   const uploadMeeting = useCallback(async (meetingData) => {
     try {
       setLoading(true);
 
-      // Extract audioFile from meetingData
       const { audioFile, title, description, category, googleEventId, attendees } = meetingData;
 
       if (!audioFile) {
@@ -172,7 +162,6 @@ export const MeetingProvider = ({ children }) => {
         },
       });
 
-      // Add to meetings list
       setMeetings((prev) => [data.data, ...prev]);
 
       return { success: true, data: data.data };
@@ -184,17 +173,14 @@ export const MeetingProvider = ({ children }) => {
     }
   }, []);
 
-  // Update meeting
   const updateMeeting = useCallback(
     async (id, updates) => {
       try {
         setLoading(true);
         const { data } = await api.patch(`/meetings/${id}`, updates);
 
-        // Update in list
         setMeetings((prev) => prev.map((meeting) => (meeting.id === id ? data.data : meeting)));
 
-        // Update current if viewing
         if (currentMeeting?.id === id) {
           setCurrentMeeting(data.data);
         }
@@ -210,17 +196,14 @@ export const MeetingProvider = ({ children }) => {
     [currentMeeting]
   );
 
-  // Delete meeting
   const deleteMeeting = useCallback(
     async (id) => {
       try {
         setLoading(true);
         await api.delete(`/meetings/${id}`);
 
-        // Remove from list
         setMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
 
-        // Clear current if viewing
         if (currentMeeting?.id === id) {
           setCurrentMeeting(null);
         }
@@ -236,7 +219,6 @@ export const MeetingProvider = ({ children }) => {
     [currentMeeting]
   );
 
-  // Format recording time
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;

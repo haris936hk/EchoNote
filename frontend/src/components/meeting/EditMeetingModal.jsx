@@ -18,7 +18,6 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
   const [titleError, setTitleError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Reset form when modal opens with new meeting
   useEffect(() => {
     if (isOpen && meeting) {
       setTitle(meeting.title || '');
@@ -41,14 +40,12 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
     const newTitleValue = e.target.value;
     setTitle(newTitleValue);
 
-    // Clear error when user starts typing
     if (titleError) {
       setTitleError('');
     }
   };
 
   const handleSubmit = async () => {
-    // Validate title
     const vError = validateTitle(title);
     if (vError) {
       setTitleError(vError);

@@ -16,7 +16,6 @@ import {
 } from 'react-icons/lu';
 import { publicAPI } from '../services/api';
 
-// Static fallback since we might lack sentimentColors from theme
 const fallbackSentimentColors = {
   positive: { dot: 'bg-[#22c55e]', label: 'Positive' },
   negative: { dot: 'bg-[#ef4444]', label: 'Negative' },

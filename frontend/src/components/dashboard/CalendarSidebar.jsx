@@ -10,12 +10,12 @@ import { useMeeting } from '../../contexts/MeetingContext';
 
 const CalendarSidebar = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // eslint-disable-line no-unused-vars
+  const { user } = useAuth(); 
   const { meetings } = useMeeting();
 
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorStatus, setErrorStatus] = useState(null); // e.g. 403
+  const [errorStatus, setErrorStatus] = useState(null); 
 
   const fetchEvents = async () => {
     try {
@@ -26,7 +26,7 @@ const CalendarSidebar = () => {
       }
     } catch (err) {
       if (err.name === 'CanceledError') {
-        // Silently ignore aborted requests from deduplication
+       
         return;
       }
       if (err.response?.status === 403 || err.response?.status === 401) {
@@ -53,7 +53,7 @@ const CalendarSidebar = () => {
     });
   };
 
-  // Grouping logic
+  
   const groupedEvents = {
     today: [],
     tomorrow: [],
@@ -136,7 +136,7 @@ const CalendarSidebar = () => {
     );
   };
 
-  // ── Missing Token State ──
+  
   if (errorStatus === 403 || errorStatus === 401) {
     return (
       <div className="rounded-card border border-echo-border bg-echo-surface p-5">
