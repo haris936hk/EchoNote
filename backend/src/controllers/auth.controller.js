@@ -148,7 +148,7 @@ const logout = async (req, res) => {
  */
 const getCurrentUser = async (req, res) => {
   try {
-    // User is already attached by authenticate middleware
+    
     return res.status(200).json({
       success: true,
       data: {
