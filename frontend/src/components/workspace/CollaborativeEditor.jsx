@@ -38,7 +38,6 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
   const [lastSaved, setLastSaved] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
 
-  // Sync incoming changes from others
   useEventListener(({ event }) => {
     if (event.type === 'UPDATE_FIELD') {
       setFormData((prev) => ({
@@ -48,7 +47,6 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
     }
   });
 
-  // Debounced save to database
   const debouncedSave = useCallback(
     debounce(async (data) => {
       setSaving(true);
@@ -80,10 +78,8 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
       return newData;
     });
 
-    // Broadcast to others immediately
     broadcast({ type: 'UPDATE_FIELD', field, value });
 
-    // Update presence
     updatePresence({ lastSection: field });
   };
 
@@ -201,14 +197,11 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
         onClose={() => setEditingTask(null)}
         task={editingTask}
         onSave={async (updatedTask) => {
-          // Handle task update logic
           const previousActions = [...formData.actionItems];
           const isNew = !updatedTask.id;
           
           let newActions;
           if (isNew) {
-            // If it's a new task, it should probably be handled by a different endpoint 
-            // but for summary sync, we just add it to the list
             newActions = [...formData.actionItems, { ...updatedTask, id: `temp-${Date.now()}` }];
           } else {
             newActions = formData.actionItems.map(t => t.id === updatedTask.id ? updatedTask : t);
