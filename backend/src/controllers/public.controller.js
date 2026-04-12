@@ -1,10 +1,9 @@
-// backend/src/controllers/public.controller.js
-// Public controller for unauthenticated access to shared resources
+
 
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -15,10 +14,7 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Get shared meeting summary by token
- * GET /api/public/meetings/:token
- */
+
 const getPublicMeetingByToken = async (req, res) => {
   try {
     const { token } = req.params;
@@ -34,7 +30,7 @@ const getPublicMeetingByToken = async (req, res) => {
       where: {
         shareToken: token
       },
-      // IMPORTANT: Restrict included fields to only what is necessary for public view
+     
       select: {
         title: true,
         category: true,
@@ -56,15 +52,12 @@ const getPublicMeetingByToken = async (req, res) => {
       });
     }
 
-    // Format the response structure to match the frontend expectations
-    // specifically adapting the Prisma schema mappings
     
-    // Parse JSON fields if they are strings (depends on Prisma configuration, but safe to check)
     const keyDecisions = meeting.summaryKeyDecisions ? (typeof meeting.summaryKeyDecisions === 'string' ? JSON.parse(meeting.summaryKeyDecisions || '[]') : meeting.summaryKeyDecisions) : [];
     const actionItems = meeting.summaryActionItems ? (typeof meeting.summaryActionItems === 'string' ? JSON.parse(meeting.summaryActionItems || '[]') : meeting.summaryActionItems) : [];
     const speakerMap = meeting.speakerMap ? (typeof meeting.speakerMap === 'string' ? JSON.parse(meeting.speakerMap || '{}') : meeting.speakerMap) : {};
 
-    // Generate speakers list from speakerMap values
+   
     const speakers = Object.values(speakerMap);
 
     const publicMeeting = {
