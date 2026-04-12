@@ -1,11 +1,10 @@
-// backend/src/config/email.js
-// Email configuration using Gmail OAuth2
+
 
 const { getGmailTransport } = require('../utils/emailTransport');
 const { prisma } = require('./database');
 const winston = require('winston');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -16,7 +15,7 @@ const logger = winston.createLogger({
   ],
 });
 
-// Email configuration
+
 const EMAIL_CONFIG = {
   from: process.env.EMAIL_FROM || 'EchoNote <hariskhan936.hk@gmail.com>',
   replyTo: process.env.EMAIL_REPLY_TO || 'hariskhan936.hk@gmail.com',
@@ -36,10 +35,10 @@ async function isEmailNotificationsEnabled(email) {
       select: { emailNotifications: true },
     });
 
-    // If user not found, return true (fail open for system emails)
+   
     if (!user) return true;
 
-    return user.emailNotifications !== false; // Default true if null
+    return user.emailNotifications !== false; 
   } catch (error) {
     logger.error('Error checking email preferences:', error);
     return true; // Fail open on error
