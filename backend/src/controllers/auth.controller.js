@@ -1,5 +1,3 @@
-// backend/src/controllers/auth.controller.js
-// Authentication controller - handles HTTP requests for auth routes
 
 const authService = require('../services/auth.service');
 const { prisma } = require('../config/database');
@@ -44,14 +42,11 @@ const googleAuth = async (req, res) => {
   }
 };
 
-/**
- * Get Google OAuth URL (server-side flow - placeholder)
- * GET /api/auth/google/url
- */
+
 const getGoogleAuthUrl = async (req, res) => {
   try {
-    // This is for server-side OAuth flow
-    // For now, returning not implemented as we use client-side flow
+    
+    
     return res.status(501).json({
       success: false,
       error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
@@ -65,10 +60,7 @@ const getGoogleAuthUrl = async (req, res) => {
   }
 };
 
-/**
- * Google OAuth callback (server-side flow - placeholder)
- * GET /api/auth/google/callback
- */
+
 const googleCallback = async (req, res) => {
   try {
     // This is for server-side OAuth flow
