@@ -10,7 +10,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Handle body scroll locking
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
