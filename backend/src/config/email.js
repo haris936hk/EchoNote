@@ -77,7 +77,7 @@ const sendEmail = async (options) => {
     
     const transporter = await getGmailTransport();
 
-    // Send email via Gmail OAuth2 SMTP
+    
     const info = await transporter.sendMail({
       from: options.from || EMAIL_CONFIG.from,
       to,
