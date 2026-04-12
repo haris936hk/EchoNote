@@ -15,9 +15,9 @@ const createOAuthClient = () => {
 
 const getEvents = async (req, res) => {
   try {
-    const userId = req.userId; // Provided by authenticate middleware
+    const userId = req.userId; 
 
-    // Get user from DB
+   
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -31,7 +31,7 @@ const getEvents = async (req, res) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    // 1. Check if user has connected Calendar (has refresh token)
+    
     if (!user.googleRefreshToken) {
       logger.warn(`User ${userId} attempted to access calendar without connecting.`);
       return res.status(403).json({
