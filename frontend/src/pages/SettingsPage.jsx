@@ -91,7 +91,6 @@ const SettingsPage = () => {
   );
 };
 
-// ─── Toggle Component ───
 const Toggle = ({ enabled, onToggle, color = 'bg-accent-primary' }) => (
   <button
     onClick={onToggle}
@@ -107,7 +106,6 @@ const Toggle = ({ enabled, onToggle, color = 'bg-accent-primary' }) => (
   </button>
 );
 
-// ─── Preferences ───
 const PreferencesContent = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -240,7 +238,6 @@ const PreferencesContent = () => {
                 }
               } else {
                 setPushNotifications(false);
-                // We keep the subscription in DB but disable preference
               }
             }}
             color="bg-indigo-500"
@@ -377,7 +374,6 @@ const PreferencesContent = () => {
   );
 };
 
-// ─── Privacy & Data ───
 const PrivacyContent = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -385,14 +381,11 @@ const PrivacyContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  // B4 — Calendar connection state
   const [calStatus, setCalStatus] = useState(null);
   const [isDisconnectingCal, setIsDisconnectingCal] = useState(false);
-  // B5 — Session state
   const [sessions, setSessions] = useState([]);
   const [isRevokingSessions, setIsRevokingSessions] = useState(false);
 
-  // B1 — Export all meetings as ZIP via existing /meetings/download/all endpoint
   const handleExportData = async () => {
     setIsExporting(true);
     try {
@@ -472,7 +465,6 @@ const PrivacyContent = () => {
     loadStats();
   }, []);
 
-  // B4 — Load calendar status
   useEffect(() => {
     const token = localStorage.getItem('token');
     fetch(`${process.env.REACT_APP_API_URL}/auth/calendar/status`, {
@@ -483,7 +475,6 @@ const PrivacyContent = () => {
       .catch(() => {});
   }, []);
 
-  // B5 — Load sessions
   useEffect(() => {
     const token = localStorage.getItem('token');
     fetch(`${process.env.REACT_APP_API_URL}/auth/sessions`, {
@@ -494,7 +485,6 @@ const PrivacyContent = () => {
       .catch(() => {});
   }, []);
 
-  // B4 — Disconnect calendar
   const handleDisconnectCalendar = async () => {
     if (!window.confirm('Disconnect Google Calendar? You can reconnect at any time.')) return;
     setIsDisconnectingCal(true);
@@ -518,7 +508,6 @@ const PrivacyContent = () => {
     }
   };
 
-  // B5 — Revoke all other sessions
   const handleRevokeSessions = async () => {
     if (!window.confirm('Sign out all other devices? Your current session will remain active.'))
       return;
@@ -757,7 +746,6 @@ const PrivacyContent = () => {
   );
 };
 
-// ─── Help & FAQ ───
 const HelpContent = () => {
   const faqs = [
     {
