@@ -59,7 +59,6 @@ const CalendarPage = () => {
       (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Grouping logic for 30 days
   const groupedEvents = [];
   const today = startOfDay(new Date());
 
