@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-/**
- * AudioVisualizer — real-time waveform display
- * Stitch design: thin vertical bars, indigo/violet color palette, OLED-optimised
- * All audio stream analysis logic preserved exactly.
- */
+
 const AudioVisualizer = ({ stream, isActive = true }) => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -37,7 +33,6 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
     };
     setCanvasSize();
 
-    // Create Web Audio API context (logic unchanged)
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     audioContextRef.current = audioContext;
 
@@ -51,7 +46,6 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    // Stitch spec: clean minimal bars — more bars, thinner gaps
     const barCount = 48;
     const barGap = 2;
 
@@ -63,7 +57,6 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
       const canvasWidth = canvas.width / window.devicePixelRatio;
       const barWidth = (canvasWidth - barGap * (barCount - 1)) / barCount;
 
-      // Clear with transparent fill — crisp on OLED
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       for (let i = 0; i < barCount; i++) {
@@ -75,39 +68,33 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
         const average = sum / binSize;
 
         const normalizedHeight = average / 255;
-        // Minimum bar height of 3px so all bars are always visible
         const barHeight = Math.max(3, normalizedHeight * canvasHeight * 0.85);
 
         const x = i * (barWidth + barGap);
         const y = (canvasHeight - barHeight) / 2;
 
-        // Stitch palette: indigo-400 (#818CF8) → violet-400 (#A78BFA)
-        // High intensity: brighter indigo; low: dimmer violet
         const gradient = ctx.createLinearGradient(0, y + barHeight, 0, y);
 
         if (normalizedHeight > 0.65) {
-          // High — bright indigo
-          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)'); // indigo-400
-          gradient.addColorStop(1, 'rgba(167, 139, 250, 1)'); // violet-400
+          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)'); 
+          gradient.addColorStop(1, 'rgba(167, 139, 250, 1)');
         } else if (normalizedHeight > 0.35) {
-          // Medium — indigo at 80% opacity
+          
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.75)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 0.85)');
         } else {
-          // Low — subdued violet
+          
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.30)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 0.45)');
         }
 
         ctx.fillStyle = gradient;
 
-        // Thin rounded bars — radius 2px for the slim aesthetic
         const radius = Math.min(2, barWidth / 2);
         ctx.beginPath();
         ctx.roundRect(x, y, barWidth, barHeight, radius);
         ctx.fill();
 
-        // Subtle glow only on high-intensity bars
         if (normalizedHeight > 0.65) {
           ctx.save();
           ctx.shadowBlur = 8;
