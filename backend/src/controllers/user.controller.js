@@ -1,10 +1,9 @@
-// backend/src/controllers/user.controller.js
-// User controller - handles HTTP requests for user management
+
 
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -15,10 +14,7 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Get current user profile
- * GET /api/users/me
- */
+
 const getCurrentUser = async (req, res) => {
   try {
     const userId = req.userId;
@@ -66,16 +62,13 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-/**
- * Update user profile
- * PATCH /api/users/me
- */
+
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.userId;
     const { name, autoDeleteDays, emailNotifications } = req.body;
 
-    // Build update object
+    
     const updateData = {};
 
     if (name !== undefined) {
@@ -148,10 +141,7 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-/**
- * Get user settings
- * GET /api/users/settings
- */
+
 const getUserSettings = async (req, res) => {
   try {
     const userId = req.userId;
