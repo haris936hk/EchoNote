@@ -58,11 +58,9 @@ const RecordPage = () => {
   const [uploadError, setUploadError] = useState(null);
   const [step, setStep] = useState('record');
 
-  // Processing state
   const [processingMeetingId, setProcessingMeetingId] = useState(null);
   const [processingStatus, setProcessingStatus] = useState(null);
 
-  // File upload state
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileValidating, setFileValidating] = useState(false);
   const fileInputRef = useRef(null);
@@ -80,7 +78,6 @@ const RecordPage = () => {
   const remainingTime = MAX_RECORDING_TIME - recordingTime;
   const remainingFormatted = `${Math.floor(remainingTime / 60)}:${String(Math.floor(remainingTime % 60)).padStart(2, '0')}`;
 
-  // Auto-stop at limit
   useEffect(() => {
     if (recordingTime >= MAX_RECORDING_TIME && isRecording) {
       stopRecording().then((result) => {
@@ -89,14 +86,12 @@ const RecordPage = () => {
     }
   }, [recordingTime, isRecording, stopRecording]);
 
-  // Move to details when we have uploaded file
   useEffect(() => {
     if (uploadedFile && step === 'record') {
       setStep('details');
     }
   }, [uploadedFile, step]);
 
-  // Polling for processing status
   useEffect(() => {
     if (step !== 'processing' || !processingMeetingId) return;
 
@@ -122,10 +117,8 @@ const RecordPage = () => {
       }
     };
 
-    // Initial check
     checkStatus();
 
-    // Poll every 3 seconds
     pollInterval = setInterval(checkStatus, 3000);
 
     return () => clearInterval(pollInterval);
@@ -134,7 +127,6 @@ const RecordPage = () => {
   const handleStartRecording = async () => {
     const result = await startRecording();
     if (!result.success) {
-      /* error set by hook */
     }
   };
 
@@ -283,7 +275,6 @@ const RecordPage = () => {
     }
   };
 
-  // ── Determine halo state ──
   const isWarningZone = recordingTime > MAX_RECORDING_TIME * 0.8; // last 20%
 
   return (
@@ -301,12 +292,10 @@ const RecordPage = () => {
       />
 
       <div className="mx-auto w-full max-w-2xl px-6 py-12">
-        {/* ════════════════════════════════════════════
-            STEP 1: RECORD / IDLE / ACTIVE / PAUSED
-            ════════════════════════════════════════════ */}
+       
         {step === 'record' && (
           <div className="flex flex-col items-center space-y-8 text-center">
-            {/* Recording Halo */}
+           
             <div
               className={`recording-halo ${isRecording && !isPaused ? 'active' : ''} ${isPaused ? 'paused' : ''}`}
               style={
@@ -456,9 +445,7 @@ const RecordPage = () => {
           </div>
         )}
 
-        {/* ════════════════════════════════════════════
-            STEP 2: MEETING DETAILS FORM
-            ════════════════════════════════════════════ */}
+        
         {step === 'details' && (
           <div className="mx-auto max-w-lg space-y-6">
             <div>
@@ -593,9 +580,7 @@ const RecordPage = () => {
           </div>
         )}
 
-        {/* ════════════════════════════════════════════
-            STEP 3: UPLOADING
-            ════════════════════════════════════════════ */}
+        
         {step === 'uploading' && (
           <div className="flex flex-col items-center space-y-6 text-center">
             <div className="size-16 animate-spin rounded-full border-2 border-accent-primary border-t-transparent"></div>
@@ -615,9 +600,7 @@ const RecordPage = () => {
           </div>
         )}
 
-        {/* ════════════════════════════════════════════
-            STEP 3.5: PROCESSING
-            ════════════════════════════════════════════ */}
+        
         {step === 'processing' && processingStatus && (
           <div className="flex w-full flex-col items-center space-y-8">
             <div className="w-full max-w-2xl rounded-card border border-white/10 bg-echo-surface p-8 shadow-[0_0_50px_rgba(129,140,248,0.08)]">
@@ -700,9 +683,7 @@ const RecordPage = () => {
           </div>
         )}
 
-        {/* ════════════════════════════════════════════
-            STEP 4: SUCCESS
-            ════════════════════════════════════════════ */}
+       
         {step === 'success' && (
           <div className="flex flex-col items-center space-y-6 text-center">
             <div className="flex size-20 items-center justify-center rounded-full bg-emerald-500/15">
