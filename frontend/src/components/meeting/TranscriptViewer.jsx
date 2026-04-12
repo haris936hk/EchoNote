@@ -15,7 +15,6 @@ import {
   LuPlay as Play,
 } from 'react-icons/lu';
 
-// ─── Entity type → Luminous Archive color mapping ───
 const ENTITY_STYLES = {
   PERSON: { bg: 'bg-accent-secondary/15', text: 'text-accent-secondary', label: 'Person' },
   ORG: { bg: 'bg-accent-primary/15', text: 'text-accent-primary', label: 'Org' },
@@ -70,12 +69,10 @@ const TranscriptViewer = ({
 
   const hasSegments = transcriptSegments && transcriptSegments.length > 0;
 
-  // Reset match index when search changes
   useEffect(() => {
     setCurrentMatchIndex(0);
   }, [searchQuery]);
 
-  // ─── F5: Speaker talk-time analytics ───
   const speakerStats = useMemo(() => {
     if (!hasSegments || transcriptSegments.length === 0) return [];
     const stats = {};
@@ -101,7 +98,6 @@ const TranscriptViewer = ({
 
   const showSpeakerAnalytics = speakerStats.length >= 2;
 
-  // ─── F6: Entity highlight regex (built once per nlpData change) ───
   const { entityRegex, entityColorMap } = useMemo(() => {
     if (!showEntities || !nlpData?.entities?.length)
       return { entityRegex: null, entityColorMap: {} };
@@ -121,7 +117,6 @@ const TranscriptViewer = ({
     };
   }, [nlpData, showEntities]);
 
-  // ─── F6: Active entity types for legend ───
   const activeEntityTypes = useMemo(() => {
     if (!showEntities || !nlpData?.entities?.length) return [];
     const seen = new Set();
@@ -135,7 +130,6 @@ const TranscriptViewer = ({
     return out;
   }, [nlpData, showEntities]);
 
-  // ─── F2: Match count across all segments ───
   const matchCount = useMemo(() => {
     if (!searchQuery) return 0;
     const regex = new RegExp(escapeRegex(searchQuery), 'gi');
@@ -148,7 +142,6 @@ const TranscriptViewer = ({
     return (transcript?.match(regex) || []).length;
   }, [searchQuery, transcript, transcriptSegments, hasSegments]);
 
-  // ─── F2: Navigate to Nth mark using DOM query after render ───
   useEffect(() => {
     if (!transcriptRef.current) return;
     const marks = transcriptRef.current.querySelectorAll('mark[data-search]');
@@ -172,9 +165,7 @@ const TranscriptViewer = ({
     setCurrentMatchIndex((i) => (i >= matchCount - 1 ? 0 : i + 1));
   }, [matchCount]);
 
-  // ─── Highlight helpers ───
 
-  // Returns a search-highlighted JSX array for a segment text string
   const highlightSearch = useCallback(
     (text) => {
       if (!searchQuery) return [text];
@@ -192,7 +183,6 @@ const TranscriptViewer = ({
     [searchQuery]
   );
 
-  // Returns an entity-highlighted JSX array for a plain string (no search active)
   const highlightEntity = useCallback(
     (text) => {
       if (!entityRegex) return [text];
@@ -216,7 +206,6 @@ const TranscriptViewer = ({
     [entityRegex, entityColorMap]
   );
 
-  // Final content for a segment: entities win when no search; search wins when active
   const getSegmentContent = useCallback(
     (text) => {
       if (searchQuery) return highlightSearch(text);
@@ -226,7 +215,6 @@ const TranscriptViewer = ({
     [searchQuery, showEntities, entityRegex, highlightSearch, highlightEntity]
   );
 
-  // Raw text highlighting (dangerouslySetInnerHTML path)
   const highlightedRawText = useMemo(() => {
     if (hasSegments || !transcript) return '';
     if (!searchQuery) return transcript;
