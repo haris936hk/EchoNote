@@ -63,8 +63,7 @@ const getGoogleAuthUrl = async (req, res) => {
 
 const googleCallback = async (req, res) => {
   try {
-    // This is for server-side OAuth flow
-    // For now, returning not implemented as we use client-side flow
+    
     return res.status(501).json({
       success: false,
       error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
