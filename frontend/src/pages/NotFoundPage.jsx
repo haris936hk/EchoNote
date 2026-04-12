@@ -1,10 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { LuMic as Mic } from 'react-icons/lu';
 
-/**
- * NotFoundPage — 404 error page
- * Matches Stitch notfound_404_echonote_fixed design
- */
+
 const NotFoundPage = () => {
   const navigate = useNavigate();
 
