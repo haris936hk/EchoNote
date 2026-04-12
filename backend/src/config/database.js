@@ -1,10 +1,9 @@
-// backend/src/config/database.js
-// Database configuration and Prisma client initialization
+
 
 const { PrismaClient } = require('@prisma/client');
 const winston = require('winston');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -15,7 +14,6 @@ const logger = winston.createLogger({
   ],
 });
 
-// Prisma Client options
 const prismaOptions = {
   log: [
     {
