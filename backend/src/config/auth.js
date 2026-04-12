@@ -263,7 +263,7 @@ const getTokenExpiry = (token) => {
     if (!decoded || !decoded.exp) {
       return null;
     }
-    return decoded.exp * 1000; // Convert to milliseconds
+    return decoded.exp * 1000; 
   } catch (error) {
     return null;
   }
@@ -294,26 +294,26 @@ module.exports = {
   googleClient,
   GOOGLE_SCOPES,
 
-  // Google OAuth functions
+  
   verifyGoogleToken,
   exchangeCodeForTokens,
   getAuthUrl,
   refreshGoogleToken,
   createUserOAuthClient,
 
-  // JWT functions
+  
   generateAccessToken,
   generateRefreshToken,
   generateTokenPair,
   verifyToken,
   decodeToken,
 
-  // Token utilities
+  
   extractTokenFromHeader,
   isTokenExpired,
   getTokenExpiry,
 
-  // General utilities
+  
   isValidEmail,
   generateRandomToken,
   hashData,
