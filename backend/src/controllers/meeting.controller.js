@@ -146,7 +146,7 @@ const createMeeting = async (req, res) => {
   }
 };
 
-t uploadAudio = async (req, res) => {
+const uploadAudio = async (req, res) => {
   try {
     const meetingId = req.params.id;
     const userId = req.userId;
