@@ -10,7 +10,6 @@ import {
 const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
   const [visible, setVisible] = useState(false);
 
-  // Trigger enter animation on mount
   useEffect(() => {
     const enter = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(enter);
@@ -63,7 +62,6 @@ const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
         'transition-all duration-300 ease-out',
         v.border,
         v.bg,
-        // Use bg-echo-elevated as base surface
         'bg-echo-elevated/90',
         visible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0',
       ].join(' ')}
@@ -96,7 +94,6 @@ Toast.propTypes = {
   onClose: PropTypes.func,
 };
 
-// ─── Toast Container ──────────────────────────────────────────────────────────
 export const ToastContainer = ({ toasts, removeToast }) => {
   return (
     <div
@@ -129,7 +126,6 @@ ToastContainer.propTypes = {
   removeToast: PropTypes.func.isRequired,
 };
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 let toastId = 0;
 let listeners = [];
 
@@ -153,7 +149,6 @@ export const useToast = () => {
   return { toasts, removeToast };
 };
 
-// ─── Global showToast ─────────────────────────────────────────────────────────
 export const showToast = (message, type = 'success', duration = 5000) => {
   const toast = { id: ++toastId, message, type, duration };
   listeners.forEach((listener) => listener(toast));
