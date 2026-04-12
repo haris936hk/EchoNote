@@ -36,10 +36,9 @@ const prismaOptions = {
   errorFormat: 'minimal',
 };
 
-// Initialize Prisma Client
+
 const prisma = new PrismaClient(prismaOptions);
 
-// Log Prisma queries in development
 if (process.env.NODE_ENV === 'development') {
   prisma.$on('query', (e) => {
     logger.debug(`Query: ${e.query}`);
@@ -47,12 +46,12 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-// Log Prisma errors
+
 prisma.$on('error', (e) => {
   logger.error(`Prisma Error: ${e.message}`);
 });
 
-// Log Prisma info
+
 prisma.$on('info', (e) => {
   logger.info(`Prisma Info: ${e.message}`);
 });
