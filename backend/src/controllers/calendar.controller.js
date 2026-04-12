@@ -1,9 +1,9 @@
-// backend/src/controllers/calendar.controller.js
+
 const { google } = require('googleapis');
 const { prisma } = require('../config/database');
 const logger = require('../utils/logger');
 
-// We need a fresh client per request to safely manage tokens without polluting a singleton
+
 const createOAuthClient = () => {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -12,10 +12,7 @@ const createOAuthClient = () => {
   );
 };
 
-/**
- * Get upcoming calendar events for the authenticated user
- * GET /api/calendar/events
- */
+
 const getEvents = async (req, res) => {
   try {
     const userId = req.userId; // Provided by authenticate middleware
