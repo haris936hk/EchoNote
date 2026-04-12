@@ -112,11 +112,9 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
   const isProcessing = processingStatuses.includes(meeting.status);
   const isFailed = meeting.status === 'FAILED';
 
-  // Get category color for left border
   const catColors = categoryColors[meeting.category] || categoryColors.OTHER;
   const statColors = statusColors[meeting.status] || statusColors.COMPLETED;
 
-  // Get topic chips from summary
   const topics = meeting.summary?.keyTopics?.slice(0, 3) || [];
 
   return (
