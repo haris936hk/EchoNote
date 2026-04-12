@@ -252,7 +252,7 @@ const executeTransaction = async (callback, maxRetries = 3) => {
   throw lastError;
 };
 
-// Graceful shutdown
+
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, closing database connection...');
   await disconnectDatabase();
