@@ -6,10 +6,7 @@ const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY,
 });
 
-/**
- * Liveblocks Auth Endpoint
- * POST /api/liveblocks/auth
- */
+
 const auth = async (req, res) => {
   try {
     const { room } = req.body;
@@ -19,7 +16,7 @@ const auth = async (req, res) => {
       return res.status(400).json({ error: 'Room ID is required' });
     }
 
-    // Room ID format: workspace_id:meeting_id
+    
     const parts = room.split(':');
     if (parts.length !== 2) {
       return res.status(400).json({ error: 'Invalid room format' });
@@ -27,7 +24,7 @@ const auth = async (req, res) => {
 
     const [workspaceId, meetingId] = parts;
 
-    // Verify requesting user is a member of the workspace
+   
     const membership = await prisma.workspaceMember.findUnique({
       where: {
         workspaceId_userId: {
@@ -51,7 +48,7 @@ const auth = async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Verify the meeting belongs to this workspace
+    
     const workspaceMeeting = await prisma.workspaceMeeting.findUnique({
       where: { meetingId },
     });
@@ -60,7 +57,7 @@ const auth = async (req, res) => {
       return res.status(404).json({ error: 'Meeting not found in this workspace' });
     }
 
-    // Start an auth session
+    
     const session = liveblocks.prepareSession(userId, {
       userInfo: {
         name: membership.user.name,
@@ -69,14 +66,14 @@ const auth = async (req, res) => {
       },
     });
 
-    // Grant access to the room
+    
     if (membership.role === 'OWNER' || membership.role === 'EDITOR') {
       session.allow(room, session.FULL_ACCESS);
     } else {
       session.allow(room, session.READ_ONLY);
     }
 
-    // Authorize the user and return the result
+    
     const { status, body } = await session.authorize();
     return res.status(status).send(body);
   } catch (error) {
