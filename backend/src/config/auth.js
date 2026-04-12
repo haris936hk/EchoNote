@@ -1,17 +1,16 @@
-// backend/src/config/auth.js
-// Authentication configuration for Google OAuth and JWT
+
 
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 
-// Google OAuth Client
+
 const googleClient = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI
 );
 
-// Google OAuth Scopes
+
 const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
@@ -58,7 +57,7 @@ const exchangeCodeForTokens = async (code) => {
     const { tokens } = await googleClient.getToken(code);
     googleClient.setCredentials(tokens);
 
-    // Get user info
+    
     const ticket = await googleClient.verifyIdToken({
       idToken: tokens.id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -89,8 +88,8 @@ const exchangeCodeForTokens = async (code) => {
  */
 const getAuthUrl = () => {
   return googleClient.generateAuthUrl({
-    access_type: 'offline', // Get refresh token
-    prompt: 'consent', // Force consent screen to get refresh token
+    access_type: 'offline',
+    prompt: 'consent', 
     scope: GOOGLE_SCOPES,
   });
 };
