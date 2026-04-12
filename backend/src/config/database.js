@@ -89,9 +89,7 @@ const disconnectDatabase = async () => {
   }
 };
 
-/**
- * Check database health
- */
+
 const checkDatabaseHealth = async () => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -106,9 +104,7 @@ const checkDatabaseHealth = async () => {
   }
 };
 
-/**
- * Clean up old processing logs (optional maintenance)
- */
+
 const cleanupOldLogs = async (daysToKeep = 30) => {
   try {
     const cutoffDate = new Date();
@@ -130,14 +126,12 @@ const cleanupOldLogs = async (daysToKeep = 30) => {
   }
 };
 
-/**
- * Clean up audio files that should be deleted
- */
+
 const cleanupExpiredAudio = async () => {
   try {
     const now = new Date();
 
-    // Find meetings where audio should be deleted
+    
     const expiredMeetings = await prisma.meeting.findMany({
       where: {
         shouldDeleteAudioAt: {
@@ -162,8 +156,7 @@ const cleanupExpiredAudio = async () => {
 
     logger.info(`Found ${expiredMeetings.length} meetings with expired audio`);
 
-    // Update meetings to mark audio as deleted
-    // Note: Actual file deletion from Supabase happens in storage.service.js
+   
     const updatePromises = expiredMeetings.map((meeting) =>
       prisma.meeting.update({
         where: { id: meeting.id },
@@ -184,9 +177,7 @@ const cleanupExpiredAudio = async () => {
   }
 };
 
-/**
- * Get database statistics
- */
+
 const getDatabaseStats = async () => {
   try {
     const [
@@ -236,9 +227,7 @@ const getDatabaseStats = async () => {
   }
 };
 
-/**
- * Transaction helper with retry logic
- */
+
 const executeTransaction = async (callback, maxRetries = 3) => {
   let lastError;
 
@@ -252,7 +241,7 @@ const executeTransaction = async (callback, maxRetries = 3) => {
       lastError = error;
       logger.warn(`Transaction attempt ${attempt} failed: ${error.message}`);
 
-      // Wait before retry (exponential backoff)
+      
       if (attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 100));
       }
