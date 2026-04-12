@@ -41,7 +41,7 @@ async function isEmailNotificationsEnabled(email) {
     return user.emailNotifications !== false; 
   } catch (error) {
     logger.error('Error checking email preferences:', error);
-    return true; // Fail open on error
+    return true; 
   }
 }
 
@@ -59,7 +59,7 @@ const sendEmail = async (options) => {
   const { to, subject, html, text, skipPreferenceCheck = false } = options;
 
   try {
-    // Check user preference (unless bypassed for critical emails like welcome email)
+    
     if (!skipPreferenceCheck) {
       const notificationsEnabled = await isEmailNotificationsEnabled(to);
       if (!notificationsEnabled) {
@@ -68,13 +68,13 @@ const sendEmail = async (options) => {
       }
     }
 
-    // Development mode - log but don't send
+    
     if (EMAIL_CONFIG.skipSend) {
       logger.info('📧 [DEV MODE] Email would be sent:', { to, subject });
       return { success: true, dev: true };
     }
 
-    // Get Gmail transport
+    
     const transporter = await getGmailTransport();
 
     // Send email via Gmail OAuth2 SMTP
