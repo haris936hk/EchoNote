@@ -48,15 +48,12 @@ const DashboardPage = () => {
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
-  // Fetch meetings on mount
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  // Auto-refresh: Poll only while there are processing meetings
   const processingIdsRef = useRef(new Set());
 
-  // Detect when meetings complete and show toast
   useEffect(() => {
     const currentlyProcessing = meetings.filter((m) => PROCESSING_STATUSES.includes(m.status));
     const currentIds = new Set(currentlyProcessing.map((m) => m.id));
@@ -79,7 +76,6 @@ const DashboardPage = () => {
     processingIdsRef.current = currentIds;
   }, [meetings]);
 
-  // Polling effect
   useEffect(() => {
     const hasProcessingMeetings = meetings.some((m) => PROCESSING_STATUSES.includes(m.status));
 
@@ -92,7 +88,6 @@ const DashboardPage = () => {
     return undefined;
   }, [meetings, fetchMeetings]);
 
-  // Scroll to top button
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
@@ -105,7 +100,6 @@ const DashboardPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter meetings
   useEffect(() => {
     let result = meetings;
     if (selectedCategory !== 'ALL') {
@@ -120,7 +114,6 @@ const DashboardPage = () => {
     setFilteredMeetings(result);
   }, [meetings, selectedCategory, debouncedSearch]);
 
-  // Statistics
   const stats = {
     total: meetings.length,
     completed: meetings.filter((m) => m.status === 'COMPLETED').length,
@@ -134,7 +127,6 @@ const DashboardPage = () => {
     return acc;
   }, {});
 
-  // Greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -178,7 +170,6 @@ const DashboardPage = () => {
     return <PageLoader label="Loading your meetings..." />;
   }
 
-  // Format duration
   const formatDuration = (seconds) => {
     const m = Math.floor(seconds / 60);
     if (m < 60) return `${m}m`;
