@@ -56,20 +56,18 @@ prisma.$on('info', (e) => {
   logger.info(`Prisma Info: ${e.message}`);
 });
 
-// Log Prisma warnings
+
 prisma.$on('warn', (e) => {
   logger.warn(`Prisma Warning: ${e.message}`);
 });
 
-/**
- * Connect to database
- */
+
 const connectDatabase = async () => {
   try {
     await prisma.$connect();
     logger.info('✅ Database connected successfully');
 
-    // Test the connection
+    
     await prisma.$queryRaw`SELECT 1`;
     logger.info('✅ Database connection verified');
 
@@ -80,9 +78,7 @@ const connectDatabase = async () => {
   }
 };
 
-/**
- * Disconnect from database
- */
+
 const disconnectDatabase = async () => {
   try {
     await prisma.$disconnect();
