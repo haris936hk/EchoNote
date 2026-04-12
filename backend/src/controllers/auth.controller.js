@@ -196,7 +196,7 @@ const verifyToken = async (req, res) => {
       data: {
         valid: true,
         user: {
-          userId: decoded.id, // Changed from decoded.userId to decoded.id
+          userId: decoded.id, 
           email: decoded.email,
           name: decoded.name,
         },
@@ -218,8 +218,7 @@ const verifyToken = async (req, res) => {
  */
 const revokeGoogleAccess = async (req, res) => {
   try {
-    // This would revoke Google OAuth permissions
-    // For now, just logout
+    
     await authService.logout(req.userId);
     res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
