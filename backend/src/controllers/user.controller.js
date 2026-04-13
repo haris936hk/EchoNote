@@ -381,13 +381,13 @@ const getUserStats = async (req, res) => {
       }),
     ]);
 
-    // Format category stats
+    
     const byCategory = {};
     categoryStats.forEach((stat) => {
       byCategory[stat.category] = stat._count;
     });
 
-    // Calculate averages
+   
     const avgDuration =
       completedMeetings > 0
         ? Math.round((totalDuration._sum.audioDuration || 0) / completedMeetings)
@@ -431,10 +431,7 @@ const getUserStats = async (req, res) => {
   }
 };
 
-/**
- * Get user activity log
- * GET /api/users/activity?limit=50
- */
+
 const getUserActivity = async (req, res) => {
   try {
     const userId = req.userId;
@@ -474,16 +471,13 @@ const getUserActivity = async (req, res) => {
   }
 };
 
-/**
- * Delete user account (with all data)
- * DELETE /api/users/me
- */
+
 const deleteUserAccount = async (req, res) => {
   try {
     const userId = req.userId;
     const { confirmation } = req.body;
 
-    // Require explicit confirmation
+    
     if (confirmation !== 'DELETE_MY_ACCOUNT') {
       return res.status(400).json({
         success: false,
@@ -492,7 +486,7 @@ const deleteUserAccount = async (req, res) => {
       });
     }
 
-    // Get all meetings with audio URLs (for cleanup)
+    
     const meetings = await prisma.meeting.findMany({
       where: { userId, audioUrl: { not: null } },
       select: { id: true, audioUrl: true },
@@ -500,16 +494,14 @@ const deleteUserAccount = async (req, res) => {
 
     logger.warn(`⚠️ Deleting user account: ${userId} with ${meetings.length} meetings`);
 
-    // Delete user (cascade will delete meetings, activities, etc.)
+    
     await prisma.user.delete({
       where: { id: userId },
     });
 
     logger.info(`🗑️ User account deleted: ${userId}`);
 
-    // TODO: Delete audio files from Supabase storage
-    // This should be done in a background job or queue
-    // For now, just return the list of files to delete
+    
     const audioFilesToDelete = meetings.filter((m) => m.audioUrl).map((m) => m.audioUrl);
 
     return res.status(200).json({
@@ -530,15 +522,12 @@ const deleteUserAccount = async (req, res) => {
   }
 };
 
-/**
- * Export user data (GDPR compliance)
- * GET /api/users/export
- */
+
 const exportUserData = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Get all user data
+    
     const [user, meetings, activities] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -607,7 +596,7 @@ const exportUserData = async (req, res) => {
       },
     };
 
-    // Set filename
+    
     const filename = `echonote_data_export_${user.email}_${Date.now()}.json`;
 
     res.setHeader('Content-Type', 'application/json');
@@ -624,10 +613,7 @@ const exportUserData = async (req, res) => {
   }
 };
 
-/**
- * Update last login timestamp
- * POST /api/users/login-timestamp
- */
+
 const updateLastLogin = async (req, res) => {
   try {
     const userId = req.userId;
@@ -650,10 +636,7 @@ const updateLastLogin = async (req, res) => {
   }
 };
 
-/**
- * Log user activity
- * POST /api/users/activity
- */
+
 const logUserActivity = async (req, res) => {
   try {
     const userId = req.userId;
@@ -704,10 +687,7 @@ const logUserActivity = async (req, res) => {
   }
 };
 
-/**
- * Test Slack Webhook Integration
- * POST /api/users/settings/slack/test
- */
+
 const testSlackWebhook = async (req, res) => {
   try {
     const userId = req.userId;
@@ -731,7 +711,7 @@ const testSlackWebhook = async (req, res) => {
     const mockMeeting = {
       title: 'EchoNote Slack Integration Test',
       category: 'OTHER',
-      audioDuration: 305, // 5:05
+      audioDuration: 305, 
       transcriptConfidence: 95,
       nlpSentiment: 'positive',
       nlpSentimentScore: 0.85,
