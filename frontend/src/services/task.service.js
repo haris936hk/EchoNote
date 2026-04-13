@@ -1,8 +1,6 @@
 import { tasksAPI } from './api';
 
-/**
- * Fetch all tasks (action items) for current user
- */
+
 export const getTasks = async () => {
   try {
     const result = await tasksAPI.getTasks();
@@ -26,9 +24,7 @@ export const getTasks = async () => {
   }
 };
 
-/**
- * Update task status or details
- */
+
 export const updateTask = async (id, updates) => {
   try {
     if (!id || !updates) {
