@@ -1,11 +1,8 @@
-// backend/src/middleware/auth.middleware.js
-// Authentication and authorization middleware
-
+ 
 const { verifyToken, extractTokenFromHeader } = require('../config/auth');
 const { prisma } = require('../config/database');
 const winston = require('winston');
-
-// Initialize logger
+ 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -16,11 +13,9 @@ const logger = winston.createLogger({
   ],
 });
 
-// ============================================
-// USER CACHE — eliminates 1 DB round-trip per request
-// ============================================
-const USER_CACHE_TTL_MS = 60 * 1000; // 60 seconds
-const _userCache = new Map(); // Map<userId, { user, expiresAt }>
+
+const USER_CACHE_TTL_MS = 60 * 1000; 
+const _userCache = new Map(); 
 
 function _getCachedUser(userId) {
   const entry = _userCache.get(userId);
@@ -36,15 +31,12 @@ function _setCachedUser(userId, user) {
   _userCache.set(userId, { user, expiresAt: Date.now() + USER_CACHE_TTL_MS });
 }
 
-/**
- * Evict this user from the cache immediately.
- * Call when user record is mutated (logout, account deletion).
- */
+
 function evictUserFromCache(userId) {
   _userCache.delete(userId);
 }
 
-// Evict fully stale entries every 5 minutes
+
 setInterval(
   () => {
     const now = Date.now();
@@ -55,10 +47,7 @@ setInterval(
   5 * 60 * 1000
 );
 
-/**
- * Authenticate user with JWT token
- * Validates token and attaches user to request
- */
+
 const authenticate = async (req, res, next) => {
   try {
     // Extract token from Authorization header
