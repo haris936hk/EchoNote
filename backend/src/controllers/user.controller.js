@@ -177,10 +177,7 @@ const getUserSettings = async (req, res) => {
   }
 };
 
-/**
- * Update user settings
- * PATCH /api/users/settings
- */
+
 const updateUserSettings = async (req, res) => {
   try {
     const userId = req.userId;
@@ -188,13 +185,13 @@ const updateUserSettings = async (req, res) => {
 
     const updateData = {};
 
-    // Handle autoDeleteDays - can be a number (1-365) or null (never delete)
+   
     if (autoDeleteDays !== undefined) {
       if (autoDeleteDays === null) {
-        // User is disabling auto-delete (never delete)
+        
         updateData.autoDeleteDays = null;
 
-        // Clear shouldDeleteAudioAt for all existing meetings
+        
         await prisma.meeting.updateMany({
           where: {
             userId: userId,
@@ -208,7 +205,7 @@ const updateUserSettings = async (req, res) => {
 
         logger.info(`⚙️ Auto-delete disabled for user: ${userId}`);
       } else {
-        // User is setting a retention period
+        
         const days = parseInt(autoDeleteDays);
         if (isNaN(days) || days < 1 || days > 365) {
           return res.status(400).json({
@@ -218,7 +215,7 @@ const updateUserSettings = async (req, res) => {
         }
         updateData.autoDeleteDays = days;
 
-        // Update shouldDeleteAudioAt for all existing meetings
+        
         const newDate = new Date();
         newDate.setDate(newDate.getDate() + days);
 
@@ -306,15 +303,12 @@ const updateUserSettings = async (req, res) => {
   }
 };
 
-/**
- * Get user statistics
- * GET /api/users/stats
- */
+
 const getUserStats = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Get meeting counts by status and category
+    
     const [
       totalMeetings,
       completedMeetings,
@@ -326,17 +320,17 @@ const getUserStats = async (req, res) => {
       storageUsed,
       recentActivity,
     ] = await Promise.all([
-      // Total meetings
+      
       prisma.meeting.count({
         where: { userId },
       }),
 
-      // Completed meetings
+      
       prisma.meeting.count({
         where: { userId, status: 'COMPLETED' },
       }),
 
-      // Processing meetings
+      
       prisma.meeting.count({
         where: {
           userId,
@@ -346,37 +340,37 @@ const getUserStats = async (req, res) => {
         },
       }),
 
-      // Failed meetings
+      
       prisma.meeting.count({
         where: { userId, status: 'FAILED' },
       }),
 
-      // Meetings by category
+      
       prisma.meeting.groupBy({
         by: ['category'],
         where: { userId },
         _count: true,
       }),
 
-      // Total duration
+      
       prisma.meeting.aggregate({
         where: { userId, status: 'COMPLETED' },
         _sum: { audioDuration: true },
       }),
 
-      // Total words
+      
       prisma.meeting.aggregate({
         where: { userId, status: 'COMPLETED' },
         _sum: { transcriptWordCount: true },
       }),
 
-      // Storage used
+      
       prisma.meeting.aggregate({
         where: { userId, audioUrl: { not: null } },
         _sum: { audioSize: true },
       }),
 
-      // Recent meetings (last 7 days)
+      
       prisma.meeting.count({
         where: {
           userId,
