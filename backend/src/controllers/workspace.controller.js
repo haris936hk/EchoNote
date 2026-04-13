@@ -3,10 +3,7 @@ const emailService = require('../services/email.service');
 const meetingService = require('../services/meeting.service');
 const logger = require('../utils/logger');
 
-/**
- * Create a new workspace
- * POST /api/workspaces
- */
+
 const createWorkspace = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -41,10 +38,7 @@ const createWorkspace = async (req, res) => {
   }
 };
 
-/**
- * Get all workspaces for the current user
- * GET /api/workspaces/me
- */
+
 const getMyWorkspaces = async (req, res) => {
   try {
     const userId = req.userId;
@@ -77,10 +71,7 @@ const getMyWorkspaces = async (req, res) => {
   }
 };
 
-/**
- * Get workspace by ID (member access only)
- * GET /api/workspaces/:id
- */
+
 const getWorkspaceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -129,10 +120,7 @@ const getWorkspaceById = async (req, res) => {
   }
 };
 
-/**
- * Delete workspace (OWNER only)
- * DELETE /api/workspaces/:id
- */
+
 const deleteWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
@@ -162,10 +150,7 @@ const deleteWorkspace = async (req, res) => {
   }
 };
 
-/**
- * Invite member by email (OWNER only)
- * POST /api/workspaces/:id/members
- */
+
 const inviteMember = async (req, res) => {
   try {
     const { id } = req.params;
@@ -203,7 +188,7 @@ const inviteMember = async (req, res) => {
         },
       });
 
-      // Send invitation email
+      
       emailService.sendWorkspaceInvitationEmail({
         to: email,
         inviterName: membership.user.name || 'A teammate',
@@ -226,10 +211,7 @@ const inviteMember = async (req, res) => {
   }
 };
 
-/**
- * Remove member (OWNER only)
- * DELETE /api/workspaces/:id/members/:userId
- */
+
 const removeMember = async (req, res) => {
   try {
     const { id, userId: targetUserId } = req.params;
@@ -270,10 +252,8 @@ const removeMember = async (req, res) => {
   }
 };
 
-/**
- * Update member role (OWNER only)
- * PATCH /api/workspaces/:id/members/:userId/role
- */
+
+
 const updateMemberRole = async (req, res) => {
   try {
     const { id, userId: targetUserId } = req.params;
@@ -316,10 +296,7 @@ const updateMemberRole = async (req, res) => {
   }
 };
 
-/**
- * Add meeting to workspace (OWNER only)
- * POST /api/workspaces/:id/meetings
- */
+
 const addMeeting = async (req, res) => {
   try {
     const { id: workspaceId } = req.params;
@@ -379,10 +356,7 @@ const addMeeting = async (req, res) => {
   }
 };
 
-/**
- * Remove meeting from workspace (OWNER only)
- * DELETE /api/workspaces/:id/meetings/:meetingId
- */
+
 const removeMeeting = async (req, res) => {
   try {
     const { id: workspaceId, meetingId } = req.params;
@@ -416,10 +390,7 @@ const removeMeeting = async (req, res) => {
   }
 };
 
-/**
- * Get all meetings for a workspace (all members)
- * GET /api/workspaces/:id/meetings
- */
+
 const getWorkspaceMeetings = async (req, res) => {
   try {
     const { id: workspaceId } = req.params;
@@ -467,10 +438,7 @@ const getWorkspaceMeetings = async (req, res) => {
   }
 };
 
-/**
- * Get single workspace meeting detail (all members)
- * GET /api/workspaces/:id/meetings/:meetingId
- */
+
 const getWorkspaceMeeting = async (req, res) => {
   try {
     const { id: workspaceId, meetingId } = req.params;
@@ -506,7 +474,7 @@ const getWorkspaceMeeting = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Meeting not found in this workspace' });
     }
 
-    // Transform meeting data for frontend consistency
+    
     const transformedMeeting = meetingService.transformMeetingForFrontend(wmLink.meeting);
 
     const data = {
