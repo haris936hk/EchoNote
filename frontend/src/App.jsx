@@ -3,26 +3,20 @@ import { HeroUIProvider } from '@heroui/react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import PropTypes from 'prop-types';
 
-// Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { MeetingProvider } from './contexts/MeetingContext';
 
-// Components
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { ToastContainer, useToast } from './components/common/Toast';
 import NotificationPromptBanner from './components/common/NotificationPromptBanner';
 
-// Routes
 import AppRoutes from './routes';
 
-// Constants
 import { GOOGLE_CLIENT_ID } from './utils/constants';
 
-// Styles
 import './styles/globals.css';
 
-// Toast wrapper component
 const ToastWrapper = ({ children }) => {
   const { toasts, removeToast } = useToast();
   return (
