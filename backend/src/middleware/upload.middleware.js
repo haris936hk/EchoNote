@@ -1,5 +1,4 @@
-// backend/src/middleware/upload.middleware.js
-// File upload middleware using multer and express-fileupload
+
 
 const multer = require('multer');
 const path = require('path');
@@ -8,7 +7,7 @@ const crypto = require('crypto');
 const winston = require('winston');
 const ffmpeg = require('fluent-ffmpeg');
 
-// Configure FFmpeg/FFprobe paths if provided in .env
+
 if (process.env.FFMPEG_PATH) {
   ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
 }
@@ -18,7 +17,7 @@ if (process.env.FFPROBE_PATH) {
 
 const { AppError } = require('./error.middleware');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
