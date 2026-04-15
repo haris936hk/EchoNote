@@ -3,15 +3,13 @@ const fsSync = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-// Storage directories
+
 const STORAGE_BASE = path.join(process.cwd(), 'storage');
 const AUDIO_DIR = path.join(STORAGE_BASE, 'audio');
 const TEMP_DIR = path.join(STORAGE_BASE, 'temp');
 const PROCESSED_DIR = path.join(STORAGE_BASE, 'processed');
 
-/**
- * Initialize storage directories
- */
+
 async function initializeStorage() {
   try {
     await fs.mkdir(STORAGE_BASE, { recursive: true });
@@ -51,7 +49,7 @@ async function storeTempAudioFile(file) {
     const filename = `${fileId}${extension}`;
     const tempPath = path.join(TEMP_DIR, filename);
 
-    // Move uploaded file to temp directory
+    
     await fs.rename(file.path, tempPath);
 
     console.log(`✅ Temp audio stored: ${filename}`);
@@ -88,10 +86,10 @@ async function storeProcessedAudio(processedPath, meetingId) {
     const filename = `${meetingId}${extension}`;
     const permanentPath = path.join(AUDIO_DIR, filename);
 
-    // Copy processed file to permanent storage
+    
     await fs.copyFile(processedPath, permanentPath);
 
-    // Get file stats
+    
     const stats = await fs.stat(permanentPath);
 
     console.log(`✅ Processed audio stored: ${filename} (${formatFileSize(stats.size)})`);
@@ -102,7 +100,7 @@ async function storeProcessedAudio(processedPath, meetingId) {
         path: permanentPath,
         filename,
         size: stats.size,
-        url: `/storage/audio/${filename}`, // Relative URL for serving
+        url: `/storage/audio/${filename}`, 
       },
     };
   } catch (error) {
@@ -121,7 +119,7 @@ async function storeProcessedAudio(processedPath, meetingId) {
  */
 async function getAudioFile(meetingId) {
   try {
-    // Find audio file with any extension
+    
     const files = await fs.readdir(AUDIO_DIR);
     const audioFile = files.find((file) => file.startsWith(meetingId));
 
@@ -160,7 +158,7 @@ async function getAudioFile(meetingId) {
  */
 async function deleteAudioFile(filePath) {
   try {
-    // Check if file exists
+   
     if (!fsSync.existsSync(filePath)) {
       return {
         success: false,
@@ -192,7 +190,7 @@ async function deleteAudioFile(filePath) {
 async function deleteTempFile(tempPath) {
   try {
     if (!fsSync.existsSync(tempPath)) {
-      return { success: true }; // Already deleted
+      return { success: true }; 
     }
 
     await fs.unlink(tempPath);
@@ -292,7 +290,7 @@ async function getStorageStats() {
       fs.readdir(PROCESSED_DIR),
     ]);
 
-    // Calculate total sizes
+    
     let audioSize = 0;
     let tempSize = 0;
     let processedSize = 0;
@@ -385,11 +383,11 @@ async function getFileSize(filePath) {
  * @returns {Object} Validation result
  */
 function validateAudioFile(file) {
-  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB (3 min at high quality)
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; 
   const ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/mp4', 'audio/x-m4a'];
   const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4'];
 
-  // Check file size
+  
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
@@ -397,7 +395,7 @@ function validateAudioFile(file) {
     };
   }
 
-  // Check MIME type
+  
   if (!ALLOWED_TYPES.includes(file.mimetype)) {
     return {
       valid: false,
@@ -405,7 +403,7 @@ function validateAudioFile(file) {
     };
   }
 
-  // Check file extension
+ 
   const extension = path.extname(file.originalname).toLowerCase();
   if (!ALLOWED_EXTENSIONS.includes(extension)) {
     return {
@@ -452,20 +450,15 @@ async function createAudioDownloadStream(meetingId) {
   }
 }
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
 
-/**
- * Generate unique file ID
- */
+
+
+
 function generateFileId() {
   return crypto.randomBytes(16).toString('hex');
 }
 
-/**
- * Format file size in human-readable format
- */
+
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
 
@@ -476,9 +469,7 @@ function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
-/**
- * Get MIME type from filename
- */
+
 function getMimeType(filename) {
   const extension = path.extname(filename).toLowerCase();
   const mimeTypes = {
@@ -491,9 +482,7 @@ function getMimeType(filename) {
   return mimeTypes[extension] || 'application/octet-stream';
 }
 
-/**
- * Get storage directory paths
- */
+
 function getStoragePaths() {
   return {
     base: STORAGE_BASE,

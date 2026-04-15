@@ -1,4 +1,4 @@
-// backend/src/services/slack.service.js
+
 const axios = require('axios');
 const winston = require('winston');
 
@@ -19,13 +19,13 @@ const logger = winston.createLogger({
  */
 async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
   try {
-    // Format duration
+    
     const durationSeconds = meetingData.audioDuration || 0;
     const mins = Math.floor(durationSeconds / 60);
     const secs = Math.floor(durationSeconds % 60);
     const formattedDuration = `${mins}:${secs.toString().padStart(2, '0')}`;
 
-    // Priority to emoji
+    
     const getPriorityEmoji = (priority) => {
       switch ((priority || '').toLowerCase()) {
         case 'high':
@@ -39,10 +39,10 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       }
     };
 
-    // Build Blocks Data
+    
     const blocks = [];
 
-    // Header
+
     blocks.push({
       type: 'header',
       text: {
@@ -52,7 +52,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       },
     });
 
-    // Context: Category & Duration
+    
     blocks.push({
       type: 'context',
       elements: [
@@ -65,7 +65,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
 
     blocks.push({ type: 'divider' });
 
-    // Executive Summary
+    
     const executiveSummary = meetingData.summaryExecutive || meetingData.executiveSummary;
     if (executiveSummary) {
       blocks.push({
@@ -78,7 +78,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       blocks.push({ type: 'divider' });
     }
 
-    // Action Items
+    
     const actionItems = meetingData.summaryActionItems || meetingData.actionItems || [];
     if (actionItems.length > 0) {
       const actionsText = actionItems
@@ -98,7 +98,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       });
     }
 
-    // Key Decisions
+    
     const keyDecisionsRaw = meetingData.summaryKeyDecisions || meetingData.keyDecisions;
     const keyDecisions =
       typeof keyDecisionsRaw === 'string' && keyDecisionsRaw.startsWith('[')
@@ -115,7 +115,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       });
     }
 
-    // Context: NLP Stats
+    
     const sentiment = meetingData.nlpSentiment || meetingData.sentiment || 'N/A';
     const confidence =
       meetingData.transcriptConfidence != null
@@ -134,7 +134,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       ],
     });
 
-    // Footer
+   
     const timestampMs = Math.floor(Date.now() / 1000);
     blocks.push({
       type: 'context',
