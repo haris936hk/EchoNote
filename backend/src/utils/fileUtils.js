@@ -1,5 +1,5 @@
-// backend/src/utils/fileUtils.js
-// Utility for file naming and management
+
+
 
 /**
  * Sanitize a title for use in filenames
@@ -11,18 +11,18 @@
 const sanitizeTitle = (title, maxLength = 50) => {
   if (!title) return 'meeting';
 
-  // Replace special characters with underscores
+  
   let sanitized = title
-    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special chars except space and hyphen
-    .replace(/\s+/g, '_') // Replace spaces with underscores
-    .replace(/-+/g, '_') // Replace hyphens with underscores
-    .replace(/_+/g, '_') // Replace multiple underscores with single
-    .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+    .replace(/[^a-zA-Z0-9\s-]/g, '') 
+    .replace(/\s+/g, '_')
+    .replace(/-+/g, '_') 
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, ''); 
 
-  // Truncate if too long
+ 
   if (sanitized.length > maxLength) {
     sanitized = sanitized.substring(0, maxLength);
-    // Don't cut in the middle of an underscore
+   
     if (sanitized.endsWith('_')) {
       sanitized = sanitized.slice(0, -1);
     }
@@ -39,7 +39,7 @@ const sanitizeTitle = (title, maxLength = 50) => {
 const formatDateForFilename = (date) => {
   const d = new Date(date);
   if (isNaN(d.getTime())) {
-    // Fallback to current date if invalid
+    
     return new Date().toISOString().slice(0, 10);
   }
   return d.toISOString().slice(0, 10);
