@@ -6,12 +6,12 @@ const path = require('path');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
 
-// Load environment variables
+
 dotenv.config();
 
 const ffmpeg = require('fluent-ffmpeg');
 
-// Configure FFmpeg/FFprobe paths if provided in .env
+
 if (process.env.FFMPEG_PATH) {
   ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
 }
@@ -19,15 +19,15 @@ if (process.env.FFPROBE_PATH) {
   ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
 }
 
-// Import configuration
+
 const { prisma } = require('./config/database');
 
-// Import services
+
 const storageService = require('./services/storage.service');
 const queueService = require('./services/queue.service');
 const transcriptionService = require('./services/transcription.service');
 
-// Import routes
+
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const meetingRoutes = require('./routes/meeting.routes');
@@ -39,30 +39,27 @@ const publicRoutes = require('./routes/public.routes');
 const workspaceRoutes = require('./routes/workspace.routes');
 const liveblocksRoutes = require('./routes/liveblocks.routes');
 
-// Import middleware
+
 const { errorHandler } = require('./middleware/error.middleware');
 const { apiLimiter } = require('./middleware/rateLimit.middleware');
 
-// Initialize Express app
+
 const app = express();
 
-// Environment variables with defaults
+
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-// ============================================
-// MIDDLEWARE CONFIGURATION
-// ============================================
+ 
 
-// Security middleware
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
-// CORS configuration
+
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -72,33 +69,31 @@ app.use(
   })
 );
 
-// Body parsing middleware
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging middleware
+
 if (NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('combined'));
 }
 
-// Rate limiting (global) - FR.56: 100 requests per hour per user
+
 app.use('/api/', apiLimiter);
 
-// Serve static files from storage directory
+
 app.use('/storage', express.static(path.join(__dirname, 'storage')));
 
-// ============================================
-// HEALTH CHECK ENDPOINT
-// ============================================
+
 
 app.get('/health', async (req, res) => {
   try {
-    // Check database connection
+    
     await prisma.$queryRaw`SELECT 1`;
 
-    // Get storage stats
+    
     const storageStats = await storageService.getStorageStats();
 
     res.json({
@@ -121,11 +116,10 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// ============================================
-// API ROUTES
-// ============================================
 
-// Mount routes
+
+
+
 app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -137,7 +131,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/liveblocks', liveblocksRoutes);
 
-// API root endpoint
+
 app.get('/api', (req, res) => {
   res.json({
     message: 'EchoNote API',
@@ -153,9 +147,7 @@ app.get('/api', (req, res) => {
   });
 });
 
-// ============================================
-// 404 HANDLER
-// ============================================
+
 
 app.use('*', (req, res) => {
   res.status(404).json({
@@ -166,17 +158,14 @@ app.use('*', (req, res) => {
   });
 });
 
-// ============================================
-// ERROR HANDLING MIDDLEWARE
-// ============================================
+
 
 app.use(errorHandler);
 
-// ============================================
-// CRON JOBS
-// ============================================
 
-// Clean up old temporary files every hour
+
+
+
 cron.schedule('0 * * * *', async () => {
   console.log('🧹 Running scheduled storage cleanup...');
 
@@ -195,7 +184,7 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 
-// Database health check every 5 minutes
+
 cron.schedule('*/5 * * * *', async () => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -205,23 +194,21 @@ cron.schedule('*/5 * * * *', async () => {
   }
 });
 
-// ============================================
-// GRACEFUL SHUTDOWN
-// ============================================
+
 
 async function gracefulShutdown(signal) {
   console.log(`\n${signal} received. Starting graceful shutdown...`);
 
-  // Close server
+ 
   server.close(async () => {
     console.log('✅ HTTP server closed');
 
     try {
-      // Stop queue worker
+      
       queueService.stopWorker();
       console.log('✅ Queue worker stopped');
 
-      // Disconnect from database
+    
       await prisma.$disconnect();
       console.log('✅ Database connection closed');
 
@@ -233,18 +220,18 @@ async function gracefulShutdown(signal) {
     }
   });
 
-  // Force shutdown after 10 seconds
+  
   setTimeout(() => {
     console.error('⚠️  Forced shutdown after timeout');
     process.exit(1);
   }, 10000);
 }
 
-// Handle shutdown signals
+
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Handle uncaught errors
+
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
   gracefulShutdown('uncaughtException');
@@ -255,20 +242,18 @@ process.on('unhandledRejection', (reason, promise) => {
   gracefulShutdown('unhandledRejection');
 });
 
-// ============================================
-// SERVER INITIALIZATION
-// ============================================
+
 
 async function initializeServer() {
   try {
     console.log('\n🚀 Starting EchoNote Backend Server...\n');
 
-    // Step 1: Test database connection
+    
     console.log('📊 Connecting to database...');
     await prisma.$connect();
     console.log('✅ Database connected');
 
-    // Step 2: Initialize storage directories
+    
     console.log('📁 Initializing storage...');
     const storageResult = await storageService.initializeStorage();
     if (storageResult.success) {
@@ -277,7 +262,7 @@ async function initializeServer() {
       throw new Error(`Storage initialization failed: ${storageResult.error}`);
     }
 
-    // Step 3: Test email service (Gmail OAuth2)
+   
     if (process.env.GMAIL_USER && process.env.GMAIL_REFRESH_TOKEN) {
       console.log('📧 Checking email service (Gmail OAuth2)...');
       console.log('✅ Email service configured');
@@ -287,7 +272,7 @@ async function initializeServer() {
       );
     }
 
-    // Step 4: Verify Python dependencies
+  
     console.log('🐍 Checking Python dependencies...');
     const { execSync } = require('child_process');
     const pythonCmd = process.env.PYTHON_PATH || 'python3';
@@ -298,7 +283,7 @@ async function initializeServer() {
       console.log(`⚠️  Python not found (tried: ${pythonCmd}). Audio processing may fail.`);
     }
 
-    // Step 5: Verify FFmpeg/FFprobe
+    
     console.log('🎵 Checking FFmpeg/FFprobe dependencies...');
     try {
       const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg';
@@ -318,7 +303,7 @@ async function initializeServer() {
       );
     }
 
-    // Step 6: Initialize transcription microservice
+   
     console.log('🤖 Initializing transcription service...');
     try {
       const result = await transcriptionService.initialize();
@@ -343,9 +328,7 @@ async function initializeServer() {
   }
 }
 
-// ============================================
-// START SERVER
-// ============================================
+
 
 let server;
 
@@ -355,7 +338,7 @@ initializeServer().then((initialized) => {
     process.exit(1);
   }
 
-  // Start HTTP server
+  
   server = app.listen(PORT, () => {
     console.log('🎉 EchoNote Backend Server Running\n');
     console.log(`📍 Environment: ${NODE_ENV}`);
@@ -381,12 +364,12 @@ initializeServer().then((initialized) => {
     console.log('='.repeat(60) + '\n');
     console.log('🎯 Server ready to accept requests!\n');
 
-    // Start queue worker
+    
     queueService.startWorker();
     console.log('⚙️  Meeting processing queue worker started\n');
   });
 
-  // Handle server errors
+  
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
       console.error(`❌ Port ${PORT} is already in use`);
@@ -398,6 +381,6 @@ initializeServer().then((initialized) => {
   });
 });
 
-// Export app for testing
+
 module.exports = app;
-// trigger reload
+
