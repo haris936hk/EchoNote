@@ -6,7 +6,7 @@ const fs = require('fs');
 const winston = require('winston');
 const { DeepgramClient } = require('@deepgram/sdk');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -17,9 +17,7 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Initialize the transcription service
- */
+
 const initialize = async () => {
   try {
     logger.info(`🎬 Initializing transcription service (Deepgram)...`);
@@ -69,9 +67,9 @@ const computeWordConfidence = (words) => {
   let weightedSum = 0;
 
   for (const w of words) {
-    // Weight by word duration (longer words carry more weight)
+    
     const duration = (w.end || 0) - (w.start || 0);
-    const weight = Math.max(duration, 0.01); // minimum weight to avoid zero
+    const weight = Math.max(duration, 0.01); 
     weightedSum += (w.confidence || 0) * weight;
     totalWeight += weight;
   }
@@ -197,13 +195,13 @@ const transcribeAudio = async (audioPath, options = {}) => {
       punctuate: true,
       paragraphs: true,
       language: options.language || 'en',
-      // Intelligence features for accuracy
+      
       detect_entities: true,
       topics: true,
       intents: true,
-      // Let smart_format handle fillers; don't inject them into output
+      
       filler_words: false,
-      // Boost domain terminology (Nova-3 uses keyterm instead of keywords)
+      
       keyterm: [
         'EchoNote',
         'Supabase',
@@ -226,16 +224,16 @@ const transcribeAudio = async (audioPath, options = {}) => {
 
     while (attempt <= maxRetries) {
       try {
-        // Must recreate stream on each attempt
+       
         const audioStream = fs.createReadStream(audioPath);
         response = await deepgram.listen.v1.media.transcribeFile(audioStream, deepgramOptions);
 
-        // Deepgram sometimes successfully returns an error payload
+        
         if (response.error) {
           throw new Error(response.error.message || 'Deepgram API error');
         }
 
-        break; // Success
+        break; 
       } catch (error) {
         const status = error.response?.status || error.status;
         const isRetryable = !status || status === 429 || status >= 500;
@@ -264,21 +262,21 @@ const transcribeAudio = async (audioPath, options = {}) => {
     const paragraphsTranscript = result.results?.paragraphs?.transcript;
     const rawTranscript = alternative?.transcript || '';
 
-    // Prefer the paragraph-formatted transcript if it contains speaker labels
+
     const transcript = paragraphsTranscript || rawTranscript;
     const utterances = result.results?.utterances || [];
 
-    // Compute real per-word confidence from Deepgram word data
+    
     const words = alternative?.words || [];
     const wordConfidence = computeWordConfidence(words);
 
-    // Extract Deepgram native intelligence
+    
     const deepgramEntities = extractDeepgramEntities(result);
     const deepgramTopics = extractDeepgramTopics(result);
     const deepgramIntents = extractDeepgramIntents(result);
     const lowConfidenceWords = extractLowConfidenceWords(words);
 
-    // Map Deepgram utterances to our internal segments format
+   
     const segments = utterances.map((u) => ({
       start: u.start,
       end: u.end,
@@ -304,7 +302,7 @@ const transcribeAudio = async (audioPath, options = {}) => {
       processingTime: parseFloat(duration),
       model: result.metadata?.model_info?.name || 'nova-3',
       method: 'deepgram',
-      // Native Deepgram intelligence — passed downstream to summarizer
+      
       deepgramEntities,
       deepgramTopics,
       deepgramIntents,
@@ -352,7 +350,7 @@ const formatTranscriptWithParagraphs = (segments) => {
 
   let formatted = '';
   let currentParagraph = '';
-  const paragraphDuration = 30; // Seconds per paragraph
+  const paragraphDuration = 30; 
 
   segments.forEach((segment, index) => {
     currentParagraph += segment.text + ' ';
@@ -377,7 +375,7 @@ const formatTranscriptWithParagraphs = (segments) => {
  * @param {string} audioPath - Path to audio file
  * @returns {Object} Speaker segments
  */
-// eslint-disable-next-line no-unused-vars
+
 const extractSpeakers = async (audioPath) => {
   logger.warn('⚠️ Speaker diarization is handled natively by Deepgram');
 

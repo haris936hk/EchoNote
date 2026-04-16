@@ -1,5 +1,4 @@
-// backend/src/utils/audioConverter.js
-// Utility for converting audio files using FFmpeg
+
 
 const { spawn } = require('child_process');
 const fs = require('fs');
