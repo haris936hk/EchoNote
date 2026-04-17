@@ -144,13 +144,3 @@
 - **FR.113**: System shall provide "Collaboration Insights" highlighting dominant participants and suggesting better session balance.
 - **FR.114**: System shall compute a "Total Questions" metric to measure curiosity and engagement level across sessions.
 
-## 3.3.16 Centralized Decision Log (Truth Repository)
-- **FR.115**: System shall maintain a global "Decision Log" aggregating all key decisions extracted across the user's entire meeting history.
-- **FR.116**: User shall be able to search the Decision Log by keyword and navigate directly to the source meeting.
-- **FR.117**: System shall visualize the Decision Log as a chronological "Truth Stream" using a vertical timeline architecture.
-
-## 3.3.17 Design System & Visual Standards
-- **FR.118**: System shall strictly adhere to the "Luminous Archive" design specification, utilizing OLED Black (#020617) as the primary background.
-- **FR.119**: System shall avoid 1px solid borders for sectioning, using tonal transitions or "Ghost Borders" (15% opacity) exclusively.
-- **FR.120**: System shall utilize Plus Jakarta Sans for all UI textual content and JetBrains Mono for all technical metadata (timestamps, file sizes).
-- **FR.121**: System shall visually distinguish AI-generated insights using subtle indigo/violet pulsing glows or specific Lucide AI icons.
