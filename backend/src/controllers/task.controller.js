@@ -1,5 +1,44 @@
 const { prisma } = require('../config/database');
 
+// ---------------------------------------------------------------------------
+// Helper: find an ActionItem and verify the requesting user has access.
+// Access is granted if:  (a) the user owns the task directly, OR
+//                        (b) the user is an OWNER/EDITOR of the workspace
+//                            that contains the meeting this task belongs to.
+// ---------------------------------------------------------------------------
+const findItemWithAccess = async (id, userId) => {
+  const item = await prisma.actionItem.findUnique({
+    where: { id },
+    include: {
+      meeting: {
+        include: {
+          workspaceMeeting: {
+            include: {
+              workspace: {
+                include: {
+                  members: { where: { userId } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!item) return null;
+
+  // Direct ownership
+  if (item.userId === userId) return item;
+
+  // Workspace OWNER / EDITOR access
+  const membership = item.meeting?.workspaceMeeting?.workspace?.members?.[0];
+  if (membership && ['OWNER', 'EDITOR'].includes(membership.role)) return item;
+
+  return null; // no access
+};
+
+// ---------------------------------------------------------------------------
 const createTask = async (req, res) => {
   try {
     const { meetingId, task, assignee, deadline, priority } = req.body;
@@ -49,14 +88,14 @@ const createTask = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.userId;
 
-    const item = await prisma.actionItem.findUnique({ where: { id } });
+    const item = await findItemWithAccess(id, req.userId);
 
-    if (!item || item.userId !== userId) {
+    if (!item) {
       return res.status(404).json({ success: false, error: 'Task not found' });
     }
 
@@ -92,6 +131,7 @@ const deleteTask = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 const getTasks = async (req, res) => {
   try {
     const tasks = await prisma.actionItem.findMany({
@@ -107,10 +147,18 @@ const getTasks = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, task, assignee, deadline, priority } = req.body;
+
+    // Ownership OR workspace EDITOR/OWNER access
+    const existing = await findItemWithAccess(id, req.userId);
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Task not found' });
+    }
 
     const dataToUpdate = {};
     if (status) {
@@ -126,18 +174,16 @@ const updateTask = async (req, res) => {
     if (priority !== undefined) dataToUpdate.priority = priority;
 
     const updatedTask = await prisma.actionItem.update({
-      where: { id, userId: req.userId }, 
+      where: { id },
       data: dataToUpdate,
     });
 
-    
     if (updatedTask.meetingId) {
       const allActionItems = await prisma.actionItem.findMany({
         where: { meetingId: updatedTask.meetingId },
         orderBy: { createdAt: 'asc' },
       });
 
-      
       const summaryActionItems = allActionItems.map((item) => ({
         id: item.id,
         task: item.task,

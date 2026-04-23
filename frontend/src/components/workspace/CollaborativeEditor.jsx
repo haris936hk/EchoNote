@@ -78,17 +78,16 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
       return newData;
     });
 
-    broadcast({ type: 'UPDATE_FIELD', field, value });
-
-    updatePresence({ lastSection: field });
+    try { broadcast({ type: 'UPDATE_FIELD', field, value }); } catch (_) {}
+    try { updatePresence({ lastSection: field }); } catch (_) {}
   };
 
   const handleFocus = (field) => {
-    updatePresence({ focusedField: field });
+    try { updatePresence({ focusedField: field }); } catch (_) {}
   };
 
   const handleBlur = () => {
-    updatePresence({ focusedField: null });
+    try { updatePresence({ focusedField: null }); } catch (_) {}
   };
 
   return (
