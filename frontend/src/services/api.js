@@ -471,6 +471,18 @@ export const tasksAPI = {
     }
   },
 
+  createTask: async (taskData) => {
+    try {
+      const response = await api.post('/tasks', taskData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to create task',
+      };
+    }
+  },
+
  
   updateTask: async (id, updates) => {
     try {
@@ -480,6 +492,18 @@ export const tasksAPI = {
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to update task',
+      };
+    }
+  },
+
+  deleteTask: async (id) => {
+    try {
+      const response = await api.delete(`/tasks/${id}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to delete task',
       };
     }
   },

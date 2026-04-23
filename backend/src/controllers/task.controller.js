@@ -1,5 +1,97 @@
 const { prisma } = require('../config/database');
 
+const createTask = async (req, res) => {
+  try {
+    const { meetingId, task, assignee, deadline, priority } = req.body;
+    const userId = req.userId;
+
+    if (!meetingId || !task) {
+      return res.status(400).json({ success: false, error: 'meetingId and task are required' });
+    }
+
+    const newItem = await prisma.actionItem.create({
+      data: {
+        task,
+        assignee: assignee || null,
+        deadline: deadline || null,
+        priority: priority || 'medium',
+        status: 'TODO',
+        meetingId,
+        userId,
+      },
+    });
+
+    // Sync the summaryActionItems JSON blob so it stays in lockstep with the relational table
+    const allActionItems = await prisma.actionItem.findMany({
+      where: { meetingId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const summaryActionItems = allActionItems.map((item) => ({
+      id: item.id,
+      task: item.task,
+      assignee: item.assignee,
+      deadline: item.deadline,
+      priority: item.priority,
+      confidence: item.confidence,
+      status: item.status,
+    }));
+
+    await prisma.meeting.update({
+      where: { id: meetingId },
+      data: { summaryActionItems },
+    });
+
+    return res.status(201).json({ success: true, data: newItem });
+  } catch (error) {
+    console.error('Create task error:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to create task' });
+  }
+};
+
+const deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const item = await prisma.actionItem.findUnique({ where: { id } });
+
+    if (!item || item.userId !== userId) {
+      return res.status(404).json({ success: false, error: 'Task not found' });
+    }
+
+    await prisma.actionItem.delete({ where: { id } });
+
+    // Sync the summaryActionItems JSON blob after deletion
+    if (item.meetingId) {
+      const allActionItems = await prisma.actionItem.findMany({
+        where: { meetingId: item.meetingId },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      const summaryActionItems = allActionItems.map((ai) => ({
+        id: ai.id,
+        task: ai.task,
+        assignee: ai.assignee,
+        deadline: ai.deadline,
+        priority: ai.priority,
+        confidence: ai.confidence,
+        status: ai.status,
+      }));
+
+      await prisma.meeting.update({
+        where: { id: item.meetingId },
+        data: { summaryActionItems },
+      });
+    }
+
+    return res.status(200).json({ success: true, message: 'Task deleted' });
+  } catch (error) {
+    console.error('Delete task error:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to delete task' });
+  }
+};
+
 const getTasks = async (req, res) => {
   try {
     const tasks = await prisma.actionItem.findMany({
@@ -69,4 +161,4 @@ const updateTask = async (req, res) => {
   }
 };
 
-module.exports = { getTasks, updateTask };
+module.exports = { getTasks, createTask, updateTask, deleteTask };

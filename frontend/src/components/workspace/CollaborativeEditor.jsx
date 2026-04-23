@@ -199,28 +199,58 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
         onSave={async (updatedTask) => {
           const previousActions = [...formData.actionItems];
           const isNew = !updatedTask.id;
-          
-          let newActions;
-          if (isNew) {
-            newActions = [...formData.actionItems, { ...updatedTask, id: `temp-${Date.now()}` }];
-          } else {
-            newActions = formData.actionItems.map(t => t.id === updatedTask.id ? updatedTask : t);
-          }
-          
-          handleChange('actionItems', newActions);
 
-          if (updatedTask.id && !updatedTask.id.startsWith('temp-')) {
+          if (isNew) {
+            // Optimistic: add with a temp ID so the UI responds instantly
+            const tempId = `temp-${Date.now()}`;
+            const tempItem = { ...updatedTask, id: tempId };
+            const optimisticActions = [...formData.actionItems, tempItem];
+            handleChange('actionItems', optimisticActions);
+
             try {
-              await taskService.updateTask(updatedTask.id, {
+              const result = await taskService.createTask({
+                meetingId,
                 task: updatedTask.task,
                 assignee: updatedTask.assignee,
                 deadline: updatedTask.deadline,
                 priority: updatedTask.priority,
               });
-              showToast('Action item updated', 'success');
+
+              if (result.success) {
+                // Replace temp item with the real DB record (real id)
+                const realActions = optimisticActions.map((t) =>
+                  t.id === tempId ? { ...tempItem, ...result.data, id: result.data.id } : t
+                );
+                handleChange('actionItems', realActions);
+                showToast('Action item created', 'success');
+              } else {
+                handleChange('actionItems', previousActions);
+                showToast('Failed to create task', 'error');
+              }
             } catch (err) {
               handleChange('actionItems', previousActions);
-              showToast('Sync error', 'error');
+              showToast('Failed to create task', 'error');
+            }
+          } else {
+            // Existing task: optimistic local update + sync relational row
+            const newActions = formData.actionItems.map((t) =>
+              t.id === updatedTask.id ? updatedTask : t
+            );
+            handleChange('actionItems', newActions);
+
+            if (!String(updatedTask.id).startsWith('temp-')) {
+              try {
+                await taskService.updateTask(updatedTask.id, {
+                  task: updatedTask.task,
+                  assignee: updatedTask.assignee,
+                  deadline: updatedTask.deadline,
+                  priority: updatedTask.priority,
+                });
+                showToast('Action item updated', 'success');
+              } catch (err) {
+                handleChange('actionItems', previousActions);
+                showToast('Sync error', 'error');
+              }
             }
           }
           setEditingTask(null);
@@ -372,16 +402,38 @@ const StrategicDecisionsEditor = ({ decisions, onChange, onFocus, onBlur, disabl
 const AssignedInitiativesEditor = ({ actionItems, meetingId, onEditTask, onUpdateTasks, onFocus, onBlur, disabled, othersFocussed }) => {
   const [isFocussed, setIsFocussed] = useState(false);
 
-  const toggleStatus = (index) => {
+  const toggleStatus = async (index) => {
     if (disabled) return;
+    const previousItems = [...actionItems];
+    const item = actionItems[index];
+    const newStatus = item.status === 'DONE' ? 'TODO' : 'DONE';
     const next = [...actionItems];
-    const task = next[index];
-    next[index] = { ...task, status: task.status === 'DONE' ? 'TODO' : 'DONE' };
-    onUpdateTasks(next);
+    next[index] = { ...item, status: newStatus };
+    onUpdateTasks(next); // optimistic update
+
+    if (item.id && !String(item.id).startsWith('temp-')) {
+      try {
+        await taskService.updateTask(item.id, { status: newStatus });
+      } catch (err) {
+        onUpdateTasks(previousItems); // revert on failure
+        showToast('Failed to update status', 'error');
+      }
+    }
   };
 
-  const removeTask = (index) => {
-    onUpdateTasks(actionItems.filter((_, i) => i !== index));
+  const removeTask = async (index) => {
+    const previousItems = [...actionItems];
+    const item = actionItems[index];
+    onUpdateTasks(actionItems.filter((_, i) => i !== index)); // optimistic update
+
+    if (item.id && !String(item.id).startsWith('temp-')) {
+      try {
+        await taskService.deleteTask(item.id);
+      } catch (err) {
+        onUpdateTasks(previousItems); // revert on failure
+        showToast('Failed to delete task', 'error');
+      }
+    }
   };
 
   return (
