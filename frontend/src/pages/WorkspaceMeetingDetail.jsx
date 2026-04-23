@@ -15,10 +15,12 @@ import { RoomProvider } from '../lib/liveblocks';
 import CollaborativeEditor from '../components/workspace/CollaborativeEditor';
 import TranscriptViewer from '../components/meeting/TranscriptViewer';
 import { showToast } from '../components/common/Toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const WorkspaceMeetingDetail = () => {
   const { id: workspaceId, meetingId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [meeting, setMeeting] = useState(null);
   const [workspace, setWorkspace] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -60,8 +62,6 @@ const WorkspaceMeetingDetail = () => {
 
   if (!meeting || !workspace) return <div className="p-20 text-center font-['Plus_Jakarta_Sans'] text-slate-500 text-white">Not found</div>;
 
-  const userString = localStorage.getItem('user');
-  const user = userString ? JSON.parse(userString) : null;
   const myMember = workspace.members.find((m) => m.user.email === user?.email);
   const myRole = myMember?.role || 'VIEWER';
   const canEdit = myRole === 'OWNER' || myRole === 'EDITOR';
@@ -114,12 +114,14 @@ const WorkspaceMeetingDetail = () => {
               </div>
             </div>
 
-            <Link to={`/meeting/${meetingId}`}>
-              <button className="group flex items-center gap-3 rounded-[10px] bg-white/[0.03] px-5 py-2.5 font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-accent-primary ring-1 ring-white/[0.06] transition-all hover:bg-white/[0.06] hover:text-[#bdc2ff] hover:ring-white/[0.12]">
-                <span>Personal View</span>
-                <LuExternalLink className="transition-transform group-hover:translate-x-0.5" size={16} />
-              </button>
-            </Link>
+            {myRole === 'OWNER' && (
+              <Link to={`/meeting/${meetingId}`}>
+                <button className="group flex items-center gap-3 rounded-[10px] bg-white/[0.03] px-5 py-2.5 font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-accent-primary ring-1 ring-white/[0.06] transition-all hover:bg-white/[0.06] hover:text-[#bdc2ff] hover:ring-white/[0.12]">
+                  <span>Personal View</span>
+                  <LuExternalLink className="transition-transform group-hover:translate-x-0.5" size={16} />
+                </button>
+              </Link>
+            )}
           </header>
         </div>
 
