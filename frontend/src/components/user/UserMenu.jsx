@@ -16,7 +16,6 @@ const UserMenu = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  // Debug: Log user data to check if picture is available
   console.log('[UserMenu] User data:', user);
   console.log('[UserMenu] User picture URL:', user?.picture);
 
@@ -149,7 +148,6 @@ const UserMenu = () => {
   );
 };
 
-// Simple user menu without sections
 export const SimpleUserMenu = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -193,7 +191,6 @@ export const SimpleUserMenu = () => {
   );
 };
 
-// User menu with badge (for notifications or status)
 export const UserMenuWithBadge = ({ badgeContent }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -242,7 +239,6 @@ export const UserMenuWithBadge = ({ badgeContent }) => {
   );
 };
 
-// Compact user button for mobile
 export const MobileUserButton = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();

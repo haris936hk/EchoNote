@@ -1,18 +1,15 @@
 import axios from 'axios';
 
-// Base API URL from environment variable
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-// Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 seconds
+  timeout: 30000, 
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Create public axios instance that bypasses auth interceptors
 export const publicAPI = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
@@ -21,21 +18,17 @@ export const publicAPI = axios.create({
   },
 });
 
-// Request deduplication map - Track pending requests
 const pendingRequests = new Map();
 
-// Helper function to generate request key for deduplication
 const getRequestKey = (config) => {
   const { method, url, params, data } = config;
   return `${method}:${url}:${JSON.stringify(params)}:${JSON.stringify(data)}`;
 };
 
-// Wrap api.request to implement Promise Cache deduplication
 const originalRequest = api.request.bind(api);
 api.request = (config) => {
   const method = config.method?.toLowerCase() || 'get';
 
-  // Only deduplicate GET requests
   if (method === 'get') {
     const requestKey = getRequestKey(config);
 
@@ -54,10 +47,9 @@ api.request = (config) => {
   return originalRequest(config);
 };
 
-// Request interceptor - Add auth token and handle deduplication
 api.interceptors.request.use(
   (config) => {
-    // Auth token handling
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -69,11 +61,9 @@ api.interceptors.request.use(
   }
 );
 
-// Track if a token refresh is already in progress to prevent multiple simultaneous refreshes
 let isRefreshing = false;
 let failedQueue = [];
 
-// Process queued requests after token refresh
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -85,7 +75,6 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Response interceptor - Handle errors globally, token refresh, and cleanup
 api.interceptors.response.use(
   (response) => {
     return response;
@@ -93,15 +82,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle different error scenarios
     if (error.response) {
-      // Server responded with error status
       const { status } = error.response;
 
       switch (status) {
         case 401:
-          // Unauthorized - Attempt token refresh before logging out
-          // Prevent infinite loop - don't retry if this IS the refresh endpoint
           if (originalRequest.url?.includes('/auth/refresh')) {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
@@ -113,7 +98,6 @@ api.interceptors.response.use(
             return Promise.reject(error);
           }
 
-          // Prevent retry loops - don't retry if already retried
           if (originalRequest._retry) {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
@@ -127,7 +111,6 @@ api.interceptors.response.use(
 
           const refreshToken = localStorage.getItem('refreshToken');
 
-          // No refresh token available - logout
           if (!refreshToken) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -138,7 +121,6 @@ api.interceptors.response.use(
             return Promise.reject(error);
           }
 
-          // If already refreshing, queue this request
           if (isRefreshing) {
             return new Promise((resolve, reject) => {
               failedQueue.push({ resolve, reject });
@@ -153,7 +135,6 @@ api.interceptors.response.use(
           originalRequest._retry = true;
           isRefreshing = true;
 
-          // Attempt to refresh token
           try {
             const response = await axios.post(
               `${API_BASE_URL}/auth/refresh`,
@@ -163,21 +144,16 @@ api.interceptors.response.use(
 
             const { accessToken } = response.data.data;
 
-            // Update token in localStorage
             localStorage.setItem('token', accessToken);
 
-            // Update authorization header for original request
             originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
 
-            // Process queued requests
             processQueue(null, accessToken);
 
-            // Retry original request
             return api(originalRequest);
           } catch (refreshError) {
             processQueue(refreshError, null);
 
-            // Clear all auth data and redirect to login
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
@@ -203,14 +179,10 @@ api.interceptors.response.use(
   }
 );
 
-// ============================================
-// AUTH API
-// ============================================
+
 
 export const authAPI = {
-  /**
-   * Login with Google OAuth
-   */
+  
   googleLogin: async (credential) => {
     try {
       const response = await api.post('/auth/google', { credential });
@@ -223,9 +195,7 @@ export const authAPI = {
     }
   },
 
-  /**
-   * Logout user
-   */
+  
   logout: async () => {
     try {
       const response = await api.post('/auth/logout');
@@ -238,9 +208,7 @@ export const authAPI = {
     }
   },
 
-  /**
-   * Verify current session
-   */
+  
   verifySession: async () => {
     try {
       const response = await api.get('/auth/verify');
@@ -251,14 +219,12 @@ export const authAPI = {
   },
 };
 
-// ============================================
-// CALENDAR API
-// ============================================
+
 
 export const calendarAPI = {
   /**
    * Get upcoming calendar events
-   * @param {number} days - Number of days to fetch ahead (default 7 via backend if undefined)
+   * @param {number} days 
    */
   getEvents: async (days = 30) => {
     try {
@@ -276,14 +242,10 @@ export const calendarAPI = {
   },
 };
 
-// ============================================
-// MEETINGS API
-// ============================================
+
 
 export const meetingsAPI = {
-  /**
-   * Get all meetings for current user
-   */
+ 
   getAllMeetings: async () => {
     try {
       const response = await api.get('/meetings');
@@ -296,9 +258,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Get single meeting by ID
-   */
+  
   getMeetingById: async (id) => {
     try {
       const response = await api.get(`/meetings/${id}`);
@@ -311,9 +271,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Upload new meeting with audio file
-   */
+  
   uploadMeeting: async ({ title, description, category, audioFile }) => {
     try {
       const formData = new FormData();
@@ -326,7 +284,7 @@ export const meetingsAPI = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000, // 60 seconds for file upload
+        timeout: 60000, 
       });
 
       return { success: true, data: response.data };
@@ -338,9 +296,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Update meeting details
-   */
+  
   updateMeeting: async (id, updates) => {
     try {
       const response = await api.patch(`/meetings/${id}`, updates);
@@ -353,9 +309,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Delete meeting
-   */
+  
   deleteMeeting: async (id) => {
     try {
       const response = await api.delete(`/meetings/${id}`);
@@ -368,9 +322,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Search meetings
-   */
+  
   searchMeetings: async (query) => {
     try {
       const response = await api.get('/meetings/search', {
@@ -385,9 +337,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Get all decisions across all meetings
-   */
+  
   getDecisions: async () => {
     try {
       const response = await api.get('/meetings/decisions');
@@ -400,9 +350,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Get meeting statistics for the current user
-   */
+  
   getStatistics: async () => {
     try {
       const response = await api.get('/meetings/stats');
@@ -415,9 +363,7 @@ export const meetingsAPI = {
     }
   },
 
-  /**
-   * Generate AI follow-up email draft
-   */
+ 
   generateFollowUp: async (id, tone = 'formal') => {
     try {
       const response = await api.post(
@@ -435,9 +381,7 @@ export const meetingsAPI = {
       };
     }
   },
-  /**
-   * Share meeting to Slack
-   */
+  
   shareToSlack: async (id) => {
     try {
       const response = await api.post(`/meetings/${id}/share/slack`);
@@ -451,14 +395,10 @@ export const meetingsAPI = {
   },
 };
 
-// ============================================
-// USER API
-// ============================================
+
 
 export const userAPI = {
-  /**
-   * Get current user profile
-   */
+ 
   getProfile: async () => {
     try {
       const response = await api.get('/user/profile');
@@ -471,9 +411,7 @@ export const userAPI = {
     }
   },
 
-  /**
-   * Update user preferences
-   */
+  
   updatePreferences: async (preferences) => {
     try {
       const response = await api.put('/user/preferences', preferences);
@@ -486,9 +424,7 @@ export const userAPI = {
     }
   },
 
-  /**
-   * Delete user account
-   */
+  
   deleteAccount: async () => {
     try {
       const response = await api.delete('/users/me', {
@@ -503,9 +439,7 @@ export const userAPI = {
     }
   },
 
-  /**
-   * Export user data
-   */
+  
   exportData: async () => {
     try {
       const response = await api.get('/user/export', {
@@ -521,14 +455,10 @@ export const userAPI = {
   },
 };
 
-// ============================================
-// TASKS API
-// ============================================
+
 
 export const tasksAPI = {
-  /**
-   * Get all tasks (action items) for current user
-   */
+ 
   getTasks: async () => {
     try {
       const response = await api.get('/tasks');
@@ -541,9 +471,7 @@ export const tasksAPI = {
     }
   },
 
-  /**
-   * Update task details (status, text, deadline, etc.)
-   */
+ 
   updateTask: async (id, updates) => {
     try {
       const response = await api.patch(`/tasks/${id}`, updates);
@@ -557,13 +485,7 @@ export const tasksAPI = {
   },
 };
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
 
-/**
- * Check if API is reachable
- */
 export const checkAPIHealth = async () => {
   try {
     const response = await api.get('/health');
@@ -573,9 +495,7 @@ export const checkAPIHealth = async () => {
   }
 };
 
-/**
- * Download file from URL
- */
+
 export const downloadFile = (url, filename) => {
   const link = document.createElement('a');
   link.href = url;

@@ -14,14 +14,12 @@ const useAudioRecorder = () => {
   const timerRef = useRef(null);
   const recordingTimeRef = useRef(0);
 
-  const MAX_RECORDING_TIME = 600; // 10 minutes in seconds
+  const MAX_RECORDING_TIME = 600; 
 
-  // Sync state with ref
   useEffect(() => {
     recordingTimeRef.current = recordingTime;
   }, [recordingTime]);
 
-  // Check browser compatibility
   const checkCompatibility = useCallback(() => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return {
@@ -33,14 +31,12 @@ const useAudioRecorder = () => {
     return { supported: true };
   }, []);
 
-  // Format time as MM:SS
   const formatTime = useCallback((seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
-  // Stop recording (defined earlier so it can be used in start/resume)
   const stopRecording = useCallback(() => {
     return new Promise((resolve) => {
       if (!recorderRef.current || !isRecording) {
@@ -52,13 +48,11 @@ const useAudioRecorder = () => {
         const blob = recorderRef.current.getBlob();
         setAudioBlob(blob);
 
-        // Stop timer
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
 
-        // Stop stream
         if (streamRef.current) {
           streamRef.current.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
@@ -74,20 +68,17 @@ const useAudioRecorder = () => {
     });
   }, [isRecording]);
 
-  // Start recording
   const startRecording = useCallback(async () => {
     try {
       setError(null);
       setAudioBlob(null);
 
-      // Check compatibility
       const compat = checkCompatibility();
       if (!compat.supported) {
         setError(compat.error);
         return { success: false, error: compat.error };
       }
 
-      // Request microphone access
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -99,7 +90,6 @@ const useAudioRecorder = () => {
       streamRef.current = mediaStream;
       setStream(mediaStream);
 
-      // Create recorder
       const recorder = new RecordRTC(mediaStream, {
         type: 'audio',
         mimeType: 'audio/webm',
@@ -114,12 +104,10 @@ const useAudioRecorder = () => {
       setIsRecording(true);
       setRecordingTime(0);
 
-      // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
           const newTime = prev + 1;
 
-          // Auto-stop at 10 minutes
           if (newTime >= MAX_RECORDING_TIME) {
             stopRecording();
             return MAX_RECORDING_TIME;
@@ -135,14 +123,12 @@ const useAudioRecorder = () => {
     }
   }, [checkCompatibility, stopRecording]);
 
-  // Pause recording
   const pauseRecording = useCallback(() => {
     if (!recorderRef.current || !isRecording || isPaused) return;
 
     recorderRef.current.pauseRecording();
     setIsPaused(true);
 
-    // Pause timer
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -151,14 +137,12 @@ const useAudioRecorder = () => {
     return { success: true };
   }, [isRecording, isPaused]);
 
-  // Resume recording
   const resumeRecording = useCallback(() => {
     if (!recorderRef.current || !isRecording || !isPaused) return;
 
     recorderRef.current.resumeRecording();
     setIsPaused(false);
 
-    // Resume timer
     timerRef.current = setInterval(() => {
       setRecordingTime((prev) => {
         const newTime = prev + 1;
@@ -173,17 +157,14 @@ const useAudioRecorder = () => {
     return { success: true };
   }, [isRecording, isPaused, stopRecording]);
 
-  // Cancel recording
   const cancelRecording = useCallback(() => {
     if (!isRecording) return;
 
-    // Stop timer
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    // Stop and destroy recorder
     if (recorderRef.current) {
       try {
         recorderRef.current.stopRecording(() => {
@@ -197,7 +178,6 @@ const useAudioRecorder = () => {
       }
     }
 
-    // Stop stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -212,7 +192,6 @@ const useAudioRecorder = () => {
     return { success: true };
   }, [isRecording]);
 
-  // Reset hook state
   const reset = useCallback(() => {
     setRecordingTime(0);
     setAudioBlob(null);
@@ -220,7 +199,6 @@ const useAudioRecorder = () => {
     setIsPaused(false);
   }, []);
 
-  // Get recording stats
   const getStats = useCallback(() => {
     return {
       duration: recordingTime,
@@ -235,7 +213,6 @@ const useAudioRecorder = () => {
     };
   }, [recordingTime, audioBlob, formatTime]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -255,7 +232,6 @@ const useAudioRecorder = () => {
   }, []);
 
   return {
-    // State
     isRecording,
     recordingTime,
     recordingTimeFormatted: formatTime(recordingTime),
@@ -264,7 +240,6 @@ const useAudioRecorder = () => {
     isPaused,
     stream,
 
-    // Actions
     startRecording,
     stopRecording,
     pauseRecording,
@@ -272,7 +247,6 @@ const useAudioRecorder = () => {
     cancelRecording,
     reset,
 
-    // Utilities
     getStats,
     checkCompatibility,
     formatTime,

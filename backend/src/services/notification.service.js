@@ -1,9 +1,9 @@
-// backend/src/services/notification.service.js
+
 const webpush = require('web-push');
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -14,13 +14,13 @@ const logger = winston.createLogger({
   ],
 });
 
-// Configure web-push with VAPID keys
+
 const configureWebPush = () => {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   let adminEmail = process.env.GMAIL_USER || 'mailto:admin@echonote.ai';
 
-  // Ensure the email is prefixed with 'mailto:' as required by web-push
+  
   if (adminEmail && !adminEmail.startsWith('mailto:')) {
     adminEmail = `mailto:${adminEmail}`;
   }
@@ -45,7 +45,7 @@ const sendPushNotificationToUser = async (userId, payload) => {
   if (!isConfigured) return { success: false, error: 'Web Push not configured' };
 
   try {
-    // Check if user has push notifications enabled in settings
+    
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { pushNotifications: true }
@@ -56,7 +56,7 @@ const sendPushNotificationToUser = async (userId, payload) => {
       return { success: false, message: 'Push disabled by user' };
     }
 
-    // Get all subscriptions for this user
+    
     const subscriptions = await prisma.pushSubscription.findMany({
       where: { userId }
     });
@@ -80,7 +80,7 @@ const sendPushNotificationToUser = async (userId, payload) => {
         await webpush.sendNotification(pushConfig, payloadString);
         return { endpoint: sub.endpoint, success: true };
       } catch (error) {
-        // If subscription is expired or invalid, remove it
+        
         if (error.statusCode === 404 || error.statusCode === 410) {
           logger.info(`🗑️ Removing expired push subscription: ${sub.endpoint}`);
           await prisma.pushSubscription.delete({ where: { id: sub.id } });
@@ -112,7 +112,7 @@ const sendMeetingCompletedPush = async (userId, meeting) => {
     title: 'Meeting Ready 🎬',
     body: `"${meeting.title}" is ready for review.`,
     url: `/meetings/${meeting.id}`,
-    icon: '/logo192.png', // Fallback, we can refine this
+    icon: '/logo192.png', 
     badge: '/badge.png',
     data: {
       meetingId: meeting.id,

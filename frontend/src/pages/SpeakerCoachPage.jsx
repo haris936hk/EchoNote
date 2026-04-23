@@ -29,10 +29,7 @@ import { PageLoader } from '../components/common/Loader';
 
 const COLORS = ['#818CF8', '#A78BFA', '#6366F1', '#4F46E5', '#C084FC', '#4ADE80', '#F472B6'];
 
-/**
- * Speaker Coach Page
- * Aggregates statistics across the 10 most recent meetings
- */
+
 const SpeakerCoachPage = () => {
   const [meetingsData, setMeetingsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,12 +39,10 @@ const SpeakerCoachPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // 1. Get list of completed meetings
         const result = await meetingsAPI.getAllMeetings();
 
         if (!result.success) throw new Error(result.error);
 
-        // Filter and limit to 10 most recent completed
         const recentMeetings = (result.data.data || [])
           .filter(m => m.status === 'COMPLETED')
           .slice(0, 10);
@@ -57,7 +52,6 @@ const SpeakerCoachPage = () => {
           return;
         }
 
-        // 2. Fetch full details for each meeting to get segments
         const fullMeetingsData = await Promise.all(
           recentMeetings.map(m => meetingsAPI.getMeetingById(m.id))
         );
@@ -73,11 +67,10 @@ const SpeakerCoachPage = () => {
     fetchData();
   }, []);
 
-  // Aggregation Engine
   const coachStats = useMemo(() => {
     if (!meetingsData.length) return null;
 
-    const speakerStats = {}; // Keyed by name (from speakerMap)
+    const speakerStats = {}; 
     let totalAllSpeakingTime = 0;
     let totalMeetingDuration = 0;
     let totalQuestions = 0;
@@ -113,14 +106,12 @@ const SpeakerCoachPage = () => {
         stats.longestMonologue = Math.max(stats.longestMonologue, duration);
         stats.sessionCount.add(meeting.id);
         
-        // Interruption checking
         if (prevSpeaker && prevSpeaker !== name) {
-          if (start < prevEnd + 0.3) { // 300ms threshold
+          if (start < prevEnd + 0.3) { 
             stats.interruptionCount += 1;
           }
         }
 
-        // Questions asked
         const qs = (text.match(/\?/g) || []).length;
         stats.questionsCount += qs;
         totalQuestions += qs;

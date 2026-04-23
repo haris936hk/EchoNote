@@ -5,8 +5,8 @@ import { MeetingContext } from '../contexts/MeetingContext';
  * Custom hook to access meeting context
  * Provides meeting data, recording state, and meeting management methods
  *
- * @throws {Error} If used outside of MeetingProvider
- * @returns {Object} Meeting context value
+ * @throws {Error} 
+ * @returns {Object} 
  */
 const useMeetings = () => {
   const context = useContext(MeetingContext);
@@ -23,9 +23,7 @@ const useMeetings = () => {
 
 export default useMeetings;
 
-/**
- * Hook to filter meetings by status
- */
+
 export const useMeetingsByStatus = (status) => {
   const { meetings } = useMeetings();
 
@@ -37,9 +35,7 @@ export const useMeetingsByStatus = (status) => {
   };
 };
 
-/**
- * Hook to filter meetings by category
- */
+
 export const useMeetingsByCategory = (category) => {
   const { meetings } = useMeetings();
 
@@ -58,9 +54,7 @@ export const useMeetingsByCategory = (category) => {
   };
 };
 
-/**
- * Hook to get meeting statistics
- */
+
 export const useMeetingStats = () => {
   const { meetings } = useMeetings();
 
@@ -73,7 +67,6 @@ export const useMeetingStats = () => {
     totalDuration: 0,
   };
 
-  // Count by category
   meetings.forEach((meeting) => {
     stats.byCategory[meeting.category] = (stats.byCategory[meeting.category] || 0) + 1;
     if (meeting.duration) {
@@ -84,9 +77,7 @@ export const useMeetingStats = () => {
   return stats;
 };
 
-/**
- * Hook to search meetings
- */
+
 export const useSearchMeetings = (searchQuery) => {
   const { meetings } = useMeetings();
 
@@ -105,27 +96,23 @@ export const useSearchMeetings = (searchQuery) => {
   );
 };
 
-/**
- * Hook to get recent meetings
- */
+
 export const useRecentMeetings = (limit = 5) => {
   const { meetings } = useMeetings();
 
   return meetings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit);
 };
 
-/**
- * Hook to check if recording is possible
- */
+
 export const useCanRecord = () => {
   const { isRecording, recordingSeconds } = useMeetings();
 
-  const MAX_RECORDING_TIME = 600; // 10 minutes
+  const MAX_RECORDING_TIME = 600; 
 
   return {
     canRecord: !isRecording,
     isRecording,
     timeRemaining: MAX_RECORDING_TIME - recordingSeconds,
-    isNearLimit: recordingSeconds >= MAX_RECORDING_TIME * 0.9, // 90% of limit
+    isNearLimit: recordingSeconds >= MAX_RECORDING_TIME * 0.9, 
   };
 };

@@ -26,11 +26,9 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
   const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
   const [placement, setPlacement] = useState('bottom');
 
-  // Parse value
   const selectedDate = value ? (typeof value === 'string' ? parseISO(value) : value) : null;
   const displayValue = selectedDate && isValid(selectedDate) ? format(selectedDate, 'MMM dd, yyyy') : '';
 
-  // Handle closing on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
@@ -50,7 +48,6 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceAbove = rect.top;
       
-      // Flip if there's significantly more room above than below
       const shouldFlip = spaceBelow < 400 && spaceAbove > spaceBelow;
 
       setPlacement(shouldFlip ? 'top' : 'bottom');
@@ -79,7 +76,7 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
     setIsOpen(false);
   };
 
-  // Calendar logic
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);

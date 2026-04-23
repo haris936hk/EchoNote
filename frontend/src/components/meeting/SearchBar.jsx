@@ -11,12 +11,10 @@ const SearchBar = ({
 }) => {
   const [localValue, setLocalValue] = useState(value);
 
-  // Sync with external value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (onChange) onChange(localValue);
@@ -60,7 +58,6 @@ SearchBar.propTypes = {
   className: PropTypes.string,
 };
 
-// Compact search bar
 export const CompactSearchBar = ({ value, onChange, placeholder }) => (
   <div className="relative">
     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />

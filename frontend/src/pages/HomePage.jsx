@@ -12,20 +12,14 @@ import Header from '../components/common/Header';
 import ScrollReveal from '../components/common/ScrollReveal';
 import Footer from '../components/common/Footer';
 
-/**
- * HomePage — Public landing page
- * Matches Stitch home_echonote_final design
- */
+
 const NAV_LINKS = [
   { path: '#features', label: 'Features' },
   { path: '#how-it-works', label: 'How It Works' },
   { path: '#cta', label: 'Benefits' },
 ];
 
-/**
- * HomePage — Public landing page
- * Matches Stitch home_echonote_final design
- */
+
 const HomePage = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();

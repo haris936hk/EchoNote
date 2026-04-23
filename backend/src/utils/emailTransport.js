@@ -10,7 +10,7 @@
 const { OAuth2Client } = require('google-auth-library');
 const nodemailer = require('nodemailer');
 
-// Singleton transport instance
+
 let gmailTransport = null;
 
 /**
@@ -60,12 +60,12 @@ async function getGmailAccessToken() {
   try {
     const oAuth2Client = createOAuth2Client();
 
-    // Set refresh token credentials
+   
     oAuth2Client.setCredentials({
       refresh_token: refreshToken,
     });
 
-    // Get access token (automatically refreshes if expired)
+  
     const { token } = await oAuth2Client.getAccessToken();
 
     if (!token) {
@@ -74,7 +74,7 @@ async function getGmailAccessToken() {
 
     return token;
   } catch (error) {
-    // Enhanced error messages for common issues
+   
     if (error.message.includes('invalid_grant')) {
       throw new Error(
         'Invalid or expired refresh token.\n' +
@@ -118,11 +118,11 @@ async function createGmailTransport() {
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
       accessToken: accessToken,
     },
-    pool: true, // Use connection pooling for better performance
-    maxConnections: 5, // Max simultaneous connections
-    maxMessages: 100, // Max messages per connection before reconnecting
-    rateDelta: 1000, // 1 second
-    rateLimit: 5, // 5 emails per second (Gmail guideline)
+    pool: true, 
+    maxConnections: 5, 
+    maxMessages: 100, 
+    rateDelta: 1000, 
+    rateLimit: 5, 
   });
 }
 

@@ -1,18 +1,11 @@
 import { meetingsAPI } from './api';
 
-// ============================================
-// MEETING CRUD OPERATIONS
-// ============================================
 
-/**
- * Fetch all meetings for current user
- */
 export const getAllMeetings = async () => {
   try {
     const result = await meetingsAPI.getAllMeetings();
 
     if (result.success) {
-      // Transform and sort meetings
       const meetings = result.data.meetings || [];
       const sortedMeetings = sortMeetingsByDate(meetings, 'desc');
 
@@ -34,9 +27,7 @@ export const getAllMeetings = async () => {
   }
 };
 
-/**
- * Fetch single meeting by ID
- */
+
 export const getMeetingById = async (id) => {
   try {
     if (!id) {
@@ -67,12 +58,9 @@ export const getMeetingById = async (id) => {
   }
 };
 
-/**
- * Upload new meeting with audio file
- */
+
 export const uploadMeeting = async (meetingData) => {
   try {
-    // Validate required fields
     const validation = validateMeetingData(meetingData);
     if (!validation.valid) {
       return {
@@ -81,7 +69,6 @@ export const uploadMeeting = async (meetingData) => {
       };
     }
 
-    // Validate audio file
     const audioValidation = validateAudioFile(meetingData.audioFile);
     if (!audioValidation.valid) {
       return {
@@ -116,9 +103,7 @@ export const uploadMeeting = async (meetingData) => {
   }
 };
 
-/**
- * Update meeting details
- */
+
 export const updateMeeting = async (id, updates) => {
   try {
     if (!id) {
@@ -128,7 +113,6 @@ export const updateMeeting = async (id, updates) => {
       };
     }
 
-    // Sanitize updates
     const sanitizedUpdates = {};
     if (updates.title) sanitizedUpdates.title = updates.title.trim();
     if (updates.description !== undefined) {
@@ -157,9 +141,7 @@ export const updateMeeting = async (id, updates) => {
   }
 };
 
-/**
- * Delete meeting
- */
+
 export const deleteMeeting = async (id) => {
   try {
     if (!id) {
@@ -190,9 +172,7 @@ export const deleteMeeting = async (id) => {
   }
 };
 
-/**
- * Delete multiple meetings
- */
+
 export const deleteMeetings = async (ids) => {
   try {
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -224,13 +204,7 @@ export const deleteMeetings = async (ids) => {
   }
 };
 
-// ============================================
-// SEARCH & FILTER
-// ============================================
 
-/**
- * Search meetings by query
- */
 export const searchMeetings = async (query) => {
   try {
     if (!query || query.trim() === '') {
@@ -261,23 +235,18 @@ export const searchMeetings = async (query) => {
   }
 };
 
-/**
- * Filter meetings by criteria
- */
+
 export const filterMeetings = (meetings, filters) => {
   let filtered = [...meetings];
 
-  // Filter by status
   if (filters.status && filters.status !== 'ALL') {
     filtered = filtered.filter((m) => m.status === filters.status);
   }
 
-  // Filter by category
   if (filters.category && filters.category !== 'ALL') {
     filtered = filtered.filter((m) => m.category === filters.category);
   }
 
-  // Filter by date range
   if (filters.dateFrom) {
     const fromDate = new Date(filters.dateFrom);
     filtered = filtered.filter((m) => new Date(m.createdAt) >= fromDate);
@@ -285,11 +254,10 @@ export const filterMeetings = (meetings, filters) => {
 
   if (filters.dateTo) {
     const toDate = new Date(filters.dateTo);
-    toDate.setHours(23, 59, 59, 999); // End of day
+    toDate.setHours(23, 59, 59, 999); 
     filtered = filtered.filter((m) => new Date(m.createdAt) <= toDate);
   }
 
-  // Filter by search query (client-side)
   if (filters.query) {
     const query = filters.query.toLowerCase();
     filtered = filtered.filter(
@@ -304,13 +272,7 @@ export const filterMeetings = (meetings, filters) => {
   return filtered;
 };
 
-// ============================================
-// SORTING & GROUPING
-// ============================================
 
-/**
- * Sort meetings by field
- */
 export const sortMeetings = (meetings, field, order = 'desc') => {
   const sorted = [...meetings];
 
@@ -318,13 +280,11 @@ export const sortMeetings = (meetings, field, order = 'desc') => {
     let aVal = a[field];
     let bVal = b[field];
 
-    // Handle date fields
     if (field === 'createdAt' || field === 'updatedAt') {
       aVal = new Date(aVal).getTime();
       bVal = new Date(bVal).getTime();
     }
 
-    // Handle string fields
     if (typeof aVal === 'string') {
       aVal = aVal.toLowerCase();
       bVal = bVal.toLowerCase();
@@ -340,16 +300,12 @@ export const sortMeetings = (meetings, field, order = 'desc') => {
   return sorted;
 };
 
-/**
- * Sort meetings by date
- */
+
 export const sortMeetingsByDate = (meetings, order = 'desc') => {
   return sortMeetings(meetings, 'createdAt', order);
 };
 
-/**
- * Group meetings by field
- */
+
 export const groupMeetingsBy = (meetings, field) => {
   return meetings.reduce((groups, meeting) => {
     const key = meeting[field];
@@ -361,23 +317,17 @@ export const groupMeetingsBy = (meetings, field) => {
   }, {});
 };
 
-/**
- * Group meetings by category
- */
+
 export const groupMeetingsByCategory = (meetings) => {
   return groupMeetingsBy(meetings, 'category');
 };
 
-/**
- * Group meetings by status
- */
+
 export const groupMeetingsByStatus = (meetings) => {
   return groupMeetingsBy(meetings, 'status');
 };
 
-/**
- * Group meetings by date (day)
- */
+
 export const groupMeetingsByDate = (meetings) => {
   return meetings.reduce((groups, meeting) => {
     const date = new Date(meeting.createdAt).toLocaleDateString();
@@ -389,13 +339,7 @@ export const groupMeetingsByDate = (meetings) => {
   }, {});
 };
 
-// ============================================
-// STATISTICS & ANALYTICS
-// ============================================
 
-/**
- * Calculate meeting statistics
- */
 export const calculateMeetingStats = (meetings) => {
   const stats = {
     total: meetings.length,
@@ -406,35 +350,30 @@ export const calculateMeetingStats = (meetings) => {
     averageDuration: 0,
     byCategory: {},
     byStatus: {},
-    recentCount: 0, // Last 7 days
+    recentCount: 0, 
   };
 
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
   meetings.forEach((meeting) => {
-    // Count by status
     stats.byStatus[meeting.status] = (stats.byStatus[meeting.status] || 0) + 1;
 
     if (meeting.status === 'COMPLETED') stats.completed++;
     if (meeting.status === 'PROCESSING') stats.processing++;
     if (meeting.status === 'FAILED') stats.failed++;
 
-    // Count by category
     stats.byCategory[meeting.category] = (stats.byCategory[meeting.category] || 0) + 1;
 
-    // Calculate duration
     if (meeting.duration) {
       stats.totalDuration += meeting.duration;
     }
 
-    // Count recent meetings
     if (new Date(meeting.createdAt) >= weekAgo) {
       stats.recentCount++;
     }
   });
 
-  // Calculate average duration
   if (meetings.length > 0) {
     stats.averageDuration = Math.round(stats.totalDuration / meetings.length);
   }
@@ -442,35 +381,23 @@ export const calculateMeetingStats = (meetings) => {
   return stats;
 };
 
-/**
- * Get recent meetings
- */
+
 export const getRecentMeetings = (meetings, limit = 5) => {
   return sortMeetingsByDate(meetings, 'desc').slice(0, limit);
 };
 
-/**
- * Get meetings by status
- */
+
 export const getMeetingsByStatus = (meetings, status) => {
   return meetings.filter((m) => m.status === status);
 };
 
-/**
- * Get meetings by category
- */
+
 export const getMeetingsByCategory = (meetings, category) => {
   if (category === 'ALL') return meetings;
   return meetings.filter((m) => m.category === category);
 };
 
-// ============================================
-// VALIDATION
-// ============================================
 
-/**
- * Validate meeting data before upload
- */
 export const validateMeetingData = (data) => {
   if (!data.title || data.title.trim() === '') {
     return { valid: false, error: 'Meeting title is required' };
@@ -500,21 +427,18 @@ export const validateMeetingData = (data) => {
   return { valid: true };
 };
 
-/**
- * Validate audio file
- */
+
 export const validateAudioFile = (file) => {
   if (!file) {
     return { valid: false, error: 'No audio file provided' };
   }
 
-  // Check file size (max 10MB)
-  const maxSize = 10 * 1024 * 1024; // 10MB
+  const maxSize = 10 * 1024 * 1024; 
   if (file.size > maxSize) {
     return { valid: false, error: 'Audio file is too large (max 10MB)' };
   }
 
-  // Check file type
+  
   const validTypes = ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/ogg'];
   if (!validTypes.includes(file.type)) {
     return { valid: false, error: 'Invalid audio file type' };
@@ -523,13 +447,7 @@ export const validateAudioFile = (file) => {
   return { valid: true };
 };
 
-// ============================================
-// FORMATTING & UTILITIES
-// ============================================
 
-/**
- * Format meeting duration
- */
 export const formatDuration = (seconds) => {
   if (!seconds || seconds === 0) return '0s';
 
@@ -545,9 +463,7 @@ export const formatDuration = (seconds) => {
   return parts.join(' ');
 };
 
-/**
- * Format meeting date
- */
+
 export const formatMeetingDate = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -565,9 +481,7 @@ export const formatMeetingDate = (dateString) => {
   }
 };
 
-/**
- * Get status color
- */
+
 export const getStatusColor = (status) => {
   const colors = {
     COMPLETED: 'success',
@@ -577,9 +491,7 @@ export const getStatusColor = (status) => {
   return colors[status] || 'default';
 };
 
-/**
- * Get category label
- */
+
 export const getCategoryLabel = (category) => {
   const labels = {
     SALES: 'Sales',
@@ -591,9 +503,7 @@ export const getCategoryLabel = (category) => {
   return labels[category] || category;
 };
 
-/**
- * Export meetings as JSON
- */
+
 export const exportMeetingsAsJSON = (meetings) => {
   const dataStr = JSON.stringify(meetings, null, 2);
   const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -607,9 +517,7 @@ export const exportMeetingsAsJSON = (meetings) => {
   URL.revokeObjectURL(url);
 };
 
-/**
- * Export meetings as CSV
- */
+
 export const exportMeetingsAsCSV = (meetings) => {
   const headers = ['ID', 'Title', 'Category', 'Status', 'Duration', 'Created At'];
   const rows = meetings.map((m) => [
@@ -637,9 +545,7 @@ export const exportMeetingsAsCSV = (meetings) => {
   URL.revokeObjectURL(url);
 };
 
-/**
- * Fetch all decisions across all meetings
- */
+
 export const getDecisions = async () => {
   try {
     const result = await meetingsAPI.getDecisions();
@@ -663,9 +569,7 @@ export const getDecisions = async () => {
   }
 };
 
-/**
- * Generate AI follow-up email draft
- */
+
 export const generateFollowUp = async (id, tone = 'formal') => {
   try {
     if (!id) return { success: false, error: 'Meeting ID is required' };
@@ -678,9 +582,7 @@ export const generateFollowUp = async (id, tone = 'formal') => {
   }
 };
 
-/**
- * Share meeting summary to Slack
- */
+
 export const shareMeetingToSlack = async (id) => {
   try {
     if (!id) return { success: false, error: 'Meeting ID is required' };
@@ -692,7 +594,6 @@ export const shareMeetingToSlack = async (id) => {
 };
 
 const meetingService = {
-  // CRUD operations
   getAllMeetings,
   getMeetingById,
   uploadMeeting,
@@ -700,11 +601,9 @@ const meetingService = {
   deleteMeeting,
   deleteMeetings,
 
-  // Search & filter
   searchMeetings,
   filterMeetings,
 
-  // Sorting & grouping
   sortMeetings,
   sortMeetingsByDate,
   groupMeetingsBy,
@@ -712,17 +611,14 @@ const meetingService = {
   groupMeetingsByStatus,
   groupMeetingsByDate,
 
-  // Statistics
   calculateMeetingStats,
   getRecentMeetings,
   getMeetingsByStatus,
   getMeetingsByCategory,
 
-  // Validation
   validateMeetingData,
   validateAudioFile,
 
-  // Utilities
   formatDuration,
   formatMeetingDate,
   getStatusColor,

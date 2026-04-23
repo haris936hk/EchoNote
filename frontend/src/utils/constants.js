@@ -1,11 +1,4 @@
-/**
- * Application Constants
- * Centralized configuration and constant values
- */
 
-// ============================================
-// APP METADATA
-// ============================================
 
 export const APP_NAME = 'EchoNote';
 export const APP_VERSION = '1.0.0';
@@ -13,13 +6,10 @@ export const APP_DESCRIPTION = 'AI-powered meeting transcription and summarizati
 export const APP_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
 export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-// ============================================
-// RECORDING LIMITS
-// ============================================
 
-export const MAX_RECORDING_TIME = 600; // 10 minutes in seconds (updated from 180)
+export const MAX_RECORDING_TIME = 600; 
 export const MAX_RECORDING_TIME_MS = MAX_RECORDING_TIME * 1000;
-export const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes (updated from 10MB)
+export const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024; 
 
 export const RECORDING_CONFIG = {
   mimeType: 'audio/webm;codecs=opus',
@@ -37,9 +27,7 @@ export const AUDIO_CONSTRAINTS = {
   },
 };
 
-// ============================================
-// MEETING CATEGORIES
-// ============================================
+
 
 export const MEETING_CATEGORIES = {
   SALES: 'SALES',
@@ -93,13 +81,10 @@ export const CATEGORIES_LIST = [
   },
 ];
 
-// ============================================
-// MEETING STATUS
-// ============================================
 
 export const MEETING_STATUS = {
   UPLOADING: 'UPLOADING',
-  PENDING: 'PENDING', // NEW: Queued for processing
+  PENDING: 'PENDING', 
   PROCESSING_AUDIO: 'PROCESSING_AUDIO',
   TRANSCRIBING: 'TRANSCRIBING',
   PROCESSING_NLP: 'PROCESSING_NLP',
@@ -110,7 +95,7 @@ export const MEETING_STATUS = {
 
 export const STATUS_LABELS = {
   [MEETING_STATUS.UPLOADING]: 'Uploading',
-  [MEETING_STATUS.PENDING]: 'Queued', // NEW: Queued for processing
+  [MEETING_STATUS.PENDING]: 'Queued', 
   [MEETING_STATUS.PROCESSING_AUDIO]: 'Processing Audio',
   [MEETING_STATUS.TRANSCRIBING]: 'Transcribing',
   [MEETING_STATUS.PROCESSING_NLP]: 'Processing NLP',
@@ -121,7 +106,7 @@ export const STATUS_LABELS = {
 
 export const STATUS_COLORS = {
   [MEETING_STATUS.UPLOADING]: 'default',
-  [MEETING_STATUS.PENDING]: 'default', // NEW: Queued for processing
+  [MEETING_STATUS.PENDING]: 'default', 
   [MEETING_STATUS.PROCESSING_AUDIO]: 'warning',
   [MEETING_STATUS.TRANSCRIBING]: 'warning',
   [MEETING_STATUS.PROCESSING_NLP]: 'warning',
@@ -130,9 +115,6 @@ export const STATUS_COLORS = {
   [MEETING_STATUS.FAILED]: 'danger',
 };
 
-// ============================================
-// VALIDATION RULES
-// ============================================
 
 export const VALIDATION = {
   MEETING_TITLE: {
@@ -154,9 +136,6 @@ export const VALIDATION = {
   },
 };
 
-// ============================================
-// STORAGE KEYS
-// ============================================
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'token',
@@ -168,9 +147,6 @@ export const STORAGE_KEYS = {
   LAST_CATEGORY: 'last_selected_category',
 };
 
-// ============================================
-// API ENDPOINTS
-// ============================================
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -191,9 +167,6 @@ export const API_ENDPOINTS = {
   },
 };
 
-// ============================================
-// PAGINATION
-// ============================================
 
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
@@ -202,23 +175,17 @@ export const PAGINATION = {
   MAX_PAGE_SIZE: 100,
 };
 
-// ============================================
-// DEBOUNCE / THROTTLE
-// ============================================
 
 export const TIMING = {
-  DEBOUNCE_SEARCH: 500, // ms
-  DEBOUNCE_INPUT: 300, // ms
-  DEBOUNCE_RESIZE: 200, // ms
-  THROTTLE_SCROLL: 100, // ms
-  AUTO_SAVE_DELAY: 2000, // ms
-  TOAST_DURATION: 3000, // ms
-  REDIRECT_DELAY: 2000, // ms
+  DEBOUNCE_SEARCH: 500, 
+  DEBOUNCE_INPUT: 300, 
+  DEBOUNCE_RESIZE: 200, 
+  THROTTLE_SCROLL: 100, 
+  AUTO_SAVE_DELAY: 2000, 
+  TOAST_DURATION: 3000, 
+  REDIRECT_DELAY: 2000, 
 };
 
-// ============================================
-// ERROR MESSAGES
-// ============================================
 
 export const ERROR_MESSAGES = {
   GENERIC: 'An unexpected error occurred. Please try again.',
@@ -238,9 +205,6 @@ export const ERROR_MESSAGES = {
   CATEGORY_REQUIRED: 'Please select a category.',
 };
 
-// ============================================
-// SUCCESS MESSAGES
-// ============================================
 
 export const SUCCESS_MESSAGES = {
   MEETING_UPLOADED: 'Meeting uploaded successfully!',
@@ -251,9 +215,6 @@ export const SUCCESS_MESSAGES = {
   LOGOUT_SUCCESS: 'Logged out successfully!',
 };
 
-// ============================================
-// ROUTES
-// ============================================
 
 export const ROUTES = {
   HOME: '/',
@@ -267,9 +228,6 @@ export const ROUTES = {
   NOT_FOUND: '*',
 };
 
-// ============================================
-// FEATURE FLAGS
-// ============================================
 
 export const FEATURES = {
   ENABLE_DARK_MODE: true,
@@ -280,9 +238,6 @@ export const FEATURES = {
   ENABLE_REAL_TIME: false,
 };
 
-// ============================================
-// DATE FORMATS
-// ============================================
 
 export const DATE_FORMATS = {
   SHORT: 'MMM d, yyyy',
@@ -293,9 +248,6 @@ export const DATE_FORMATS = {
   ISO: "yyyy-MM-dd'T'HH:mm:ss",
 };
 
-// ============================================
-// SUPPORTED FILE TYPES
-// ============================================
 
 export const SUPPORTED_AUDIO_TYPES = [
   'audio/webm',
@@ -303,44 +255,34 @@ export const SUPPORTED_AUDIO_TYPES = [
   'audio/mpeg',
   'audio/wav',
   'audio/ogg',
-  'audio/m4a', // M4A format
-  'audio/x-m4a', // M4A variant
-  'audio/mp4', // M4A uses MP4 container
+  'audio/m4a', 
+  'audio/x-m4a', 
+  'audio/mp4', 
 ];
 
 export const SUPPORTED_AUDIO_EXTENSIONS = ['.webm', '.mp3', '.wav', '.ogg', '.m4a'];
 
-// ============================================
-// ANALYTICS EVENTS
-// ============================================
 
 export const ANALYTICS_EVENTS = {
-  // User events
   USER_LOGIN: 'user_login',
   USER_LOGOUT: 'user_logout',
   USER_SIGNUP: 'user_signup',
 
-  // Meeting events
   MEETING_CREATED: 'meeting_created',
   MEETING_VIEWED: 'meeting_viewed',
   MEETING_UPDATED: 'meeting_updated',
   MEETING_DELETED: 'meeting_deleted',
   MEETING_SEARCHED: 'meeting_searched',
 
-  // Recording events
   RECORDING_STARTED: 'recording_started',
   RECORDING_STOPPED: 'recording_stopped',
   RECORDING_FAILED: 'recording_failed',
 
-  // Feature usage
   EXPORT_CLICKED: 'export_clicked',
   THEME_CHANGED: 'theme_changed',
   FILTER_APPLIED: 'filter_applied',
 };
 
-// ============================================
-// KEYBOARD SHORTCUTS
-// ============================================
 
 export const KEYBOARD_SHORTCUTS = {
   SEARCH: 'Ctrl+K',
@@ -350,9 +292,7 @@ export const KEYBOARD_SHORTCUTS = {
   HELP: '?',
 };
 
-// ============================================
-// NOTIFICATION TYPES
-// ============================================
+
 
 export const NOTIFICATION_TYPES = {
   SUCCESS: 'success',
@@ -361,9 +301,7 @@ export const NOTIFICATION_TYPES = {
   INFO: 'info',
 };
 
-// ============================================
-// CACHE DURATION
-// ============================================
+
 
 export const CACHE_DURATION = {
   SHORT: 5 * 60 * 1000, // 5 minutes
@@ -372,9 +310,7 @@ export const CACHE_DURATION = {
   DAY: 24 * 60 * 60 * 1000, // 24 hours
 };
 
-// ============================================
-// RETENTION PERIODS (DAYS)
-// ============================================
+
 
 export const RETENTION_PERIODS = [
   { value: 7, label: '7 days' },
@@ -384,9 +320,7 @@ export const RETENTION_PERIODS = [
   { value: 365, label: '1 year' },
 ];
 
-// ============================================
-// EXTERNAL LINKS
-// ============================================
+
 
 export const EXTERNAL_LINKS = {
   DOCUMENTATION: 'https://docs.echonote.com',
@@ -397,9 +331,7 @@ export const EXTERNAL_LINKS = {
   FEEDBACK: 'https://echonote.com/feedback',
 };
 
-// ============================================
-// REGEX PATTERNS
-// ============================================
+
 
 export const REGEX_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -409,9 +341,6 @@ export const REGEX_PATTERNS = {
   SLUG: /^[a-z0-9-]+$/,
 };
 
-// ============================================
-// DEFAULT VALUES
-// ============================================
 
 export const DEFAULTS = {
   THEME: 'light',
@@ -423,9 +352,6 @@ export const DEFAULTS = {
   AUTO_DELETE: false,
 };
 
-// ============================================
-// LIMITS
-// ============================================
 
 export const LIMITS = {
   MAX_FILE_SIZE: MAX_AUDIO_FILE_SIZE,
@@ -437,9 +363,6 @@ export const LIMITS = {
   MAX_FAVORITES: 50,
 };
 
-// ============================================
-// HTTP STATUS CODES
-// ============================================
 
 export const HTTP_STATUS = {
   OK: 200,
@@ -454,9 +377,6 @@ export const HTTP_STATUS = {
   SERVICE_UNAVAILABLE: 503,
 };
 
-// ============================================
-// ENVIRONMENT
-// ============================================
 
 export const ENVIRONMENT = {
   isDevelopment: process.env.NODE_ENV === 'development',
@@ -464,15 +384,9 @@ export const ENVIRONMENT = {
   mode: process.env.NODE_ENV || 'development',
 };
 
-// ============================================
-// GOOGLE OAUTH
-// ============================================
 
 export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
-// ============================================
-// EXPORT ALL
-// ============================================
 
 const constants = {
   APP_NAME,

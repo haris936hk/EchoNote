@@ -57,7 +57,6 @@ CategoryFilter.propTypes = {
   counts: PropTypes.object,
 };
 
-// Badge component for displaying category
 export const CategoryBadge = ({ category }) => {
   const catColors = categoryColors[category] || categoryColors.OTHER;
   const categoryData =

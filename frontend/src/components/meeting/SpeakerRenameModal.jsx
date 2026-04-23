@@ -39,7 +39,7 @@ const SpeakerRenameModal = ({ isOpen, onClose, speakerId, currentName, onSave })
             scale: 1,
             transition: {
               duration: 0.3,
-              ease: [0.22, 1, 0.36, 1], // Custom bounce-like ease
+              ease: [0.22, 1, 0.36, 1], 
             },
           },
           exit: {

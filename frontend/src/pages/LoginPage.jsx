@@ -4,15 +4,11 @@ import { LuMic as Mic, LuLock as Lock } from 'react-icons/lu';
 import { useAuth } from '../contexts/AuthContext';
 import LoginButton from '../components/auth/LoginButton';
 
-/**
- * LoginPage — Google OAuth sign-in
- * Matches Stitch sign_in_echonote_fixed design
- */
+
 const LoginPage = () => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!loading && isAuthenticated) {
       navigate('/');

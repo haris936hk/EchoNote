@@ -31,7 +31,6 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
     }
   }, [task, isOpen]);
 
-  // Handle body scroll locking
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

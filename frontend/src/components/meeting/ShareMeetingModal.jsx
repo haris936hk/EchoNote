@@ -11,7 +11,6 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
   const [localShareToken, setLocalShareToken] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Sync with meeting prop when opened or meeting changes
   useEffect(() => {
     if (meeting?.shareEnabled && meeting?.shareToken) {
       setLocalShareToken(meeting.shareToken);
@@ -20,7 +19,6 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
     }
   }, [meeting, isOpen]);
 
-  // Handle body scroll locking
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

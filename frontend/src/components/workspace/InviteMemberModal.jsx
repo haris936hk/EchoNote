@@ -15,7 +15,6 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInvited }) => {
   const [role, setRole] = useState('VIEWER');
   const [loading, setLoading] = useState(false);
 
-  // Handle body scroll locking
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

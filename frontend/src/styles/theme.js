@@ -1,16 +1,6 @@
-/**
- * EchoNote Theme Configuration — OLED Dark Mode Design System
- * Centralized theme settings matching Stitch UI screens
- * Fonts: Plus Jakarta Sans (UI) + JetBrains Mono (data)
- * Primary: Indigo #818CF8 | CTA: Green #22C55E | Bg: #020617
- */
 
-// ============================================
-// COLOR PALETTE
-// ============================================
 
 export const colors = {
-  // Brand / Accent
   primary: {
     50: '#EEF2FF',
     100: '#E0E7FF',
@@ -86,7 +76,6 @@ export const colors = {
     foreground: '#FFFFFF',
   },
 
-  // Neutral (Slate scale)
   default: {
     50: '#F8FAFC',
     100: '#F1F5F9',
@@ -102,22 +91,20 @@ export const colors = {
     foreground: '#F8FAFC',
   },
 
-  // Background surfaces
   background: {
-    dark: '#020617', // OLED near-black
+    dark: '#020617',
   },
 
   foreground: {
     dark: '#F8FAFC',
   },
 
-  // Surface hierarchy
   content: {
     dark: {
-      1: '#0F172A', // Cards, panels
-      2: '#1E293B', // Hover surfaces, elevated
-      3: '#334155', // Tertiary surfaces
-      4: '#475569', // Quaternary
+      1: '#0F172A', 
+      2: '#1E293B', 
+      3: '#334155', 
+      4: '#475569', 
     },
   },
 
@@ -125,20 +112,16 @@ export const colors = {
     dark: 'rgba(255,255,255,0.06)',
   },
 
-  // Accent tokens
   accent: {
     primary: '#818CF8',
     secondary: '#A78BFA',
     glow: 'rgba(129,140,248,0.12)',
   },
 
-  // CTA
   cta: '#22C55E',
 };
 
-// ============================================
-// TYPOGRAPHY
-// ============================================
+
 
 export const typography = {
   fontFamily: {
@@ -178,9 +161,7 @@ export const typography = {
   },
 };
 
-// ============================================
-// SPACING & RADII
-// ============================================
+
 
 export const spacing = {
   pagePadding: '24px',
@@ -196,9 +177,7 @@ export const borderRadius = {
   chip: '9999px',
 };
 
-// ============================================
-// SHADOWS
-// ============================================
+
 
 export const shadows = {
   sm: '0 1px 2px 0 rgb(0 0 0 / 0.3)',
@@ -211,9 +190,7 @@ export const shadows = {
   none: 'none',
 };
 
-// ============================================
-// TRANSITIONS
-// ============================================
+
 
 export const transitions = {
   duration: {
@@ -229,9 +206,7 @@ export const transitions = {
   },
 };
 
-// ============================================
-// CATEGORY COLORS
-// ============================================
+
 
 export const categoryColors = {
   SALES: {
@@ -266,9 +241,6 @@ export const categoryColors = {
   },
 };
 
-// ============================================
-// STATUS COLORS
-// ============================================
 
 export const statusColors = {
   COMPLETED: {
@@ -285,7 +257,6 @@ export const statusColors = {
     dot: 'bg-amber-400',
     label: 'PROCESSING',
   },
-  // Pipeline sub-states map to PROCESSING
   UPLOADING: {
     color: 'warning',
     bg: 'bg-amber-500/10',
@@ -330,9 +301,6 @@ export const statusColors = {
   },
 };
 
-// ============================================
-// SENTIMENT COLORS
-// ============================================
 
 export const sentimentColors = {
   positive: { color: '#34D399', label: 'Positive', dot: 'bg-emerald-400' },
@@ -341,9 +309,6 @@ export const sentimentColors = {
   mixed: { color: '#FBBF24', label: 'Mixed', dot: 'bg-amber-400' },
 };
 
-// ============================================
-// ANIMATION CONFIG (Framer Motion)
-// ============================================
 
 export const animations = {
   fadeIn: {
@@ -372,9 +337,6 @@ export const animations = {
   },
 };
 
-// ============================================
-// EXPORT DEFAULT THEME
-// ============================================
 
 const theme = {
   colors,

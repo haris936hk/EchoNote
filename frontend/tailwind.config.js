@@ -10,7 +10,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ── EchoNote OLED Dark Mode Palette ──
         'echo-base': '#020617',
         'echo-surface': '#0F172A',
         'echo-surface-hover': '#1E293B',
@@ -18,7 +17,6 @@ module.exports = {
         'echo-border': 'rgba(255,255,255,0.06)',
         'echo-border-subtle': 'rgba(255,255,255,0.03)',
 
-        // Accent colors
         accent: {
           primary: '#818CF8',
           secondary: '#A78BFA',
@@ -29,7 +27,6 @@ module.exports = {
           hover: '#16A34A',
         },
 
-        // Semantic status
         status: {
           success: '#34D399',
           warning: '#FBBF24',
@@ -37,7 +34,7 @@ module.exports = {
           info: '#60A5FA',
         },
 
-        // Sentiment
+        
         sentiment: {
           positive: '#34D399',
           neutral: '#818CF8',
@@ -45,12 +42,10 @@ module.exports = {
           mixed: '#FBBF24',
         },
 
-        // Text hierarchy
         'text-primary': '#F8FAFC',
         'text-secondary': '#94A3B8',
         'text-muted': '#64748B',
 
-        // Stitch surface tokens (from code.html)
         surface: {
           DEFAULT: '#0c1324',
           bright: '#33394c',
@@ -65,7 +60,6 @@ module.exports = {
         'on-surface-variant': '#c6c5d5',
         'outline-variant': '#454653',
 
-        // HeroUI overrides
         primary: {
           DEFAULT: '#818CF8',
           50: '#EEF2FF',

@@ -42,7 +42,6 @@ const getDurColor = (ms) => {
   return 'text-red-400';
 };
 
-// ─── Main Component ───
 const ProcessingLogAccordion = ({
   meetingId,
   processingDuration,
@@ -50,10 +49,9 @@ const ProcessingLogAccordion = ({
   processingCompletedAt,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [stages, setStages] = useState(null); // null = not loaded yet
+  const [stages, setStages] = useState(null); 
   const [loadingStages, setLoadingStages] = useState(false);
 
-  // Lazy-fetch stage data on first open
   const handleToggle = () => {
     const opening = !isOpen;
     setIsOpen(opening);
@@ -69,7 +67,7 @@ const ProcessingLogAccordion = ({
           if (data.success && Array.isArray(data.data?.processingLogs)) {
             setStages(data.data.processingLogs);
           } else {
-            setStages([]); // Mark as loaded with no data
+            setStages([]); 
           }
         })
         .catch(() => setStages([]))

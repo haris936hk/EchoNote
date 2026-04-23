@@ -10,13 +10,9 @@ export const useTheme = () => {
   return context;
 };
 
-/**
- * ThemeProvider — Hardcoded to OLED dark mode
- * EchoNote is dark-mode-only by design.
- */
+
 export const ThemeProvider = ({ children }) => {
   useEffect(() => {
-    // Always enforce dark mode
     const root = document.documentElement;
     root.classList.add('dark');
     localStorage.setItem('theme', 'dark');
@@ -24,8 +20,8 @@ export const ThemeProvider = ({ children }) => {
 
   const value = {
     isDark: true,
-    toggleTheme: () => {}, // No-op — dark mode only
-    setTheme: () => {}, // No-op — dark mode only
+    toggleTheme: () => {}, 
+    setTheme: () => {}, 
     theme: 'dark',
   };
 

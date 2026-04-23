@@ -1,15 +1,4 @@
-/**
- * Formatters Utility
- * Functions for formatting dates, numbers, file sizes, durations, etc.
- */
 
-// ============================================
-// DATE & TIME FORMATTING
-// ============================================
-
-/**
- * Format date to locale string
- */
 export const formatDate = (date, options = {}) => {
   if (!date) return '';
 
@@ -28,9 +17,7 @@ export const formatDate = (date, options = {}) => {
   }
 };
 
-/**
- * Format date with time
- */
+
 export const formatDateTime = (date, options = {}) => {
   if (!date) return '';
 
@@ -51,9 +38,7 @@ export const formatDateTime = (date, options = {}) => {
   }
 };
 
-/**
- * Format time only
- */
+
 export const formatTime = (date) => {
   if (!date) return '';
 
@@ -69,9 +54,7 @@ export const formatTime = (date) => {
   }
 };
 
-/**
- * Format relative time (e.g., "2 hours ago")
- */
+
 export const formatRelativeTime = (date) => {
   if (!date) return '';
 
@@ -110,9 +93,7 @@ export const formatRelativeTime = (date) => {
   }
 };
 
-/**
- * Get friendly date (Today, Yesterday, or formatted date)
- */
+
 export const getFriendlyDate = (date) => {
   if (!date) return '';
 
@@ -122,7 +103,6 @@ export const getFriendlyDate = (date) => {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    // Reset time to compare dates only
     dateObj.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     yesterday.setHours(0, 0, 0, 0);
@@ -140,9 +120,7 @@ export const getFriendlyDate = (date) => {
   }
 };
 
-/**
- * Format ISO date string to readable format
- */
+
 export const formatISODate = (isoString) => {
   if (!isoString) return '';
 
@@ -160,13 +138,7 @@ export const formatISODate = (isoString) => {
   }
 };
 
-// ============================================
-// DURATION FORMATTING
-// ============================================
 
-/**
- * Format seconds to MM:SS
- */
 export const formatDurationShort = (seconds) => {
   if (!seconds || seconds === 0) return '0:00';
 
@@ -175,9 +147,7 @@ export const formatDurationShort = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-/**
- * Format seconds to human-readable duration
- */
+
 export const formatDuration = (seconds) => {
   if (!seconds || seconds === 0) return '0s';
 
@@ -193,9 +163,7 @@ export const formatDuration = (seconds) => {
   return parts.join(' ');
 };
 
-/**
- * Format seconds to long format (e.g., "2 hours, 30 minutes")
- */
+
 export const formatDurationLong = (seconds) => {
   if (!seconds || seconds === 0) return '0 seconds';
 
@@ -216,20 +184,12 @@ export const formatDurationLong = (seconds) => {
   return parts.join(', ') + ', and ' + last;
 };
 
-/**
- * Format milliseconds to seconds
- */
+
 export const msToSeconds = (ms) => {
   return Math.floor(ms / 1000);
 };
 
-// ============================================
-// FILE SIZE FORMATTING
-// ============================================
 
-/**
- * Format bytes to human-readable size
- */
 export const formatFileSize = (bytes, decimals = 2) => {
   if (!bytes || bytes === 0) return '0 Bytes';
 
@@ -242,43 +202,29 @@ export const formatFileSize = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-/**
- * Format bytes to KB
- */
+
 export const bytesToKB = (bytes) => {
   return (bytes / 1024).toFixed(2);
 };
 
-/**
- * Format bytes to MB
- */
+
 export const bytesToMB = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(2);
 };
 
-// ============================================
-// NUMBER FORMATTING
-// ============================================
 
-/**
- * Format number with commas
- */
 export const formatNumber = (number) => {
   if (number === null || number === undefined) return '0';
   return number.toLocaleString('en-US');
 };
 
-/**
- * Format number as percentage
- */
+
 export const formatPercentage = (value, decimals = 0) => {
   if (value === null || value === undefined) return '0%';
   return `${value.toFixed(decimals)}%`;
 };
 
-/**
- * Format number as currency
- */
+
 export const formatCurrency = (amount, currency = 'USD') => {
   if (amount === null || amount === undefined) return '$0.00';
 
@@ -288,9 +234,7 @@ export const formatCurrency = (amount, currency = 'USD') => {
   }).format(amount);
 };
 
-/**
- * Format large numbers with suffixes (K, M, B)
- */
+
 export const formatCompactNumber = (number) => {
   if (!number || number === 0) return '0';
 
@@ -306,13 +250,7 @@ export const formatCompactNumber = (number) => {
   return scaled.toFixed(1) + suffix;
 };
 
-// ============================================
-// TEXT FORMATTING
-// ============================================
 
-/**
- * Truncate text with ellipsis
- */
 export const truncateText = (text, maxLength = 50, suffix = '...') => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
@@ -320,9 +258,7 @@ export const truncateText = (text, maxLength = 50, suffix = '...') => {
   return text.substring(0, maxLength - suffix.length) + suffix;
 };
 
-/**
- * Truncate text by word count
- */
+
 export const truncateWords = (text, maxWords = 10, suffix = '...') => {
   if (!text) return '';
 
@@ -332,17 +268,13 @@ export const truncateWords = (text, maxWords = 10, suffix = '...') => {
   return words.slice(0, maxWords).join(' ') + suffix;
 };
 
-/**
- * Capitalize first letter
- */
+
 export const capitalize = (text) => {
   if (!text) return '';
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
 
-/**
- * Title case (capitalize each word)
- */
+
 export const titleCase = (text) => {
   if (!text) return '';
 
@@ -353,9 +285,7 @@ export const titleCase = (text) => {
     .join(' ');
 };
 
-/**
- * Convert to kebab-case
- */
+
 export const toKebabCase = (text) => {
   if (!text) return '';
 
@@ -365,9 +295,7 @@ export const toKebabCase = (text) => {
     .replace(/[^\w-]/g, '');
 };
 
-/**
- * Convert to snake_case
- */
+
 export const toSnakeCase = (text) => {
   if (!text) return '';
 
@@ -377,18 +305,14 @@ export const toSnakeCase = (text) => {
     .replace(/[^\w_]/g, '');
 };
 
-/**
- * Convert to camelCase
- */
+
 export const toCamelCase = (text) => {
   if (!text) return '';
 
   return text.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 };
 
-/**
- * Extract initials from name
- */
+
 export const getInitials = (name, maxLength = 2) => {
   if (!name) return '';
 
@@ -401,21 +325,12 @@ export const getInitials = (name, maxLength = 2) => {
   return initials;
 };
 
-/**
- * Pluralize word based on count
- */
 export const pluralize = (word, count, suffix = 's') => {
   if (!word) return '';
   return count === 1 ? word : word + suffix;
 };
 
-// ============================================
-// CATEGORY & STATUS FORMATTING
-// ============================================
 
-/**
- * Format category name
- */
 export const formatCategory = (category) => {
   if (!category) return '';
 
@@ -430,9 +345,7 @@ export const formatCategory = (category) => {
   return categoryMap[category] || capitalize(category);
 };
 
-/**
- * Format status name
- */
+
 export const formatStatus = (status) => {
   if (!status) return '';
 
@@ -446,21 +359,13 @@ export const formatStatus = (status) => {
   return statusMap[status] || capitalize(status);
 };
 
-// ============================================
-// URL & EMAIL FORMATTING
-// ============================================
 
-/**
- * Format URL for display (remove protocol)
- */
 export const formatURL = (url) => {
   if (!url) return '';
   return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 };
 
-/**
- * Mask email address
- */
+
 export const maskEmail = (email) => {
   if (!email) return '';
 
@@ -475,13 +380,7 @@ export const maskEmail = (email) => {
   return `${maskedUsername}@${domain}`;
 };
 
-// ============================================
-// VALIDATION HELPERS
-// ============================================
 
-/**
- * Check if value is valid date
- */
 export const isValidDate = (date) => {
   try {
     const dateObj = new Date(date);
@@ -491,21 +390,13 @@ export const isValidDate = (date) => {
   }
 };
 
-/**
- * Check if string is valid email
- */
+
 export const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-// ============================================
-// ARRAY FORMATTING
-// ============================================
 
-/**
- * Format array to comma-separated string
- */
 export const formatList = (array, conjunction = 'and') => {
   if (!array || array.length === 0) return '';
   if (array.length === 1) return array[0];
@@ -516,12 +407,10 @@ export const formatList = (array, conjunction = 'and') => {
   return `${rest.join(', ')}, ${conjunction} ${last}`;
 };
 
-// ============================================
-// EXPORT ALL
-// ============================================
+
 
 const formatHelpers = {
-  // Date & Time
+  
   formatDate,
   formatDateTime,
   formatTime,
@@ -529,24 +418,22 @@ const formatHelpers = {
   getFriendlyDate,
   formatISODate,
 
-  // Duration
+  
   formatDurationShort,
   formatDuration,
   formatDurationLong,
   msToSeconds,
 
-  // File Size
   formatFileSize,
   bytesToKB,
   bytesToMB,
 
-  // Numbers
+ 
   formatNumber,
   formatPercentage,
   formatCurrency,
   formatCompactNumber,
 
-  // Text
   truncateText,
   truncateWords,
   capitalize,
@@ -557,19 +444,15 @@ const formatHelpers = {
   getInitials,
   pluralize,
 
-  // Category & Status
   formatCategory,
   formatStatus,
 
-  // URL & Email
   formatURL,
   maskEmail,
 
-  // Validation
   isValidDate,
   isValidEmail,
 
-  // Array
   formatList,
 };
 

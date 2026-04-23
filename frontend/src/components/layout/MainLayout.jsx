@@ -2,15 +2,11 @@ import { createContext } from 'react';
 import Header from '../common/Header';
 import ScrollReveal from '../common/ScrollReveal';
 
-// Scroll state context - optionally kept for children
 export const ScrollContext = createContext({
   showNavbar: true,
 });
 
-/**
- * MainLayout — Wrapper for authenticated pages
- * OLED dark background, scroll-hide navbar, no footer
- */
+
 const MainLayout = ({ children }) => {
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard' },

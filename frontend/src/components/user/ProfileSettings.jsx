@@ -133,7 +133,6 @@ const ProfileSettings = () => {
   );
 };
 
-// Compact profile card for sidebar
 export const ProfileCard = () => {
   const { user } = useAuth();
 

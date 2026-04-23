@@ -1,8 +1,8 @@
-// backend/src/controllers/notification.controller.js
+
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
-// Initialize logger
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -13,10 +13,7 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Get VAPID Public Key
- * GET /api/notifications/vapidPublicKey
- */
+
 const getVapidPublicKey = async (req, res) => {
   try {
     const publicKey = process.env.VAPID_PUBLIC_KEY;
@@ -41,10 +38,7 @@ const getVapidPublicKey = async (req, res) => {
   }
 };
 
-/**
- * Subscribe to Push Notifications
- * POST /api/notifications/subscribe
- */
+
 const subscribe = async (req, res) => {
   try {
     const userId = req.userId;
@@ -57,7 +51,7 @@ const subscribe = async (req, res) => {
       });
     }
 
-    // Upsert subscription (endpoint is unique)
+    
     const savedSubscription = await prisma.pushSubscription.upsert({
       where: { endpoint: subscription.endpoint },
       update: {
@@ -90,10 +84,7 @@ const subscribe = async (req, res) => {
   }
 };
 
-/**
- * Unsubscribe from Push Notifications
- * POST /api/notifications/unsubscribe
- */
+
 const unsubscribe = async (req, res) => {
   try {
     const { endpoint } = req.body;

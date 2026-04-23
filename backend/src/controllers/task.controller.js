@@ -34,18 +34,18 @@ const updateTask = async (req, res) => {
     if (priority !== undefined) dataToUpdate.priority = priority;
 
     const updatedTask = await prisma.actionItem.update({
-      where: { id, userId: req.userId }, // Enforces ownership
+      where: { id, userId: req.userId }, 
       data: dataToUpdate,
     });
 
-    // Sync back to meeting JSON
+    
     if (updatedTask.meetingId) {
       const allActionItems = await prisma.actionItem.findMany({
         where: { meetingId: updatedTask.meetingId },
         orderBy: { createdAt: 'asc' },
       });
 
-      // Filter out fields we don't necessarily want in the JSON array, or just keep them
+      
       const summaryActionItems = allActionItems.map((item) => ({
         id: item.id,
         task: item.task,

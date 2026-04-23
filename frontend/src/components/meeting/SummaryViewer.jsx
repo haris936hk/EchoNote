@@ -124,7 +124,6 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
     }
 
     const previousActions = [...localActions];
-    // Optimistic UI
     setLocalActions((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
 
     try {

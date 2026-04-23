@@ -1,9 +1,6 @@
-// frontend/src/services/notification.service.js
 import api from './api';
 
-/**
- * Utility to convert VAPID public key
- */
+
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -16,9 +13,7 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 const notificationService = {
-  /**
-   * Register Service Worker
-   */
+  
   async registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       console.warn('Service Workers not supported');
@@ -35,9 +30,7 @@ const notificationService = {
     }
   },
 
-  /**
-   * Check if push is supported and permission is granted
-   */
+  
   async getPushStatus() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       return { supported: false, granted: false };
@@ -51,9 +44,7 @@ const notificationService = {
     };
   },
 
-  /**
-   * Request notification permission
-   */
+ 
   async requestPermission() {
     if (!('Notification' in window)) return false;
     
@@ -61,20 +52,16 @@ const notificationService = {
     return permission === 'granted';
   },
 
-  /**
-   * Subscribe to push notifications
-   */
+  
   async subscribeUser() {
     try {
       const registration = await navigator.serviceWorker.ready;
       
-      // Check if already subscribed
       const existingSubscription = await registration.pushManager.getSubscription();
       if (existingSubscription) {
         return existingSubscription;
       }
 
-      // Get VAPID public key from backend
       const response = await api.get('/notifications/vapidPublicKey');
       const publicKey = response.data.publicKey;
 
@@ -83,7 +70,6 @@ const notificationService = {
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
 
-      // Save subscription to backend
       await api.post('/notifications/subscribe', subscription);
       
       console.log('✅ User subscribed to push notifications');
@@ -94,19 +80,15 @@ const notificationService = {
     }
   },
 
-  /**
-   * Unsubscribe from push notifications
-   */
+  
   async unsubscribeUser() {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       
       if (subscription) {
-        // Unsubscribe from browser
         await subscription.unsubscribe();
         
-        // Remove from backend
         await api.post('/notifications/unsubscribe', { endpoint: subscription.endpoint });
         
         console.log('🚫 User unsubscribed from push notifications');

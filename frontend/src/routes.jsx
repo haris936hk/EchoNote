@@ -3,11 +3,9 @@ import { useAuth } from './contexts/AuthContext';
 import { Spinner } from '@heroui/react';
 import PropTypes from 'prop-types';
 
-// Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 
-// Pages
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -26,14 +24,10 @@ import WorkspacesPage from './pages/WorkspacesPage';
 import WorkspaceDetailPage from './pages/WorkspaceDetailPage';
 import WorkspaceMeetingDetail from './pages/WorkspaceMeetingDetail';
 
-/**
- * Public Route Component
- * Redirects to dashboard if user is already authenticated
- */
+
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -42,7 +36,6 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  // Redirect to dashboard if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -54,9 +47,7 @@ PublicRoute.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-/**
- * Main Application Routes
- */
+
 const AppRoutes = () => {
   return (
     <Routes>

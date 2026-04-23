@@ -87,7 +87,6 @@ const MeetingDetailPage = () => {
 
       const result = await response.json();
       if (result.success) {
-        // Optimistic UI update or refresh meeting data
         fetchMeeting(id);
       }
     } catch {
@@ -99,7 +98,6 @@ const MeetingDetailPage = () => {
     if (id) fetchMeeting(id);
   }, [id, fetchMeeting]);
 
-  // Poll for processing status
   useEffect(() => {
     if (!currentMeeting || !id) return undefined;
     if (!PROCESSING_STATUSES.includes(currentMeeting.status)) return undefined;
@@ -135,7 +133,6 @@ const MeetingDetailPage = () => {
     }
   };
 
-  // F1 — Retry failed meeting using original audio URL stored in DB
   const handleRetry = async () => {
     try {
       setIsRetrying(true);
@@ -146,7 +143,6 @@ const MeetingDetailPage = () => {
       });
       const data = await response.json();
       if (data.success) {
-        // Refresh meeting — triggers the polling effect since status is now PENDING
         fetchMeeting(id);
       } else {
         window.alert(data.error || 'Failed to reprocess meeting.');
@@ -267,7 +263,6 @@ const MeetingDetailPage = () => {
     );
   };
 
-  // Pipeline step progress
   const getCurrentStepIndex = () => {
     if (!currentMeeting) return -1;
     return PIPELINE_STEPS.findIndex((s) => s.key === currentMeeting.status);
