@@ -3,8 +3,13 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "eslint.workingDirectories": ["./frontend", "./backend"],
-  "prettier.documentSelectors": ["**/*.{js,jsx,ts,tsx,css,json,md,html}"],
+  "eslint.workingDirectories": [
+    "./frontend",
+    "./backend"
+  ],
+  "prettier.documentSelectors": [
+    "**/*.{js,jsx,ts,tsx,css,json,md,html}"
+  ],
   "css.validate": false,
   "css.lint.unknownAtRules": "ignore",
   "files.associations": {
