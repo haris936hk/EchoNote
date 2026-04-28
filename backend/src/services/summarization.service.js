@@ -1,6 +1,6 @@
 
 
-const groqService = require('./groqService');
+const customLLMService = require('./customLLMService');
 const winston = require('winston');
 
 
@@ -16,7 +16,7 @@ const logger = winston.createLogger({
 
 /**
  * Generate comprehensive meeting summary
- * Uses Groq-hosted openai/gpt-oss-120b with strict schema enforcement
+ * Uses the custom LLM with strict schema enforcement
  * @param {string} transcript - Meeting transcript
  * @param {Object} metadata - Meeting metadata (title, category, duration)
  * @param {Object} nlpData - NLP analysis results (optional)
@@ -64,7 +64,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     }
 
     
-    const result = await groqService.generateSummary(transcript, nlpFeatures, {
+    const result = await customLLMService.generateSummary(transcript, nlpFeatures, {
       category: metadata.category || null,
     });
 
@@ -86,7 +86,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       keyTopics: Array.isArray(result.data.keyTopics) ? result.data.keyTopics : [],
       sentiment: result.data.sentiment || 'neutral',
       metadata: {
-        model: `${process.env.GROQ_MODEL || 'openai/gpt-oss-120b'} (Groq)`,
+        model: `${process.env.CUSTOM_LLM_MODEL || 'llama-3.3-70b-versatile'} (Custom LLM)`,
         duration: parseFloat(duration),
         totalProcessingTime: parseFloat(duration),
       },
@@ -109,7 +109,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       error.message.includes('EHOSTUNREACH')
     ) {
       userMessage =
-        'Groq API is currently unreachable. Please check your internet connection and GROQ_API_KEY.';
+        'AI summarization service is currently unreachable. Please check your internet connection and CUSTOM_LLM_API_KEY.';
     }
 
     throw new Error(userMessage);
@@ -128,7 +128,7 @@ const generateExecutiveSummary = async (transcript, metadata = {}) => {
     logger.info(`📋 Generating executive summary`);
     const startTime = Date.now();
 
-    const result = await groqService.generateSummary(transcript, null);
+    const result = await customLLMService.generateSummary(transcript, null);
 
     if (!result.success) {
       throw new Error(result.error || 'Executive summary generation failed');
@@ -172,7 +172,7 @@ const extractActions = async (transcript) => {
     const startTime = Date.now();
 
    
-    const result = await groqService.generateSummary(transcript, null);
+    const result = await customLLMService.generateSummary(transcript, null);
 
     if (!result.success) {
       throw new Error(result.error || 'Action item extraction failed');

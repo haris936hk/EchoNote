@@ -1595,7 +1595,7 @@ const generateFollowUp = async (req, res) => {
     const userId = req.userId;
     const tone = req.query.tone || 'formal';
 
-    const groqService = require('../services/groqService');
+    const customLLMService = require('../services/customLLMService');
     const meeting = await meetingService.getMeetingById(id, userId);
 
     if (!meeting) {
@@ -1606,7 +1606,7 @@ const generateFollowUp = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Meeting processing not yet complete' });
     }
 
-    const result = await groqService.generateFollowUpEmail(meeting, tone);
+    const result = await customLLMService.generateFollowUpEmail(meeting, tone);
 
     if (!result.success) {
       return res.status(500).json({ success: false, error: result.error });

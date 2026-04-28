@@ -30,7 +30,7 @@ const NLP_CONFIG = {
  * Returns data in dataset format
  *
  * NOTE: Sentiment is NOT extracted by SpaCy/TextBlob anymore.
- * It is derived from the Groq LLM which has full transcript context.
+ * It is derived from the AI LLM which has full transcript context.
  *
  * @param {string} text - Transcript text
  * @returns {Object} Complete NLP analysis in dataset format
@@ -65,7 +65,7 @@ const processMeetingTranscript = async (text) => {
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Complete NLP pipeline finished in ${totalTime}s`);
 
-    // Return in enriched format for Groq LLM
+    // Return in enriched format for the LLM
     return {
       success: result.success || true,
       entities: result.entities || [], // [{text, label, count}]

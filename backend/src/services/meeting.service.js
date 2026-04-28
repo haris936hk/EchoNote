@@ -30,7 +30,7 @@ function deserializeArrayField(value) {
   return value; // Already an array or other value
 }
 /**
- * Helper function to map string sentiment (Groq) to numeric score (Analytics)
+ * Helper function to map string sentiment (AI LLM) to numeric score (Analytics)
  * @param {string} sentiment - 'positive', 'neutral', 'negative'
  * @returns {number|null} Score between 0 and 1
  */
@@ -190,7 +190,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.svoTriplets?.length || 0} SVOs, ${nlpResult.actionSignals?.length || 0} action signals, ${nlpResult.questions?.length || 0} questions`
     );
 
-    // Step 5: Generate AI summary using Groq
+    // Step 5: Generate AI summary
     await updateMeetingStatus(meetingId, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
@@ -295,7 +295,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         // NLP Features
         nlpEntities: nlpEntitiesText,
         nlpActionPatterns: nlpActionPatternsText,
-        // Sentiment is now derived from Groq summary output (authoritative, full-context)
+        // Sentiment is now derived from AI summary output (authoritative, full-context)
         nlpSentiment: enhancedSummary.sentiment || null,
         nlpSentimentScore: mapSentimentToScore(enhancedSummary.sentiment),
 
@@ -599,7 +599,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.svoTriplets?.length || 0} SVOs, ${nlpResult.actionSignals?.length || 0} action signals, ${nlpResult.questions?.length || 0} questions`
     );
 
-    // Step 6: Generate AI summary using Groq
+    // Step 6: Generate AI summary
     await updateMeetingStatus(meeting.id, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
@@ -675,7 +675,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         // NLP Features
         nlpEntities: nlpEntitiesText,
         nlpActionPatterns: nlpActionPatternsText,
-        // Sentiment from Groq summary output (authoritative, full-context)
+        // Sentiment from AI summary output (authoritative, full-context)
         nlpSentiment: enhancedSummary.sentiment || null,
         nlpSentimentScore: mapSentimentToScore(enhancedSummary.sentiment),
 

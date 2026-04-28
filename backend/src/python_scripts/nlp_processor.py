@@ -143,7 +143,7 @@ def parse_with_speaker_context(text):
 def build_speaker_entity_map(speaker_segments, doc):
     """
     Map speakers to the entities they mention most frequently.
-    This helps Groq attribute action items to correct speakers.
+    This helps attribute action items to correct speakers.
     
     Returns: {
         "SPEAKER_00": ["ProjectX (TECH)", "John (PERSON)"],
@@ -406,7 +406,7 @@ def extract_svo_triplets(doc, max_triplets=20):
 
 def process_text(text, model_name):
     """
-    Process transcript text and extract NLP features for Groq LLM input.
+    Process transcript text and extract NLP features for LLM input.
 
     Returns: {
         "success": true,

@@ -1,31 +1,30 @@
 /**
- * Groq Inference Service
+ * Custom LLM Inference Service
  *
- * Replaces the NGROK-hosted Qwen2.5-7B custom model with the
- * Groq-hosted `openai/gpt-oss-120b` model via the OpenAI-compatible API.
+ * Handles AI-powered meeting summarization using a hosted LLM
+ * via the OpenAI-compatible API.
  *
  * Pipeline Integration:
  *   Deepgram → SpaCy NLP → [THIS SERVICE] → Formatted Summary
  *
- * Drop-in replacement for customModelService.js:
- *   - Same public method: generateSummary(transcript, nlpFeatures)
- *   - Same return shape: { success, data: { executiveSummary, keyDecisions,
- *                          actionItems, nextSteps, keyTopics, sentiment } }
+ * Public interface: generateSummary(transcript, nlpFeatures)
+ * Return shape: { success, data: { executiveSummary, keyDecisions,
+ *                 actionItems, nextSteps, keyTopics, sentiment } }
  */
 
-const { Groq } = require('groq-sdk');
+const { Groq } = require('groq-sdk'); // SDK kept as transport layer
 const logger = require('../utils/logger');
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
-const DEFAULT_TIMEOUT_MS = 30_000; // 30 s — Groq is typically <5 s
+const DEFAULT_TIMEOUT_MS = 30_000; // 30 s — typically <5 s in practice
 
 // ─── JSON Schema (strict constrained decoding) ──────────────────────────────
 
 /**
  * Strict JSON Schema for meeting summary output.
- * With `strict: true`, Groq uses constrained decoding at the token level —
+ * With `strict: true`, the model uses constrained decoding at the token level —
  * the model literally cannot produce output that violates this schema.
  */
 const SUMMARY_JSON_SCHEMA = {
@@ -227,24 +226,24 @@ Output your valid JSON now:`;
 
 // ─── Class ────────────────────────────────────────────────────────────────────
 
-class GroqService {
+class CustomLLMService {
   constructor() {
-    this.apiKey = process.env.GROQ_API_KEY || '';
+    this.apiKey = process.env.CUSTOM_LLM_API_KEY || '';
     this.model = DEFAULT_MODEL; // Forcing Llama 3.3, ignoring legacy .env variable
-    this.timeout = parseInt(process.env.GROQ_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
+    this.timeout = parseInt(process.env.CUSTOM_LLM_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
 
-    this.groq = new Groq({
+    this.client = new Groq({
       apiKey: this.apiKey,
       timeout: this.timeout,
     });
 
     if (!this.apiKey) {
       logger.warn(
-        '[GroqService] GROQ_API_KEY is not set. Summarization will fail until it is configured.'
+        '[CustomLLMService] CUSTOM_LLM_API_KEY is not set. Summarization will fail until it is configured.'
       );
     }
 
-    logger.info('[GroqService] Initialized', { model: this.model });
+    logger.info('[CustomLLMService] Initialized', { model: this.model });
   }
 
   // ─── Public API ──────────────────────────────────────────────────────────────
@@ -261,7 +260,7 @@ class GroqService {
     try {
       const { category = null, enableVerification = true } = options;
 
-      logger.info('[GroqService] Starting summary generation', {
+      logger.info('[CustomLLMService] Starting summary generation', {
         transcriptLength: transcript?.length ?? 0,
         hasNlpFeatures: !!nlpFeatures,
         category,
@@ -278,7 +277,7 @@ class GroqService {
       const maxTokens = this._calculateMaxTokens(userMessage);
 
       // Pass 1: Generate summary
-      const rawJson = await this._callGroqWithRetry(
+      const rawJson = await this._callWithRetry(
         userMessage,
         1,
         systemPrompt,
@@ -294,7 +293,7 @@ class GroqService {
         formattedSummary = await this._verifyAndCorrect(formattedSummary, transcript);
       }
 
-      logger.info('[GroqService] Summary generation successful', {
+      logger.info('[CustomLLMService] Summary generation successful', {
         hasActionItems: formattedSummary.actionItems?.length > 0,
         actionItemCount: formattedSummary.actionItems?.length ?? 0,
         sentiment: formattedSummary.sentiment,
@@ -303,7 +302,7 @@ class GroqService {
 
       return { success: true, data: formattedSummary };
     } catch (error) {
-      logger.error('[GroqService] Summary generation failed', {
+      logger.error('[CustomLLMService] Summary generation failed', {
         error: error.message,
         stack: error.stack,
       });
@@ -321,7 +320,7 @@ class GroqService {
    */
   async generateFollowUpEmail(meetingData, tone = 'formal') {
     try {
-      logger.info('[GroqService] Starting follow-up email generation', {
+      logger.info('[CustomLLMService] Starting follow-up email generation', {
         meetingId: meetingData.id,
         tone,
       });
@@ -348,7 +347,7 @@ ATTENDEES:
 ${JSON.stringify(meetingData.attendees || [])}
 `;
 
-      const rawJson = await this._callGroqWithRetry(userMessage, 1, FOLLOWUP_SYSTEM_PROMPT);
+      const rawJson = await this._callWithRetry(userMessage, 1, FOLLOWUP_SYSTEM_PROMPT);
       const parsed = JSON.parse(rawJson);
 
       return {
@@ -359,19 +358,19 @@ ${JSON.stringify(meetingData.attendees || [])}
         },
       };
     } catch (error) {
-      logger.error('[GroqService] Follow-up generation failed', { error: error.message });
+      logger.error('[CustomLLMService] Follow-up generation failed', { error: error.message });
       return { success: false, error: error.message };
     }
   }
 
   /**
-   * Health check — verifies the Groq API is reachable and the key is valid.
+   * Health check — verifies the LLM API is reachable and the key is valid.
    *
    * @returns {Promise<{success: boolean, data?: object, error?: string}>}
    */
   async healthCheck() {
     try {
-      const response = await this.groq.models.list();
+      const response = await this.client.models.list();
 
       const models = response.data ?? [];
       const modelAvailable = models.some((m) => m.id === this.model);
@@ -386,7 +385,7 @@ ${JSON.stringify(meetingData.attendees || [])}
         },
       };
     } catch (error) {
-      logger.error('[GroqService] Health check failed', { error: error.message });
+      logger.error('[CustomLLMService] Health check failed', { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -416,7 +415,7 @@ ${JSON.stringify(meetingData.attendees || [])}
 
     // Log received features during development
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('[GroqService] NLP features received', {
+      logger.debug('[CustomLLMService] NLP features received', {
         entities: nlpFeatures.entities?.length ?? 0,
         svoTriplets: nlpFeatures.svoTriplets?.length ?? 0,
         actionSignals: nlpFeatures.actionSignals?.length ?? 0,
@@ -537,7 +536,7 @@ ${JSON.stringify(meetingData.attendees || [])}
   }
 
   /**
-   * Send chat completion request to Groq via the SDK.
+   * Send chat completion request to the LLM API via the SDK.
    * Uses built-in SDK retries, bypassing custom exponential backoff wrapper.
    *
    * @param {string} userMessage   - The assembled user message.
@@ -547,7 +546,7 @@ ${JSON.stringify(meetingData.attendees || [])}
    * @param {number} maxTokens     - Max output tokens.
    * @returns {Promise<string>}    - Raw JSON string from the model.
    */
-  async _callGroqWithRetry(
+  async _callWithRetry(
     userMessage,
     attempt = 1,
     systemPrompt = SYSTEM_PROMPT,
@@ -561,7 +560,7 @@ ${JSON.stringify(meetingData.attendees || [])}
         ? `${systemPrompt}\n\nStrict JSON Format required:\n${JSON.stringify(jsonSchema, null, 2)}`
         : systemPrompt;
 
-      const response = await this.groq.chat.completions.create({
+      const response = await this.client.chat.completions.create({
         model: this.model,
         messages: [
           { role: 'system', content: finalSystemPrompt },
@@ -576,13 +575,13 @@ ${JSON.stringify(meetingData.attendees || [])}
       const content = response.choices?.[0]?.message?.content;
 
       if (!content) {
-        throw new Error('Groq API returned an empty response body');
+        throw new Error('LLM API returned an empty response body');
       }
 
       // Log token usage for monitoring
       const usage = response.usage;
       if (usage) {
-        logger.info('[GroqService] Token usage', {
+        logger.info('[CustomLLMService] Token usage', {
           promptTokens: usage.prompt_tokens,
           completionTokens: usage.completion_tokens,
           totalTokens: usage.total_tokens,
@@ -592,12 +591,12 @@ ${JSON.stringify(meetingData.attendees || [])}
       return content;
     } catch (error) {
       if (error.status === 401) {
-        throw new Error('Invalid Groq API key. Please set a valid GROQ_API_KEY in your .env file.');
+        throw new Error('Invalid API key. Please set a valid CUSTOM_LLM_API_KEY in your .env file.');
       }
       if (error.status === 429) {
-        throw new Error('Groq API rate limit exceeded. Please try again in a moment.');
+        throw new Error('LLM API rate limit exceeded. Please try again in a moment.');
       }
-      throw new Error(`Groq API failed: ${error.message}`);
+      throw new Error(`LLM API request failed: ${error.message}`);
     }
   }
 
@@ -611,12 +610,12 @@ ${JSON.stringify(meetingData.attendees || [])}
    */
   async _verifyAndCorrect(summary, transcript) {
     try {
-      logger.info('[GroqService] Starting verification pass');
+      logger.info('[CustomLLMService] Starting verification pass');
       const startTime = Date.now();
 
       const userMessage = `<transcript>\n${transcript}\n</transcript>\n\n<summary>\n${JSON.stringify(summary, null, 2)}\n</summary>`;
 
-      const rawJson = await this._callGroqWithRetry(
+      const rawJson = await this._callWithRetry(
         userMessage,
         1,
         VERIFICATION_SYSTEM_PROMPT,
@@ -628,20 +627,20 @@ ${JSON.stringify(meetingData.attendees || [])}
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
       if (verification.verified) {
-        logger.info(`[GroqService] Verification passed in ${duration}s — no corrections needed`);
+        logger.info(`[CustomLLMService] Verification passed in ${duration}s — no corrections needed`);
         return summary;
       }
 
       // Apply corrections
       logger.info(
-        `[GroqService] Verification found ${verification.corrections.length} issues in ${duration}s`
+        `[CustomLLMService] Verification found ${verification.corrections.length} issues in ${duration}s`
       );
 
       const corrected = { ...summary };
 
       for (const correction of verification.corrections) {
         const { field, issue, correction: fix } = correction;
-        logger.warn(`[GroqService] Correction: ${field} — ${issue}`);
+        logger.warn(`[CustomLLMService] Correction: ${field} — ${issue}`);
 
         // Handle action item removals (hallucinated items)
         if (field.startsWith('actionItems[') && issue.toLowerCase().includes('not committed')) {
@@ -650,7 +649,7 @@ ${JSON.stringify(meetingData.attendees || [])}
             const idx = parseInt(match[1]);
             if (corrected.actionItems[idx]) {
               logger.info(
-                `[GroqService] Removing hallucinated action item: "${corrected.actionItems[idx].task}"`
+                `[CustomLLMService] Removing hallucinated action item: "${corrected.actionItems[idx].task}"`
               );
               corrected.actionItems[idx] = null; // Mark for removal
             }
@@ -692,7 +691,7 @@ ${JSON.stringify(meetingData.attendees || [])}
     } catch (error) {
       // Verification is best-effort — if it fails, return original summary
       logger.warn(
-        `[GroqService] Verification pass failed, using original summary: ${error.message}`
+        `[CustomLLMService] Verification pass failed, using original summary: ${error.message}`
       );
       return summary;
     }
@@ -727,7 +726,7 @@ ${JSON.stringify(meetingData.attendees || [])}
 
     const missingFields = requiredFields.filter((f) => !(f in parsed));
     if (missingFields.length > 0) {
-      logger.warn('[GroqService] Response missing fields — applying defaults', { missingFields });
+      logger.warn('[CustomLLMService] Response missing fields — applying defaults', { missingFields });
     }
 
     // Normalise action items (filter empty tasks)
@@ -787,7 +786,7 @@ ${JSON.stringify(meetingData.attendees || [])}
 
     // Quality warnings
     if (formatted.executiveSummary.length < 150) {
-      logger.warn('[GroqService] Executive summary is shorter than expected', {
+      logger.warn('[CustomLLMService] Executive summary is shorter than expected', {
         length: formatted.executiveSummary.length,
       });
     }
@@ -816,4 +815,4 @@ ${JSON.stringify(meetingData.attendees || [])}
 
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
-module.exports = new GroqService();
+module.exports = new CustomLLMService();
