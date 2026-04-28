@@ -11,6 +11,7 @@ import {
   LuCalendar as Calendar,
   LuTag as Tag,
   LuMailPlus as MailPlus,
+  LuLayout as Jira,
 } from 'react-icons/lu';
 import { Button } from '@heroui/react';
 import FollowUpModal from './FollowUpModal';
@@ -19,6 +20,7 @@ import { sentimentColors } from '../../styles/theme';
 import { taskService } from '../../services/task.service';
 import { showToast } from '../../components/common/Toast';
 import { LuPencil } from 'react-icons/lu';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CopyBtn = ({ section, content, copiedSection, onCopy }) => (
   <button
@@ -45,12 +47,14 @@ CopyBtn.propTypes = {
   onCopy: PropTypes.func.isRequired,
 };
 
-const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
+const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) => {
+  const { user } = useAuth();
   const [copiedSection, setCopiedSection] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
   const [localActions, setLocalActions] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
+  const [syncingTaskId, setSyncingTaskId] = useState(null);
 
   useEffect(() => {
     if (summary && typeof summary === 'object' && Array.isArray(summary.actionItems)) {
@@ -146,6 +150,34 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
     setEditingTask(null);
   };
 
+  const handleSyncToJira = async (actionItem) => {
+    if (actionItem.jiraIssueKey) return;
+    
+    setSyncingTaskId(actionItem.id);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/jira/sync/${actionItem.id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        showToast(`Synced to Jira: ${data.data.key}`, 'success');
+        // Update local state
+        setLocalActions(prev => prev.map(t => 
+          t.id === actionItem.id ? { ...t, jiraIssueKey: data.data.key } : t
+        ));
+      } else {
+        showToast(data.error || 'Failed to sync to Jira', 'error');
+      }
+    } catch (error) {
+      showToast('Network error during Jira sync', 'error');
+    } finally {
+      setSyncingTaskId(null);
+    }
+  };
+
   const toggleActionItem = (index) => {
     setCheckedItems((prev) => ({ ...prev, [index]: !prev[index] }));
   };
@@ -166,7 +198,29 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
   const sentiment = sentimentColors[summaryData.sentiment] || sentimentColors.neutral;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {canEdit && (
+        <div className="flex items-center justify-between rounded-[16px] bg-echo-surface border border-echo-border p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-accent-primary/10 text-accent-primary">
+              <LuPencil size={16} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Editor Mode</h4>
+              <p className="text-[11px] text-slate-500 font-medium">Refine AI-generated insights and tasks</p>
+            </div>
+          </div>
+          <Button 
+            size="sm"
+            color="primary"
+            className="rounded-full bg-accent-primary hover:bg-accent-primary/90 font-bold text-[11px] px-6"
+            onPress={onEdit}
+          >
+            EDIT SUMMARY
+          </Button>
+        </div>
+      )}
+
       {/* ── Executive Summary ── */}
       {summaryData.executive && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
@@ -280,16 +334,45 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
                       >
                         {action.task}
                       </p>
-                      {action.id && (
-                        <button
-                          type="button"
-                          onClick={() => setEditingTask(action)}
-                          aria-label="Edit Task"
-                          className="mt-0.5 shrink-0 text-slate-500 transition-colors hover:text-accent-primary"
-                        >
-                          <LuPencil size={14} />
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2 mt-0.5 shrink-0">
+                        {action.jiraIssueKey ? (
+                          <a
+                            href={`https://${user?.jiraDomain || localStorage.getItem('jiraDomain') || ''}/browse/${action.jiraIssueKey}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 rounded bg-[#0052CC]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#0052CC] transition-colors hover:bg-[#0052CC]/20"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Jira size={10} /> {action.jiraIssueKey}
+                          </a>
+                        ) : (
+                          action.id && !isChecked && (
+                            <button
+                              type="button"
+                              onClick={() => handleSyncToJira(action)}
+                              disabled={syncingTaskId === action.id}
+                              className="text-slate-500 transition-colors hover:text-[#0052CC] disabled:opacity-50"
+                              title="Sync to Jira"
+                            >
+                              {syncingTaskId === action.id ? (
+                                <div className="size-3 animate-spin rounded-full border border-current border-t-transparent" />
+                              ) : (
+                                <Jira size={14} />
+                              )}
+                            </button>
+                          )
+                        )}
+                        {action.id && (
+                          <button
+                            type="button"
+                            onClick={() => setEditingTask(action)}
+                            aria-label="Edit Task"
+                            className="text-slate-500 transition-colors hover:text-accent-primary"
+                          >
+                            <LuPencil size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {(action.assignee || action.deadline || action.priority) && (
@@ -316,6 +399,32 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Next Steps ── */}
+      {summaryData.nextSteps.length > 0 && (
+        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ArrowRight size={14} className="text-emerald-400" />
+              <h4 className="text-sm font-semibold text-white">Next Steps</h4>
+            </div>
+            <CopyBtn
+              section="nextSteps"
+              content={summaryData.nextSteps}
+              copiedSection={copiedSection}
+              onCopy={copySection}
+            />
+          </div>
+          <div className="space-y-2">
+            {summaryData.nextSteps.map((step, i) => (
+              <div key={`${step}-${i}`} className="flex items-start gap-2.5 pl-1">
+                <ArrowRight size={10} className="mt-1.5 shrink-0 text-emerald-400" />
+                <p className="text-sm leading-relaxed text-slate-300">{step}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -350,32 +459,6 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle }) => {
           <span className="text-xs text-slate-600">Sentiment</span>
         </div>
       </div>
-
-      {/* ── Next Steps ── */}
-      {summaryData.nextSteps.length > 0 && (
-        <div className="rounded-card border border-echo-border bg-echo-surface p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ArrowRight size={14} className="text-emerald-400" />
-              <h4 className="text-sm font-semibold text-white">Next Steps</h4>
-            </div>
-            <CopyBtn
-              section="nextSteps"
-              content={summaryData.nextSteps}
-              copiedSection={copiedSection}
-              onCopy={copySection}
-            />
-          </div>
-          <div className="space-y-2">
-            {summaryData.nextSteps.map((step, i) => (
-              <div key={`${step}-${i}`} className="flex items-start gap-2.5 pl-1">
-                <ArrowRight size={10} className="mt-1.5 shrink-0 text-emerald-400" />
-                <p className="text-sm leading-relaxed text-slate-300">{step}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ── AI Follow-up Modal ── */}
       <FollowUpModal

@@ -7,6 +7,7 @@ const emailService = require('./email.service');
 const supabaseStorage = require('./supabase-storage.service');
 const slackService = require('./slack.service');
 const notificationService = require('./notification.service');
+const jiraService = require('./jira.service');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -367,6 +368,30 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         where: { id: updatedMeeting.id },
         data: { summaryActionItems: summaryActionItems1 },
       });
+
+      // --- NEW: Jira Auto-Sync ---
+      const userWithJira = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          jiraDomain: true,
+          jiraEmail: true,
+          jiraApiToken: true,
+          jiraProjectKey: true,
+          jiraAutoSync: true,
+        },
+      });
+
+      if (userWithJira && userWithJira.jiraAutoSync && userWithJira.jiraApiToken) {
+        console.log(`\n🚀 Starting Jira auto-sync for ${allActionItems1.length} items...`);
+        for (const item of allActionItems1) {
+          try {
+            await jiraService.createIssue(userWithJira, item);
+            console.log(`✅ Synced item "${item.task.substring(0, 20)}..." to Jira`);
+          } catch (err) {
+            console.error(`⚠️ Jira sync failed for item ${item.id}:`, err.message);
+          }
+        }
+      }
     }
 
     // Step 8: Clean up temporary files
@@ -720,6 +745,30 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         where: { id: meeting.id },
         data: { summaryActionItems: summaryActionItems2 },
       });
+
+      // --- NEW: Jira Auto-Sync ---
+      const userWithJira = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          jiraDomain: true,
+          jiraEmail: true,
+          jiraApiToken: true,
+          jiraProjectKey: true,
+          jiraAutoSync: true,
+        },
+      });
+
+      if (userWithJira && userWithJira.jiraAutoSync && userWithJira.jiraApiToken) {
+        console.log(`\n🚀 Starting Jira auto-sync for ${allActionItems2.length} items...`);
+        for (const item of allActionItems2) {
+          try {
+            await jiraService.createIssue(userWithJira, item);
+            console.log(`✅ Synced item "${item.task.substring(0, 20)}..." to Jira`);
+          } catch (err) {
+            console.error(`⚠️ Jira sync failed for item ${item.id}:`, err.message);
+          }
+        }
+      }
     }
 
     // Step 9: Clean up temporary files

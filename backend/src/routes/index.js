@@ -10,6 +10,7 @@ const meetingRoutes = require('./meeting.routes');
 const userRoutes = require('./user.routes');
 const calendarRoutes = require('./calendar.routes');
 const taskRoutes = require('./task.routes');
+const jiraRoutes = require('./jira.routes');
 
 // API version and status
 const API_VERSION = '1.0.0';
@@ -383,6 +384,7 @@ router.use('/meetings', meetingRoutes);
 router.use('/users', userRoutes);
 router.use('/calendar', calendarRoutes);
 router.use('/tasks', taskRoutes);
+router.use('/jira', jiraRoutes);
 
 /**
  * Helper function to format uptime

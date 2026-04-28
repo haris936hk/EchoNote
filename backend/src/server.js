@@ -38,6 +38,7 @@ const notificationRoutes = require('./routes/notification.routes');
 const publicRoutes = require('./routes/public.routes');
 const workspaceRoutes = require('./routes/workspace.routes');
 const liveblocksRoutes = require('./routes/liveblocks.routes');
+const jiraRoutes = require('./routes/jira.routes');
 
 
 const { errorHandler } = require('./middleware/error.middleware');
@@ -130,6 +131,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/liveblocks', liveblocksRoutes);
+app.use('/api/jira', jiraRoutes);
 
 
 app.get('/api', (req, res) => {

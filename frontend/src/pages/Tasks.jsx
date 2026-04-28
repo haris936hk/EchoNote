@@ -8,7 +8,9 @@ import {
   LuCalendar,
   LuExternalLink,
   LuSearch,
+  LuLayout as Jira,
 } from 'react-icons/lu';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { taskService } from '../services/task.service';
 import { PageLoader } from '../components/common/Loader';
@@ -41,12 +43,14 @@ const COLUMNS = [
 ];
 
 export default function Tasks() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
   const [filterMeeting, setFilterMeeting] = useState('all');
   const [editingTask, setEditingTask] = useState(null);
+  const [syncingTaskId, setSyncingTaskId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -126,6 +130,33 @@ export default function Tasks() {
     } catch (error) {
       setTasks(oldTasks);
       showToast('Network error occurred', 'error');
+    }
+  };
+
+  const handleSyncToJira = async (task) => {
+    if (task.jiraIssueKey) return;
+    
+    setSyncingTaskId(task.id);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/jira/sync/${task.id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        showToast(`Synced to Jira: ${data.data.key}`, 'success');
+        setTasks(prev => prev.map(t => 
+          t.id === task.id ? { ...t, jiraIssueKey: data.data.key } : t
+        ));
+      } else {
+        showToast(data.error || 'Failed to sync to Jira', 'error');
+      }
+    } catch (error) {
+      showToast('Network error during Jira sync', 'error');
+    } finally {
+      setSyncingTaskId(null);
     }
   };
 
@@ -269,6 +300,23 @@ export default function Tasks() {
                             >
                               <LuPencil size={14} />
                             </button>
+                            {!task.jiraIssueKey && col.id !== 'DONE' && (
+                              <button
+                                aria-label="Sync to Jira"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSyncToJira(task);
+                                }}
+                                disabled={syncingTaskId === task.id}
+                                className="text-slate-400 opacity-0 transition-opacity hover:text-[#0052CC] group-hover:opacity-100 disabled:opacity-50"
+                              >
+                                {syncingTaskId === task.id ? (
+                                  <div className="size-3 animate-spin rounded-full border border-current border-t-transparent" />
+                                ) : (
+                                  <Jira size={14} />
+                                )}
+                              </button>
+                            )}
                             {task.priority === 'high' && (
                               <div className="size-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
                             )}
@@ -288,6 +336,18 @@ export default function Tasks() {
                                 <LuCalendar size={12} className="text-amber-400" />
                                 <span className="font-mono">{task.deadline}</span>
                               </div>
+                            )}
+                            {task.jiraIssueKey && (
+                              <a
+                                href={`https://${user?.jiraDomain || localStorage.getItem('jiraDomain') || ''}/browse/${task.jiraIssueKey}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center gap-1.5 rounded-md border border-[#0052CC]/20 bg-[#0052CC]/10 px-2 py-0.5 text-[10px] font-bold text-[#0052CC] transition-colors hover:bg-[#0052CC]/20"
+                              >
+                                <Jira size={12} />
+                                <span className="font-mono">{task.jiraIssueKey}</span>
+                              </a>
                             )}
                           </div>
 

@@ -1681,33 +1681,43 @@ const updateMeetingSummary = async (req, res) => {
 
   try {
    
-    const workspaceMeeting = await prisma.workspaceMeeting.findUnique({
-      where: { meetingId },
-      include: {
-        workspace: {
+    // 1. Check if the meeting exists and if the user is the owner
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId },
+      include: { 
+        workspaceMeeting: {
           include: {
-            members: {
-              where: { userId },
+            workspace: {
+              include: {
+                members: {
+                  where: { userId },
+                },
+              },
             },
           },
         },
-      },
+      }
     });
 
-    if (!workspaceMeeting) {
-      return res.status(403).json({
-        success: false,
-        error: 'This meeting does not belong to a workspace or is not editable via this endpoint',
-      });
+    if (!meeting) {
+      return res.status(404).json({ success: false, error: 'Meeting not found' });
     }
 
-    const membership = workspaceMeeting.workspace.members[0];
-    const isAuthorized = membership && (membership.role === 'OWNER' || membership.role === 'EDITOR');
+    let isAuthorized = false;
+
+    // Owner can always edit their own meeting
+    if (meeting.userId === userId) {
+      isAuthorized = true;
+    } else if (meeting.workspaceMeeting) {
+      // If not the owner, check if it's a workspace meeting where the user is an OWNER or EDITOR
+      const membership = meeting.workspaceMeeting.workspace.members[0];
+      isAuthorized = membership && (membership.role === 'OWNER' || membership.role === 'EDITOR');
+    }
 
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
-        error: 'You must be a workspace OWNER or EDITOR to edit the summary',
+        error: 'You do not have permission to edit this meeting summary',
       });
     }
 
@@ -1735,7 +1745,7 @@ const updateMeetingSummary = async (req, res) => {
       },
     });
 
-    logger.info(`Meeting summary updated: ${meetingId} by user ${userId} in workspace ${workspaceMeeting.workspaceId}`);
+    logger.info(`Meeting summary updated: ${meetingId} by user ${userId} (Context: ${meeting.workspaceMeeting ? 'Workspace' : 'Personal'})`);
 
    
     const transformedMeeting = meetingService.transformMeetingForFrontend(updatedMeeting);

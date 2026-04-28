@@ -19,6 +19,8 @@ import {
   LuMonitor as Monitor,
   LuLink as Link,
   LuSlack as Slack,
+  LuLayout as Jira,
+  LuRefreshCw as Refresh,
 } from 'react-icons/lu';
 import ProfileSettings from '../components/user/ProfileSettings';
 import { useAuth } from '../contexts/AuthContext';
@@ -107,12 +109,19 @@ const Toggle = ({ enabled, onToggle, color = 'bg-accent-primary' }) => (
 );
 
 const PreferencesContent = () => {
+  const { refreshUserData } = useAuth();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [autoDelete, setAutoDelete] = useState(false);
   const [retentionDays, setRetentionDays] = useState('30');
   const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
+  const [jiraDomain, setJiraDomain] = useState('');
+  const [jiraEmail, setJiraEmail] = useState('');
+  const [jiraApiToken, setJiraApiToken] = useState('');
+  const [jiraProjectKey, setJiraProjectKey] = useState('');
+  const [jiraAutoSync, setJiraAutoSync] = useState(false);
   const [isCheckingSlack, setIsCheckingSlack] = useState(false);
+  const [isCheckingJira, setIsCheckingJira] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -129,6 +138,10 @@ const PreferencesContent = () => {
             setEmailNotifications(data.data.emailNotifications ?? true);
             setPushNotifications(data.data.pushNotifications ?? true);
             setSlackWebhookUrl(data.data.slackWebhookUrl || '');
+            setJiraDomain(data.data.jiraDomain || '');
+            setJiraEmail(data.data.jiraEmail || '');
+            setJiraProjectKey(data.data.jiraProjectKey || '');
+            setJiraAutoSync(data.data.jiraAutoSync || false);
             if (data.data.autoDeleteDays !== null && data.data.autoDeleteDays !== undefined) {
               setAutoDelete(true);
               setRetentionDays(String(data.data.autoDeleteDays));
@@ -155,12 +168,18 @@ const PreferencesContent = () => {
           emailNotifications,
           pushNotifications,
           slackWebhookUrl,
+          jiraDomain,
+          jiraEmail,
+          jiraApiToken: jiraApiToken || undefined, // Only send if changed
+          jiraProjectKey,
+          jiraAutoSync,
           autoDeleteDays: autoDelete ? parseInt(retentionDays) : null,
         }),
       });
       const data = await response.json();
       if (response.ok && data.success) {
         showToast('Preferences saved successfully!', 'success');
+        await refreshUserData(); // Sync changes to AuthContext
       } else {
         showToast(data.error || 'Failed to save preferences', 'error');
       }
@@ -190,6 +209,28 @@ const PreferencesContent = () => {
       showToast('Failed to test Slack integration.', 'error');
     } finally {
       setIsCheckingSlack(false);
+    }
+  };
+
+  const handleTestJira = async () => {
+    setIsCheckingJira(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/jira/test-connection', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jiraDomain, jiraEmail, jiraApiToken }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showToast(data.message || 'Jira test successful!', 'success');
+      } else {
+        showToast(data.error || 'Jira test failed', 'error');
+      }
+    } catch (error) {
+      showToast('Failed to test Jira integration.', 'error');
+    } finally {
+      setIsCheckingJira(false);
     }
   };
 
@@ -352,6 +393,91 @@ const PreferencesContent = () => {
                 Disconnect
               </button>
             </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-5 rounded-card border border-echo-border bg-echo-surface p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+            <Jira className="text-[#0052CC]" size={18} /> Jira Integration
+          </h2>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500">Auto-sync issues</span>
+            <Toggle
+              enabled={jiraAutoSync}
+              onToggle={() => setJiraAutoSync(!jiraAutoSync)}
+              color="bg-[#0052CC]"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400">Jira Domain</label>
+            <input
+              type="text"
+              className="w-full rounded-btn border border-echo-border bg-echo-base p-2.5 text-sm text-white shadow-inner placeholder:text-slate-500 focus:border-accent-primary focus:outline-none"
+              placeholder="company.atlassian.net"
+              value={jiraDomain}
+              onChange={(e) => setJiraDomain(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400">Default Project Key</label>
+            <input
+              type="text"
+              className="w-full rounded-btn border border-echo-border bg-echo-base p-2.5 text-sm text-white shadow-inner placeholder:text-slate-500 focus:border-accent-primary focus:outline-none"
+              placeholder="PROJ"
+              value={jiraProjectKey}
+              onChange={(e) => setJiraProjectKey(e.target.value.toUpperCase())}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400">Jira Email</label>
+            <input
+              type="email"
+              className="w-full rounded-btn border border-echo-border bg-echo-base p-2.5 text-sm text-white shadow-inner placeholder:text-slate-500 focus:border-accent-primary focus:outline-none"
+              placeholder="user@example.com"
+              value={jiraEmail}
+              onChange={(e) => setJiraEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400">API Token</label>
+            <input
+              type="password"
+              className="w-full rounded-btn border border-echo-border bg-echo-base p-2.5 text-sm text-white shadow-inner placeholder:text-slate-500 focus:border-accent-primary focus:outline-none"
+              placeholder={jiraApiToken ? "••••••••••••" : "Paste your API token"}
+              value={jiraApiToken}
+              onChange={(e) => setJiraApiToken(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2">
+          <button
+            type="button"
+            onClick={handleTestJira}
+            disabled={isCheckingJira || !jiraDomain || !jiraEmail || !jiraApiToken}
+            className="btn-ghost flex-1 rounded-btn px-4 py-2.5 text-sm font-medium transition-colors hover:bg-echo-surface-hover disabled:opacity-50 sm:flex-none"
+          >
+            {isCheckingJira ? 'Testing...' : 'Test Jira Connection'}
+          </button>
+          {jiraDomain && (
+            <button
+              type="button"
+              onClick={() => {
+                setJiraDomain('');
+                setJiraEmail('');
+                setJiraApiToken('');
+                setJiraProjectKey('');
+                setJiraAutoSync(false);
+              }}
+              className="btn-ghost rounded-btn px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+            >
+              Clear Settings
+            </button>
           )}
         </div>
       </div>

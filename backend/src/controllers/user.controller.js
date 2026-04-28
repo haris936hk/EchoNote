@@ -153,6 +153,11 @@ const getUserSettings = async (req, res) => {
         emailNotifications: true,
         pushNotifications: true,
         slackWebhookUrl: true,
+        jiraDomain: true,
+        jiraEmail: true,
+        jiraProjectKey: true,
+        jiraAutoSync: true,
+        // jiraApiToken is excluded for security, user only sees it when setting it
       },
     });
 
@@ -181,7 +186,16 @@ const getUserSettings = async (req, res) => {
 const updateUserSettings = async (req, res) => {
   try {
     const userId = req.userId;
-    const { autoDeleteDays, emailNotifications, slackWebhookUrl } = req.body;
+    const { 
+      autoDeleteDays, 
+      emailNotifications, 
+      slackWebhookUrl,
+      jiraDomain,
+      jiraEmail,
+      jiraApiToken,
+      jiraProjectKey,
+      jiraAutoSync
+    } = req.body;
 
     const updateData = {};
 
@@ -268,6 +282,12 @@ const updateUserSettings = async (req, res) => {
       }
     }
 
+    if (jiraDomain !== undefined) updateData.jiraDomain = jiraDomain;
+    if (jiraEmail !== undefined) updateData.jiraEmail = jiraEmail;
+    if (jiraApiToken !== undefined) updateData.jiraApiToken = jiraApiToken;
+    if (jiraProjectKey !== undefined) updateData.jiraProjectKey = jiraProjectKey;
+    if (jiraAutoSync !== undefined) updateData.jiraAutoSync = !!jiraAutoSync;
+
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
         success: false,
@@ -283,6 +303,10 @@ const updateUserSettings = async (req, res) => {
         emailNotifications: true,
         pushNotifications: true,
         slackWebhookUrl: true,
+        jiraDomain: true,
+        jiraEmail: true,
+        jiraProjectKey: true,
+        jiraAutoSync: true,
       },
     });
 

@@ -27,6 +27,11 @@ model User {
   emailNotifications Boolean @default(true)
   pushNotifications  Boolean @default(true)
   slackWebhookUrl    String? @db.Text // Slack integration endpoint
+  jiraDomain         String? @db.Text // Jira Cloud domain (e.g., company.atlassian.net)
+  jiraEmail          String? @db.Text // Jira account email
+  jiraApiToken       String? @db.Text // Jira API Token
+  jiraProjectKey     String? @db.Text // Default Jira project key
+  jiraAutoSync       Boolean @default(false) // Auto-sync action items to Jira
 
   // Timestamps
   createdAt   DateTime @default(now())
@@ -245,6 +250,8 @@ model ActionItem {
   status      TaskStatus @default(TODO)
   confidence  String?    @default("medium") // Extraction confidence: high, medium, low
   sourceQuote String?    @db.Text // Transcript citation for grounding verification
+  jiraIssueKey String?   @db.Text // Jira issue key (e.g., PROJ-123)
+  jiraIssueId  String?   @db.Text // Jira internal issue ID
 
   meetingId String
   meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)

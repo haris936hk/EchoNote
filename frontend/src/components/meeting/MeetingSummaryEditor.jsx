@@ -1,21 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import {
-  useMyPresence,
-  useOthers,
-  useBroadcastEvent,
-  useEventListener,
-} from '../../lib/liveblocks';
-import api from '../../services/api';
+import React, { useState, useCallback, useEffect } from 'react';
 import debounce from 'lodash.debounce';
+import api from '../../services/api';
 import { showToast } from '../common/Toast';
+import MeetingEditorBase from './MeetingEditorBase';
 import { taskService } from '../../services/task.service';
-import MeetingEditorBase from '../meeting/MeetingEditorBase';
 
-const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) => {
-  const [, updatePresence] = useMyPresence();
-  const others = useOthers();
-  const broadcast = useBroadcastEvent();
-
+const MeetingSummaryEditor = ({ meetingId, initialData, canEdit }) => {
   const s = initialData.summary || {};
   const [formData, setFormData] = useState({
     executiveSummary: s.executiveSummary || initialData.summaryExecutive || '',
@@ -33,15 +23,7 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
-
-  useEventListener(({ event }) => {
-    if (event.type === 'UPDATE_FIELD') {
-      setFormData((prev) => ({
-        ...prev,
-        [event.field]: event.value,
-      }));
-    }
-  });
+  const [editingTask, setEditingTask] = useState(null);
 
   const debouncedSave = useCallback(
     debounce(async (data) => {
@@ -73,17 +55,6 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
       debouncedSave(newData);
       return newData;
     });
-
-    try { broadcast({ type: 'UPDATE_FIELD', field, value }); } catch (_) {}
-    try { updatePresence({ lastSection: field }); } catch (_) {}
-  };
-
-  const handleFocus = (field) => {
-    try { updatePresence({ focusedField: field }); } catch (_) {}
-  };
-
-  const handleBlur = () => {
-    try { updatePresence({ focusedField: null }); } catch (_) {}
   };
 
   const handleUpdateTasks = async (updatedTask) => {
@@ -148,16 +119,16 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
       meetingId={meetingId}
       formData={formData}
       onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
+      onFocus={() => {}}
+      onBlur={() => {}}
       saving={saving}
       lastSaved={lastSaved}
       isDirty={isDirty}
       canEdit={canEdit}
-      others={others}
+      others={[]} // No others in personal mode
       onUpdateTasks={handleUpdateTasks}
     />
   );
 };
 
-export default CollaborativeEditor;
+export default MeetingSummaryEditor;

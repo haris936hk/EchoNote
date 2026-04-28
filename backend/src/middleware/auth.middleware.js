@@ -89,6 +89,8 @@ const authenticate = async (req, res, next) => {
           id: true,
           email: true,
           name: true,
+          jiraDomain: true,
+          jiraAutoSync: true,
         },
       });
       if (user) _setCachedUser(user.id, user);
@@ -143,6 +145,8 @@ const optionalAuth = async (req, res, next) => {
             email: true,
             name: true,
             picture: true,
+            jiraDomain: true,
+            jiraAutoSync: true,
           },
         });
         if (user) _setCachedUser(user.id, user);

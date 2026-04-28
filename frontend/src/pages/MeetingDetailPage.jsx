@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
 import {
   LuArrowLeft as ArrowLeft,
   LuDownload as Download,
@@ -19,6 +19,7 @@ import {
   LuSlack as Slack,
   LuLock as Lock,
 } from 'react-icons/lu';
+import { useAuth } from '../contexts/AuthContext';
 import { useMeeting } from '../contexts/MeetingContext';
 import { shareMeetingToSlack } from '../services/meeting.service';
 import { showToast } from '../components/common/Toast';
@@ -30,6 +31,7 @@ import { PageLoader } from '../components/common/Loader';
 import EditMeetingModal from '../components/meeting/EditMeetingModal';
 import SpeakerRenameModal from '../components/meeting/SpeakerRenameModal';
 import ShareMeetingModal from '../components/meeting/ShareMeetingModal';
+import MeetingSummaryEditor from '../components/meeting/MeetingSummaryEditor';
 
 const PIPELINE_STEPS = [
   { key: 'UPLOADING', label: 'Upload' },
@@ -50,6 +52,7 @@ const PROCESSING_STATUSES = [
 const MeetingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { currentMeeting, fetchMeeting, deleteMeeting, updateMeeting, loading } = useMeeting();
   const audioRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
@@ -60,6 +63,7 @@ const MeetingDetailPage = () => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [isSendingToSlack, setIsSendingToSlack] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Open share modal
   const handleShare = () => {
@@ -625,11 +629,43 @@ const MeetingDetailPage = () => {
             {/* Right Column — AI Insights (40%, sticky) */}
             <div className="lg:col-span-2">
               <div className="space-y-4 lg:sticky lg:top-[88px]">
-                <SummaryViewer
-                  summary={currentMeeting.summary}
-                  meetingId={currentMeeting.id}
-                  meetingTitle={currentMeeting.title}
-                />
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between rounded-[16px] bg-[#0c1324] border border-white/[0.06] p-4 mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-accent-primary/10 text-accent-primary">
+                          <Edit3 size={16} />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white">Live Editor</h4>
+                          <p className="text-[11px] text-slate-500 font-medium">Changes are saved automatically</p>
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        className="rounded-full bg-white/5 hover:bg-white/10 font-bold text-[11px] px-6 text-white border border-white/10"
+                        onPress={() => setIsEditing(false)}
+                      >
+                        CLOSE EDITOR
+                      </Button>
+                    </div>
+                    <MeetingSummaryEditor
+                      meetingId={currentMeeting.id}
+                      initialData={currentMeeting}
+                      canEdit={true}
+                    />
+                  </div>
+                ) : (
+                  <SummaryViewer
+                    summary={currentMeeting.summary}
+                    meetingId={currentMeeting.id}
+                    meetingTitle={currentMeeting.title}
+                    canEdit={!currentMeeting.workspaceMeeting && currentMeeting.userId === user?.id}
+                    onEdit={() => setIsEditing(true)}
+                  />
+                )}
               </div>
             </div>
           </div>
