@@ -2,7 +2,6 @@
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
-
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -13,11 +12,10 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const getVapidPublicKey = async (req, res) => {
   try {
     const publicKey = process.env.VAPID_PUBLIC_KEY;
-    
+
     if (!publicKey) {
       return res.status(500).json({
         success: false,
@@ -38,7 +36,6 @@ const getVapidPublicKey = async (req, res) => {
   }
 };
 
-
 const subscribe = async (req, res) => {
   try {
     const userId = req.userId;
@@ -51,7 +48,6 @@ const subscribe = async (req, res) => {
       });
     }
 
-    
     const savedSubscription = await prisma.pushSubscription.upsert({
       where: { endpoint: subscription.endpoint },
       update: {
@@ -83,7 +79,6 @@ const subscribe = async (req, res) => {
     });
   }
 };
-
 
 const unsubscribe = async (req, res) => {
   try {

@@ -6,7 +6,6 @@ export const ScrollContext = createContext({
   showNavbar: true,
 });
 
-
 const MainLayout = ({ children }) => {
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard' },
@@ -23,12 +22,12 @@ const MainLayout = ({ children }) => {
   return (
     <ScrollContext.Provider value={{ showNavbar: true }}>
       <div className="min-h-screen" style={{ backgroundColor: '#020617' }}>
-        {/* Navigation Bar — Reveal on scroll up */}
+        {}
         <ScrollReveal>
           <Header navItems={navLinks} />
         </ScrollReveal>
 
-        {/* Main Content */}
+        {}
         <main className="container mx-auto max-w-7xl px-4 pt-[100px]">{children}</main>
       </div>
     </ScrollContext.Provider>

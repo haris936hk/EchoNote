@@ -3,7 +3,6 @@ const webpush = require('web-push');
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
-
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -14,13 +13,11 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const configureWebPush = () => {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   let adminEmail = process.env.GMAIL_USER || 'mailto:admin@echonote.ai';
 
-  
   if (adminEmail && !adminEmail.startsWith('mailto:')) {
     adminEmail = `mailto:${adminEmail}`;
   }
@@ -36,16 +33,11 @@ const configureWebPush = () => {
 
 const isConfigured = configureWebPush();
 
-/**
- * Send a push notification to a specific user
- * @param {string} userId - ID of the user
- * @param {Object} payload - Notification payload { title, body, url, icon, badge }
- */
 const sendPushNotificationToUser = async (userId, payload) => {
   if (!isConfigured) return { success: false, error: 'Web Push not configured' };
 
   try {
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { pushNotifications: true }
@@ -56,7 +48,6 @@ const sendPushNotificationToUser = async (userId, payload) => {
       return { success: false, message: 'Push disabled by user' };
     }
 
-    
     const subscriptions = await prisma.pushSubscription.findMany({
       where: { userId }
     });
@@ -80,7 +71,7 @@ const sendPushNotificationToUser = async (userId, payload) => {
         await webpush.sendNotification(pushConfig, payloadString);
         return { endpoint: sub.endpoint, success: true };
       } catch (error) {
-        
+
         if (error.statusCode === 404 || error.statusCode === 410) {
           logger.info(`🗑️ Removing expired push subscription: ${sub.endpoint}`);
           await prisma.pushSubscription.delete({ where: { id: sub.id } });
@@ -92,9 +83,9 @@ const sendPushNotificationToUser = async (userId, payload) => {
     });
 
     const results = await Promise.allSettled(notificationPromises);
-    
+
     logger.info(`📤 Sent push notifications to user ${userId} (${subscriptions.length} devices)`);
-    
+
     return { success: true, results };
   } catch (error) {
     logger.error(`Error in sendPushNotificationToUser: ${error.message}`);
@@ -102,17 +93,12 @@ const sendPushNotificationToUser = async (userId, payload) => {
   }
 };
 
-/**
- * Send a notification when a meeting is completed
- * @param {string} userId - User ID
- * @param {Object} meeting - Meeting object
- */
 const sendMeetingCompletedPush = async (userId, meeting) => {
   const payload = {
     title: 'Meeting Ready 🎬',
     body: `"${meeting.title}" is ready for review.`,
     url: `/meetings/${meeting.id}`,
-    icon: '/logo192.png', 
+    icon: '/logo192.png',
     badge: '/badge.png',
     data: {
       meetingId: meeting.id,

@@ -44,7 +44,7 @@ const WorkspaceMeetingDetail = () => {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [workspaceId, meetingId]);
 
   if (loading) {
@@ -73,12 +73,12 @@ const WorkspaceMeetingDetail = () => {
 
   return (
     <RoomProvider id={`${workspaceId}:${meetingId}`} initialPresence={{}}>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto max-w-7xl space-y-10 p-8 lg:p-12"
       >
-        {/* Navigation / Header */}
+        {}
         <div className="space-y-6">
           <div className="flex items-center gap-3 font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-widest text-slate-600">
              <button onClick={() => navigate('/workspaces')} className="hover:text-accent-primary transition-colors">Workspaces</button>
@@ -125,7 +125,7 @@ const WorkspaceMeetingDetail = () => {
           </header>
         </div>
 
-        {/* Tab System */}
+        {}
         <div className="space-y-8">
            <div className="flex items-center gap-1 border-b border-white/[0.04]">
               {tabs.map((tab) => {
@@ -141,7 +141,7 @@ const WorkspaceMeetingDetail = () => {
                     <Icon size={18} />
                     <span>{tab.label}</span>
                     {activeTab === tab.id && (
-                       <motion.div 
+                       <motion.div
                         layoutId="active-tab"
                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-primary shadow-[0_0_10px_rgba(129,140,248,0.5)]"
                        />

@@ -1,8 +1,8 @@
- 
+
 const { verifyToken, extractTokenFromHeader } = require('../config/auth');
 const { prisma } = require('../config/database');
 const winston = require('winston');
- 
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -13,9 +13,8 @@ const logger = winston.createLogger({
   ],
 });
 
-
-const USER_CACHE_TTL_MS = 60 * 1000; 
-const _userCache = new Map(); 
+const USER_CACHE_TTL_MS = 60 * 1000;
+const _userCache = new Map();
 
 function _getCachedUser(userId) {
   const entry = _userCache.get(userId);
@@ -31,11 +30,9 @@ function _setCachedUser(userId, user) {
   _userCache.set(userId, { user, expiresAt: Date.now() + USER_CACHE_TTL_MS });
 }
 
-
 function evictUserFromCache(userId) {
   _userCache.delete(userId);
 }
-
 
 setInterval(
   () => {
@@ -47,10 +44,9 @@ setInterval(
   5 * 60 * 1000
 );
 
-
 const authenticate = async (req, res, next) => {
   try {
-    
+
     const token = extractTokenFromHeader(req.headers.authorization);
 
     if (!token) {
@@ -60,7 +56,6 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    
     let decoded;
     try {
       decoded = verifyToken(token);
@@ -80,7 +75,6 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    
     let user = _getCachedUser(decoded.id);
     if (!user) {
       user = await prisma.user.findUnique({
@@ -104,11 +98,9 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    
     req.user = user;
     req.userId = user.id;
 
-    
     if (process.env.NODE_ENV === 'development') {
       logger.debug(`✅ User authenticated: ${user.email}`);
     }
@@ -122,7 +114,6 @@ const authenticate = async (req, res, next) => {
     });
   }
 };
-
 
 const optionalAuth = async (req, res, next) => {
   try {
@@ -168,10 +159,6 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-/**
- * Check if user owns the resource
- * @param {string} resourceType - Type of resource (meeting, etc.)
- */
 const authorize = (resourceType) => {
   return async (req, res, next) => {
     try {
@@ -190,7 +177,7 @@ const authorize = (resourceType) => {
         case 'meeting':
           resource = await prisma.meeting.findUnique({
             where: { id: resourceId },
-            select: { userId: true }, 
+            select: { userId: true },
           });
           break;
 
@@ -208,7 +195,6 @@ const authorize = (resourceType) => {
         });
       }
 
-
       if (resource.userId !== req.userId) {
         logger.warn(
           `⚠️ Unauthorized access attempt by ${req.user.email} to ${resourceType} ${resourceId}`
@@ -220,7 +206,6 @@ const authorize = (resourceType) => {
         });
       }
 
-      
       req[resourceType] = resource;
 
       next();
@@ -234,15 +219,9 @@ const authorize = (resourceType) => {
   };
 };
 
-/**
- * Rate limiting middleware
- * @param {number} maxRequests - Maximum requests allowed
- * @param {number} windowMs - Time window in milliseconds
- */
 const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
   const requests = new Map();
 
-  
   setInterval(() => {
     const now = Date.now();
     for (const [key, data] of requests.entries()) {
@@ -253,7 +232,7 @@ const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
   }, 60000);
 
   return (req, res, next) => {
-    const identifier = req.userId || req.ip; 
+    const identifier = req.userId || req.ip;
     const now = Date.now();
 
     if (!requests.has(identifier)) {
@@ -266,17 +245,14 @@ const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
 
     const userData = requests.get(identifier);
 
-    
     if (now - userData.resetTime > windowMs) {
       userData.count = 1;
       userData.resetTime = now;
       return next();
     }
 
-    
     userData.count++;
 
-    
     if (userData.count > maxRequests) {
       const resetIn = Math.ceil((windowMs - (now - userData.resetTime)) / 1000);
 
@@ -290,7 +266,6 @@ const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
       });
     }
 
-    
     res.setHeader('X-RateLimit-Limit', maxRequests);
     res.setHeader('X-RateLimit-Remaining', maxRequests - userData.count);
     res.setHeader('X-RateLimit-Reset', new Date(userData.resetTime + windowMs).toISOString());
@@ -299,11 +274,6 @@ const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
   };
 };
 
-/**
- * Validate request has required fields
- * @param {Array} requiredFields - Array of required field names
- * @param {string} location - Where to check ('body', 'query', 'params')
- */
 const validateRequired = (requiredFields, location = 'body') => {
   return (req, res, next) => {
     const data = req[location];
@@ -327,7 +297,6 @@ const validateRequired = (requiredFields, location = 'body') => {
   };
 };
 
-
 const requireVerifiedEmail = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -336,8 +305,6 @@ const requireVerifiedEmail = async (req, res, next) => {
         error: 'Authentication required',
       });
     }
-
-    
 
     next();
   } catch (error) {
@@ -349,11 +316,9 @@ const requireVerifiedEmail = async (req, res, next) => {
   }
 };
 
-
 const requestLogger = (req, res, next) => {
   const start = Date.now();
 
-  
   res.on('finish', () => {
     const duration = Date.now() - start;
     const logData = {
@@ -376,7 +341,6 @@ const requestLogger = (req, res, next) => {
   next();
 };
 
-
 const corsMiddleware = (req, res, next) => {
   const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'];
   const origin = req.headers.origin;
@@ -388,16 +352,14 @@ const corsMiddleware = (req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400'); 
+  res.setHeader('Access-Control-Max-Age', '86400');
 
-  
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
   }
 
   next();
 };
-
 
 const securityHeaders = (req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -408,7 +370,6 @@ const securityHeaders = (req, res, next) => {
 
   next();
 };
-
 
 const requireCompletedMeeting = async (req, res, next) => {
   try {
@@ -445,13 +406,11 @@ const requireCompletedMeeting = async (req, res, next) => {
   }
 };
 
-
 const authenticateMedia = async (req, res, next) => {
   try {
-    
+
     let token = extractTokenFromHeader(req.headers.authorization);
 
-    
     if (!token && req.query.token) {
       token = req.query.token;
     }
@@ -463,7 +422,6 @@ const authenticateMedia = async (req, res, next) => {
       });
     }
 
-    
     let decoded;
     try {
       decoded = verifyToken(token);
@@ -483,7 +441,6 @@ const authenticateMedia = async (req, res, next) => {
       });
     }
 
-   
     let user = _getCachedUser(decoded.id);
     if (!user) {
       user = await prisma.user.findUnique({
@@ -511,7 +468,6 @@ const authenticateMedia = async (req, res, next) => {
       });
     }
 
-    
     req.user = user;
     req.userId = user.id;
 

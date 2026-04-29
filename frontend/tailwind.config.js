@@ -1,6 +1,5 @@
 const { heroui } = require('@heroui/react');
 
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
@@ -34,7 +33,6 @@ module.exports = {
           info: '#60A5FA',
         },
 
-        
         sentiment: {
           positive: '#34D399',
           neutral: '#818CF8',

@@ -9,11 +9,6 @@ const client = new OAuth2Client(
   'postmessage'
 );
 
-/**
- * Verify Google OAuth token and extract user profile
- * @param {string} token - Google ID token from @react-oauth/google
- * @returns {Promise<Object>} User profile data from Google
- */
 async function verifyGoogleToken(token) {
   try {
     const ticket = await client.verifyIdToken({
@@ -36,24 +31,17 @@ async function verifyGoogleToken(token) {
   }
 }
 
-/**
- * Authenticate user with Google OAuth (create or login)
- * @param {string} authCode - Google authorization code from frontend
- * @returns {Promise<Object>} User object with JWT tokens
- */
 async function authenticateWithGoogle(authCode) {
   try {
-    // Step 1: Exchange code for Google tokens
+
     const { tokens } = await client.getToken(authCode);
 
     if (!tokens.id_token) {
       throw new Error('No ID token received from Google');
     }
 
-    // Step 2: Verify Google ID token
     const googleProfile = await verifyGoogleToken(tokens.id_token);
 
-    // Step 3: Find or create user
     let user = await prisma.user.findUnique({
       where: { email: googleProfile.email },
     });
@@ -61,13 +49,12 @@ async function authenticateWithGoogle(authCode) {
     const googleTokenExpiry = tokens.expiry_date ? new Date(tokens.expiry_date) : null;
     const userId = user ? user.id : crypto.randomUUID();
 
-    // Pre-generate tokens to avoid a second database query later
     const tokenUser = { id: userId, email: googleProfile.email, name: googleProfile.name };
     const accessToken = generateAccessToken(tokenUser);
     const refreshToken = generateRefreshToken(tokenUser);
 
     if (user) {
-      // Update existing user's info and last login
+
       const updates = {
         name: googleProfile.name,
         picture: googleProfile.picture,
@@ -88,7 +75,7 @@ async function authenticateWithGoogle(authCode) {
       });
       console.log(`✅ User logged in: ${user.email}`);
     } else {
-      // Create new user
+
       user = await prisma.user.create({
         data: {
           id: userId,
@@ -105,7 +92,6 @@ async function authenticateWithGoogle(authCode) {
       });
       console.log(`✅ New user created: ${user.email}`);
 
-      // Send welcome email (non-blocking)
       const emailService = require('../config/email');
       try {
         await emailService.sendWelcomeEmail({
@@ -114,7 +100,7 @@ async function authenticateWithGoogle(authCode) {
         });
         console.log(`📧 Welcome email sent to ${user.email}`);
       } catch (error) {
-        // Don't fail auth if email fails
+
         console.error('Failed to send welcome email:', error.message);
       }
     }
@@ -139,11 +125,6 @@ async function authenticateWithGoogle(authCode) {
   }
 }
 
-/**
- * Generate JWT access token (short-lived, 1 hour)
- * @param {Object} user - User object from database
- * @returns {string} JWT access token
- */
 function generateAccessToken(user) {
   return jwt.sign(
     {
@@ -160,11 +141,6 @@ function generateAccessToken(user) {
   );
 }
 
-/**
- * Generate JWT refresh token (long-lived, 7 days)
- * @param {Object} user - User object from database
- * @returns {string} JWT refresh token
- */
 function generateRefreshToken(user) {
   return jwt.sign(
     {
@@ -180,21 +156,15 @@ function generateRefreshToken(user) {
   );
 }
 
-/**
- * Refresh access token using valid refresh token
- * @param {string} refreshToken - Refresh token from client
- * @returns {Promise<Object>} New access token or error
- */
 async function refreshAccessToken(refreshToken) {
   try {
-    // Step 1: Verify refresh token signature
+
     const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
     const decoded = jwt.verify(refreshToken, secret, {
       issuer: 'echonote-api',
       audience: 'echonote-client',
     });
 
-    // Step 2: Find user and verify stored refresh token matches
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
@@ -207,7 +177,6 @@ async function refreshAccessToken(refreshToken) {
       throw new Error('Invalid refresh token');
     }
 
-    // Step 3: Generate new access token
     const newAccessToken = generateAccessToken(user);
 
     console.log(`✅ Access token refreshed for: ${user.email}`);
@@ -225,11 +194,6 @@ async function refreshAccessToken(refreshToken) {
   }
 }
 
-/**
- * Verify JWT access token
- * @param {string} token - JWT access token
- * @returns {Object|null} Decoded token payload or null if invalid
- */
 function verifyAccessToken(token) {
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
@@ -239,11 +203,6 @@ function verifyAccessToken(token) {
   }
 }
 
-/**
- * Logout user by invalidating refresh token
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Success status
- */
 async function logout(userId) {
   try {
     await prisma.user.update({
@@ -266,11 +225,6 @@ async function logout(userId) {
   }
 }
 
-/**
- * Get user profile by ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} User profile with meeting count
- */
 async function getUserProfile(userId) {
   try {
     const user = await prisma.user.findUnique({
@@ -308,15 +262,9 @@ async function getUserProfile(userId) {
   }
 }
 
-/**
- * Update user profile (only name allowed)
- * @param {string} userId - User ID
- * @param {Object} updates - Fields to update
- * @returns {Promise<Object>} Updated user profile
- */
 async function updateUserProfile(userId, updates) {
   try {
-    // Only allow updating name (email/picture controlled by Google)
+
     const allowedUpdates = {};
     if (updates.name) {
       allowedUpdates.name = updates.name;
@@ -348,14 +296,9 @@ async function updateUserProfile(userId, updates) {
   }
 }
 
-/**
- * Delete user account and all associated data (GDPR compliance)
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Success status
- */
 async function deleteUserAccount(userId) {
   try {
-    // Prisma cascade will delete all meetings due to onDelete: Cascade
+
     await prisma.user.delete({
       where: { id: userId },
     });
@@ -375,11 +318,6 @@ async function deleteUserAccount(userId) {
   }
 }
 
-/**
- * Check if user exists by email
- * @param {string} email - User email
- * @returns {Promise<boolean>} True if user exists
- */
 async function userExists(email) {
   try {
     const user = await prisma.user.findUnique({

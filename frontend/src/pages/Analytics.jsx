@@ -126,7 +126,7 @@ const Analytics = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-7xl pb-12 duration-700">
-      {/* Header */}
+      {}
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -142,7 +142,7 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Hero Stats */}
+      {}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Experience"
@@ -175,7 +175,7 @@ const Analytics = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Main Sentiment Trend */}
+        {}
         <div className="lg:col-span-2">
           <div className="rounded-[20px] border border-white/5 bg-slate-900/40 p-6 backdrop-blur-xl">
             <div className="mb-6 flex items-center justify-between">
@@ -228,7 +228,7 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Categories Distribution */}
+        {}
         <div>
           <div className="flex h-full flex-col rounded-[20px] border border-white/5 bg-slate-900/40 p-6 backdrop-blur-xl">
             <div className="mb-6 flex items-center gap-2">
@@ -289,7 +289,7 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Top Knowledge Nodes / Entities */}
+      {}
       <div className="mt-6">
         <div className="rounded-[20px] border border-white/5 bg-slate-900/40 p-6 backdrop-blur-xl">
           <div className="mb-6 flex items-center gap-2">

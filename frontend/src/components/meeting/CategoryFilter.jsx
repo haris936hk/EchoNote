@@ -75,7 +75,6 @@ CategoryBadge.propTypes = {
   category: PropTypes.string.isRequired,
 };
 
-// Get category data by value
 export const getCategoryData = (value) => {
   return CATEGORIES.find((c) => c.value === value) || CATEGORIES[CATEGORIES.length - 1];
 };

@@ -1,7 +1,5 @@
 
-
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -20,17 +18,15 @@ const logger = winston.createLogger({
   ],
 });
 
-
 class AppError extends Error {
   constructor(message, statusCode = 500, code = null) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
-    this.isOperational = true; 
+    this.isOperational = true;
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
 
 const notFound = (req, res, next) => {
   const error = new AppError(
@@ -41,20 +37,17 @@ const notFound = (req, res, next) => {
   next(error);
 };
 
-
 const handlePrismaError = (error) => {
-  
+
   if (error.code === 'P2002') {
     const field = error.meta?.target?.[0] || 'field';
     return new AppError(`This ${field} already exists`, 409, 'DUPLICATE_ENTRY');
   }
 
-  
   if (error.code === 'P2025') {
     return new AppError('The requested resource was not found', 404, 'RESOURCE_NOT_FOUND');
   }
 
-  
   if (error.code === 'P2003') {
     return new AppError(
       'Cannot perform this action due to related data',
@@ -63,20 +56,16 @@ const handlePrismaError = (error) => {
     );
   }
 
-  
   if (error.code === 'P2014') {
     return new AppError('Invalid relationship between resources', 400, 'INVALID_RELATION');
   }
 
-  
   if (error.code === 'P2021') {
     return new AppError('Database configuration error', 500, 'DATABASE_ERROR');
   }
 
-  
   return new AppError('Database operation failed', 500, 'DATABASE_ERROR');
 };
-
 
 const handleJWTError = (error) => {
   if (error.name === 'JsonWebTokenError') {
@@ -90,7 +79,6 @@ const handleJWTError = (error) => {
   return new AppError('Authentication failed', 401, 'AUTH_ERROR');
 };
 
-
 const handleValidationError = (error) => {
   const errors = Object.values(error.errors || {}).map((err) => err.message);
   const message =
@@ -98,7 +86,6 @@ const handleValidationError = (error) => {
 
   return new AppError(message, 400, 'VALIDATION_ERROR');
 };
-
 
 const handleMulterError = (error) => {
   if (error.code === 'LIMIT_FILE_SIZE') {
@@ -116,10 +103,9 @@ const handleMulterError = (error) => {
   return new AppError('File upload failed', 400, 'UPLOAD_ERROR');
 };
 
-
 const handleAxiosError = (error) => {
   if (error.response) {
-    
+
     const status = error.response.status;
     const message = error.response.data?.error || error.message;
 
@@ -139,13 +125,12 @@ const handleAxiosError = (error) => {
   }
 
   if (error.request) {
-    
+
     return new AppError('External service is unavailable', 503, 'SERVICE_UNAVAILABLE');
   }
 
   return new AppError('Failed to communicate with external service', 500, 'EXTERNAL_API_ERROR');
 };
-
 
 const sendErrorDev = (err, req, res) => {
   logger.error('Error in development:', {
@@ -172,9 +157,8 @@ const sendErrorDev = (err, req, res) => {
   });
 };
 
-
 const sendErrorProd = (err, req, res) => {
-  
+
   if (err.isOperational) {
     logger.error('Operational error:', {
       message: err.message,
@@ -191,7 +175,6 @@ const sendErrorProd = (err, req, res) => {
     });
   }
 
-
   logger.error('Unknown error:', {
     error: err,
     stack: err.stack,
@@ -206,53 +189,43 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 
-
 const errorHandler = (err, req, res, next) => {
- 
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  
   let error = { ...err };
   error.message = err.message;
   error.stack = err.stack;
 
- 
   if (err.code && err.code.startsWith('P')) {
     error = handlePrismaError(err);
   }
 
-  
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
     error = handleJWTError(err);
   }
 
-  
   if (err.name === 'ValidationError') {
     error = handleValidationError(err);
   }
 
-  
   if (err.name === 'MulterError') {
     error = handleMulterError(err);
   }
 
-  
   if (err.isAxiosError) {
     error = handleAxiosError(err);
   }
 
-  
   if (err.name === 'CastError') {
     error = new AppError('Invalid ID format', 400, 'INVALID_ID');
   }
 
- 
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     error = new AppError('Invalid JSON in request body', 400, 'INVALID_JSON');
   }
 
- 
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(error, req, res);
   } else {
@@ -260,13 +233,11 @@ const errorHandler = (err, req, res, next) => {
   }
 };
 
-
 const asyncHandler = (fn) => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
-
 
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', {
@@ -274,13 +245,11 @@ process.on('unhandledRejection', (reason, promise) => {
     reason: reason.stack || reason,
   });
 
-  
   if (process.env.NODE_ENV === 'production') {
     logger.error('Shutting down due to unhandled rejection...');
     process.exit(1);
   }
 });
-
 
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', {
@@ -288,20 +257,17 @@ process.on('uncaughtException', (error) => {
     stack: error.stack,
   });
 
- 
   logger.error('Shutting down due to uncaught exception...');
   process.exit(1);
 });
 
-
 const gracefulShutdown = (signal) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
 
-  
   setTimeout(() => {
     logger.error('Could not close connections in time, forcefully shutting down');
     process.exit(1);
-  }, 10000); 
+  }, 10000);
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

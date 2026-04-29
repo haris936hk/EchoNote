@@ -58,7 +58,7 @@ const WorkspacesPage = () => {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -76,7 +76,7 @@ const WorkspacesPage = () => {
             Collaborative archives for unified mission intelligence.
           </p>
         </motion.div>
-        
+
         <motion.button
           variants={itemVariants}
           onClick={() => setIsModalOpen(true)}
@@ -89,7 +89,7 @@ const WorkspacesPage = () => {
 
       <AnimatePresence mode="wait">
         {workspaces.length === 0 ? (
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="flex flex-col items-center justify-center rounded-[32px] bg-[#0c1324]/50 py-32 text-center ring-1 ring-white/[0.04] backdrop-blur-sm"
           >
@@ -121,7 +121,7 @@ const WorkspacesPage = () => {
                 onClick={() => navigate(`/workspaces/${workspace.id}`)}
                 className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-[#0c1324] p-8 ring-1 ring-white/[0.08] transition-all hover:-translate-y-1 hover:bg-[#111827] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:ring-white/[0.15]"
               >
-                {/* Background Accent Glow */}
+                {}
                 <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-accent-primary/5 blur-3xl transition-opacity group-hover:opacity-100 opacity-0" />
 
                 <div className="flex items-start justify-between">

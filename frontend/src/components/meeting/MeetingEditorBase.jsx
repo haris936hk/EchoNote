@@ -3,15 +3,15 @@ import { motion } from 'framer-motion';
 import { LuCheckCircle, LuCloud, LuCloudOff, LuUsers, LuHash, LuPenTool, LuPencil, LuPlus, LuTrash2, LuSparkles, LuUser, LuCalendar, LuArrowRight } from 'react-icons/lu';
 import EditTaskModal from './EditTaskModal';
 
-const MeetingEditorBase = ({ 
+const MeetingEditorBase = ({
   meetingId,
-  formData, 
-  onChange, 
-  onFocus, 
-  onBlur, 
-  saving, 
-  lastSaved, 
-  isDirty, 
+  formData,
+  onChange,
+  onFocus,
+  onBlur,
+  saving,
+  lastSaved,
+  isDirty,
   canEdit,
   others = [],
   onEditTask,
@@ -29,7 +29,7 @@ const MeetingEditorBase = ({
 
   return (
     <div className="space-y-8">
-      {/* Presence/Status bar */}
+      {}
       <div className="flex items-center justify-between rounded-[20px] bg-[#0c1324] px-6 py-4 ring-1 ring-white/[0.06] shadow-xl">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
@@ -38,7 +38,7 @@ const MeetingEditorBase = ({
              </div>
              <div className="flex -space-x-2 overflow-hidden">
                 {others.map(({ connectionId, presence: otherPresence, info }) => (
-                  <div 
+                  <div
                     key={connectionId}
                     className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0c1324] bg-accent-primary/10 ring-1 ring-accent-primary/20 transition-transform hover:z-10 hover:scale-110"
                   >
@@ -83,7 +83,7 @@ const MeetingEditorBase = ({
         </div>
       </div>
 
-      {/* Editor Sections */}
+      {}
       <div className="flex flex-col gap-5">
         <EditorSection
           title="Manifest / Executive Summary"
@@ -126,7 +126,7 @@ const MeetingEditorBase = ({
         />
       </div>
 
-      {/* Internal Task Modal if not handled externally */}
+      {}
       {!onEditTask && (
         <EditTaskModal
           isOpen={!!editingTask}
@@ -141,7 +141,7 @@ const MeetingEditorBase = ({
 
 const EditorSection = ({ title, value, onChange, onFocus, onBlur, disabled, placeholder, othersFocussed }) => {
   const [isFocussed, setIsFocussed] = useState(false);
-  
+
   return (
     <div className={`group relative flex flex-col overflow-hidden rounded-[24px] bg-[#0c1324] transition-all ring-1 ${
       isFocussed ? 'bg-[#1e253c]/40 ring-accent-primary/40 shadow-[0_20px_60px_-15px_rgba(129,140,248,0.15)]' : 'ring-white/[0.06] hover:bg-[#111827] hover:ring-white/[0.12]'
@@ -222,7 +222,7 @@ const StrategicDecisionsEditor = ({ decisions, onChange, onFocus, onBlur, disabl
         {decisions.map((decision, i) => (
           <div key={i} className="group/item flex items-start gap-3">
             <div className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent-primary shadow-[0_0_8px_rgba(129,140,248,0.5)]" />
-            <input 
+            <input
               className="flex-1 bg-transparent font-['Plus_Jakarta_Sans'] text-[14px] font-medium leading-relaxed text-slate-300 outline-none focus:text-white"
               value={decision}
               onChange={(e) => updateItem(i, e.target.value)}
@@ -231,7 +231,7 @@ const StrategicDecisionsEditor = ({ decisions, onChange, onFocus, onBlur, disabl
               disabled={disabled}
             />
             {!disabled && (
-              <button 
+              <button
                 onClick={() => removeItem(i)}
                 className="opacity-0 transition-opacity hover:text-red-400 group-hover/item:opacity-100 text-slate-600"
               >
@@ -253,7 +253,7 @@ const StrategicDecisionsEditor = ({ decisions, onChange, onFocus, onBlur, disabl
                 className="w-full bg-transparent font-['Plus_Jakarta_Sans'] text-[14px] text-slate-500 outline-none transition-colors focus:text-slate-300"
               />
               {newItem.trim() && (
-                <button 
+                <button
                   onClick={addItem}
                   className="absolute right-0 top-1/2 -translate-y-1/2 text-accent-primary hover:text-[#bdc2ff]"
                 >
@@ -264,9 +264,9 @@ const StrategicDecisionsEditor = ({ decisions, onChange, onFocus, onBlur, disabl
           </div>
         )}
       </div>
- 
+
       {isFocussed && (
-        <motion.div 
+        <motion.div
           layoutId="lip-decisions"
           className="absolute left-0 top-0 bottom-0 w-1 bg-accent-primary shadow-[0_0_15px_rgba(129,140,248,0.5)]"
         />
@@ -311,7 +311,7 @@ const AssignedInitiativesEditor = ({ actionItems, meetingId, onEditTask, onUpdat
               </div>
            )}
            {!disabled && (
-             <button 
+             <button
               onClick={() => onEditTask({ meetingId, task: '', status: 'TODO' })}
               className="flex items-center gap-1.5 rounded-full bg-accent-primary/10 px-2.5 py-1 font-['JetBrains_Mono'] text-[9px] font-bold text-accent-primary ring-1 ring-accent-primary/20 hover:bg-accent-primary/20"
              >
@@ -325,8 +325,8 @@ const AssignedInitiativesEditor = ({ actionItems, meetingId, onEditTask, onUpdat
         {actionItems.map((item, i) => {
           const isDone = item.status === 'DONE';
           return (
-            <div 
-              key={i} 
+            <div
+              key={i}
               onMouseEnter={() => setIsFocussed(true)}
               onMouseLeave={() => setIsFocussed(false)}
               className={`relative rounded-[16px] bg-[#050b1a] p-4 ring-1 ring-white/[0.04] transition-all hover:ring-white/[0.08] ${isDone ? 'opacity-50' : ''}`}
@@ -351,13 +351,13 @@ const AssignedInitiativesEditor = ({ actionItems, meetingId, onEditTask, onUpdat
                       </p>
                       {!disabled && (
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             onClick={() => onEditTask(item)}
                             className="text-slate-600 transition-colors hover:text-accent-primary"
                           >
                             <LuPencil size={12} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => removeTask(i)}
                             className="text-slate-600 transition-colors hover:text-red-400"
                           >
@@ -366,7 +366,7 @@ const AssignedInitiativesEditor = ({ actionItems, meetingId, onEditTask, onUpdat
                         </div>
                       )}
                    </div>
-                   
+
                    {(item.assignee || item.deadline || item.priority) && (
                      <div className="flex flex-wrap items-center gap-2">
                         {item.assignee && (
@@ -402,9 +402,9 @@ const AssignedInitiativesEditor = ({ actionItems, meetingId, onEditTask, onUpdat
           </div>
         )}
       </div>
- 
+
       {isFocussed && (
-        <motion.div 
+        <motion.div
           layoutId="lip-initiatives"
           className="absolute left-0 top-0 bottom-0 w-1 bg-accent-primary shadow-[0_0_15px_rgba(129,140,248,0.5)]"
         />
@@ -457,7 +457,7 @@ const ForwardProjectionEditor = ({ nextSteps, onChange, onFocus, onBlur, disable
         {nextSteps.map((step, i) => (
           <div key={i} className="group/item flex items-start gap-3 pl-1">
             <LuArrowRight size={10} className="mt-1.5 shrink-0 text-emerald-400/60 transition-colors group-focus-within/item:text-emerald-400" />
-            <input 
+            <input
               className="flex-1 bg-transparent font-['Plus_Jakarta_Sans'] text-[14px] font-medium leading-relaxed text-slate-300 outline-none focus:text-white"
               value={step}
               onChange={(e) => updateItem(i, e.target.value)}
@@ -466,7 +466,7 @@ const ForwardProjectionEditor = ({ nextSteps, onChange, onFocus, onBlur, disable
               disabled={disabled}
             />
             {!disabled && (
-              <button 
+              <button
                 onClick={() => removeItem(i)}
                 className="opacity-0 transition-opacity hover:text-red-400 group-hover/item:opacity-100 text-slate-600"
               >
@@ -488,7 +488,7 @@ const ForwardProjectionEditor = ({ nextSteps, onChange, onFocus, onBlur, disable
                 className="w-full bg-transparent font-['Plus_Jakarta_Sans'] text-[14px] text-slate-500 outline-none transition-colors focus:text-slate-300"
               />
               {newItem.trim() && (
-                <button 
+                <button
                   onClick={addItem}
                   className="absolute right-0 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-300"
                 >
@@ -501,7 +501,7 @@ const ForwardProjectionEditor = ({ nextSteps, onChange, onFocus, onBlur, disable
       </div>
 
       {isFocussed && (
-        <motion.div 
+        <motion.div
           layoutId="lip-nextsteps"
           className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
         />

@@ -8,7 +8,6 @@ async function testMeetingEmails() {
 
   console.log(`📧 Test recipient: ${testRecipient}\n`);
 
-  
   try {
     console.log('1️⃣ Testing Meeting Completion Email...');
     await emailService.sendMeetingCompletedEmail({
@@ -52,7 +51,6 @@ async function testMeetingEmails() {
     failureCount++;
   }
 
-  
   try {
     console.log('2️⃣ Testing Meeting Failed Email...');
     await emailService.sendMeetingFailedEmail({
@@ -70,7 +68,6 @@ async function testMeetingEmails() {
     failureCount++;
   }
 
-  
   try {
     console.log('3️⃣ Testing Welcome Email...');
     await emailService.sendWelcomeEmail({
@@ -84,7 +81,6 @@ async function testMeetingEmails() {
     failureCount++;
   }
 
-  
   console.log('═══════════════════════════════════════════════════');
   console.log(`   Test Summary: ${successCount} passed, ${failureCount} failed`);
   console.log('═══════════════════════════════════════════════════\n');

@@ -1,6 +1,5 @@
 import { tasksAPI } from './api';
 
-
 export const getTasks = async () => {
   try {
     const result = await tasksAPI.getTasks();
@@ -23,7 +22,6 @@ export const getTasks = async () => {
     };
   }
 };
-
 
 export const updateTask = async (id, updates) => {
   try {
@@ -55,7 +53,6 @@ export const updateTask = async (id, updates) => {
   }
 };
 
-
 export const createTask = async (taskData) => {
   try {
     const result = await tasksAPI.createTask(taskData);
@@ -78,7 +75,6 @@ export const createTask = async (taskData) => {
     };
   }
 };
-
 
 export const deleteTask = async (id) => {
   try {

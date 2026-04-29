@@ -1,13 +1,12 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { LuMic as Mic } from 'react-icons/lu';
 
-
 const NotFoundPage = () => {
   const navigate = useNavigate();
 
   return (
     <div className="flex min-h-screen flex-col" style={{ backgroundColor: '#020617' }}>
-      {/* Navbar */}
+      {}
       <nav className="w-full bg-[#2e3447]/40 backdrop-blur-3xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link
@@ -36,16 +35,16 @@ const NotFoundPage = () => {
         </div>
       </nav>
 
-      {/* Content */}
+      {}
       <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-6">
-        {/* Abstract geometric background */}
+        {}
         <div className="absolute inset-0 opacity-[0.03]">
           <div className="absolute left-1/4 top-1/4 size-64 rotate-45 border border-white/20"></div>
           <div className="absolute bottom-1/3 right-1/4 size-48 rotate-12 border border-white/15"></div>
           <div className="absolute left-1/2 top-1/2 size-32 -rotate-12 border border-white/10"></div>
         </div>
 
-        {/* 404 Display */}
+        {}
         <h1
           className="select-none text-[120px] font-extrabold leading-none tracking-tighter text-slate-700/50 md:text-[160px]"
           style={{ fontFamily: 'Plus Jakarta Sans' }}
@@ -59,7 +58,7 @@ const NotFoundPage = () => {
           The page you're looking for doesn't exist or has been moved.
         </p>
 
-        {/* Actions */}
+        {}
         <div className="flex items-center gap-4">
           <Link
             to="/dashboard"

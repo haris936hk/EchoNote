@@ -1,11 +1,8 @@
-// backend/src/services/transcription.service.js
-// Transcription service using Deepgram SDK
 
 const path = require('path');
 const fs = require('fs');
 const winston = require('winston');
 const { DeepgramClient } = require('@deepgram/sdk');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -17,7 +14,6 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const initialize = async () => {
   try {
     logger.info(`🎬 Initializing transcription service (Deepgram)...`);
@@ -28,11 +24,6 @@ const initialize = async () => {
   }
 };
 
-/**
- * Helper: Count words in text
- * @param {string} text - Text to count
- * @returns {number} Word count
- */
 const countWords = (text) => {
   if (!text) return 0;
   return text
@@ -41,11 +32,6 @@ const countWords = (text) => {
     .filter((word) => word.length > 0).length;
 };
 
-/**
- * Helper: Check transcript completeness
- * @param {string} text - Transcript text
- * @returns {string} Completeness status
- */
 const checkCompleteness = (text) => {
   if (!text) return 'empty';
   const wordCount = countWords(text);
@@ -55,11 +41,6 @@ const checkCompleteness = (text) => {
   return 'complete';
 };
 
-/**
- * Compute weighted average confidence from Deepgram per-word data
- * @param {Array} words - Deepgram words array [{word, confidence, start, end}, ...]
- * @returns {number} Weighted average confidence (0-1)
- */
 const computeWordConfidence = (words) => {
   if (!words || words.length === 0) return 0;
 
@@ -67,9 +48,9 @@ const computeWordConfidence = (words) => {
   let weightedSum = 0;
 
   for (const w of words) {
-    
+
     const duration = (w.end || 0) - (w.start || 0);
-    const weight = Math.max(duration, 0.01); 
+    const weight = Math.max(duration, 0.01);
     weightedSum += (w.confidence || 0) * weight;
     totalWeight += weight;
   }
@@ -77,11 +58,6 @@ const computeWordConfidence = (words) => {
   return totalWeight > 0 ? weightedSum / totalWeight : 0;
 };
 
-/**
- * Extract unique entities from Deepgram detect_entities response
- * @param {Object} result - Deepgram result object
- * @returns {Array} Deduplicated entities [{text, label, confidence}, ...]
- */
 const extractDeepgramEntities = (result) => {
   const entityResults = result.results?.entities?.segments || [];
   const entityMap = new Map();
@@ -103,11 +79,6 @@ const extractDeepgramEntities = (result) => {
   return Array.from(entityMap.values());
 };
 
-/**
- * Extract topics from Deepgram topics response
- * @param {Object} result - Deepgram result object
- * @returns {Array} Topics [{topic, confidence}, ...]
- */
 const extractDeepgramTopics = (result) => {
   const topicSegments = result.results?.topics?.segments || [];
   const topicMap = new Map();
@@ -128,11 +99,6 @@ const extractDeepgramTopics = (result) => {
   return Array.from(topicMap.values());
 };
 
-/**
- * Extract intents from Deepgram intents response
- * @param {Object} result - Deepgram result object
- * @returns {Array} Intents [{intent, confidence}, ...]
- */
 const extractDeepgramIntents = (result) => {
   const intentSegments = result.results?.intents?.segments || [];
   const intentMap = new Map();
@@ -153,11 +119,6 @@ const extractDeepgramIntents = (result) => {
   return Array.from(intentMap.values());
 };
 
-/**
- * Extract individual low confidence words for downstream LLM awareness
- * @param {Array} words - Deepgram words array
- * @returns {Array} Low confidence words
- */
 const extractLowConfidenceWords = (words) => {
   if (!words || words.length === 0) return [];
   return words
@@ -169,12 +130,6 @@ const extractLowConfidenceWords = (words) => {
     }));
 };
 
-/**
- * Transcribe audio using Deepgram API
- * @param {string} audioPath - Path to audio file
- * @param {Object} options - Transcription options
- * @returns {Object} Transcription result
- */
 const transcribeAudio = async (audioPath, options = {}) => {
   try {
     const apiKey = process.env.DEEPGRAM_API_KEY;
@@ -195,13 +150,13 @@ const transcribeAudio = async (audioPath, options = {}) => {
       punctuate: true,
       paragraphs: true,
       language: options.language || 'en',
-      
+
       detect_entities: true,
       topics: true,
       intents: true,
-      
+
       filler_words: false,
-      
+
       keyterm: [
         'EchoNote',
         'Supabase',
@@ -224,16 +179,15 @@ const transcribeAudio = async (audioPath, options = {}) => {
 
     while (attempt <= maxRetries) {
       try {
-       
+
         const audioStream = fs.createReadStream(audioPath);
         response = await deepgram.listen.v1.media.transcribeFile(audioStream, deepgramOptions);
 
-        
         if (response.error) {
           throw new Error(response.error.message || 'Deepgram API error');
         }
 
-        break; 
+        break;
       } catch (error) {
         const status = error.response?.status || error.status;
         const isRetryable = !status || status === 429 || status >= 500;
@@ -262,21 +216,17 @@ const transcribeAudio = async (audioPath, options = {}) => {
     const paragraphsTranscript = result.results?.paragraphs?.transcript;
     const rawTranscript = alternative?.transcript || '';
 
-
     const transcript = paragraphsTranscript || rawTranscript;
     const utterances = result.results?.utterances || [];
 
-    
     const words = alternative?.words || [];
     const wordConfidence = computeWordConfidence(words);
 
-    
     const deepgramEntities = extractDeepgramEntities(result);
     const deepgramTopics = extractDeepgramTopics(result);
     const deepgramIntents = extractDeepgramIntents(result);
     const lowConfidenceWords = extractLowConfidenceWords(words);
 
-   
     const segments = utterances.map((u) => ({
       start: u.start,
       end: u.end,
@@ -302,7 +252,7 @@ const transcribeAudio = async (audioPath, options = {}) => {
       processingTime: parseFloat(duration),
       model: result.metadata?.model_info?.name || 'nova-3',
       method: 'deepgram',
-      
+
       deepgramEntities,
       deepgramTopics,
       deepgramIntents,
@@ -314,12 +264,6 @@ const transcribeAudio = async (audioPath, options = {}) => {
   }
 };
 
-/**
- * Get transcription quality metrics
- * @param {string} audioPath - Path to audio file
- * @param {string} transcriptText - Transcribed text
- * @returns {Object} Quality metrics
- */
 const getTranscriptionQuality = async (audioPath, transcriptText) => {
   try {
     logger.info(`📊 Analyzing transcription quality`);
@@ -340,17 +284,12 @@ const getTranscriptionQuality = async (audioPath, transcriptText) => {
   }
 };
 
-/**
- * Format transcript with paragraphs
- * @param {Array<Object>} segments - Transcript segments with timestamps
- * @returns {string} Formatted transcript
- */
 const formatTranscriptWithParagraphs = (segments) => {
   if (!segments || segments.length === 0) return '';
 
   let formatted = '';
   let currentParagraph = '';
-  const paragraphDuration = 30; 
+  const paragraphDuration = 30;
 
   segments.forEach((segment, index) => {
     currentParagraph += segment.text + ' ';
@@ -369,12 +308,6 @@ const formatTranscriptWithParagraphs = (segments) => {
 
   return formatted.trim();
 };
-
-/**
- * Extract speaker diarization
- * @param {string} audioPath - Path to audio file
- * @returns {Object} Speaker segments
- */
 
 const extractSpeakers = async (audioPath) => {
   logger.warn('⚠️ Speaker diarization is handled natively by Deepgram');

@@ -177,8 +177,8 @@ const PublicMeetingSummary = () => {
   return (
     <div className="min-h-screen bg-[#020617] py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-[1100px] mx-auto space-y-6">
-        
-        {/* Header containing Branding/Watermark */}
+
+        {}
         <header className="flex items-center mb-8 opacity-60">
           <div className="flex items-center gap-2.5 select-none">
             <Mic2 className="text-[#818cf8]" size={20} />
@@ -188,7 +188,7 @@ const PublicMeetingSummary = () => {
           </div>
         </header>
 
-        {/* ── Meeting Hero Card ── */}
+        {}
         <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center bg-[#0c1324] border border-[rgba(255,255,255,0.06)] rounded-[16px] p-6 lg:p-8">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -199,11 +199,11 @@ const PublicMeetingSummary = () => {
                 Read-Only
               </span>
             </div>
-            
+
             <h1 className="font-['Plus_Jakarta_Sans'] text-3xl md:text-4xl font-bold tracking-tight text-[#f8fafc]">
               {meeting.title}
             </h1>
-            
+
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-1 font-mono text-[13px]">
               <span className="inline-flex items-center gap-2 text-[#94a3b8]">
                 <Calendar size={13} className="text-[#64748b]" />
@@ -223,11 +223,11 @@ const PublicMeetingSummary = () => {
           </div>
         </div>
 
-        {/* ── Summary Cards Grid ── */}
+        {}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          
+
           <div className="space-y-6">
-            {/* ── Executive Summary ── */}
+            {}
             {summaryData.executive && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -246,7 +246,7 @@ const PublicMeetingSummary = () => {
               </div>
             )}
 
-            {/* ── Key Decisions ── */}
+            {}
             {summaryData.decisions.length > 0 && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -266,8 +266,8 @@ const PublicMeetingSummary = () => {
                 </div>
               </div>
             )}
-            
-            {/* ── Next Steps ── */}
+
+            {}
             {summaryData.nextSteps.length > 0 && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -290,7 +290,7 @@ const PublicMeetingSummary = () => {
           </div>
 
           <div className="space-y-6">
-            {/* ── Action Items ── */}
+            {}
             {summaryData.actions.length > 0 && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -304,9 +304,9 @@ const PublicMeetingSummary = () => {
                   <CopyBtn section="actions" content={summaryData.actions} copiedSection={copiedSection} onCopy={copySection} />
                 </div>
                 <div className="space-y-3 relative">
-                  {/* Decorative faint vertical line to ground items */}
+                  {}
                   <div className="absolute left-[11px] top-4 bottom-4 w-px bg-white/[0.02]"></div>
-                  
+
                   {summaryData.actions.map((action, i) => (
                     <div key={`action-${i}`} className="relative space-y-2.5 rounded-[12px] border border-[rgba(255,255,255,0.03)] bg-[#020617] p-4 z-10 transition-colors hover:border-white/[0.08]">
                       <div className="flex items-start gap-3">
@@ -339,8 +339,8 @@ const PublicMeetingSummary = () => {
                 </div>
               </div>
             )}
-            
-            {/* ── Key Topics ── */}
+
+            {}
             {summaryData.keyTopics.length > 0 && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-5">
                 <div className="mb-3 flex items-center justify-between">
@@ -362,7 +362,7 @@ const PublicMeetingSummary = () => {
               </div>
             )}
 
-            {/* ── Sentiment ── */}
+            {}
             <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-5">
               <div className="flex items-center justify-between">
                  <div className="flex items-center gap-3">
@@ -374,8 +374,8 @@ const PublicMeetingSummary = () => {
                  </span>
               </div>
             </div>
-            
-            {/* ── Participants ── */}
+
+            {}
             {(meeting.speakers && meeting.speakers.length > 0) && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-5">
                 <div className="mb-3 flex items-center justify-between">

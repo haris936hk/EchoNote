@@ -9,7 +9,6 @@ export const setLocalItem = (key, value) => {
   }
 };
 
-
 export const getLocalItem = (key, defaultValue = null) => {
   try {
     const item = localStorage.getItem(key);
@@ -22,7 +21,6 @@ export const getLocalItem = (key, defaultValue = null) => {
   }
 };
 
-
 export const removeLocalItem = (key) => {
   try {
     localStorage.removeItem(key);
@@ -31,7 +29,6 @@ export const removeLocalItem = (key) => {
     return { success: false, error: error.message };
   }
 };
-
 
 export const clearLocalStorage = () => {
   try {
@@ -42,7 +39,6 @@ export const clearLocalStorage = () => {
   }
 };
 
-
 export const hasLocalItem = (key) => {
   try {
     return localStorage.getItem(key) !== null;
@@ -51,7 +47,6 @@ export const hasLocalItem = (key) => {
   }
 };
 
-
 export const getLocalKeys = () => {
   try {
     return Object.keys(localStorage);
@@ -59,7 +54,6 @@ export const getLocalKeys = () => {
     return [];
   }
 };
-
 
 export const getLocalStorageSize = () => {
   try {
@@ -85,7 +79,6 @@ export const setSessionItem = (key, value) => {
   }
 };
 
-
 export const getSessionItem = (key, defaultValue = null) => {
   try {
     const item = sessionStorage.getItem(key);
@@ -107,7 +100,6 @@ export const removeSessionItem = (key) => {
   }
 };
 
-
 export const clearSessionStorage = () => {
   try {
     sessionStorage.clear();
@@ -116,7 +108,6 @@ export const clearSessionStorage = () => {
     return { success: false, error: error.message };
   }
 };
-
 
 export const setItemWithExpiry = (key, value, ttlMs) => {
   try {
@@ -153,16 +144,13 @@ export const getItemWithExpiry = (key, defaultValue = null) => {
   }
 };
 
-
 export const savePreferences = (preferences) => {
   return setLocalItem('user_preferences', preferences);
 };
 
-
 export const getPreferences = (defaultPreferences = {}) => {
   return getLocalItem('user_preferences', defaultPreferences);
 };
-
 
 export const updatePreference = (key, value) => {
   try {
@@ -174,26 +162,21 @@ export const updatePreference = (key, value) => {
   }
 };
 
-
 export const clearPreferences = () => {
   return removeLocalItem('user_preferences');
 };
-
 
 export const cacheData = (key, data, ttlMs = 3600000) => {
   return setItemWithExpiry(`cache_${key}`, data, ttlMs);
 };
 
-
 export const getCachedData = (key, defaultValue = null) => {
   return getItemWithExpiry(`cache_${key}`, defaultValue);
 };
 
-
 export const clearCache = (key) => {
   return removeLocalItem(`cache_${key}`);
 };
-
 
 export const clearAllCache = () => {
   try {
@@ -206,16 +189,13 @@ export const clearAllCache = () => {
   }
 };
 
-
 export const saveTheme = (theme) => {
   return setLocalItem('theme', theme);
 };
 
-
 export const getTheme = (defaultTheme = 'light') => {
   return getLocalItem('theme', defaultTheme);
 };
-
 
 export const toggleTheme = () => {
   const currentTheme = getTheme();
@@ -223,7 +203,6 @@ export const toggleTheme = () => {
   saveTheme(newTheme);
   return newTheme;
 };
-
 
 export const addToRecent = (listKey, item, maxItems = 10) => {
   try {
@@ -244,17 +223,14 @@ export const addToRecent = (listKey, item, maxItems = 10) => {
   }
 };
 
-
 export const getRecent = (listKey, limit = 10) => {
   const recent = getLocalItem(listKey, []);
   return recent.slice(0, limit);
 };
 
-
 export const clearRecent = (listKey) => {
   return removeLocalItem(listKey);
 };
-
 
 export const addToFavorites = (item) => {
   try {
@@ -273,7 +249,6 @@ export const addToFavorites = (item) => {
   }
 };
 
-
 export const removeFromFavorites = (itemId) => {
   try {
     let favorites = getLocalItem('favorites', []);
@@ -285,22 +260,18 @@ export const removeFromFavorites = (itemId) => {
   }
 };
 
-
 export const getFavorites = () => {
   return getLocalItem('favorites', []);
 };
-
 
 export const isFavorite = (itemId) => {
   const favorites = getFavorites();
   return favorites.some((f) => f.id === itemId);
 };
 
-
 export const clearFavorites = () => {
   return removeLocalItem('favorites');
 };
-
 
 export const isLocalStorageAvailable = () => {
   try {
@@ -313,7 +284,6 @@ export const isLocalStorageAvailable = () => {
   }
 };
 
-
 export const isSessionStorageAvailable = () => {
   try {
     const test = '__storage_test__';
@@ -324,7 +294,6 @@ export const isSessionStorageAvailable = () => {
     return false;
   }
 };
-
 
 export const getStorageQuota = async () => {
   try {
@@ -344,7 +313,6 @@ export const getStorageQuota = async () => {
   }
 };
 
-
 export const migrateData = (oldKey, newKey) => {
   try {
     const data = getLocalItem(oldKey);
@@ -358,7 +326,6 @@ export const migrateData = (oldKey, newKey) => {
     return { success: false, error: error.message };
   }
 };
-
 
 export const cleanupExpiredItems = () => {
   try {
@@ -386,8 +353,6 @@ export const cleanupExpiredItems = () => {
     return { success: false, error: error.message };
   }
 };
-
-
 
 const storageService = {
   setLocalItem,

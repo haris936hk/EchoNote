@@ -275,14 +275,14 @@ const RecordPage = () => {
     }
   };
 
-  const isWarningZone = recordingTime > MAX_RECORDING_TIME * 0.8; // last 20%
+  const isWarningZone = recordingTime > MAX_RECORDING_TIME * 0.8;
 
   return (
     <div
       className="flex min-h-screen items-center justify-center"
       style={{ backgroundColor: '#020617' }}
     >
-      {/* Hidden file input */}
+      {}
       <input
         ref={fileInputRef}
         type="file"
@@ -292,10 +292,10 @@ const RecordPage = () => {
       />
 
       <div className="mx-auto w-full max-w-2xl px-6 py-12">
-       
+
         {step === 'record' && (
           <div className="flex flex-col items-center space-y-8 text-center">
-           
+
             <div
               className={`recording-halo ${isRecording && !isPaused ? 'active' : ''} ${isPaused ? 'paused' : ''}`}
               style={
@@ -321,14 +321,14 @@ const RecordPage = () => {
               />
             </div>
 
-            {/* Status label */}
+            {}
             <p className="text-sm text-slate-500">
               {!isRecording && !audioBlob && 'Ready to record'}
               {isRecording && !isPaused && 'Recording...'}
               {isPaused && 'Recording paused'}
             </p>
 
-            {/* Timer */}
+            {}
             <div className="space-y-2">
               <p className="font-mono text-5xl font-bold tracking-tight text-white">
                 {recordingTimeFormatted || '00:00'}
@@ -338,14 +338,14 @@ const RecordPage = () => {
               )}
             </div>
 
-            {/* Audio Visualizer */}
+            {}
             {isRecording && stream && (
               <div className="w-full max-w-md">
                 <AudioVisualizer stream={stream} isRecording={isRecording && !isPaused} />
               </div>
             )}
 
-            {/* Progress bar (only when recording) */}
+            {}
             {isRecording && (
               <div className="w-full max-w-md">
                 <Progress
@@ -365,7 +365,7 @@ const RecordPage = () => {
               </div>
             )}
 
-            {/* Error */}
+            {}
             {(recordingError || uploadError) && (
               <div className="flex items-center gap-2 rounded-btn border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
                 <AlertCircle size={16} />
@@ -373,7 +373,7 @@ const RecordPage = () => {
               </div>
             )}
 
-            {/* Controls */}
+            {}
             <div className="flex items-center gap-4">
               {!isRecording ? (
                 <>
@@ -436,7 +436,7 @@ const RecordPage = () => {
               )}
             </div>
 
-            {/* Tips */}
+            {}
             {!isRecording && (
               <p className="max-w-sm text-xs text-slate-600">
                 Up to 10 minutes · MP3, WAV, M4A, WEBM, OGG · 50MB max
@@ -445,7 +445,6 @@ const RecordPage = () => {
           </div>
         )}
 
-        
         {step === 'details' && (
           <div className="mx-auto max-w-lg space-y-6">
             <div>
@@ -455,7 +454,7 @@ const RecordPage = () => {
               </p>
             </div>
 
-            {/* Audio preview */}
+            {}
             {(audioBlob || uploadedFile) && (
               <div className="rounded-card border border-echo-border bg-echo-surface p-4">
                 <div className="mb-3 flex items-center gap-3">
@@ -479,7 +478,7 @@ const RecordPage = () => {
               </div>
             )}
 
-            {/* Form */}
+            {}
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-slate-300" htmlFor="meeting-title">
@@ -550,7 +549,7 @@ const RecordPage = () => {
               </div>
             </div>
 
-            {/* Error */}
+            {}
             {uploadError && (
               <div className="flex items-center gap-2 rounded-btn border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                 <AlertCircle size={16} className="shrink-0" />
@@ -580,7 +579,6 @@ const RecordPage = () => {
           </div>
         )}
 
-        
         {step === 'uploading' && (
           <div className="flex flex-col items-center space-y-6 text-center">
             <div className="size-16 animate-spin rounded-full border-2 border-accent-primary border-t-transparent"></div>
@@ -600,7 +598,6 @@ const RecordPage = () => {
           </div>
         )}
 
-        
         {step === 'processing' && processingStatus && (
           <div className="flex w-full flex-col items-center space-y-8">
             <div className="w-full max-w-2xl rounded-card border border-white/10 bg-echo-surface p-8 shadow-[0_0_50px_rgba(129,140,248,0.08)]">
@@ -616,7 +613,7 @@ const RecordPage = () => {
                 </p>
               </div>
 
-              {/* Progress Bar */}
+              {}
               <div className="mb-12 px-2">
                 <Progress
                   value={processingStatus.progress || 0}
@@ -630,7 +627,7 @@ const RecordPage = () => {
                 />
               </div>
 
-              {/* Pipeline Steps */}
+              {}
               <div className="flex w-full items-center justify-between gap-1 px-1">
                 {PIPELINE_STEPS.map((pipelineStep, index) => {
                   const currentIdx = PIPELINE_STEPS.findIndex(
@@ -683,7 +680,6 @@ const RecordPage = () => {
           </div>
         )}
 
-       
         {step === 'success' && (
           <div className="flex flex-col items-center space-y-6 text-center">
             <div className="flex size-20 items-center justify-center rounded-full bg-emerald-500/15">

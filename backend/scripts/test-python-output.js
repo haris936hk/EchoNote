@@ -33,10 +33,8 @@ async function runTests() {
   console.log('🚀 Starting Python Output Verification Tests');
   console.log('-------------------------------------------');
 
-  
   const nlpTest = await testScript('nlp_processor.py', ['test']);
 
- 
   const audioTest = await testScript('audio_processor.py', []);
 
   console.log('\n-------------------------------------------');

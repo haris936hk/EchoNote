@@ -1,5 +1,4 @@
 
-
 const meetingService = require('../services/meeting.service');
 const queueService = require('../services/queue.service');
 const supabaseStorage = require('../services/supabase-storage.service');
@@ -12,7 +11,6 @@ const { prisma } = require('../config/database');
 const { convertWavToMp3, cleanupTempMp3 } = require('../utils/audioConverter');
 const { generateDownloadFilename, ensureDirectoryExists } = require('../utils/fileUtils');
 
-
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -23,13 +21,11 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const createMeetingWithAudio = async (req, res) => {
   try {
     const { title, description, category } = req.body;
     const userId = req.userId;
 
-    
     if (!title || !title.trim()) {
       return res.status(400).json({
         success: false,
@@ -37,7 +33,6 @@ const createMeetingWithAudio = async (req, res) => {
       });
     }
 
-    
     if (!req.file && !req.uploadedFile) {
       return res.status(400).json({
         success: false,
@@ -47,7 +42,6 @@ const createMeetingWithAudio = async (req, res) => {
 
     const audioFile = req.uploadedFile || req.file;
 
-    
     const validCategories = ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'];
     if (category && !validCategories.includes(category)) {
       return res.status(400).json({
@@ -57,12 +51,10 @@ const createMeetingWithAudio = async (req, res) => {
       });
     }
 
-    
     logger.info(
       `📤 Creating meeting with audio for user ${userId}: ${audioFile.filename || audioFile.originalname}`
     );
 
-    
     const meeting = await meetingService.createMeeting({
       userId,
       title: title.trim(),
@@ -72,10 +64,8 @@ const createMeetingWithAudio = async (req, res) => {
 
     logger.info(`✅ Meeting created: ${meeting.id}`);
 
-    
     const fileToProcess = req.uploadedFile || req.file;
 
-    
     const queueResult = await queueService.addToQueue(meeting.id, userId, fileToProcess);
 
     if (!queueResult.success) {
@@ -106,13 +96,11 @@ const createMeetingWithAudio = async (req, res) => {
   }
 };
 
-
 const createMeeting = async (req, res) => {
   try {
     const { title, description, category } = req.body;
     const userId = req.userId;
 
-    
     const validCategories = ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'];
     if (category && !validCategories.includes(category)) {
       return res.status(400).json({
@@ -151,7 +139,6 @@ const uploadAudio = async (req, res) => {
     const meetingId = req.params.id;
     const userId = req.userId;
 
-   
     if (!req.file && !req.uploadedFile) {
       return res.status(400).json({
         success: false,
@@ -161,8 +148,7 @@ const uploadAudio = async (req, res) => {
 
     const audioFile = req.uploadedFile || req.file;
 
-    
-    const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 52428800; // 50MB
+    const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 52428800;
     if (audioFile.size > maxSize) {
       return res.status(400).json({
         success: false,
@@ -170,7 +156,6 @@ const uploadAudio = async (req, res) => {
       });
     }
 
-    
     const allowedFormats = (
       process.env.ALLOWED_AUDIO_FORMATS || 'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg'
     ).split(',');
@@ -184,7 +169,6 @@ const uploadAudio = async (req, res) => {
 
     logger.info(`📤 Uploading audio for meeting ${meetingId}`);
 
-    
     const result = await meetingService.uploadAndProcessAudio(meetingId, userId, audioFile);
 
     return res.status(200).json({
@@ -202,13 +186,12 @@ const uploadAudio = async (req, res) => {
   }
 };
 
-
 const getMeetings = async (req, res) => {
   try {
     const userId = req.userId;
     const {
       page = 1,
-      limit = 100, 
+      limit = 100,
       category,
       search,
       status,
@@ -249,7 +232,6 @@ const getMeetings = async (req, res) => {
   }
 };
 
-
 const getMeetingById = async (req, res) => {
   try {
     const meetingId = req.params.id;
@@ -284,7 +266,6 @@ const updateMeeting = async (req, res) => {
     const userId = req.userId;
     const { title, description, category } = req.body;
 
-    
     if (category) {
       const validCategories = ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'];
       if (!validCategories.includes(category)) {
@@ -320,7 +301,6 @@ const updateMeeting = async (req, res) => {
   }
 };
 
-
 const deleteMeeting = async (req, res) => {
   try {
     const meetingId = req.params.id;
@@ -343,7 +323,6 @@ const deleteMeeting = async (req, res) => {
     });
   }
 };
-
 
 const getTranscript = async (req, res) => {
   try {
@@ -376,7 +355,6 @@ const getTranscript = async (req, res) => {
   }
 };
 
-
 const getSummary = async (req, res) => {
   try {
     const meetingId = req.params.id;
@@ -405,7 +383,6 @@ const getSummary = async (req, res) => {
   }
 };
 
-
 const downloadAudio = async (req, res) => {
   let tempMp3Path = null;
   let tempWavPath = null;
@@ -422,15 +399,13 @@ const downloadAudio = async (req, res) => {
       });
     }
 
-   
     const tempDir = path.join(process.cwd(), 'storage', 'temp');
     ensureDirectoryExists(tempDir);
 
     let sourceWavPath;
 
-   
     if (audioData.isRemote || audioData.url.startsWith('http')) {
-     
+
       logger.info(`📥 Downloading audio from Supabase for meeting ${meetingId}`);
       tempWavPath = path.join(tempDir, `${meetingId}_source.wav`);
 
@@ -449,7 +424,7 @@ const downloadAudio = async (req, res) => {
 
       sourceWavPath = tempWavPath;
     } else {
-      
+
       if (!fs.existsSync(audioData.url)) {
         return res.status(404).json({
           success: false,
@@ -459,7 +434,6 @@ const downloadAudio = async (req, res) => {
       sourceWavPath = audioData.url;
     }
 
-    
     const meeting = await meetingService.getMeetingById(meetingId, userId);
     const downloadFilename = generateDownloadFilename(
       meeting.title,
@@ -470,7 +444,6 @@ const downloadAudio = async (req, res) => {
 
     tempMp3Path = path.join(tempDir, `${meetingId}_audio.mp3`);
 
-    
     logger.info(`🎵 Converting audio to MP3 for meeting ${meetingId}`);
     const conversionResult = await convertWavToMp3(sourceWavPath, tempMp3Path);
 
@@ -484,20 +457,17 @@ const downloadAudio = async (req, res) => {
       });
     }
 
-    
     if (tempWavPath) cleanupTempMp3(tempWavPath);
 
-    
     res.setHeader('Content-Type', 'audio/mpeg');
     res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
     res.setHeader('Content-Length', conversionResult.size);
 
-   
     const fileStream = fs.createReadStream(tempMp3Path);
     fileStream.pipe(res);
 
     fileStream.on('close', () => {
-      
+
       cleanupTempMp3(tempMp3Path);
     });
 
@@ -523,12 +493,11 @@ const downloadAudio = async (req, res) => {
   }
 };
 
-
 const downloadTranscript = async (req, res) => {
   try {
     const meetingId = req.params.id;
     const userId = req.userId;
-    const format = req.query.format || 'txt'; // txt, json
+    const format = req.query.format || 'txt';
 
     const [transcriptData, meeting] = await Promise.all([
       meetingService.getTranscript(meetingId, userId),
@@ -568,12 +537,11 @@ const downloadTranscript = async (req, res) => {
   }
 };
 
-
 const downloadSummary = async (req, res) => {
   try {
     const meetingId = req.params.id;
     const userId = req.userId;
-    const format = req.query.format || 'txt'; // txt, json
+    const format = req.query.format || 'txt';
 
     const [summary, meeting] = await Promise.all([
       meetingService.getSummary(meetingId, userId),
@@ -594,13 +562,12 @@ const downloadSummary = async (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(JSON.stringify(summary, null, 2));
     } else {
-      
+
       let textContent = `Meeting Summary: ${meeting.title}\n`;
       textContent += `Category: ${meeting.category}\n`;
       textContent += `Date: ${new Date(meeting.createdAt).toLocaleString()}\n\n`;
       textContent += `=== EXECUTIVE SUMMARY ===\n${summary.executiveSummary}\n\n`;
 
-      
       if (Array.isArray(summary.keyDecisions) && summary.keyDecisions.length > 0) {
         textContent += '=== KEY DECISIONS ===\n';
         summary.keyDecisions.forEach((decision, index) => {
@@ -619,7 +586,6 @@ const downloadSummary = async (req, res) => {
         textContent += `\n`;
       });
 
-      
       if (Array.isArray(summary.nextSteps) && summary.nextSteps.length > 0) {
         textContent += '\n=== NEXT STEPS ===\n';
         summary.nextSteps.forEach((step, index) => {
@@ -643,7 +609,6 @@ const downloadSummary = async (req, res) => {
     });
   }
 };
-
 
 const searchMeetings = async (req, res) => {
   try {
@@ -677,7 +642,6 @@ const searchMeetings = async (req, res) => {
   }
 };
 
-
 const getMeetingStats = async (req, res) => {
   try {
     const userId = req.userId;
@@ -697,7 +661,6 @@ const getMeetingStats = async (req, res) => {
     });
   }
 };
-
 
 const getProcessingStatus = async (req, res) => {
   try {
@@ -720,7 +683,6 @@ const getProcessingStatus = async (req, res) => {
   }
 };
 
-
 const streamAudio = async (req, res) => {
   try {
     const meetingId = req.params.id;
@@ -741,18 +703,15 @@ const streamAudio = async (req, res) => {
     let audioFilePath = audioData.url;
     let tempFile = null;
 
-    
     if (audioData.isRemote || audioData.url.startsWith('http')) {
       logger.info(`📥 Downloading audio from Supabase for streaming: ${meetingId}`);
 
-      
       const tempDir = path.join(process.cwd(), 'storage', 'temp');
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
       tempFile = path.join(tempDir, `stream_${meetingId}_${Date.now()}.wav`);
 
-      
       const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
         audioData.url,
         tempFile
@@ -769,7 +728,7 @@ const streamAudio = async (req, res) => {
 
       audioFilePath = tempFile;
     } else {
-      
+
       if (!fs.existsSync(audioData.url)) {
         return res.status(404).json({
           success: false,
@@ -782,11 +741,9 @@ const streamAudio = async (req, res) => {
     const fileSize = stat.size;
     const range = req.headers.range;
 
-    
     res.setHeader('Content-Type', 'audio/wav');
     res.setHeader('Accept-Ranges', 'bytes');
 
-    
     const cleanupTemp = () => {
       if (tempFile && fs.existsSync(tempFile)) {
         fs.unlink(tempFile, (err) => {
@@ -796,18 +753,16 @@ const streamAudio = async (req, res) => {
     };
 
     if (range) {
-      
+
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
       const chunkSize = end - start + 1;
 
-     
       res.status(206);
       res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
       res.setHeader('Content-Length', chunkSize);
 
-      
       const fileStream = fs.createReadStream(audioFilePath, { start, end });
       fileStream.pipe(res);
 
@@ -821,7 +776,7 @@ const streamAudio = async (req, res) => {
 
       fileStream.on('close', cleanupTemp);
     } else {
-      
+
       res.setHeader('Content-Length', fileSize);
       const fileStream = fs.createReadStream(audioFilePath);
       fileStream.pipe(res);
@@ -848,7 +803,6 @@ const streamAudio = async (req, res) => {
   }
 };
 
-
 const downloadAll = async (req, res) => {
   let tempMp3Path = null;
   let tempZipPath = null;
@@ -857,7 +811,6 @@ const downloadAll = async (req, res) => {
     const meetingId = req.params.id;
     const userId = req.userId;
 
-    
     const meeting = await meetingService.getMeetingById(meetingId, userId);
 
     if (!meeting) {
@@ -867,7 +820,6 @@ const downloadAll = async (req, res) => {
       });
     }
 
-    
     if (meeting.status !== 'COMPLETED') {
       return res.status(400).json({
         success: false,
@@ -877,11 +829,9 @@ const downloadAll = async (req, res) => {
 
     logger.info(`📦 Creating ZIP download for meeting ${meetingId}`);
 
-    
     const tempDir = path.join(process.cwd(), 'storage', 'temp');
     ensureDirectoryExists(tempDir);
 
-    
     const audioFilename = generateDownloadFilename(
       meeting.title,
       meeting.createdAt,
@@ -907,7 +857,6 @@ const downloadAll = async (req, res) => {
       'zip'
     );
 
-    
     const [audioData, transcriptData, summary] = await Promise.all([
       meetingService.getAudioDownloadUrl(meetingId, userId),
       meetingService.getTranscript(meetingId, userId),
@@ -925,7 +874,6 @@ const downloadAll = async (req, res) => {
       }
     }
 
-   
     let summaryText = '';
     if (summary) {
       summaryText = `Meeting Summary: ${meeting.title}\n`;
@@ -963,7 +911,6 @@ const downloadAll = async (req, res) => {
       }
     }
 
-    
     if (!audioAvailable && !transcriptData && !summary) {
       return res.status(404).json({
         success: false,
@@ -971,7 +918,6 @@ const downloadAll = async (req, res) => {
       });
     }
 
-    
     tempZipPath = path.join(tempDir, `${meetingId}_all.zip`);
 
     await new Promise((resolve, reject) => {
@@ -983,17 +929,14 @@ const downloadAll = async (req, res) => {
 
       archive.pipe(outputStream);
 
-      
       if (audioAvailable && fs.existsSync(tempMp3Path)) {
         archive.file(tempMp3Path, { name: audioFilename });
       }
 
-     
       if (transcriptData && transcriptData.text) {
         archive.append(transcriptData.text, { name: transcriptFilename });
       }
 
-     
       if (summaryText) {
         archive.append(summaryText, { name: summaryFilename });
       }
@@ -1001,20 +944,17 @@ const downloadAll = async (req, res) => {
       archive.finalize();
     });
 
-    
     const zipStats = fs.statSync(tempZipPath);
 
-    
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
     res.setHeader('Content-Length', zipStats.size);
 
-    
     const zipStream = fs.createReadStream(tempZipPath);
     zipStream.pipe(res);
 
     zipStream.on('close', () => {
-      
+
       if (tempMp3Path) cleanupTempMp3(tempMp3Path);
       if (tempZipPath && fs.existsSync(tempZipPath)) {
         fs.unlinkSync(tempZipPath);
@@ -1036,7 +976,7 @@ const downloadAll = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error creating download all ZIP: ${error.message}`);
-    
+
     if (tempMp3Path) cleanupTempMp3(tempMp3Path);
     if (tempZipPath && fs.existsSync(tempZipPath)) {
       fs.unlinkSync(tempZipPath);
@@ -1049,7 +989,6 @@ const downloadAll = async (req, res) => {
   }
 };
 
-
 const exportAllMeetings = async (req, res) => {
   const tempFiles = [];
   let tempZipPath = null;
@@ -1057,10 +996,9 @@ const exportAllMeetings = async (req, res) => {
   try {
     const userId = req.userId;
 
-    
     const allMeetings = await meetingService.getMeetings(userId, {
       page: 1,
-      limit: 1000, 
+      limit: 1000,
       status: 'COMPLETED',
     });
 
@@ -1074,30 +1012,26 @@ const exportAllMeetings = async (req, res) => {
     const meetings = allMeetings.meetings;
     logger.info(`📦 Creating export ZIP for ${meetings.length} meetings for user ${userId}`);
 
-    
     const tempDir = path.join(process.cwd(), 'storage', 'temp');
     ensureDirectoryExists(tempDir);
 
-    
     const exportDate = new Date().toISOString().slice(0, 10);
     const zipFilename = `EchoNote_Export_${exportDate}.zip`;
     tempZipPath = path.join(tempDir, `export_${userId}_${Date.now()}.zip`);
 
-    
     await new Promise((resolve, reject) => {
       const outputStream = fs.createWriteStream(tempZipPath);
-      const archive = archiver('zip', { zlib: { level: 6 } }); // Level 6 for balance of speed/compression
+      const archive = archiver('zip', { zlib: { level: 6 } });
 
       outputStream.on('close', resolve);
       archive.on('error', reject);
       archive.pipe(outputStream);
 
-      
       (async () => {
         try {
           for (const meeting of meetings) {
             try {
-              
+
               const folderName = meeting.title
                 .replace(/[<>:"/\\|?*]/g, '_')
                 .replace(/\s+/g, '_')
@@ -1105,12 +1039,10 @@ const exportAllMeetings = async (req, res) => {
 
               const meetingFolder = `${folderName}_${meeting.id.substring(0, 8)}`;
 
-              
               const audioData = await meetingService.getAudioDownloadUrl(meeting.id, userId);
               if (audioData && audioData.url) {
                 let audioPath = audioData.url;
 
-                
                 if (audioData.isRemote || audioData.url.startsWith('http')) {
                   const tempAudioPath = path.join(tempDir, `export_${meeting.id}_audio.wav`);
                   const downloadResult = await supabaseStorage.downloadAudioFromSupabase(
@@ -1136,14 +1068,12 @@ const exportAllMeetings = async (req, res) => {
                 }
               }
 
-              
               const transcriptData = await meetingService.getTranscript(meeting.id, userId);
               if (transcriptData && transcriptData.text) {
                 const transcriptText = `Meeting: ${meeting.title}\nDate: ${new Date(meeting.createdAt).toLocaleString()}\nCategory: ${meeting.category}\n\n${'='.repeat(60)}\n\n${transcriptData.text}`;
                 archive.append(transcriptText, { name: `${meetingFolder}/transcript.txt` });
               }
 
-              
               const summary = await meetingService.getSummary(meeting.id, userId);
               if (summary) {
                 let summaryText = `Meeting Summary: ${meeting.title}\n`;
@@ -1185,7 +1115,7 @@ const exportAllMeetings = async (req, res) => {
               logger.warn(
                 `Error processing meeting ${meeting.id} for export: ${meetingError.message}`
               );
-              
+
             }
           }
 
@@ -1196,7 +1126,6 @@ const exportAllMeetings = async (req, res) => {
       })();
     });
 
-    
     const stat = fs.statSync(tempZipPath);
 
     res.setHeader('Content-Type', 'application/zip');
@@ -1207,13 +1136,13 @@ const exportAllMeetings = async (req, res) => {
     fileStream.pipe(res);
 
     fileStream.on('close', () => {
-      
+
       tempFiles.forEach((file) => {
         if (fs.existsSync(file)) {
           try {
             fs.unlinkSync(file);
           } catch (e) {
-            
+
           }
         }
       });
@@ -1221,20 +1150,20 @@ const exportAllMeetings = async (req, res) => {
         try {
           fs.unlinkSync(tempZipPath);
         } catch (e) {
-          
+
         }
       }
     });
 
     fileStream.on('error', (err) => {
       logger.error(`Error streaming export ZIP: ${err.message}`);
-      
+
       tempFiles.forEach((file) => {
         if (fs.existsSync(file)) {
           try {
             fs.unlinkSync(file);
           } catch (e) {
-            
+
           }
         }
       });
@@ -1242,7 +1171,7 @@ const exportAllMeetings = async (req, res) => {
         try {
           fs.unlinkSync(tempZipPath);
         } catch (e) {
-          
+
         }
       }
       if (!res.headersSent) {
@@ -1254,13 +1183,13 @@ const exportAllMeetings = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error creating export ZIP: ${error.message}`);
-    
+
     tempFiles.forEach((file) => {
       if (fs.existsSync(file)) {
         try {
           fs.unlinkSync(file);
         } catch (e) {
-          
+
         }
       }
     });
@@ -1268,7 +1197,7 @@ const exportAllMeetings = async (req, res) => {
       try {
         fs.unlinkSync(tempZipPath);
       } catch (e) {
-        
+
       }
     }
     return res.status(500).json({
@@ -1278,7 +1207,6 @@ const exportAllMeetings = async (req, res) => {
     });
   }
 };
-
 
 const updateSpeakerMap = async (req, res) => {
   try {
@@ -1293,20 +1221,18 @@ const updateSpeakerMap = async (req, res) => {
       });
     }
 
-    
     const meeting = await prisma.meeting.findFirst({
       where: { id: meetingId, userId },
     });
 
     if (!meeting) {
-      
+
       return res.status(404).json({
         success: false,
         error: 'Meeting not found',
       });
     }
 
-    
     let currentMap = {};
     if (meeting.speakerMap) {
       currentMap =
@@ -1315,15 +1241,12 @@ const updateSpeakerMap = async (req, res) => {
           : meeting.speakerMap;
     }
 
-    
     currentMap[speakerId] = newName;
 
     const updatedMeeting = await prisma.meeting.update({
       where: { id: meetingId },
       data: { speakerMap: currentMap },
     });
-
-    
 
     logger.info(`✅ Speaker map updated for meeting: ${meetingId}`);
 
@@ -1342,25 +1265,22 @@ const updateSpeakerMap = async (req, res) => {
   }
 };
 
-
 const reprocessMeeting = async (req, res) => {
   try {
     const meetingId = req.params.id;
     const userId = req.userId;
-
-    
 
     const meeting = await prisma.meeting.findFirst({
       where: { id: meetingId, userId },
     });
 
     if (!meeting) {
-      
+
       return res.status(404).json({ success: false, error: 'Meeting not found' });
     }
 
     if (meeting.status !== 'FAILED') {
-     
+
       return res.status(400).json({
         success: false,
         error: 'Only failed meetings can be reprocessed',
@@ -1368,14 +1288,13 @@ const reprocessMeeting = async (req, res) => {
     }
 
     if (!meeting.audioUrl) {
-      
+
       return res.status(400).json({
         success: false,
         error: 'No audio file found for this meeting. Please upload a new recording.',
       });
     }
 
-    
     await prisma.meeting.update({
       where: { id: meetingId },
       data: {
@@ -1389,7 +1308,6 @@ const reprocessMeeting = async (req, res) => {
       },
     });
 
-    
     queueService.addToQueue(meetingId);
 
     logger.info(`🔄 Meeting ${meetingId} queued for reprocessing by user ${userId}`);
@@ -1408,7 +1326,6 @@ const reprocessMeeting = async (req, res) => {
     });
   }
 };
-
 
 const generateShareLink = async (req, res) => {
   try {
@@ -1466,7 +1383,6 @@ const generateShareLink = async (req, res) => {
   }
 };
 
-
 const revokeShareLink = async (req, res) => {
   try {
     const meetingId = req.params.id;
@@ -1498,13 +1414,10 @@ const revokeShareLink = async (req, res) => {
   }
 };
 
-
 const getMeetingAnalytics = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.userId;
-
-    
 
     const meeting = await prisma.meeting.findFirst({
       where: { id, userId },
@@ -1520,13 +1433,10 @@ const getMeetingAnalytics = async (req, res) => {
       },
     });
 
-    
-
     if (!meeting) {
       return res.status(404).json({ success: false, error: 'Meeting not found' });
     }
 
-    
     const segments = Array.isArray(meeting.transcriptSegments) ? meeting.transcriptSegments : [];
     const speakerMap = meeting.speakerMap || {};
     const speakerTime = {};
@@ -1564,7 +1474,6 @@ const getMeetingAnalytics = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Failed to retrieve analytics' });
   }
 };
-
 
 const getAllDecisions = async (req, res) => {
   try {
@@ -1622,7 +1531,6 @@ const generateFollowUp = async (req, res) => {
   }
 };
 
-
 const shareToSlack = async (req, res) => {
   try {
     const meetingId = req.params.id;
@@ -1673,18 +1581,17 @@ const shareToSlack = async (req, res) => {
   }
 };
 
-
 const updateMeetingSummary = async (req, res) => {
   const meetingId = req.params.id;
   const userId = req.userId;
   const { executiveSummary, actionItems, keyDecisions, nextSteps } = req.body;
 
   try {
-   
+
     // 1. Check if the meeting exists and if the user is the owner
     const meeting = await prisma.meeting.findUnique({
       where: { id: meetingId },
-      include: { 
+      include: {
         workspaceMeeting: {
           include: {
             workspace: {
@@ -1721,7 +1628,6 @@ const updateMeetingSummary = async (req, res) => {
       });
     }
 
-    
     const normalizeToArray = (val) => {
       if (!val) return [];
       if (Array.isArray(val)) return val;
@@ -1739,7 +1645,7 @@ const updateMeetingSummary = async (req, res) => {
       where: { id: meetingId },
       data: {
         summaryExecutive: executiveSummary,
-        summaryActionItems: actionItemsArray, 
+        summaryActionItems: actionItemsArray,
         summaryKeyDecisions: JSON.stringify(keyDecisionsArray),
         summaryNextSteps: JSON.stringify(nextStepsArray),
       },
@@ -1747,7 +1653,6 @@ const updateMeetingSummary = async (req, res) => {
 
     logger.info(`Meeting summary updated: ${meetingId} by user ${userId} (Context: ${meeting.workspaceMeeting ? 'Workspace' : 'Personal'})`);
 
-   
     const transformedMeeting = meetingService.transformMeetingForFrontend(updatedMeeting);
 
     return res.status(200).json({
@@ -1794,4 +1699,3 @@ module.exports = {
   shareToSlack,
   updateMeetingSummary,
 };
-

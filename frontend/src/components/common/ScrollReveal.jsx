@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 
-
 const ScrollReveal = ({ children }) => {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollYRef = useRef(0);
@@ -12,16 +11,15 @@ const ScrollReveal = ({ children }) => {
       const currentScrollY = window.scrollY;
       const lastScrollY = lastScrollYRef.current;
 
-      // Threshold for reveal/hide
       const scrollThreshold = 5;
 
       if (currentScrollY < 10) {
         setIsVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down - hide
+
         setIsVisible(false);
       } else if (currentScrollY < lastScrollY - scrollThreshold) {
-        // Scrolling up - reveal (with 5px buffer)
+
         setIsVisible(true);
       }
 
@@ -41,7 +39,7 @@ const ScrollReveal = ({ children }) => {
           exit={{ y: -100, opacity: 0 }}
           transition={{
             duration: 0.4,
-            ease: [0.22, 1, 0.36, 1], 
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="pointer-events-none fixed inset-x-0 top-0 z-50"
         >

@@ -49,7 +49,7 @@ const ProcessingLogAccordion = ({
   processingCompletedAt,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [stages, setStages] = useState(null); 
+  const [stages, setStages] = useState(null);
   const [loadingStages, setLoadingStages] = useState(false);
 
   const handleToggle = () => {
@@ -67,7 +67,7 @@ const ProcessingLogAccordion = ({
           if (data.success && Array.isArray(data.data?.processingLogs)) {
             setStages(data.data.processingLogs);
           } else {
-            setStages([]); 
+            setStages([]);
           }
         })
         .catch(() => setStages([]))
@@ -82,7 +82,7 @@ const ProcessingLogAccordion = ({
 
   return (
     <div className="overflow-hidden rounded-card bg-echo-surface">
-      {/* ── Accordion Header ── */}
+      {}
       <button
         onClick={handleToggle}
         className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-echo-surface-hover"
@@ -102,10 +102,10 @@ const ProcessingLogAccordion = ({
         />
       </button>
 
-      {/* ── Accordion Body ── */}
+      {}
       {isOpen && (
         <div className="bg-echo-base px-5 pb-5 pt-1">
-          {/* Timestamps grid */}
+          {}
           <div className="mb-4 grid grid-cols-2 gap-3">
             <div className="rounded-btn bg-echo-surface p-3">
               <p className="mb-1 text-[10px] uppercase tracking-widest text-slate-600">Started</p>
@@ -121,14 +121,14 @@ const ProcessingLogAccordion = ({
             </div>
           </div>
 
-          {/* Loading spinner */}
+          {}
           {loadingStages && (
             <div className="flex justify-center py-3">
               <div className="size-4 animate-spin rounded-full border-2 border-accent-primary border-t-transparent" />
             </div>
           )}
 
-          {/* Per-stage breakdown from ProcessingLog */}
+          {}
           {!loadingStages && hasStages && (
             <div className="space-y-2.5">
               {stages.map((stage) => (
@@ -141,7 +141,7 @@ const ProcessingLogAccordion = ({
                   <span className="flex-1 text-xs text-slate-400">
                     {STAGE_LABELS[stage.stage] || stage.stage}
                   </span>
-                  {/* Proportional bar */}
+                  {}
                   {stage.durationMs && processingDuration && (
                     <div className="h-[3px] w-16 overflow-hidden rounded-full bg-echo-surface">
                       <div
@@ -163,7 +163,7 @@ const ProcessingLogAccordion = ({
                 </div>
               ))}
 
-              {/* Total row — weight shift replaces a border separator */}
+              {}
               <div className="flex items-center justify-between pt-3">
                 <span className="text-xs font-semibold text-white">Total pipeline</span>
                 <span className="font-mono text-sm font-bold text-white">
@@ -173,7 +173,7 @@ const ProcessingLogAccordion = ({
             </div>
           )}
 
-          {/* Fallback: no stage data, just show total */}
+          {}
           {!loadingStages && !hasStages && processingDuration && (
             <div className="flex items-center justify-between py-1">
               <span className="text-xs text-slate-400">Total pipeline duration</span>

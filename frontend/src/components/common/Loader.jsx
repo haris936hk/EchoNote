@@ -35,7 +35,6 @@ Loader.propTypes = {
   className: PropTypes.string,
 };
 
-// Page-level loader
 export const PageLoader = ({ label = 'Loading page...' }) => (
   <div className="flex min-h-screen items-center justify-center">
     <Loader size="lg" label={label} />
@@ -46,7 +45,6 @@ PageLoader.propTypes = {
   label: PropTypes.string,
 };
 
-// Card-level loader
 export const CardLoader = ({ label = 'Loading...' }) => (
   <div className="flex items-center justify-center p-8">
     <Loader size="md" label={label} />
@@ -57,7 +55,6 @@ CardLoader.propTypes = {
   label: PropTypes.string,
 };
 
-// Inline loader
 export const InlineLoader = ({ label }) => (
   <div className="flex items-center gap-2">
     <div className="size-4 animate-spin rounded-full border-2 border-accent-primary border-t-transparent"></div>
@@ -68,7 +65,6 @@ export const InlineLoader = ({ label }) => (
 InlineLoader.propTypes = {
   label: PropTypes.string,
 };
-
 
 export const SkeletonLoader = ({ count = 3 }) => (
   <>

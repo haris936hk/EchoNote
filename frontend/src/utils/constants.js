@@ -1,20 +1,18 @@
 
-
 export const APP_NAME = 'EchoNote';
 export const APP_VERSION = '1.0.0';
 export const APP_DESCRIPTION = 'AI-powered meeting transcription and summarization';
 export const APP_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
 export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-
-export const MAX_RECORDING_TIME = 600; 
+export const MAX_RECORDING_TIME = 600;
 export const MAX_RECORDING_TIME_MS = MAX_RECORDING_TIME * 1000;
-export const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024; 
+export const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024;
 
 export const RECORDING_CONFIG = {
   mimeType: 'audio/webm;codecs=opus',
   audioBitsPerSecond: 128000,
-  sampleRate: 16000, // Whisper optimal sample rate
+  sampleRate: 16000,
 };
 
 export const AUDIO_CONSTRAINTS = {
@@ -23,11 +21,9 @@ export const AUDIO_CONSTRAINTS = {
     noiseSuppression: true,
     autoGainControl: true,
     sampleRate: 16000,
-    channelCount: 1, // Mono
+    channelCount: 1,
   },
 };
-
-
 
 export const MEETING_CATEGORIES = {
   SALES: 'SALES',
@@ -81,10 +77,9 @@ export const CATEGORIES_LIST = [
   },
 ];
 
-
 export const MEETING_STATUS = {
   UPLOADING: 'UPLOADING',
-  PENDING: 'PENDING', 
+  PENDING: 'PENDING',
   PROCESSING_AUDIO: 'PROCESSING_AUDIO',
   TRANSCRIBING: 'TRANSCRIBING',
   PROCESSING_NLP: 'PROCESSING_NLP',
@@ -95,7 +90,7 @@ export const MEETING_STATUS = {
 
 export const STATUS_LABELS = {
   [MEETING_STATUS.UPLOADING]: 'Uploading',
-  [MEETING_STATUS.PENDING]: 'Queued', 
+  [MEETING_STATUS.PENDING]: 'Queued',
   [MEETING_STATUS.PROCESSING_AUDIO]: 'Processing Audio',
   [MEETING_STATUS.TRANSCRIBING]: 'Transcribing',
   [MEETING_STATUS.PROCESSING_NLP]: 'Processing NLP',
@@ -106,7 +101,7 @@ export const STATUS_LABELS = {
 
 export const STATUS_COLORS = {
   [MEETING_STATUS.UPLOADING]: 'default',
-  [MEETING_STATUS.PENDING]: 'default', 
+  [MEETING_STATUS.PENDING]: 'default',
   [MEETING_STATUS.PROCESSING_AUDIO]: 'warning',
   [MEETING_STATUS.TRANSCRIBING]: 'warning',
   [MEETING_STATUS.PROCESSING_NLP]: 'warning',
@@ -114,7 +109,6 @@ export const STATUS_COLORS = {
   [MEETING_STATUS.COMPLETED]: 'success',
   [MEETING_STATUS.FAILED]: 'danger',
 };
-
 
 export const VALIDATION = {
   MEETING_TITLE: {
@@ -136,7 +130,6 @@ export const VALIDATION = {
   },
 };
 
-
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'token',
   USER: 'user',
@@ -146,7 +139,6 @@ export const STORAGE_KEYS = {
   FAVORITES: 'favorites',
   LAST_CATEGORY: 'last_selected_category',
 };
-
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -167,7 +159,6 @@ export const API_ENDPOINTS = {
   },
 };
 
-
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
   DEFAULT_PAGE_SIZE: 12,
@@ -175,17 +166,15 @@ export const PAGINATION = {
   MAX_PAGE_SIZE: 100,
 };
 
-
 export const TIMING = {
-  DEBOUNCE_SEARCH: 500, 
-  DEBOUNCE_INPUT: 300, 
-  DEBOUNCE_RESIZE: 200, 
-  THROTTLE_SCROLL: 100, 
-  AUTO_SAVE_DELAY: 2000, 
-  TOAST_DURATION: 3000, 
-  REDIRECT_DELAY: 2000, 
+  DEBOUNCE_SEARCH: 500,
+  DEBOUNCE_INPUT: 300,
+  DEBOUNCE_RESIZE: 200,
+  THROTTLE_SCROLL: 100,
+  AUTO_SAVE_DELAY: 2000,
+  TOAST_DURATION: 3000,
+  REDIRECT_DELAY: 2000,
 };
-
 
 export const ERROR_MESSAGES = {
   GENERIC: 'An unexpected error occurred. Please try again.',
@@ -205,7 +194,6 @@ export const ERROR_MESSAGES = {
   CATEGORY_REQUIRED: 'Please select a category.',
 };
 
-
 export const SUCCESS_MESSAGES = {
   MEETING_UPLOADED: 'Meeting uploaded successfully!',
   MEETING_UPDATED: 'Meeting updated successfully!',
@@ -214,7 +202,6 @@ export const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: 'Welcome back!',
   LOGOUT_SUCCESS: 'Logged out successfully!',
 };
-
 
 export const ROUTES = {
   HOME: '/',
@@ -228,7 +215,6 @@ export const ROUTES = {
   NOT_FOUND: '*',
 };
 
-
 export const FEATURES = {
   ENABLE_DARK_MODE: true,
   ENABLE_EXPORT: true,
@@ -237,7 +223,6 @@ export const FEATURES = {
   ENABLE_SHARING: false,
   ENABLE_REAL_TIME: false,
 };
-
 
 export const DATE_FORMATS = {
   SHORT: 'MMM d, yyyy',
@@ -248,20 +233,18 @@ export const DATE_FORMATS = {
   ISO: "yyyy-MM-dd'T'HH:mm:ss",
 };
 
-
 export const SUPPORTED_AUDIO_TYPES = [
   'audio/webm',
   'audio/mp3',
   'audio/mpeg',
   'audio/wav',
   'audio/ogg',
-  'audio/m4a', 
-  'audio/x-m4a', 
-  'audio/mp4', 
+  'audio/m4a',
+  'audio/x-m4a',
+  'audio/mp4',
 ];
 
 export const SUPPORTED_AUDIO_EXTENSIONS = ['.webm', '.mp3', '.wav', '.ogg', '.m4a'];
-
 
 export const ANALYTICS_EVENTS = {
   USER_LOGIN: 'user_login',
@@ -283,7 +266,6 @@ export const ANALYTICS_EVENTS = {
   FILTER_APPLIED: 'filter_applied',
 };
 
-
 export const KEYBOARD_SHORTCUTS = {
   SEARCH: 'Ctrl+K',
   NEW_MEETING: 'Ctrl+N',
@@ -292,8 +274,6 @@ export const KEYBOARD_SHORTCUTS = {
   HELP: '?',
 };
 
-
-
 export const NOTIFICATION_TYPES = {
   SUCCESS: 'success',
   ERROR: 'error',
@@ -301,16 +281,12 @@ export const NOTIFICATION_TYPES = {
   INFO: 'info',
 };
 
-
-
 export const CACHE_DURATION = {
-  SHORT: 5 * 60 * 1000, // 5 minutes
-  MEDIUM: 15 * 60 * 1000, // 15 minutes
-  LONG: 60 * 60 * 1000, // 1 hour
-  DAY: 24 * 60 * 60 * 1000, // 24 hours
+  SHORT: 5 * 60 * 1000,
+  MEDIUM: 15 * 60 * 1000,
+  LONG: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
 };
-
-
 
 export const RETENTION_PERIODS = [
   { value: 7, label: '7 days' },
@@ -319,8 +295,6 @@ export const RETENTION_PERIODS = [
   { value: 180, label: '6 months' },
   { value: 365, label: '1 year' },
 ];
-
-
 
 export const EXTERNAL_LINKS = {
   DOCUMENTATION: 'https://docs.echonote.com',
@@ -331,8 +305,6 @@ export const EXTERNAL_LINKS = {
   FEEDBACK: 'https://echonote.com/feedback',
 };
 
-
-
 export const REGEX_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   URL: /^https?:\/\/.+/,
@@ -340,7 +312,6 @@ export const REGEX_PATTERNS = {
   ALPHANUMERIC: /^[a-zA-Z0-9]+$/,
   SLUG: /^[a-z0-9-]+$/,
 };
-
 
 export const DEFAULTS = {
   THEME: 'light',
@@ -352,7 +323,6 @@ export const DEFAULTS = {
   AUTO_DELETE: false,
 };
 
-
 export const LIMITS = {
   MAX_FILE_SIZE: MAX_AUDIO_FILE_SIZE,
   MAX_RECORDING_TIME: MAX_RECORDING_TIME,
@@ -362,7 +332,6 @@ export const LIMITS = {
   MAX_RECENT_ITEMS: 10,
   MAX_FAVORITES: 50,
 };
-
 
 export const HTTP_STATUS = {
   OK: 200,
@@ -377,16 +346,13 @@ export const HTTP_STATUS = {
   SERVICE_UNAVAILABLE: 503,
 };
 
-
 export const ENVIRONMENT = {
   isDevelopment: process.env.NODE_ENV === 'development',
   isProduction: process.env.NODE_ENV === 'production',
   mode: process.env.NODE_ENV || 'development',
 };
 
-
 export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-
 
 const constants = {
   APP_NAME,

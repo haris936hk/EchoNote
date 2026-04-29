@@ -1,47 +1,37 @@
-/* stylelint-disable */
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* ============================================
-   CSS VARIABLES — OLED Dark Mode
-   ============================================ */
-
 :root {
-  /* Background surfaces */
+
   --echo-base: #020617;
   --echo-surface: #0f172a;
   --echo-surface-hover: #1e293b;
   --echo-elevated: #1e293b;
 
-  /* Accents */
   --accent-primary: #818cf8;
   --accent-secondary: #a78bfa;
   --accent-glow: rgba(129, 140, 248, 0.12);
   --cta-color: #22c55e;
 
-  /* Text hierarchy */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
-  /* Borders */
   --border-default: rgba(255, 255, 255, 0.06);
   --border-subtle: rgba(255, 255, 255, 0.03);
 
-  /* Status */
   --status-success: #34d399;
   --status-warning: #fbbf24;
   --status-danger: #f87171;
   --status-info: #60a5fa;
 
-  /* Sentiment */
   --sentiment-positive: #34d399;
   --sentiment-neutral: #818cf8;
   --sentiment-negative: #f87171;
   --sentiment-mixed: #fbbf24;
 
-  /* HeroUI overrides */
   --color-primary: 129 140 248;
   --color-primary-foreground: 255 255 255;
   --color-secondary: 167 139 250;
@@ -74,17 +64,13 @@
   --overlay-opacity: 0.6;
 }
 
-/* ============================================
-   BASE STYLES
-   ============================================ */
-
 @layer base {
   html {
     @apply antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
-    /* scroll-padding-top: 100px; */
+
   }
 
   body {
@@ -100,7 +86,6 @@
       'calt' 1;
   }
 
-  /* Scrollbar — OLED dark */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -119,18 +104,15 @@
     background: #475569;
   }
 
-  /* Selection */
   ::selection {
     background: rgba(129, 140, 248, 0.25);
     color: #f8fafc;
   }
 
-  /* Focus visible */
   *:focus-visible {
     @apply outline-none ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950;
   }
 
-  /* Override focus for inputs */
   input:focus-visible,
   input:focus,
   textarea:focus-visible,
@@ -141,17 +123,12 @@
   }
 }
 
-/* ============================================
-   CUSTOM COMPONENTS
-   ============================================ */
-
 @layer components {
-  /* Container */
+
   .container {
     @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
   }
 
-  /* ── Glass Card ── */
   .glass-card {
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(24px);
@@ -159,7 +136,6 @@
     border: 1px solid var(--border-default);
   }
 
-  /* ── Gradient Border Card ── */
   .gradient-border-card {
     position: relative;
     border-radius: 12px;
@@ -184,12 +160,10 @@
     pointer-events: none;
   }
 
-  /* ── Ghost Border ── */
   .ghost-border {
     border: 1px solid rgba(69, 70, 83, 0.15);
   }
 
-  /* ── Text Gradient ── */
   .text-gradient {
     background: linear-gradient(135deg, #bdc2ff 0%, #818cf8 100%);
     -webkit-background-clip: text;
@@ -197,7 +171,6 @@
     background-clip: text;
   }
 
-  /* ── AI Glow Effect ── */
   .ai-glow {
     position: relative;
   }
@@ -212,7 +185,6 @@
     z-index: -1;
   }
 
-  /* ── Card hover ── */
   .card-hover {
     @apply transition-all duration-150;
   }
@@ -221,7 +193,6 @@
     border-color: rgba(129, 140, 248, 0.2);
   }
 
-  /* ── Button base ── */
   .btn {
     @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
     border-radius: 10px;
@@ -263,7 +234,6 @@
     background-color: #ef4444;
   }
 
-  /* ── Input base ── */
   .input-echo {
     background: var(--echo-surface);
     border: 1px solid var(--border-default);
@@ -282,7 +252,6 @@
     box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1);
   }
 
-  /* ── Badge / Chip ── */
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors;
   }
@@ -303,7 +272,6 @@
     color: #f87171;
   }
 
-  /* ── Status Dot ── */
   .status-dot {
     @apply w-2 h-2 rounded-full;
   }
@@ -321,7 +289,6 @@
     animation: aiGlow 1.5s ease-in-out infinite;
   }
 
-  /* ── Skeleton Loading ── */
   .skeleton {
     background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
     background-size: 200% 100%;
@@ -329,7 +296,6 @@
     border-radius: 8px;
   }
 
-  /* ── Recording Halo ── */
   .recording-halo {
     width: 128px;
     height: 128px;
@@ -354,7 +320,6 @@
     animation: none;
   }
 
-  /* ── AI Indicator Dot ── */
   .ai-dot {
     width: 6px;
     height: 6px;
@@ -364,10 +329,6 @@
     display: inline-block;
   }
 }
-
-/* ============================================
-   CUSTOM UTILITIES
-   ============================================ */
 
 @layer utilities {
   .text-balance {
@@ -402,10 +363,6 @@
     overflow: hidden;
   }
 }
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
 
 @keyframes fadeIn {
   from {
@@ -464,10 +421,6 @@
   }
 }
 
-/* ============================================
-   AUDIO PLAYER STYLES
-   ============================================ */
-
 audio {
   width: 100%;
   height: 40px;
@@ -478,10 +431,6 @@ audio::-webkit-media-controls-panel {
   background: #1e293b;
 }
 
-/* ============================================
-   PRINT STYLES
-   ============================================ */
-
 @media print {
   * {
     background: white !important;
@@ -489,10 +438,6 @@ audio::-webkit-media-controls-panel {
     box-shadow: none !important;
   }
 }
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
 
 .sr-only {
   position: absolute;
@@ -517,10 +462,6 @@ audio::-webkit-media-controls-panel {
   }
 }
 
-/* ============================================
-   LOADING STATES
-   ============================================ */
-
 .spinner {
   @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
 }
@@ -528,10 +469,6 @@ audio::-webkit-media-controls-panel {
 .spinner-lg {
   @apply w-8 h-8;
 }
-
-/* ============================================
-   CUSTOM SCROLLBAR
-   ============================================ */
 
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -556,20 +493,12 @@ audio::-webkit-media-controls-panel {
   background: #475569;
 }
 
-/* ============================================
-   SAFE AREAS
-   ============================================ */
-
 .safe-top {
   padding-top: env(safe-area-inset-top);
 }
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
-
-/* ============================================
-   BUTTON UTILITIES
-   ============================================ */
 
 .btn-cta {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
@@ -626,10 +555,6 @@ audio::-webkit-media-controls-panel {
   box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
 }
 
-/* ============================================
-   CARD UTILITIES
-   ============================================ */
-
 .card-hover {
   transition: all 0.2s ease;
 }
@@ -639,10 +564,6 @@ audio::-webkit-media-controls-panel {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* ============================================
-   TEXT UTILITIES
-   ============================================ */
-
 .truncate-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -650,10 +571,6 @@ audio::-webkit-media-controls-panel {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-/* ============================================
-   AI DOT INDICATOR
-   ============================================ */
 
 .ai-dot {
   position: relative;
@@ -685,10 +602,6 @@ audio::-webkit-media-controls-panel {
     opacity: 0;
   }
 }
-
-/* ============================================
-   RECORDING HALO
-   ============================================ */
 
 .recording-halo {
   width: 120px;
@@ -735,10 +648,6 @@ audio::-webkit-media-controls-panel {
   }
 }
 
-/* ============================================
-   ECHO SURFACE TOKENS
-   ============================================ */
-
 .bg-echo-base {
   background-color: var(--echo-base);
 }
@@ -767,7 +676,6 @@ audio::-webkit-media-controls-panel {
   background-color: var(--accent-secondary);
 }
 
-/* Opacity variants for accent */
 .bg-accent-primary\/5 {
   background-color: rgba(129, 140, 248, 0.05);
 }
@@ -792,10 +700,6 @@ audio::-webkit-media-controls-panel {
 .bg-accent-secondary\/10 {
   background-color: rgba(167, 139, 250, 0.1);
 }
-
-/* ============================================
-   AI GLOW ANIMATION
-   ============================================ */
 
 @keyframes animate-ai-glow {
   0%,

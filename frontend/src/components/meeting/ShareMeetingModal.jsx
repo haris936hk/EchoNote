@@ -55,8 +55,8 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
       const response = await api.post(`/meetings/${meeting.id}/share`);
       if (response.data.success) {
         showToast('Share link generated', 'success');
-        setLocalShareToken(response.data.data.shareToken); // Update local state instantly
-        if (onShareUpdate) onShareUpdate(response.data.data.shareUrl); // Trigger background refresh
+        setLocalShareToken(response.data.data.shareToken);
+        if (onShareUpdate) onShareUpdate(response.data.data.shareUrl);
       }
     } catch (error) {
       showToast(error.response?.data?.error || 'Failed to generate link', 'error');
@@ -83,7 +83,7 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8">
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -93,7 +93,7 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
             className="absolute inset-0 bg-[#020617]/70 backdrop-blur-xl"
           />
 
-          {/* Modal Container */}
+          {}
           <motion.div
             initial={{ y: 20, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -101,10 +101,10 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative flex w-full max-w-[500px] flex-col overflow-hidden rounded-card bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(189,194,255,0.15)] ring-1 ring-white/[0.06]"
           >
-            {/* Outline Glow Fallback */}
+            {}
             <div className="pointer-events-none absolute inset-0 rounded-card shadow-[inset_0_1px_rgba(255,255,255,0.05)]" />
 
-            {/* Header */}
+            {}
             <div className="z-10 flex-none bg-[#0c1324] p-8 pb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-5">
@@ -130,14 +130,14 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
               </div>
             </div>
 
-            {/* Content Body */}
+            {}
             <div className="relative z-0 px-8 pb-8 pt-2">
               <p className="font-['Plus_Jakarta_Sans'] text-[14px] leading-relaxed text-[#94a3b8] mb-8">
                 Create a public URL that anyone can use to view this meeting&#39;s summary. No sign-up required. Access to the transcript and audio will remain restricted.
               </p>
 
               {localShareToken ? (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3.5"
@@ -147,7 +147,7 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
                        Your Share Link
                      </label>
                    </div>
-                   
+
                    <div className="flex items-center gap-3">
                      <div className="relative flex-1">
                        <input
@@ -180,15 +180,15 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
               )}
             </div>
 
-            {/* Footer */}
+            {}
             {(localShareToken) && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="relative z-10 flex flex-none items-center justify-between bg-[#0c1324] p-8 pt-6"
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-10 -translate-y-full bg-gradient-to-b from-transparent to-[#0c1324]" />
-                
+
                 <button
                   onClick={handleRevoke}
                   disabled={isRevoking}
@@ -201,7 +201,7 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
                   )}
                   <span className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold">Revoke Link</span>
                 </button>
-                
+
                 <button
                   onClick={onClose}
                   className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-[#64748b] transition-all hover:text-[#94a3b8]"
@@ -210,7 +210,7 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
                 </button>
               </motion.div>
             )}
-            
+
           </motion.div>
         </div>
       )}

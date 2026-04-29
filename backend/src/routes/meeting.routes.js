@@ -1,5 +1,3 @@
-// backend/src/routes/meeting.routes.js
-// Meeting routes for CRUD operations and processing
 
 const express = require('express');
 const router = express.Router();
@@ -28,81 +26,35 @@ const {
   handleMulterError,
 } = require('../middleware/upload.middleware');
 
-/**
- * @route   GET /api/meetings/stats
- * @desc    Get user's meeting statistics
- * @access  Private
- * @returns { success, data: { overview, byCategory, metrics } }
- */
 router.get('/stats', authenticate, meetingController.getMeetingStats);
 
-/**
- * @route   GET /api/meetings/search
- * @desc    Search meetings
- * @access  Private
- * @query   q=<query>&category=<category>&limit=<number>
- * @returns { success, data: [meetings], count }
- */
 router.get(
   '/search',
   authenticate,
-  searchLimiter, // 30 searches per minute
+  searchLimiter,
   sanitizeQuery,
   validateSearch,
   meetingController.searchMeetings
 );
 
-/**
- * @route   GET /api/meetings/export
- * @desc    Export all meetings as ZIP archive
- * @access  Private
- * @returns ZIP file with meeting folders containing audio.mp3, transcript.txt, summary.txt
- */
 router.get('/export', authenticate, meetingController.exportAllMeetings);
 
-/**
- * @route   GET /api/meetings/decisions
- * @desc    Get all decisions across all meetings
- * @access  Private
- * @returns { success, data: [decisions] }
- */
 router.get('/decisions', authenticate, meetingController.getAllDecisions);
 
-/**
- * @route   GET /api/meetings
- * @desc    Get all meetings for authenticated user
- * @access  Private
- * @query   page=<number>&limit=<number>&category=<category>&status=<status>&search=<query>&sortBy=<field>&sortOrder=<asc|desc>
- * @returns { success, data: [meetings], pagination }
- */
 router.get('/', authenticate, sanitizeQuery, validatePagination, meetingController.getMeetings);
 
-/**
- * @route   POST /api/meetings/upload
- * @desc    Create new meeting and upload audio (combined endpoint)
- * @access  Private
- * @body    FormData with 'audio', 'title', 'description', 'category'
- * @returns { success, data: meeting, message }
- */
 router.post(
   '/upload',
   authenticate,
-  uploadLimiter, // 5 uploads per minute (stricter rate limiting)
+  uploadLimiter,
   uploadAudio,
   handleMulterError,
   validateAudioFile,
-  validateAudioDuration, // FR.45: Validate 3-minute limit
+  validateAudioDuration,
   sanitizeBody,
   meetingController.createMeetingWithAudio
 );
 
-/**
- * @route   POST /api/meetings
- * @desc    Create new meeting
- * @access  Private
- * @body    { title, description?, category? }
- * @returns { success, data: meeting, message }
- */
 router.post(
   '/',
   authenticate,
@@ -111,21 +63,8 @@ router.post(
   meetingController.createMeeting
 );
 
-/**
- * @route   GET /api/meetings/:id
- * @desc    Get single meeting by ID
- * @access  Private (owner only)
- * @returns { success, data: meeting }
- */
 router.get('/:id', authenticate, validateUUIDParam('id'), meetingController.getMeetingById);
 
-/**
- * @route   PATCH /api/meetings/:id
- * @desc    Update meeting metadata
- * @access  Private (owner only)
- * @body    { title?, description?, category? }
- * @returns { success, data: meeting, message }
- */
 router.patch(
   '/:id',
   authenticate,
@@ -136,13 +75,6 @@ router.patch(
   meetingController.updateMeeting
 );
 
-/**
- * @route   PATCH /api/meetings/:id/speakers
- * @desc    Update speaker name mapping
- * @access  Private (owner only)
- * @body    { speakerId, newName }
- * @returns { success, data: speakerMap, message }
- */
 router.patch(
   '/:id/speakers',
   authenticate,
@@ -152,13 +84,6 @@ router.patch(
   meetingController.updateSpeakerMap
 );
 
-/**
- * @route   PATCH /api/meetings/:id/summary
- * @desc    Update meeting summary (Workspace context)
- * @access  Private (Workspace OWNER/EDITOR only)
- * @body    { executiveSummary?, actionItems?, keyDecisions?, nextSteps? }
- * @returns { success, data: meeting, message }
- */
 router.patch(
   '/:id/summary',
   authenticate,
@@ -167,13 +92,6 @@ router.patch(
   meetingController.updateMeetingSummary
 );
 
-
-/**
- * @route   DELETE /api/meetings/:id
- * @desc    Delete meeting and associated data
- * @access  Private (owner only)
- * @returns { success, message }
- */
 router.delete(
   '/:id',
   authenticate,
@@ -182,32 +100,19 @@ router.delete(
   meetingController.deleteMeeting
 );
 
-/**
- * @route   POST /api/meetings/:id/upload
- * @desc    Upload audio file for meeting
- * @access  Private (owner only)
- * @body    FormData with 'audio' field
- * @returns { success, data: { meetingId, status }, message }
- */
 router.post(
   '/:id/upload',
   authenticate,
   validateUUIDParam('id'),
   authorize('meeting'),
-  uploadLimiter, // 5 uploads per minute (stricter rate limiting)
+  uploadLimiter,
   uploadAudio,
   handleMulterError,
   validateAudioFile,
-  validateAudioDuration, // FR.45: Validate 3-minute limit
+  validateAudioDuration,
   meetingController.uploadAudio
 );
 
-/**
- * @route   GET /api/meetings/:id/transcript
- * @desc    Get meeting transcript
- * @access  Private (owner only)
- * @returns { success, data: { text, wordCount } }
- */
 router.get(
   '/:id/transcript',
   authenticate,
@@ -216,12 +121,6 @@ router.get(
   meetingController.getTranscript
 );
 
-/**
- * @route   GET /api/meetings/:id/summary
- * @desc    Get AI-generated meeting summary
- * @access  Private (owner only)
- * @returns { success, data: { executiveSummary, keyDecisions, actionItems, nextSteps } }
- */
 router.get(
   '/:id/summary',
   authenticate,
@@ -230,13 +129,6 @@ router.get(
   meetingController.getSummary
 );
 
-/**
- * @route   POST /api/meetings/:id/followup
- * @desc    Generate AI follow-up email draft
- * @access  Private (owner only)
- * @query   tone=<formal|casual>
- * @returns { success, data: { subject, body } }
- */
 router.post(
   '/:id/followup',
   authenticate,
@@ -246,12 +138,6 @@ router.post(
   meetingController.generateFollowUp
 );
 
-/**
- * @route   GET /api/meetings/:id/status
- * @desc    Get processing status of meeting
- * @access  Private (owner only)
- * @returns { success, data: { status, progress, estimatedTimeRemaining, currentStage } }
- */
 router.get(
   '/:id/status',
   authenticate,
@@ -259,13 +145,6 @@ router.get(
   meetingController.getProcessingStatus
 );
 
-/**
- * @route   GET /api/meetings/:id/audio
- * @desc    Stream meeting audio file (for audio player)
- * @access  Private (owner only)
- * @query   token=<jwt_token> (optional, for audio elements that can't send headers)
- * @returns Audio file stream (inline)
- */
 router.get(
   '/:id/audio',
   authenticateMedia,
@@ -274,12 +153,6 @@ router.get(
   meetingController.streamAudio
 );
 
-/**
- * @route   GET /api/meetings/:id/download/audio
- * @desc    Download meeting audio file
- * @access  Private (owner only)
- * @returns { success, data: { url, filename, size, expiresAt } }
- */
 router.get(
   '/:id/download/audio',
   authenticate,
@@ -287,13 +160,6 @@ router.get(
   meetingController.downloadAudio
 );
 
-/**
- * @route   GET /api/meetings/:id/download/transcript
- * @desc    Download meeting transcript
- * @access  Private (owner only)
- * @query   format=<txt|json>
- * @returns File download (text or JSON)
- */
 router.get(
   '/:id/download/transcript',
   authenticate,
@@ -303,13 +169,6 @@ router.get(
   meetingController.downloadTranscript
 );
 
-/**
- * @route   GET /api/meetings/:id/download/summary
- * @desc    Download meeting summary
- * @access  Private (owner only)
- * @query   format=<txt|json>
- * @returns File download (text or JSON)
- */
 router.get(
   '/:id/download/summary',
   authenticate,
@@ -319,12 +178,6 @@ router.get(
   meetingController.downloadSummary
 );
 
-/**
- * @route   GET /api/meetings/:id/download/all
- * @desc    Download all meeting files (audio MP3, transcript TXT, summary TXT) as ZIP
- * @access  Private (owner only)
- * @returns ZIP file containing all meeting files
- */
 router.get(
   '/:id/download/all',
   authenticate,
@@ -333,13 +186,6 @@ router.get(
   meetingController.downloadAll
 );
 
-/**
- * @route   POST /api/meetings/:id/reprocess
- * @desc    Reprocess meeting (regenerate summary/transcript)
- * @access  Private (owner only)
- * @body    { regenerateTranscript?, regenerateSummary? }
- * @returns { success, message }
- */
 router.post(
   '/:id/reprocess',
   authenticate,
@@ -349,12 +195,6 @@ router.post(
   meetingController.reprocessMeeting
 );
 
-/**
- * @route   POST /api/meetings/:id/share/slack
- * @desc    Share meeting summary to configured Slack webhook
- * @access  Private (owner only)
- * @returns { success, message }
- */
 router.post(
   '/:id/share/slack',
   authenticate,
@@ -364,12 +204,6 @@ router.post(
   meetingController.shareToSlack
 );
 
-/**
- * @route   POST /api/meetings/:id/share
- * @desc    Generate shareable link for meeting
- * @access  Private (owner only)
- * @returns { success, data: { shareToken, shareUrl } }
- */
 router.post(
   '/:id/share',
   authenticate,
@@ -378,12 +212,6 @@ router.post(
   meetingController.generateShareLink
 );
 
-/**
- * @route   DELETE /api/meetings/:id/share
- * @desc    Revoke share link for meeting
- * @access  Private (owner only)
- * @returns { success, message }
- */
 router.delete(
   '/:id/share',
   authenticate,
@@ -392,12 +220,6 @@ router.delete(
   meetingController.revokeShareLink
 );
 
-/**
- * @route   GET /api/meetings/:id/analytics
- * @desc    Get meeting analytics (speaker time, topics, sentiment)
- * @access  Private (owner only)
- * @returns { success, data: { speakerTime, topics, sentiment, engagement } }
- */
 router.get(
   '/:id/analytics',
   authenticate,
@@ -406,15 +228,8 @@ router.get(
   meetingController.getMeetingAnalytics
 );
 
-/**
- * @route   POST /api/meetings/batch-delete
- * @desc    Delete multiple meetings at once
- * @access  Private
- * @body    { meetingIds: [id1, id2, ...] }
- * @returns { success, data: { deleted, failed }, message }
- */
 router.post('/batch-delete', authenticate, sanitizeBody, (req, res) => {
-  // Future feature - batch operations
+
   res.status(501).json({
     success: false,
     error: 'Batch delete not yet implemented',
@@ -422,12 +237,6 @@ router.post('/batch-delete', authenticate, sanitizeBody, (req, res) => {
   });
 });
 
-/**
- * @route   GET /api/meetings/categories
- * @desc    Get list of available categories
- * @access  Public
- * @returns { success, data: [categories] }
- */
 router.get('/categories', (req, res) => {
   res.status(200).json({
     success: true,

@@ -12,9 +12,6 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Test Jira connection with provided credentials
- */
 const testConnection = async (req, res) => {
   try {
     const { jiraDomain, jiraEmail, jiraApiToken } = req.body;
@@ -49,15 +46,11 @@ const testConnection = async (req, res) => {
   }
 };
 
-/**
- * Manually sync an action item to Jira
- */
 const syncActionItem = async (req, res) => {
   try {
     const { actionItemId } = req.params;
     const userId = req.userId;
 
-    // Get user with Jira settings
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
@@ -69,7 +62,6 @@ const syncActionItem = async (req, res) => {
       });
     }
 
-    // Get action item
     const actionItem = await prisma.actionItem.findUnique({
       where: { id: actionItemId },
       include: { meeting: true }

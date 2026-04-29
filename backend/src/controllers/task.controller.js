@@ -1,11 +1,5 @@
 const { prisma } = require('../config/database');
 
-// ---------------------------------------------------------------------------
-// Helper: find an ActionItem and verify the requesting user has access.
-// Access is granted if:  (a) the user owns the task directly, OR
-//                        (b) the user is an OWNER/EDITOR of the workspace
-//                            that contains the meeting this task belongs to.
-// ---------------------------------------------------------------------------
 const findItemWithAccess = async (id, userId) => {
   const item = await prisma.actionItem.findUnique({
     where: { id },
@@ -28,17 +22,14 @@ const findItemWithAccess = async (id, userId) => {
 
   if (!item) return null;
 
-  // Direct ownership
   if (item.userId === userId) return item;
 
-  // Workspace OWNER / EDITOR access
   const membership = item.meeting?.workspaceMeeting?.workspace?.members?.[0];
   if (membership && ['OWNER', 'EDITOR'].includes(membership.role)) return item;
 
-  return null; // no access
+  return null;
 };
 
-// ---------------------------------------------------------------------------
 const createTask = async (req, res) => {
   try {
     const { meetingId, task, assignee, deadline, priority } = req.body;
@@ -60,7 +51,6 @@ const createTask = async (req, res) => {
       },
     });
 
-    // Sync the summaryActionItems JSON blob so it stays in lockstep with the relational table
     const allActionItems = await prisma.actionItem.findMany({
       where: { meetingId },
       orderBy: { createdAt: 'asc' },
@@ -88,7 +78,6 @@ const createTask = async (req, res) => {
   }
 };
 
-// ---------------------------------------------------------------------------
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,7 +90,6 @@ const deleteTask = async (req, res) => {
 
     await prisma.actionItem.delete({ where: { id } });
 
-    // Sync the summaryActionItems JSON blob after deletion
     if (item.meetingId) {
       const allActionItems = await prisma.actionItem.findMany({
         where: { meetingId: item.meetingId },
@@ -131,7 +119,6 @@ const deleteTask = async (req, res) => {
   }
 };
 
-// ---------------------------------------------------------------------------
 const getTasks = async (req, res) => {
   try {
     const tasks = await prisma.actionItem.findMany({
@@ -147,13 +134,11 @@ const getTasks = async (req, res) => {
   }
 };
 
-// ---------------------------------------------------------------------------
 const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, task, assignee, deadline, priority } = req.body;
 
-    // Ownership OR workspace EDITOR/OWNER access
     const existing = await findItemWithAccess(id, req.userId);
 
     if (!existing) {

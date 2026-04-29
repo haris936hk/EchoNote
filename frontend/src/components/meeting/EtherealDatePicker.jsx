@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  format, 
-  addMonths, 
-  subMonths, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
-  eachDayOfInterval, 
-  isSameMonth, 
-  isSameDay, 
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
   isToday,
   parseISO,
   isValid
@@ -31,7 +31,7 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
           containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
       }
@@ -47,13 +47,13 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
       const rect = containerRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceAbove = rect.top;
-      
+
       const shouldFlip = spaceBelow < 400 && spaceAbove > spaceBelow;
 
       setPlacement(shouldFlip ? 'top' : 'bottom');
       setCoords({
-        top: shouldFlip 
-          ? rect.top + window.scrollY - 8 
+        top: shouldFlip
+          ? rect.top + window.scrollY - 8
           : rect.bottom + window.scrollY + 8,
         left: rect.left + window.scrollX,
         width: rect.width
@@ -76,7 +76,6 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
     setIsOpen(false);
   };
 
-
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
@@ -92,11 +91,11 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
   const pickerContent = (
     <AnimatePresence>
       {isOpen && (
-        <div 
+        <div
           ref={dropdownRef}
           className="fixed z-[200] w-[320px]"
-          style={{ 
-            top: coords.top, 
+          style={{
+            top: coords.top,
             left: Math.min(Math.max(20, coords.left), window.innerWidth - 340),
             transform: placement === 'top' ? 'translateY(-100%)' : 'none'
           }}
@@ -108,7 +107,7 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
             transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             className="w-full overflow-hidden rounded-xl bg-[#0c1324]/90 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] ring-1 ring-white/[0.08] backdrop-blur-2xl max-h-[calc(100vh-60px)] overflow-y-auto scrollbar-hide"
           >
-            {/* Header */}
+            {}
           <div className="mb-4 flex items-center justify-between px-1">
             <h3 className="font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-[#f8fafc]">
               {format(currentMonth, 'MMMM yyyy')}
@@ -129,11 +128,11 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
             </div>
           </div>
 
-          {/* Weekdays */}
+          {}
           <div className="mb-2 grid grid-cols-7">
             {weekDays.map((day) => (
-              <div 
-                key={day} 
+              <div
+                key={day}
                 className="text-center font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-tighter text-[#64748b]"
               >
                 {day}
@@ -141,7 +140,7 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
             ))}
           </div>
 
-          {/* Grid */}
+          {}
           <div className="grid grid-cols-7 gap-y-1">
             {calendarDays.map((day, idx) => {
               const isSelected = selectedDate && isSameDay(day, selectedDate);
@@ -158,15 +157,15 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
                     hover:bg-white/5
                   `}
                 >
-                  {/* Selection Glow */}
+                  {}
                   {isSelected && (
-                    <motion.div 
+                    <motion.div
                       layoutId="selectedDay"
                       className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#bdc2ff]/20 to-[#818cf8]/20 ring-1 ring-[#818cf8]/50 shadow-[0_0_15px_rgba(129,140,248,0.3)]"
                     />
                   )}
-                  
-                  {/* Today Indicator */}
+
+                  {}
                   {isTodayDate && !isSelected && (
                     <div className="absolute bottom-1.5 size-1 rounded-full bg-[#818cf8]/50" />
                   )}

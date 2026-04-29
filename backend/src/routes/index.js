@@ -1,10 +1,7 @@
-// backend/src/routes/index.js
-// Central route registry - combines all routes
 
 const express = require('express');
 const router = express.Router();
 
-// Import route modules
 const authRoutes = require('./auth.routes');
 const meetingRoutes = require('./meeting.routes');
 const userRoutes = require('./user.routes');
@@ -12,14 +9,9 @@ const calendarRoutes = require('./calendar.routes');
 const taskRoutes = require('./task.routes');
 const jiraRoutes = require('./jira.routes');
 
-// API version and status
 const API_VERSION = '1.0.0';
 const API_PREFIX = '/api';
 
-/**
- * Root endpoint
- * GET /
- */
 router.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -35,15 +27,10 @@ router.get('/', (req, res) => {
   });
 });
 
-/**
- * Health check endpoint
- * GET /api/health
- */
 router.get('/health', async (req, res) => {
   try {
     const { checkDatabaseHealth } = require('../config/database');
 
-    // Check database
     const dbHealth = await checkDatabaseHealth();
 
     const overallHealth = dbHealth.status === 'healthy' ? 'healthy' : 'degraded';
@@ -80,10 +67,6 @@ router.get('/health', async (req, res) => {
   }
 });
 
-/**
- * API status endpoint with statistics
- * GET /api/status
- */
 router.get('/status', async (req, res) => {
   try {
     const { getDatabaseStats } = require('../config/database');
@@ -119,10 +102,6 @@ router.get('/status', async (req, res) => {
   }
 });
 
-/**
- * API documentation endpoint
- * GET /api/docs
- */
 router.get('/docs', (req, res) => {
   res.status(200).json({
     success: true,
@@ -172,10 +151,6 @@ router.get('/docs', (req, res) => {
   });
 });
 
-/**
- * Privacy Policy endpoint (FR.42 - GDPR compliance)
- * GET /api/privacy-policy
- */
 router.get('/privacy-policy', (req, res) => {
   const privacyPolicy = {
     lastUpdated: '2026-01-04',
@@ -346,10 +321,6 @@ router.get('/privacy-policy', (req, res) => {
   });
 });
 
-/**
- * Test endpoint for development
- * GET /api/test
- */
 if (process.env.NODE_ENV === 'development') {
   router.get('/test', (req, res) => {
     res.status(200).json({
@@ -376,9 +347,6 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-/**
- * Register route modules
- */
 router.use('/auth', authRoutes);
 router.use('/meetings', meetingRoutes);
 router.use('/users', userRoutes);
@@ -386,9 +354,6 @@ router.use('/calendar', calendarRoutes);
 router.use('/tasks', taskRoutes);
 router.use('/jira', jiraRoutes);
 
-/**
- * Helper function to format uptime
- */
 function formatUptime(seconds) {
   const days = Math.floor(seconds / 86400);
   const hours = Math.floor((seconds % 86400) / 3600);
@@ -404,10 +369,6 @@ function formatUptime(seconds) {
   return parts.join(' ');
 }
 
-/**
- * Catch-all for undefined API routes
- * This will be caught by the notFound middleware in server.js
- */
 router.use('*', (req, res) => {
   res.status(404).json({
     success: false,

@@ -1,9 +1,7 @@
 
-
 const { getGmailTransport } = require('../utils/emailTransport');
 const { prisma } = require('./database');
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -15,7 +13,6 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const EMAIL_CONFIG = {
   from: process.env.EMAIL_FROM || 'EchoNote <hariskhan936.hk@gmail.com>',
   replyTo: process.env.EMAIL_REPLY_TO || 'hariskhan936.hk@gmail.com',
@@ -23,11 +20,6 @@ const EMAIL_CONFIG = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 };
 
-/**
- * Check if user has email notifications enabled
- * @param {string} email - User email address
- * @returns {Promise<boolean>} - True if enabled or user not found
- */
 async function isEmailNotificationsEnabled(email) {
   try {
     const user = await prisma.user.findUnique({
@@ -35,31 +27,20 @@ async function isEmailNotificationsEnabled(email) {
       select: { emailNotifications: true },
     });
 
-   
     if (!user) return true;
 
-    return user.emailNotifications !== false; 
+    return user.emailNotifications !== false;
   } catch (error) {
     logger.error('Error checking email preferences:', error);
-    return true; 
+    return true;
   }
 }
 
-/**
- * Send email via Gmail OAuth2 SMTP
- * @param {Object} options - Email options
- * @param {string} options.to - Recipient email address
- * @param {string} options.subject - Email subject
- * @param {string} options.html - HTML email content
- * @param {string} [options.text] - Plain text email content
- * @param {boolean} [options.skipPreferenceCheck=false] - Skip user preference check for critical emails
- * @returns {Object} Send result
- */
 const sendEmail = async (options) => {
   const { to, subject, html, text, skipPreferenceCheck = false } = options;
 
   try {
-    
+
     if (!skipPreferenceCheck) {
       const notificationsEnabled = await isEmailNotificationsEnabled(to);
       if (!notificationsEnabled) {
@@ -68,16 +49,13 @@ const sendEmail = async (options) => {
       }
     }
 
-    
     if (EMAIL_CONFIG.skipSend) {
       logger.info('📧 [DEV MODE] Email would be sent:', { to, subject });
       return { success: true, dev: true };
     }
 
-    
     const transporter = await getGmailTransport();
 
-    
     const info = await transporter.sendMail({
       from: options.from || EMAIL_CONFIG.from,
       to,
@@ -95,10 +73,6 @@ const sendEmail = async (options) => {
   }
 };
 
-/**
- * Send meeting completion notification
- * @param {Object} params - Email parameters
- */
 const sendMeetingCompletedEmail = async ({ to, userName, meeting }) => {
   const subject = `✅ Your meeting "${meeting.title}" is ready`;
 
@@ -394,10 +368,6 @@ For support, contact: support@echonote.app
   return sendEmail({ to, subject, html, text });
 };
 
-/**
- * Send meeting processing failed notification
- * @param {Object} params - Email parameters
- */
 const sendMeetingFailedEmail = async ({ to, userName, meeting, error }) => {
   const subject = `❌ Processing failed for "${meeting.title}"`;
 
@@ -445,25 +415,25 @@ const sendMeetingFailedEmail = async ({ to, userName, meeting, error }) => {
         <h1>⚠️ Processing Error</h1>
         <p>Hi ${userName || 'there'},</p>
         <p>We encountered an issue while processing your meeting "${meeting.title}".</p>
-        
+
         <div class="error-box">
           <strong>Error Details:</strong><br>
           ${error || 'An unexpected error occurred during processing.'}
         </div>
-        
+
         <p><strong>What you can do:</strong></p>
         <ul>
           <li>Try uploading the recording again</li>
           <li>Ensure the audio file is clear and not corrupted</li>
           <li>Contact support if the issue persists</li>
         </ul>
-        
+
         <center>
           <a href="${EMAIL_CONFIG.frontendUrl}/meetings/${meeting.id}" class="button">
             View Meeting Details
           </a>
         </center>
-        
+
         <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
           Need help? Contact us at <a href="mailto:support@echonote.app">support@echonote.app</a>
         </p>
@@ -492,10 +462,6 @@ For support, contact: support@echonote.app
   return sendEmail({ to, subject, html, text });
 };
 
-/**
- * Send welcome email to new users
- * @param {Object} params - Email parameters
- */
 const sendWelcomeEmail = async ({ to, userName }) => {
   const subject = '🎉 Welcome to EchoNote!';
 
@@ -760,10 +726,6 @@ Need help? Reply to this email or visit our Help Center.
   return sendEmail({ to, subject, html, text });
 };
 
-/**
- * Send workspace invitation email
- * @param {Object} params - Email parameters
- */
 const sendWorkspaceInvitationEmail = async ({ to, inviterName, workspaceName, role }) => {
   const subject = `🤝 ${inviterName} invited you to join "${workspaceName}"`;
 
@@ -902,10 +864,6 @@ EchoNote Collaborative Intelligence
   return sendEmail({ to, subject, html, text, skipPreferenceCheck: true });
 };
 
-/**
- * Test email configuration
- * @param {string} to - Test recipient email
- */
 const testEmailConfig = async (to) => {
   return sendEmail({
     to,

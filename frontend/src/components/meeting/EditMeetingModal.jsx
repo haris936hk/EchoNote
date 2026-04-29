@@ -101,7 +101,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
             </ModalHeader>
             <ModalBody>
               <div className="space-y-5">
-                {/* Title Input */}
+                {}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-300">
                     Meeting Title <span className="text-red-400">*</span>
@@ -122,7 +122,7 @@ const EditMeetingModal = ({ isOpen, onClose, meeting, onSave }) => {
                   />
                 </div>
 
-                {/* Description Input */}
+                {}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-300">Description</label>
                   <Textarea

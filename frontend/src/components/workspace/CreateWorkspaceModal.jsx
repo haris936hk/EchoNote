@@ -48,7 +48,7 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -57,7 +57,7 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
             className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
           />
 
-          {/* Modal Container */}
+          {}
           <motion.div
             initial={{ y: 20, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -65,7 +65,7 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative w-full max-w-lg overflow-hidden rounded-[24px] bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(129,140,248,0.2)] ring-1 ring-white/[0.08]"
           >
-            {/* Header */}
+            {}
             <div className="p-8 pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
               </div>
             </div>
 
-            {/* Body */}
+            {}
             <div className="space-y-6 p-8 pt-4">
               <div className="space-y-2">
                 <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -117,11 +117,11 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
               </div>
             </div>
 
-            {/* Footer */}
+            {}
             <div className="relative flex items-center justify-end gap-4 bg-[#080d1a] p-8 pt-6">
-              {/* Tonal Transition */}
+              {}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-8 -translate-y-full bg-gradient-to-b from-transparent to-[#080d1a]" />
-              
+
               <button
                 onClick={onClose}
                 className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold text-slate-500 transition-all hover:text-slate-300"

@@ -1,15 +1,12 @@
 
-
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
-
 
 const googleClient = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI
 );
-
 
 const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
@@ -18,11 +15,6 @@ const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
 ];
 
-/**
- * Verify Google ID Token
- * @param {string} token - Google ID token from frontend
- * @returns {Object} Decoded token payload with user info
- */
 const verifyGoogleToken = async (token) => {
   try {
     const ticket = await googleClient.verifyIdToken({
@@ -47,17 +39,11 @@ const verifyGoogleToken = async (token) => {
   }
 };
 
-/**
- * Exchange authorization code for tokens (server-side flow)
- * @param {string} code - Authorization code from Google
- * @returns {Object} Access token, refresh token, and user info
- */
 const exchangeCodeForTokens = async (code) => {
   try {
     const { tokens } = await googleClient.getToken(code);
     googleClient.setCredentials(tokens);
 
-    
     const ticket = await googleClient.verifyIdToken({
       idToken: tokens.id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -82,23 +68,14 @@ const exchangeCodeForTokens = async (code) => {
   }
 };
 
-/**
- * Get Google authorization URL for server-side flow
- * @returns {string} Authorization URL
- */
 const getAuthUrl = () => {
   return googleClient.generateAuthUrl({
     access_type: 'offline',
-    prompt: 'consent', 
+    prompt: 'consent',
     scope: GOOGLE_SCOPES,
   });
 };
 
-/**
- * Refresh Google access token
- * @param {string} refreshToken - User's refresh token
- * @returns {Object} New access token and expiry
- */
 const refreshGoogleToken = async (refreshToken) => {
   try {
     googleClient.setCredentials({
@@ -116,11 +93,6 @@ const refreshGoogleToken = async (refreshToken) => {
   }
 };
 
-/**
- * Generate JWT access token
- * @param {Object} payload - User data to encode
- * @returns {string} JWT token
- */
 const generateAccessToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '7d',
@@ -129,11 +101,6 @@ const generateAccessToken = (payload) => {
   });
 };
 
-/**
- * Generate JWT refresh token
- * @param {Object} payload - User data to encode
- * @returns {string} JWT refresh token
- */
 const generateRefreshToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d',
@@ -142,11 +109,6 @@ const generateRefreshToken = (payload) => {
   });
 };
 
-/**
- * Verify JWT token
- * @param {string} token - JWT token to verify
- * @returns {Object} Decoded token payload
- */
 const verifyToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET, {
@@ -163,20 +125,10 @@ const verifyToken = (token) => {
   }
 };
 
-/**
- * Decode JWT token without verification (for debugging)
- * @param {string} token - JWT token to decode
- * @returns {Object} Decoded token payload
- */
 const decodeToken = (token) => {
   return jwt.decode(token);
 };
 
-/**
- * Generate both access and refresh tokens
- * @param {Object} user - User object from database
- * @returns {Object} Access and refresh tokens
- */
 const generateTokenPair = (user) => {
   const payload = {
     id: user.id,
@@ -191,23 +143,13 @@ const generateTokenPair = (user) => {
   };
 };
 
-/**
- * Extract token from Authorization header
- * @param {string} authHeader - Authorization header value
- * @returns {string|null} Token or null
- */
 const extractTokenFromHeader = (authHeader) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
-  return authHeader.substring(7); // Remove 'Bearer ' prefix
+  return authHeader.substring(7);
 };
 
-/**
- * Check if token is expired
- * @param {string} token - JWT token
- * @returns {boolean} True if expired
- */
 const isTokenExpired = (token) => {
   try {
     const decoded = jwt.decode(token);
@@ -222,59 +164,33 @@ const isTokenExpired = (token) => {
   }
 };
 
-/**
- * Validate email format
- * @param {string} email - Email to validate
- * @returns {boolean} True if valid
- */
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-/**
- * Generate random token (for verification codes, etc.)
- * @param {number} length - Token length
- * @returns {string} Random token
- */
 const generateRandomToken = (length = 32) => {
   const crypto = require('crypto');
   return crypto.randomBytes(length).toString('hex');
 };
 
-/**
- * Hash sensitive data
- * @param {string} data - Data to hash
- * @returns {string} Hashed data
- */
 const hashData = (data) => {
   const crypto = require('crypto');
   return crypto.createHash('sha256').update(data).digest('hex');
 };
 
-/**
- * Get token expiry time in milliseconds
- * @param {string} token - JWT token
- * @returns {number|null} Expiry time or null
- */
 const getTokenExpiry = (token) => {
   try {
     const decoded = jwt.decode(token);
     if (!decoded || !decoded.exp) {
       return null;
     }
-    return decoded.exp * 1000; 
+    return decoded.exp * 1000;
   } catch (error) {
     return null;
   }
 };
 
-/**
- * Create OAuth2 client with user's tokens
- * @param {string} accessToken - User's access token
- * @param {string} refreshToken - User's refresh token
- * @returns {OAuth2Client} Configured OAuth2 client
- */
 const createUserOAuthClient = (accessToken, refreshToken) => {
   const client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -294,26 +210,22 @@ module.exports = {
   googleClient,
   GOOGLE_SCOPES,
 
-  
   verifyGoogleToken,
   exchangeCodeForTokens,
   getAuthUrl,
   refreshGoogleToken,
   createUserOAuthClient,
 
-  
   generateAccessToken,
   generateRefreshToken,
   generateTokenPair,
   verifyToken,
   decodeToken,
 
-  
   extractTokenFromHeader,
   isTokenExpired,
   getTokenExpiry,
 
-  
   isValidEmail,
   generateRandomToken,
   hashData,

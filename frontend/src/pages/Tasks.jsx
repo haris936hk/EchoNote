@@ -77,7 +77,6 @@ export default function Tasks() {
     e.dataTransfer.setData('taskId', taskId);
     e.dataTransfer.effectAllowed = 'move';
 
-    // Dim the item being dragged
     const target = e.target;
     setTimeout(() => {
       target.style.opacity = '0.4';
@@ -95,7 +94,6 @@ export default function Tasks() {
     const task = tasks.find((t) => t.id === taskId);
     if (!task || task.status === status) return;
 
-    // Optimistic UI Update
     const oldTasks = [...tasks];
     setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status } : t)));
 
@@ -135,7 +133,7 @@ export default function Tasks() {
 
   const handleSyncToJira = async (task) => {
     if (task.jiraIssueKey) return;
-    
+
     setSyncingTaskId(task.id);
     try {
       const token = localStorage.getItem('token');
@@ -144,10 +142,10 @@ export default function Tasks() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         showToast(`Synced to Jira: ${data.data.key}`, 'success');
-        setTasks(prev => prev.map(t => 
+        setTasks(prev => prev.map(t =>
           t.id === task.id ? { ...t, jiraIssueKey: data.data.key } : t
         ));
       } else {
@@ -183,7 +181,7 @@ export default function Tasks() {
 
   return (
     <div className="flex h-full min-h-[calc(100vh-120px)] flex-col gap-6 py-6">
-      {/* ── Header Area ── */}
+      {}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Action Items</h1>
@@ -245,7 +243,7 @@ export default function Tasks() {
         </div>
       </div>
 
-      {/* ── Kanban Board ── */}
+      {}
       <div className="flex-1 pb-10">
         <div className="grid h-full min-h-[500px] grid-cols-1 gap-6 md:grid-cols-3">
           {COLUMNS.map((col) => (
@@ -255,7 +253,7 @@ export default function Tasks() {
               onDrop={(e) => handleDrop(e, col.id)}
               className="flex min-h-[400px] flex-col rounded-card border border-echo-border bg-echo-surface/50"
             >
-              {/* Column Header */}
+              {}
               <div className="flex items-center justify-between border-b border-echo-border bg-echo-surface/30 p-4">
                 <div className="flex items-center gap-2.5">
                   <div className={`rounded-md p-1.5 ${col.bgColor}`}>
@@ -268,7 +266,7 @@ export default function Tasks() {
                 </span>
               </div>
 
-              {/* Task List */}
+              {}
               <div className="custom-scrollbar max-h-[70vh] flex-1 space-y-3 overflow-y-auto p-3">
                 <AnimatePresence mode="popLayout">
                   {filteredTasks

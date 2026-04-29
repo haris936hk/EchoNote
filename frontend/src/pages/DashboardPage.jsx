@@ -180,7 +180,7 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6 py-6">
-      {/* ── Page Header ── */}
+      {}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Dashboard</h1>
@@ -208,7 +208,7 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* ── Empty State ── */}
+      {}
       {meetings.length === 0 && !loading && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-16 text-center">
           <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-accent-primary/10">
@@ -236,7 +236,7 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* ── Stats Strip ── */}
+      {}
       {meetings.length > 0 && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -282,7 +282,7 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* ── Processing Alert ── */}
+      {}
       {stats.processing > 0 && (
         <div className="flex items-center gap-3 rounded-btn border border-accent-primary/10 bg-accent-primary/5 px-4 py-3">
           <div className="ai-dot" />
@@ -292,7 +292,7 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* ── Failed Alert ── */}
+      {}
       {stats.failed > 0 && (
         <div className="flex items-center gap-3 rounded-btn border border-red-500/10 bg-red-500/5 px-4 py-3">
           <AlertCircle size={16} className="shrink-0 text-red-400" />
@@ -302,11 +302,11 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* ── Main Content ── */}
+      {}
       <div className="flex flex-col gap-6 lg:flex-row">
-        {/* Left Column — Meetings */}
+        {}
         <div className="flex-1 space-y-5">
-          {/* Search & Filters */}
+          {}
           <div className="space-y-4">
             <SearchBar
               value={searchQuery}
@@ -332,7 +332,7 @@ const DashboardPage = () => {
           )}
         </div>
 
-        {/* Right Column — Sidebar */}
+        {}
         <div
           className={`${showMobileSidebar ? 'flex' : 'hidden'} w-full shrink-0 flex-col space-y-6 lg:flex lg:w-[320px]`}
         >
@@ -379,7 +379,7 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Scroll to Top */}
+      {}
       {showScrollTop && (
         <div className="fixed bottom-8 right-8 z-50">
           <Button
@@ -392,7 +392,7 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* Edit Meeting Modal */}
+      {}
       <EditMeetingModal
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}

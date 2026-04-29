@@ -104,7 +104,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8">
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -114,7 +114,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
             className="absolute inset-0 bg-[#020617]/70 backdrop-blur-xl"
           />
 
-          {/* Modal Container */}
+          {}
           <motion.div
             initial={{ y: 20, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -122,14 +122,14 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative flex max-h-[min(85vh,800px)] w-full max-w-2xl flex-col overflow-hidden rounded-card bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(189,194,255,0.15)] ring-1 ring-white/[0.06]"
           >
-            {/* Outline Glow Fallback / Additional ambient light */}
+            {}
             <div className="pointer-events-none absolute inset-0 rounded-card shadow-[inset_0_1px_rgba(255,255,255,0.05)]" />
 
-            {/* Header (Fixed) */}
+            {}
             <div className="z-10 flex-none bg-[#0c1324] p-8 pb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-5">
-                  {/* AI Living Indicator */}
+                  {}
                   <div className="relative">
                     <div className="flex size-14 items-center justify-center rounded-[14px] bg-[#151b2d] shadow-inner ring-1 ring-white/[0.06]">
                       <LuSparkles className="text-[#818cf8]" size={28} />
@@ -161,16 +161,16 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
               </div>
             </div>
 
-            {/* Scrollable Body */}
+            {}
             <div className="relative z-0 flex-1 overflow-y-auto px-8 pb-4 scrollbar-hide">
               <div className="space-y-8">
-                {/* Email Tone Selector */}
+                {}
                 <div className="space-y-3.5">
                   <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
                     EMAIL TONE
                   </label>
                   <div className="relative flex rounded-[12px] bg-[#151b2d]/50 p-1.5 ring-1 ring-white/[0.06] backdrop-blur-md">
-                    {/* Sliding Background */}
+                    {}
                     <motion.div
                       className="absolute inset-y-1.5 w-[calc(50%-6px)] rounded-[8px] bg-gradient-to-br from-[#818cf8] to-[#a78bfa] shadow-[0_4px_12px_rgba(129,140,248,0.25)]"
                       initial={false}
@@ -196,7 +196,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                   </div>
                 </div>
 
-                {/* Subject Line */}
+                {}
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
                     <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
@@ -257,7 +257,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
                   </div>
                 </div>
 
-                {/* Message Body */}
+                {}
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
                     <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
@@ -327,9 +327,9 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
               </div>
             </div>
 
-            {/* Footer (Fixed) */}
+            {}
             <div className="relative z-10 flex flex-none items-center justify-between bg-[#0c1324] p-8 pt-6">
-              {/* Tonal Transition instead of border line */}
+              {}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-10 -translate-y-full bg-gradient-to-b from-transparent to-[#0c1324]" />
 
               <button

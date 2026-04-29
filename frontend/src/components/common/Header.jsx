@@ -5,13 +5,11 @@ import { motion } from 'framer-motion';
 import { LuMic as Mic } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 
-
 const Header = ({ navItems = [] }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [activeItem, setActiveItem] = useState(location.pathname);
 
- 
   useEffect(() => {
     setActiveItem(location.pathname);
   }, [location.pathname]);
@@ -29,7 +27,7 @@ const Header = ({ navItems = [] }) => {
   return (
     <header className="flex w-full justify-center px-4 py-6">
       <div className="flex h-14 items-center gap-6 rounded-full border border-white/10 bg-surface/40 px-6 shadow-[0_0_40px_rgba(189,194,255,0.08)] backdrop-blur-2xl">
-        {/* Brand/Logo Section */}
+        {}
         <Link
           to="/dashboard"
           className="flex items-center gap-2 text-accent-primary transition-opacity hover:opacity-80"
@@ -39,10 +37,10 @@ const Header = ({ navItems = [] }) => {
           <span className="text-base font-bold tracking-tighter">EchoNote</span>
         </Link>
 
-        {/* Vertical Divider */}
+        {}
         <div className="h-6 w-px bg-white/10" />
 
-        {/* Navigation Section */}
+        {}
         <nav className="flex items-center gap-1">
           {navItems.map((link) => {
             const isHash = link.path.startsWith('#');
@@ -82,10 +80,10 @@ const Header = ({ navItems = [] }) => {
           })}
         </nav>
 
-        {/* Vertical Divider (Optional, to separate user from nav) */}
+        {}
         <div className="h-6 w-px bg-white/10" />
 
-        {/* User Avatar / Auth Section */}
+        {}
         <div className="flex items-center">
           {user ? (
             <Link to="/settings" onClick={() => setActiveItem('/settings')}>

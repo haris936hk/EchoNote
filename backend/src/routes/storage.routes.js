@@ -1,17 +1,9 @@
-// backend/src/routes/storage.routes.js
-// Storage management routes
 
 const express = require('express');
 const router = express.Router();
 const storageService = require('../services/storage.service');
 const { authenticate } = require('../middleware/auth.middleware');
 
-/**
- * @route   GET /api/storage/stats
- * @desc    Get storage statistics
- * @access  Private (Admin in production)
- * @returns { success, data: { raw, processed, total } }
- */
 router.get('/stats', authenticate, async (req, res) => {
   try {
     const result = await storageService.getStorageStats();
@@ -33,12 +25,6 @@ router.get('/stats', authenticate, async (req, res) => {
   }
 });
 
-/**
- * @route   POST /api/storage/cleanup
- * @desc    Manually trigger storage cleanup
- * @access  Private (Admin in production)
- * @returns { success, message }
- */
 router.post('/cleanup', authenticate, async (req, res) => {
   try {
     console.log('🧹 Manual storage cleanup triggered');
@@ -62,13 +48,6 @@ router.post('/cleanup', authenticate, async (req, res) => {
   }
 });
 
-/**
- * Health check for storage service
- * @route   GET /api/storage/health
- * @desc    Check if storage service is working
- * @access  Public
- * @returns { success, status, timestamp }
- */
 router.get('/health', async (req, res) => {
   try {
     const result = await storageService.getStorageStats();

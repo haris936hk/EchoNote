@@ -77,7 +77,7 @@ const UserMenu = () => {
           base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
         }}
       >
-        {/* User Info Section */}
+        {}
         <DropdownSection
           showDivider
           classNames={{
@@ -100,7 +100,7 @@ const UserMenu = () => {
           </DropdownItem>
         </DropdownSection>
 
-        {/* Navigation Section */}
+        {}
         <DropdownSection
           showDivider
           classNames={{
@@ -128,7 +128,7 @@ const UserMenu = () => {
           </DropdownItem>
         </DropdownSection>
 
-        {/* Logout Section */}
+        {}
         <DropdownSection
           classNames={{
             group: 'p-0',
@@ -229,7 +229,7 @@ export const UserMenuWithBadge = ({ badgeContent }) => {
         </DropdownMenu>
       </Dropdown>
 
-      {/* Badge */}
+      {}
       {badgeContent && (
         <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-danger text-xs font-medium text-white">
           {badgeContent}

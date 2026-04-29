@@ -1,8 +1,6 @@
 
-
 const { prisma } = require('../config/database');
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -13,7 +11,6 @@ const logger = winston.createLogger({
     }),
   ],
 });
-
 
 const getPublicMeetingByToken = async (req, res) => {
   try {
@@ -30,7 +27,7 @@ const getPublicMeetingByToken = async (req, res) => {
       where: {
         shareToken: token
       },
-     
+
       select: {
         title: true,
         category: true,
@@ -52,12 +49,10 @@ const getPublicMeetingByToken = async (req, res) => {
       });
     }
 
-    
     const keyDecisions = meeting.summaryKeyDecisions ? (typeof meeting.summaryKeyDecisions === 'string' ? JSON.parse(meeting.summaryKeyDecisions || '[]') : meeting.summaryKeyDecisions) : [];
     const actionItems = meeting.summaryActionItems ? (typeof meeting.summaryActionItems === 'string' ? JSON.parse(meeting.summaryActionItems || '[]') : meeting.summaryActionItems) : [];
     const speakerMap = meeting.speakerMap ? (typeof meeting.speakerMap === 'string' ? JSON.parse(meeting.speakerMap || '{}') : meeting.speakerMap) : {};
 
-   
     const speakers = Object.values(speakerMap);
 
     const publicMeeting = {

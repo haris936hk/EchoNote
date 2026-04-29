@@ -1,23 +1,15 @@
 
-
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-
 
 const FFMPEG_PATH =
   process.env.FFMPEG_PATH ||
   'C:\\Users\\HK\\Desktop\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe';
 
-/**
- * Convert WAV audio file to MP3 format
- * @param {string} inputPath - Path to the input WAV file
- * @param {string} outputPath - Path for the output MP3 file
- * @returns {Promise<{success: boolean, outputPath?: string, size?: number, error?: string}>}
- */
 const convertWavToMp3 = (inputPath, outputPath) => {
   return new Promise((resolve) => {
-    
+
     if (!fs.existsSync(inputPath)) {
       return resolve({
         success: false,
@@ -25,13 +17,11 @@ const convertWavToMp3 = (inputPath, outputPath) => {
       });
     }
 
-    
     const outputDir = path.dirname(outputPath);
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-   
     const args = ['-i', inputPath, '-b:a', '128k', '-ac', '1', '-ar', '44100', '-y', outputPath];
 
     const ffmpeg = spawn(FFMPEG_PATH, args);
@@ -67,11 +57,6 @@ const convertWavToMp3 = (inputPath, outputPath) => {
   });
 };
 
-/**
- * Cleanup temporary MP3 file after download
- * @param {string} filePath - Path to the temporary file to delete
- * @returns {Promise<boolean>}
- */
 const cleanupTempMp3 = async (filePath) => {
   try {
     if (fs.existsSync(filePath)) {
@@ -85,10 +70,6 @@ const cleanupTempMp3 = async (filePath) => {
   }
 };
 
-/**
- * Check if FFmpeg is available
- * @returns {Promise<boolean>}
- */
 const checkFfmpegAvailable = () => {
   return new Promise((resolve) => {
     const ffmpeg = spawn(FFMPEG_PATH, ['-version']);

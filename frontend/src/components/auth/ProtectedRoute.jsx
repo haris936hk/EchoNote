@@ -5,7 +5,6 @@ import { Spinner } from '@heroui/react';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -14,12 +13,10 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
- 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  
   return children;
 };
 

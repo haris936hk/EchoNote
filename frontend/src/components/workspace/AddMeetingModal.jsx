@@ -63,7 +63,7 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -72,7 +72,7 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
             className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
           />
 
-          {/* Modal Container */}
+          {}
           <motion.div
             initial={{ y: 20, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -80,7 +80,7 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(189,194,255,0.2)] ring-1 ring-white/[0.08]"
           >
-            {/* Header */}
+            {}
             <div className="flex-none p-8 pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -103,7 +103,7 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
               </div>
             </div>
 
-            {/* Scrollable Body */}
+            {}
             <div className="flex-1 overflow-y-auto px-8 py-4 scrollbar-hide">
               <div className="space-y-6">
                 <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -185,10 +185,10 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
               </div>
             </div>
 
-            {/* Footer */}
+            {}
             <div className="relative flex-none bg-[#080d1a] p-8 pt-6">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-10 -translate-y-full bg-gradient-to-b from-transparent to-[#080d1a]" />
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
                    {selectedMeeting && (

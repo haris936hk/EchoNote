@@ -48,7 +48,7 @@ export default function Decisions() {
 
   return (
     <div className="flex h-full min-h-[calc(100vh-120px)] flex-col gap-8 px-4 py-8">
-      {/* ── Editorial Header ── */}
+      {}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
@@ -81,9 +81,9 @@ export default function Decisions() {
         </div>
       </div>
 
-      {/* ── The Chronological Stream ── */}
+      {}
       <div className="relative flex-1">
-        {/* Timeline Line */}
+        {}
         <div className="absolute bottom-0 left-[17px] top-4 w-px bg-gradient-to-b from-accent-primary/30 via-echo-border to-transparent" />
 
         <div className="space-y-12 pb-20">
@@ -97,14 +97,14 @@ export default function Decisions() {
                   transition={{ delay: index * 0.05 }}
                   className="group relative pl-12"
                 >
-                  {/* Timeline Node */}
+                  {}
                   <div className="absolute left-0 top-1 z-10 flex size-[35px] items-center justify-center rounded-full border-3 border-echo-surface bg-echo-base transition-colors group-hover:border-accent-primary/30">
                     <div className="size-2 rounded-full bg-accent-primary shadow-[0_0_10px_rgba(129,140,248,0.5)]" />
                   </div>
 
-                  {/* Decision Content */}
+                  {}
                   <div className="flex flex-col gap-4">
-                    {/* Timestamp & Meeting Link (TECHNICAL DATA) */}
+                    {}
                     <div className="flex flex-wrap items-center gap-3">
                       <div className="flex items-center gap-2 rounded-md border border-white/5 bg-white/5 px-2.5 py-1 font-mono text-[10px] text-slate-500">
                         <LuCalendar size={12} />
@@ -125,7 +125,7 @@ export default function Decisions() {
                       </button>
                     </div>
 
-                    {/* The Decision itself (Plus Jakarta Sans) */}
+                    {}
                     <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-echo-surface to-echo-surface/50 p-6 shadow-2xl transition-all hover:border-white/10 hover:bg-white/[0.03] group-hover:-translate-y-1">
                       <div className="absolute right-0 top-0 p-4 opacity-5">
                         <LuShieldCheck size={80} className="scale-125" />
@@ -149,7 +149,7 @@ export default function Decisions() {
         </div>
       </div>
 
-      {/* ── Footer Metadata ── */}
+      {}
       {filteredDecisions.length > 0 && (
         <div className="flex items-center justify-center border-t border-white/5 py-12">
           <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-600">

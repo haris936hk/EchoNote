@@ -125,7 +125,7 @@ const MeetingSummaryEditor = ({ meetingId, initialData, canEdit }) => {
       lastSaved={lastSaved}
       isDirty={isDirty}
       canEdit={canEdit}
-      others={[]} // No others in personal mode
+      others={[]}
       onUpdateTasks={handleUpdateTasks}
     />
   );

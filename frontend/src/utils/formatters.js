@@ -17,7 +17,6 @@ export const formatDate = (date, options = {}) => {
   }
 };
 
-
 export const formatDateTime = (date, options = {}) => {
   if (!date) return '';
 
@@ -38,7 +37,6 @@ export const formatDateTime = (date, options = {}) => {
   }
 };
 
-
 export const formatTime = (date) => {
   if (!date) return '';
 
@@ -53,7 +51,6 @@ export const formatTime = (date) => {
     return '';
   }
 };
-
 
 export const formatRelativeTime = (date) => {
   if (!date) return '';
@@ -93,7 +90,6 @@ export const formatRelativeTime = (date) => {
   }
 };
 
-
 export const getFriendlyDate = (date) => {
   if (!date) return '';
 
@@ -120,7 +116,6 @@ export const getFriendlyDate = (date) => {
   }
 };
 
-
 export const formatISODate = (isoString) => {
   if (!isoString) return '';
 
@@ -138,7 +133,6 @@ export const formatISODate = (isoString) => {
   }
 };
 
-
 export const formatDurationShort = (seconds) => {
   if (!seconds || seconds === 0) return '0:00';
 
@@ -146,7 +140,6 @@ export const formatDurationShort = (seconds) => {
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
-
 
 export const formatDuration = (seconds) => {
   if (!seconds || seconds === 0) return '0s';
@@ -162,7 +155,6 @@ export const formatDuration = (seconds) => {
 
   return parts.join(' ');
 };
-
 
 export const formatDurationLong = (seconds) => {
   if (!seconds || seconds === 0) return '0 seconds';
@@ -184,11 +176,9 @@ export const formatDurationLong = (seconds) => {
   return parts.join(', ') + ', and ' + last;
 };
 
-
 export const msToSeconds = (ms) => {
   return Math.floor(ms / 1000);
 };
-
 
 export const formatFileSize = (bytes, decimals = 2) => {
   if (!bytes || bytes === 0) return '0 Bytes';
@@ -202,28 +192,23 @@ export const formatFileSize = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-
 export const bytesToKB = (bytes) => {
   return (bytes / 1024).toFixed(2);
 };
 
-
 export const bytesToMB = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(2);
 };
-
 
 export const formatNumber = (number) => {
   if (number === null || number === undefined) return '0';
   return number.toLocaleString('en-US');
 };
 
-
 export const formatPercentage = (value, decimals = 0) => {
   if (value === null || value === undefined) return '0%';
   return `${value.toFixed(decimals)}%`;
 };
-
 
 export const formatCurrency = (amount, currency = 'USD') => {
   if (amount === null || amount === undefined) return '$0.00';
@@ -233,7 +218,6 @@ export const formatCurrency = (amount, currency = 'USD') => {
     currency: currency,
   }).format(amount);
 };
-
 
 export const formatCompactNumber = (number) => {
   if (!number || number === 0) return '0';
@@ -250,14 +234,12 @@ export const formatCompactNumber = (number) => {
   return scaled.toFixed(1) + suffix;
 };
 
-
 export const truncateText = (text, maxLength = 50, suffix = '...') => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
 
   return text.substring(0, maxLength - suffix.length) + suffix;
 };
-
 
 export const truncateWords = (text, maxWords = 10, suffix = '...') => {
   if (!text) return '';
@@ -268,12 +250,10 @@ export const truncateWords = (text, maxWords = 10, suffix = '...') => {
   return words.slice(0, maxWords).join(' ') + suffix;
 };
 
-
 export const capitalize = (text) => {
   if (!text) return '';
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
-
 
 export const titleCase = (text) => {
   if (!text) return '';
@@ -285,7 +265,6 @@ export const titleCase = (text) => {
     .join(' ');
 };
 
-
 export const toKebabCase = (text) => {
   if (!text) return '';
 
@@ -294,7 +273,6 @@ export const toKebabCase = (text) => {
     .replace(/\s+/g, '-')
     .replace(/[^\w-]/g, '');
 };
-
 
 export const toSnakeCase = (text) => {
   if (!text) return '';
@@ -305,13 +283,11 @@ export const toSnakeCase = (text) => {
     .replace(/[^\w_]/g, '');
 };
 
-
 export const toCamelCase = (text) => {
   if (!text) return '';
 
   return text.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 };
-
 
 export const getInitials = (name, maxLength = 2) => {
   if (!name) return '';
@@ -330,7 +306,6 @@ export const pluralize = (word, count, suffix = 's') => {
   return count === 1 ? word : word + suffix;
 };
 
-
 export const formatCategory = (category) => {
   if (!category) return '';
 
@@ -345,7 +320,6 @@ export const formatCategory = (category) => {
   return categoryMap[category] || capitalize(category);
 };
 
-
 export const formatStatus = (status) => {
   if (!status) return '';
 
@@ -359,12 +333,10 @@ export const formatStatus = (status) => {
   return statusMap[status] || capitalize(status);
 };
 
-
 export const formatURL = (url) => {
   if (!url) return '';
-  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  return url.replace(/^https?:\/\
 };
-
 
 export const maskEmail = (email) => {
   if (!email) return '';
@@ -380,7 +352,6 @@ export const maskEmail = (email) => {
   return `${maskedUsername}@${domain}`;
 };
 
-
 export const isValidDate = (date) => {
   try {
     const dateObj = new Date(date);
@@ -390,12 +361,10 @@ export const isValidDate = (date) => {
   }
 };
 
-
 export const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
-
 
 export const formatList = (array, conjunction = 'and') => {
   if (!array || array.length === 0) return '';
@@ -407,10 +376,8 @@ export const formatList = (array, conjunction = 'and') => {
   return `${rest.join(', ')}, ${conjunction} ${last}`;
 };
 
-
-
 const formatHelpers = {
-  
+
   formatDate,
   formatDateTime,
   formatTime,
@@ -418,7 +385,6 @@ const formatHelpers = {
   getFriendlyDate,
   formatISODate,
 
-  
   formatDurationShort,
   formatDuration,
   formatDurationLong,
@@ -428,7 +394,6 @@ const formatHelpers = {
   bytesToKB,
   bytesToMB,
 
- 
   formatNumber,
   formatPercentage,
   formatCurrency,

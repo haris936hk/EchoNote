@@ -1,8 +1,6 @@
 
-
 const { PrismaClient } = require('@prisma/client');
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -36,7 +34,6 @@ const prismaOptions = {
   errorFormat: 'minimal',
 };
 
-
 const prisma = new PrismaClient(prismaOptions);
 
 if (process.env.NODE_ENV === 'development') {
@@ -46,28 +43,23 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-
 prisma.$on('error', (e) => {
   logger.error(`Prisma Error: ${e.message}`);
 });
-
 
 prisma.$on('info', (e) => {
   logger.info(`Prisma Info: ${e.message}`);
 });
 
-
 prisma.$on('warn', (e) => {
   logger.warn(`Prisma Warning: ${e.message}`);
 });
-
 
 const connectDatabase = async () => {
   try {
     await prisma.$connect();
     logger.info('✅ Database connected successfully');
 
-    
     await prisma.$queryRaw`SELECT 1`;
     logger.info('✅ Database connection verified');
 
@@ -78,7 +70,6 @@ const connectDatabase = async () => {
   }
 };
 
-
 const disconnectDatabase = async () => {
   try {
     await prisma.$disconnect();
@@ -88,7 +79,6 @@ const disconnectDatabase = async () => {
     throw error;
   }
 };
-
 
 const checkDatabaseHealth = async () => {
   try {
@@ -103,7 +93,6 @@ const checkDatabaseHealth = async () => {
     };
   }
 };
-
 
 const cleanupOldLogs = async (daysToKeep = 30) => {
   try {
@@ -126,12 +115,10 @@ const cleanupOldLogs = async (daysToKeep = 30) => {
   }
 };
 
-
 const cleanupExpiredAudio = async () => {
   try {
     const now = new Date();
 
-    
     const expiredMeetings = await prisma.meeting.findMany({
       where: {
         shouldDeleteAudioAt: {
@@ -156,7 +143,6 @@ const cleanupExpiredAudio = async () => {
 
     logger.info(`Found ${expiredMeetings.length} meetings with expired audio`);
 
-   
     const updatePromises = expiredMeetings.map((meeting) =>
       prisma.meeting.update({
         where: { id: meeting.id },
@@ -176,7 +162,6 @@ const cleanupExpiredAudio = async () => {
     throw error;
   }
 };
-
 
 const getDatabaseStats = async () => {
   try {
@@ -227,7 +212,6 @@ const getDatabaseStats = async () => {
   }
 };
 
-
 const executeTransaction = async (callback, maxRetries = 3) => {
   let lastError;
 
@@ -241,7 +225,6 @@ const executeTransaction = async (callback, maxRetries = 3) => {
       lastError = error;
       logger.warn(`Transaction attempt ${attempt} failed: ${error.message}`);
 
-      
       if (attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 100));
       }
@@ -251,7 +234,6 @@ const executeTransaction = async (callback, maxRetries = 3) => {
   logger.error(`Transaction failed after ${maxRetries} attempts`);
   throw lastError;
 };
-
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, closing database connection...');

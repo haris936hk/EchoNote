@@ -1,12 +1,10 @@
 
-
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const winston = require('winston');
 const ffmpeg = require('fluent-ffmpeg');
-
 
 if (process.env.FFMPEG_PATH) {
   ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
@@ -16,7 +14,6 @@ if (process.env.FFPROBE_PATH) {
 }
 
 const { AppError } = require('./error.middleware');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -28,27 +25,25 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const STORAGE_BASE = path.join(process.cwd(), 'storage');
 const UPLOAD_CONFIG = {
-  maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 52428800, 
-  uploadDir: path.join(STORAGE_BASE, 'temp'), 
-  rawDir: path.join(STORAGE_BASE, 'temp'), 
+  maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 52428800,
+  uploadDir: path.join(STORAGE_BASE, 'temp'),
+  rawDir: path.join(STORAGE_BASE, 'temp'),
   processedDir: path.join(STORAGE_BASE, 'processed'),
   allowedFormats: (
     process.env.ALLOWED_AUDIO_FORMATS ||
     'audio/mpeg,audio/wav,audio/mp3,audio/webm,audio/ogg,audio/m4a,audio/x-m4a,audio/mp4'
   ).split(','),
-  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 600, 
+  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 600,
 };
-
 
 const ensureUploadDirs = () => {
   const dirs = [
     STORAGE_BASE,
     UPLOAD_CONFIG.uploadDir,
     UPLOAD_CONFIG.processedDir,
-    path.join(STORAGE_BASE, 'audio'), 
+    path.join(STORAGE_BASE, 'audio'),
   ];
 
   dirs.forEach((dir) => {
@@ -59,9 +54,7 @@ const ensureUploadDirs = () => {
   });
 };
 
-
 ensureUploadDirs();
-
 
 const generateFilename = (originalName, userId) => {
   const timestamp = Date.now();
@@ -69,7 +62,6 @@ const generateFilename = (originalName, userId) => {
   const ext = path.extname(originalName);
   return `${userId}_${timestamp}_${randomString}${ext}`;
 };
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -82,9 +74,8 @@ const storage = multer.diskStorage({
   },
 });
 
-
 const fileFilter = (req, file, cb) => {
-  
+
   if (!UPLOAD_CONFIG.allowedFormats.includes(file.mimetype)) {
     logger.warn(`❌ Invalid file type: ${file.mimetype}`);
     return cb(
@@ -97,7 +88,6 @@ const fileFilter = (req, file, cb) => {
     );
   }
 
-  
   const ext = path.extname(file.originalname).toLowerCase();
   const allowedExtensions = ['.mp3', '.wav', '.webm', '.ogg', '.m4a', '.mpeg'];
 
@@ -116,19 +106,16 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
-
 const upload = multer({
   storage: storage,
   limits: {
     fileSize: UPLOAD_CONFIG.maxFileSize,
-    files: 1, 
+    files: 1,
   },
   fileFilter: fileFilter,
 });
 
-
 const uploadAudio = upload.single('audio');
-
 
 const validateAudioFile = async (req, res, next) => {
   try {
@@ -138,12 +125,10 @@ const validateAudioFile = async (req, res, next) => {
 
     const file = req.file;
 
-    
     logger.info(`📤 File uploaded: ${file.filename} (${file.size} bytes)`);
 
-    
     if (file.size > UPLOAD_CONFIG.maxFileSize) {
-      
+
       fs.unlinkSync(file.path);
 
       return next(
@@ -155,18 +140,15 @@ const validateAudioFile = async (req, res, next) => {
       );
     }
 
-    
     if (!fs.existsSync(file.path)) {
       return next(new AppError('Uploaded file not found', 500, 'FILE_NOT_FOUND'));
     }
 
-    
     if (file.size === 0) {
       fs.unlinkSync(file.path);
       return next(new AppError('Uploaded file is empty', 400, 'EMPTY_FILE'));
     }
 
-    
     req.uploadedFile = {
       filename: file.filename,
       originalName: file.originalname,
@@ -181,7 +163,6 @@ const validateAudioFile = async (req, res, next) => {
   } catch (error) {
     logger.error(`Error validating file: ${error.message}`);
 
-    
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
@@ -189,7 +170,6 @@ const validateAudioFile = async (req, res, next) => {
     next(new AppError('File validation failed', 500, 'VALIDATION_ERROR'));
   }
 };
-
 
 const validateAudioDuration = async (req, res, next) => {
   try {
@@ -204,7 +184,7 @@ const validateAudioDuration = async (req, res, next) => {
     }
 
     const filePath = req.uploadedFile.path;
-    const maxDuration = UPLOAD_CONFIG.maxDuration; 
+    const maxDuration = UPLOAD_CONFIG.maxDuration;
 
     logger.info(`🎵 Checking audio duration for: ${req.uploadedFile.filename}`);
 
@@ -212,7 +192,7 @@ const validateAudioDuration = async (req, res, next) => {
       ffmpeg.ffprobe(filePath, (err, metadata) => {
         if (err) {
           logger.error(`❌ FFprobe error: ${err.message}`);
-          
+
           cleanupUploadedFile(filePath);
           return resolve(
             next(
@@ -241,7 +221,6 @@ const validateAudioDuration = async (req, res, next) => {
           );
         }
 
-        
         if (duration > maxDuration) {
           const durationMinutes = Math.floor(duration / 60);
           const durationSeconds = Math.floor(duration % 60);
@@ -251,7 +230,6 @@ const validateAudioDuration = async (req, res, next) => {
             `❌ Audio too long: ${durationMinutes}m ${durationSeconds}s (max: ${maxMinutes}m)`
           );
 
-          
           cleanupUploadedFile(filePath);
 
           return resolve(
@@ -265,7 +243,6 @@ const validateAudioDuration = async (req, res, next) => {
           );
         }
 
-       
         req.uploadedFile.duration = duration;
         req.uploadedFile.durationFormatted = `${Math.floor(duration / 60)}m ${Math.floor(duration % 60)}s`;
 
@@ -277,7 +254,6 @@ const validateAudioDuration = async (req, res, next) => {
   } catch (error) {
     logger.error(`Error validating audio duration: ${error.message}`);
 
-    
     if (req.uploadedFile && req.uploadedFile.path) {
       cleanupUploadedFile(req.uploadedFile.path);
     }
@@ -285,7 +261,6 @@ const validateAudioDuration = async (req, res, next) => {
     next(new AppError('Audio duration validation failed', 500, 'DURATION_VALIDATION_ERROR'));
   }
 };
-
 
 const expressFileUploadConfig = {
   limits: {
@@ -295,11 +270,10 @@ const expressFileUploadConfig = {
   responseOnLimit: 'File size limit exceeded',
   useTempFiles: true,
   tempFileDir: UPLOAD_CONFIG.rawDir,
-  uploadTimeout: 60000, 
+  uploadTimeout: 60000,
   debug: process.env.NODE_ENV === 'development',
   parseNested: true,
 };
-
 
 const validateExpressFileUpload = async (req, res, next) => {
   try {
@@ -309,7 +283,6 @@ const validateExpressFileUpload = async (req, res, next) => {
 
     const audioFile = req.files.audio;
 
-    
     if (!UPLOAD_CONFIG.allowedFormats.includes(audioFile.mimetype)) {
       return next(
         new AppError(
@@ -320,7 +293,6 @@ const validateExpressFileUpload = async (req, res, next) => {
       );
     }
 
-    
     if (audioFile.size > UPLOAD_CONFIG.maxFileSize) {
       return next(
         new AppError(
@@ -331,7 +303,6 @@ const validateExpressFileUpload = async (req, res, next) => {
       );
     }
 
-    
     const ext = path.extname(audioFile.name).toLowerCase();
     const allowedExtensions = ['.mp3', '.wav', '.webm', '.ogg', '.m4a', '.mpeg'];
 
@@ -345,15 +316,12 @@ const validateExpressFileUpload = async (req, res, next) => {
       );
     }
 
-    
     const userId = req.userId || 'anonymous';
     const uniqueFilename = generateFilename(audioFile.name, userId);
     const finalPath = path.join(UPLOAD_CONFIG.rawDir, uniqueFilename);
 
-    
     await audioFile.mv(finalPath);
 
-    
     req.uploadedFile = {
       filename: uniqueFilename,
       originalName: audioFile.name,
@@ -371,7 +339,6 @@ const validateExpressFileUpload = async (req, res, next) => {
   }
 };
 
-
 const cleanupUploadedFile = (filePath) => {
   try {
     if (filePath && fs.existsSync(filePath)) {
@@ -386,11 +353,10 @@ const cleanupUploadedFile = (filePath) => {
   }
 };
 
-
 const cleanupOldFiles = async (maxAgeHours = 24) => {
   try {
     const now = Date.now();
-    const maxAge = maxAgeHours * 60 * 60 * 1000; 
+    const maxAge = maxAgeHours * 60 * 60 * 1000;
     let cleanedCount = 0;
 
     const dirs = [UPLOAD_CONFIG.rawDir, UPLOAD_CONFIG.processedDir];
@@ -421,7 +387,6 @@ const cleanupOldFiles = async (maxAgeHours = 24) => {
   }
 };
 
-
 const getUploadStats = () => {
   try {
     const stats = {
@@ -429,7 +394,6 @@ const getUploadStats = () => {
       processed: { count: 0, totalSize: 0 },
     };
 
-    
     if (fs.existsSync(UPLOAD_CONFIG.rawDir)) {
       const rawFiles = fs.readdirSync(UPLOAD_CONFIG.rawDir);
       stats.raw.count = rawFiles.length;
@@ -439,7 +403,6 @@ const getUploadStats = () => {
       }, 0);
     }
 
-    
     if (fs.existsSync(UPLOAD_CONFIG.processedDir)) {
       const processedFiles = fs.readdirSync(UPLOAD_CONFIG.processedDir);
       stats.processed.count = processedFiles.length;
@@ -449,7 +412,6 @@ const getUploadStats = () => {
       }, 0);
     }
 
-    
     stats.raw.totalSizeMB = Math.round(stats.raw.totalSize / (1024 * 1024));
     stats.processed.totalSizeMB = Math.round(stats.processed.totalSize / (1024 * 1024));
     stats.totalSizeMB = stats.raw.totalSizeMB + stats.processed.totalSizeMB;
@@ -460,7 +422,6 @@ const getUploadStats = () => {
     return null;
   }
 };
-
 
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
@@ -492,7 +453,6 @@ const handleMulterError = (err, req, res, next) => {
   next(err);
 };
 
-
 const isAudioFile = (filePath) => {
   try {
     const buffer = Buffer.alloc(12);
@@ -500,30 +460,24 @@ const isAudioFile = (filePath) => {
     fs.readSync(fd, buffer, 0, 12, 0);
     fs.closeSync(fd);
 
-    
     const hex = buffer.toString('hex');
 
-    
     if (hex.startsWith('494433') || hex.startsWith('fffb') || hex.startsWith('fff3')) {
       return 'audio/mpeg';
     }
 
-    
     if (hex.startsWith('52494646') && hex.includes('57415645')) {
       return 'audio/wav';
     }
 
-   
     if (hex.startsWith('4f676753')) {
       return 'audio/ogg';
     }
 
-   
     if (hex.includes('6674797069736f6d') || hex.includes('667479704d344120')) {
       return 'audio/mp4';
     }
 
-    
     if (hex.startsWith('1a45dfa3')) {
       return 'audio/webm';
     }

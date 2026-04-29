@@ -6,7 +6,6 @@ const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY,
 });
 
-
 const auth = async (req, res) => {
   try {
     const { room } = req.body;
@@ -16,7 +15,6 @@ const auth = async (req, res) => {
       return res.status(400).json({ error: 'Room ID is required' });
     }
 
-    
     const parts = room.split(':');
     if (parts.length !== 2) {
       return res.status(400).json({ error: 'Invalid room format' });
@@ -44,7 +42,7 @@ const auth = async (req, res) => {
       };
       canEdit = true;
     } else {
-      // Workspace room logic
+
       const workspaceId = prefix;
       const meetingId = id;
 
@@ -95,7 +93,6 @@ const auth = async (req, res) => {
       session.allow(room, session.READ_ONLY);
     }
 
-    
     const { status, body } = await session.authorize();
     return res.status(status).send(body);
   } catch (error) {
@@ -106,12 +103,12 @@ const auth = async (req, res) => {
 
 const getUserColor = (id) => {
   const colors = [
-    '#818CF8', // Indigo
-    '#A78BFA', // Violet
-    '#F472B6', // Pink
-    '#FB923C', // Orange
-    '#34D399', // Emerald
-    '#60A5FA', // Blue
+    '#818CF8',
+    '#A78BFA',
+    '#F472B6',
+    '#FB923C',
+    '#34D399',
+    '#60A5FA',
   ];
   const index = Math.abs(id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % colors.length;
   return colors[index];

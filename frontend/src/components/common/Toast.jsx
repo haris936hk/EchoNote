@@ -66,16 +66,16 @@ const Toast = ({ message, type = 'success', duration = 5000, onClose }) => {
         visible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0',
       ].join(' ')}
     >
-      {/* Left accent bar */}
+      {}
       <div className={`absolute inset-y-0 left-0 w-[3px] rounded-l-[12px] ${v.bar}`} />
 
-      {/* Icon */}
+      {}
       <div className="mt-0.5 pl-2">{v.icon}</div>
 
-      {/* Message */}
+      {}
       <span className="flex-1 text-sm font-medium leading-snug text-white/90">{message}</span>
 
-      {/* Close button */}
+      {}
       <button
         onClick={handleClose}
         aria-label="Dismiss notification"

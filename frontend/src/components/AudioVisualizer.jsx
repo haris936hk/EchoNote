@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-
 const AudioVisualizer = ({ stream, isActive = true }) => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -76,14 +75,14 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
         const gradient = ctx.createLinearGradient(0, y + barHeight, 0, y);
 
         if (normalizedHeight > 0.65) {
-          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)'); 
+          gradient.addColorStop(0, 'rgba(129, 140, 248, 1)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 1)');
         } else if (normalizedHeight > 0.35) {
-          
+
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.75)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 0.85)');
         } else {
-          
+
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.30)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 0.45)');
         }
@@ -126,7 +125,7 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
       <canvas ref={canvasRef} className="size-full" style={{ display: 'block' }} />
       {!stream && (
         <div className="absolute inset-0 flex items-center justify-center gap-1.5">
-          {/* Static placeholder bars when no stream */}
+          {}
           {Array.from({ length: 24 }).map((_, i) => (
             <div
               key={i}

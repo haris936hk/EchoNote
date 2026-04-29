@@ -1,24 +1,9 @@
-/**
- * Gmail OAuth2 Email Transport Utility
- *
- * Handles OAuth2 authentication and Nodemailer transport creation for Gmail SMTP.
- * Uses singleton pattern for efficiency and includes automatic access token refresh.
- *
- * @module emailTransport
- */
 
 const { OAuth2Client } = require('google-auth-library');
 const nodemailer = require('nodemailer');
 
-
 let gmailTransport = null;
 
-/**
- * Create OAuth2 client for Gmail API
- *
- * @returns {OAuth2Client} Configured OAuth2 client
- * @throws {Error} If environment variables are missing
- */
 function createOAuth2Client() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -33,13 +18,6 @@ function createOAuth2Client() {
   return new OAuth2Client(clientId, clientSecret, redirectUri);
 }
 
-/**
- * Get Gmail access token using refresh token
- * Automatically refreshes the access token when needed
- *
- * @returns {Promise<string>} Valid Gmail access token
- * @throws {Error} If refresh token is invalid or token fetch fails
- */
 async function getGmailAccessToken() {
   const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
 
@@ -60,12 +38,10 @@ async function getGmailAccessToken() {
   try {
     const oAuth2Client = createOAuth2Client();
 
-   
     oAuth2Client.setCredentials({
       refresh_token: refreshToken,
     });
 
-  
     const { token } = await oAuth2Client.getAccessToken();
 
     if (!token) {
@@ -74,7 +50,7 @@ async function getGmailAccessToken() {
 
     return token;
   } catch (error) {
-   
+
     if (error.message.includes('invalid_grant')) {
       throw new Error(
         'Invalid or expired refresh token.\n' +
@@ -95,11 +71,6 @@ async function getGmailAccessToken() {
   }
 }
 
-/**
- * Create Nodemailer transport with Gmail OAuth2 authentication
- *
- * @returns {Promise<nodemailer.Transporter>} Configured Nodemailer transport
- */
 async function createGmailTransport() {
   const accessToken = await getGmailAccessToken();
   const gmailUser = process.env.GMAIL_USER;
@@ -118,20 +89,14 @@ async function createGmailTransport() {
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
       accessToken: accessToken,
     },
-    pool: true, 
-    maxConnections: 5, 
-    maxMessages: 100, 
-    rateDelta: 1000, 
-    rateLimit: 5, 
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
+    rateDelta: 1000,
+    rateLimit: 5,
   });
 }
 
-/**
- * Get Gmail transport singleton
- * Creates transport on first call, reuses on subsequent calls
- *
- * @returns {Promise<nodemailer.Transporter>} Gmail transport instance
- */
 async function getGmailTransport() {
   if (!gmailTransport) {
     console.log('🔧 Initializing Gmail OAuth2 transport...');
@@ -141,12 +106,6 @@ async function getGmailTransport() {
   return gmailTransport;
 }
 
-/**
- * Close Gmail transport connection
- * Call this during graceful server shutdown
- *
- * @returns {Promise<void>}
- */
 async function closeGmailTransport() {
   if (gmailTransport) {
     console.log('🔌 Closing Gmail transport...');
@@ -156,13 +115,6 @@ async function closeGmailTransport() {
   }
 }
 
-/**
- * Verify Gmail transport connection
- * Useful for health checks and testing
- *
- * @returns {Promise<boolean>} True if connection is valid
- * @throws {Error} If verification fails
- */
 async function verifyGmailTransport() {
   const transport = await getGmailTransport();
   return await transport.verify();

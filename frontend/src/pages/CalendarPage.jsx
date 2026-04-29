@@ -104,7 +104,7 @@ const CalendarPage = () => {
 
   return (
     <div className="mx-auto max-w-5xl pb-20">
-      {/* Header Area */}
+      {}
       <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-center">
         <div>
           <h1 className="font-plus-jakarta mb-2 text-4xl font-bold tracking-tight text-white">
@@ -175,7 +175,7 @@ const CalendarPage = () => {
                   >
                     <CardBody className="p-0">
                       <div className="flex flex-col md:flex-row">
-                        {/* Time Section */}
+                        {}
                         <div className="flex shrink-0 flex-col items-start justify-center border-echo-border/30 bg-accent-primary/5 p-6 md:w-32 md:items-center md:border-r">
                           <span className="font-mono text-sm font-bold text-white">
                             {format(parseISO(event.start), 'h:mm a')}
@@ -185,7 +185,7 @@ const CalendarPage = () => {
                           </span>
                         </div>
 
-                        {/* Content Section */}
+                        {}
                         <div className="grow p-6">
                           <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-start">
                             <div>

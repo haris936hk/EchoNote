@@ -12,20 +12,14 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Send meeting completed notification to a Slack webhook
- * @param {string} webhookUrl - Slack incoming webhook URL
- * @param {Object} meetingData - Meeting data to populate the template
- */
 async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
   try {
-    
+
     const durationSeconds = meetingData.audioDuration || 0;
     const mins = Math.floor(durationSeconds / 60);
     const secs = Math.floor(durationSeconds % 60);
     const formattedDuration = `${mins}:${secs.toString().padStart(2, '0')}`;
 
-    
     const getPriorityEmoji = (priority) => {
       switch ((priority || '').toLowerCase()) {
         case 'high':
@@ -39,9 +33,7 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       }
     };
 
-    
     const blocks = [];
-
 
     blocks.push({
       type: 'header',
@@ -52,7 +44,6 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       },
     });
 
-    
     blocks.push({
       type: 'context',
       elements: [
@@ -65,7 +56,6 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
 
     blocks.push({ type: 'divider' });
 
-    
     const executiveSummary = meetingData.summaryExecutive || meetingData.executiveSummary;
     if (executiveSummary) {
       blocks.push({
@@ -78,7 +68,6 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       blocks.push({ type: 'divider' });
     }
 
-    
     const actionItems = meetingData.summaryActionItems || meetingData.actionItems || [];
     if (actionItems.length > 0) {
       const actionsText = actionItems
@@ -98,7 +87,6 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       });
     }
 
-    
     const keyDecisionsRaw = meetingData.summaryKeyDecisions || meetingData.keyDecisions;
     const keyDecisions =
       typeof keyDecisionsRaw === 'string' && keyDecisionsRaw.startsWith('[')
@@ -115,7 +103,6 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       });
     }
 
-    
     const sentiment = meetingData.nlpSentiment || meetingData.sentiment || 'N/A';
     const confidence =
       meetingData.transcriptConfidence != null
@@ -134,7 +121,6 @@ async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
       ],
     });
 
-   
     const timestampMs = Math.floor(Date.now() / 1000);
     blocks.push({
       type: 'context',

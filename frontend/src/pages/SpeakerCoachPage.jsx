@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  LuMic, 
-  LuTrendingUp, 
-  LuBrain, 
-  LuClock, 
-  LuZap, 
-  LuMessageSquare, 
-  LuVolumeX, 
+import {
+  LuMic,
+  LuTrendingUp,
+  LuBrain,
+  LuClock,
+  LuZap,
+  LuMessageSquare,
+  LuVolumeX,
   LuUser,
   LuBarChart3,
   LuHelpCircle,
   LuActivity
 } from 'react-icons/lu';
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
   Tooltip as RechartsTooltip,
   BarChart,
   Bar,
@@ -28,7 +28,6 @@ import { meetingsAPI } from '../services/api';
 import { PageLoader } from '../components/common/Loader';
 
 const COLORS = ['#818CF8', '#A78BFA', '#6366F1', '#4F46E5', '#C084FC', '#4ADE80', '#F472B6'];
-
 
 const SpeakerCoachPage = () => {
   const [meetingsData, setMeetingsData] = useState([]);
@@ -46,7 +45,7 @@ const SpeakerCoachPage = () => {
         const recentMeetings = (result.data.data || [])
           .filter(m => m.status === 'COMPLETED')
           .slice(0, 10);
-        
+
         if (recentMeetings.length === 0) {
           setLoading(false);
           return;
@@ -70,7 +69,7 @@ const SpeakerCoachPage = () => {
   const coachStats = useMemo(() => {
     if (!meetingsData.length) return null;
 
-    const speakerStats = {}; 
+    const speakerStats = {};
     let totalAllSpeakingTime = 0;
     let totalMeetingDuration = 0;
     let totalQuestions = 0;
@@ -105,9 +104,9 @@ const SpeakerCoachPage = () => {
         stats.wordCount += text.trim().split(/\s+/).length;
         stats.longestMonologue = Math.max(stats.longestMonologue, duration);
         stats.sessionCount.add(meeting.id);
-        
+
         if (prevSpeaker && prevSpeaker !== name) {
-          if (start < prevEnd + 0.3) { 
+          if (start < prevEnd + 0.3) {
             stats.interruptionCount += 1;
           }
         }
@@ -166,7 +165,7 @@ const SpeakerCoachPage = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 pb-12 transition-all duration-1000">
-      {/* Header */}
+      {}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
         <div>
           <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-white md:text-4xl shadow-indigo-500/20">
@@ -181,7 +180,7 @@ const SpeakerCoachPage = () => {
         </div>
       </div>
 
-      {/* Hero Stats */}
+      {}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Participation', value: `${Math.round(100 - coachStats.silenceRatio)}%`, icon: LuActivity, desc: 'active speaking ratio', color: 'indigo' },
@@ -208,7 +207,7 @@ const SpeakerCoachPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Participation Split */}
+        {}
         <div className="rounded-[24px] border border-white/5 bg-slate-900/40 p-6 backdrop-blur-xl lg:col-span-1 shadow-xl shadow-black/10">
           <div className="mb-6 flex items-center gap-3">
             <LuBarChart3 className="text-accent-secondary" />
@@ -232,7 +231,7 @@ const SpeakerCoachPage = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                   ))}
                 </Pie>
-                <RechartsTooltip 
+                <RechartsTooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
                   itemStyle={{ color: '#fff', fontSize: '12px' }}
                   formatter={(value) => `${formatSecs(value)}`}
@@ -253,17 +252,17 @@ const SpeakerCoachPage = () => {
           </div>
         </div>
 
-        {/* Speaker Dashboard */}
+        {}
         <div className="space-y-4 lg:col-span-2">
            <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white">Participant Analysis</h3>
            </div>
-           
+
            <div className="grid grid-cols-1 gap-4">
              {coachStats.speakers.map((speaker, i) => (
                <div key={speaker.name} className="group overflow-hidden rounded-[20px] border border-white/5 bg-slate-900/20 p-5 transition-all hover:bg-slate-900/40 hover:border-white/10 shadow-sm">
                  <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-                    {/* Speaker Identity */}
+                    {}
                     <div className="flex min-w-[140px] items-center gap-3">
                       <div className="flex size-10 items-center justify-center rounded-full bg-accent-primary/10 font-bold text-accent-primary ring-1 ring-accent-primary/20 group-hover:ring-accent-primary/40 transition-all">
                         {speaker.name.charAt(0).toUpperCase()}
@@ -274,7 +273,7 @@ const SpeakerCoachPage = () => {
                       </div>
                     </div>
 
-                    {/* Matrix */}
+                    {}
                     <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-slate-500">Pace</p>
@@ -297,10 +296,10 @@ const SpeakerCoachPage = () => {
                     </div>
                  </div>
 
-                 {/* Ratio Bar */}
+                 {}
                  <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-                    <div 
-                      className="h-full bg-accent-primary transition-all duration-1000" 
+                    <div
+                      className="h-full bg-accent-primary transition-all duration-1000"
                       style={{ width: `${speaker.talkRatio}%`, backgroundColor: COLORS[i % COLORS.length] }}
                     />
                  </div>
@@ -309,8 +308,8 @@ const SpeakerCoachPage = () => {
            </div>
         </div>
       </div>
-      
-      {/* Footer Insight */}
+
+      {}
       <div className="rounded-[24px] border border-accent-primary/15 bg-accent-primary/5 p-6 backdrop-blur-xl ring-1 ring-white/5">
         <div className="flex items-start gap-4">
           <div className="flex size-10 items-center justify-center rounded-xl bg-accent-primary/20 text-accent-primary">
@@ -319,7 +318,7 @@ const SpeakerCoachPage = () => {
           <div>
             <h4 className="font-bold text-white">Collaboration Insight</h4>
             <p className="mt-1 text-sm leading-relaxed text-slate-400">
-              The aggregate talk-to-silence ratio is <span className="font-bold text-white">{Math.round(100 - coachStats.silenceRatio)}%</span>. 
+              The aggregate talk-to-silence ratio is <span className="font-bold text-white">{Math.round(100 - coachStats.silenceRatio)}%</span>.
               {coachStats.speakers[0] && (
                 <> <span className="text-accent-primary font-semibold">{coachStats.speakers[0].name}</span> tends to dominate sessions with the longest active monologues. Consider facilitating earlier contributions from other participants to balance the collective input.</>
               )}

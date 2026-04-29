@@ -58,24 +58,24 @@ const NotificationPromptBanner = () => {
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-lg px-4 pointer-events-none"
       >
-        <div 
+        <div
           className="pointer-events-auto relative flex items-center gap-5 p-5 rounded-[20px] bg-[#0c1324]/80 backdrop-blur-xl ring-1 ring-white/[0.06] overflow-hidden"
-          style={{ 
+          style={{
             boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 80px -20px rgba(129, 140, 248, 0.15)',
           }}
         >
-          {/* Accent Glow backdrop */}
+          {}
           <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-indigo-500/10 to-transparent blur-2xl -translate-x-1/2" />
 
-          {/* Icon Shield (FollowUpModal Style) */}
+          {}
           <div className="relative flex-none">
             <div className="flex size-14 items-center justify-center rounded-[14px] bg-[#151b2d] shadow-inner ring-1 ring-white/[0.06]">
               <LuBell className="text-[#818cf8]" size={26} />
             </div>
-            {/* AI Living Indicator pulsing dot */}
+            {}
             <div className="absolute -bottom-1 left-1/2 size-1.5 -translate-x-1/2 animate-pulse rounded-full bg-[#a78bfa] shadow-[0_0_12px_4px_rgba(167,139,250,0.3)]" />
           </div>
-          
+
           <div className="flex-grow min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <LuSparkles className="text-[#a78bfa] size-3" />

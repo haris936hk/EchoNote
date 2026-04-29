@@ -24,7 +24,7 @@ module.exports = [
         expect: 'readonly',
         beforeEach: 'readonly',
         afterEach: 'readonly',
-        // Node.js globals
+
         Buffer: 'readonly',
         setTimeout: 'readonly',
         setInterval: 'readonly',

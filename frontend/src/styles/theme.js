@@ -1,5 +1,4 @@
 
-
 export const colors = {
   primary: {
     50: '#EEF2FF',
@@ -101,10 +100,10 @@ export const colors = {
 
   content: {
     dark: {
-      1: '#0F172A', 
-      2: '#1E293B', 
-      3: '#334155', 
-      4: '#475569', 
+      1: '#0F172A',
+      2: '#1E293B',
+      3: '#334155',
+      4: '#475569',
     },
   },
 
@@ -120,8 +119,6 @@ export const colors = {
 
   cta: '#22C55E',
 };
-
-
 
 export const typography = {
   fontFamily: {
@@ -161,8 +158,6 @@ export const typography = {
   },
 };
 
-
-
 export const spacing = {
   pagePadding: '24px',
   sectionGap: '48px',
@@ -177,8 +172,6 @@ export const borderRadius = {
   chip: '9999px',
 };
 
-
-
 export const shadows = {
   sm: '0 1px 2px 0 rgb(0 0 0 / 0.3)',
   base: '0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3)',
@@ -189,8 +182,6 @@ export const shadows = {
   glow: '0 0 20px rgba(129,140,248,0.3)',
   none: 'none',
 };
-
-
 
 export const transitions = {
   duration: {
@@ -205,8 +196,6 @@ export const transitions = {
     easeInOut: 'ease-in-out',
   },
 };
-
-
 
 export const categoryColors = {
   SALES: {
@@ -240,7 +229,6 @@ export const categoryColors = {
     chip: 'bg-slate-500/15 text-slate-300',
   },
 };
-
 
 export const statusColors = {
   COMPLETED: {
@@ -301,14 +289,12 @@ export const statusColors = {
   },
 };
 
-
 export const sentimentColors = {
   positive: { color: '#34D399', label: 'Positive', dot: 'bg-emerald-400' },
   neutral: { color: '#818CF8', label: 'Neutral', dot: 'bg-indigo-400' },
   negative: { color: '#F87171', label: 'Negative', dot: 'bg-red-400' },
   mixed: { color: '#FBBF24', label: 'Mixed', dot: 'bg-amber-400' },
 };
-
 
 export const animations = {
   fadeIn: {
@@ -336,7 +322,6 @@ export const animations = {
     animate: { transition: { staggerChildren: 0.05 } },
   },
 };
-
 
 const theme = {
   colors,

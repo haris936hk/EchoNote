@@ -10,7 +10,6 @@ export const useTheme = () => {
   return context;
 };
 
-
 export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const root = document.documentElement;
@@ -20,8 +19,8 @@ export const ThemeProvider = ({ children }) => {
 
   const value = {
     isDark: true,
-    toggleTheme: () => {}, 
-    setTheme: () => {}, 
+    toggleTheme: () => {},
+    setTheme: () => {},
     theme: 'dark',
   };
 

@@ -12,13 +12,11 @@ import Header from '../components/common/Header';
 import ScrollReveal from '../components/common/ScrollReveal';
 import Footer from '../components/common/Footer';
 
-
 const NAV_LINKS = [
   { path: '#features', label: 'Features' },
   { path: '#how-it-works', label: 'How It Works' },
   { path: '#cta', label: 'Benefits' },
 ];
-
 
 const HomePage = () => {
   const { isAuthenticated } = useAuth();
@@ -71,13 +69,13 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0c1324', color: '#dce1fb' }}>
-      {/* ── Navigation ── */}
+      {}
       <ScrollReveal>
         <Header navItems={NAV_LINKS} />
       </ScrollReveal>
 
       <main className="pb-20 pt-32">
-        {/* ── Hero Section ── */}
+        {}
         <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
           <div className="space-y-8">
             <h1 className="text-5xl font-extrabold leading-tight tracking-tighter text-on-surface md:text-7xl">
@@ -97,12 +95,12 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Product mockup */}
+          {}
           <div className="group relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 blur-2xl transition duration-1000 group-hover:opacity-40" />
             <div className="glass-card relative rotate-2 rounded-2xl border border-[#454653]/10 p-2 shadow-2xl">
               <div className="flex aspect-video overflow-hidden rounded-xl border border-[#454653]/20 bg-[#23293c] shadow-2xl">
-                {/* Left panel - transcript mockup */}
+                {}
                 <div className="w-1/2 space-y-3 border-r border-[#454653]/20 p-4">
                   <div className="h-4 w-1/3 rounded bg-accent-primary/20" />
                   <div className="space-y-2">
@@ -115,7 +113,7 @@ const HomePage = () => {
                     <div className="h-2 w-3/4 rounded bg-[#c6c5d5]/10" />
                   </div>
                 </div>
-                {/* Right panel - summary mockup */}
+                {}
                 <div className="w-1/2 space-y-4 bg-[#070d1f]/50 p-4">
                   <div className="h-4 w-1/2 rounded bg-accent-secondary/20" />
                   <div className="rounded-lg border border-[#454653]/10 bg-[#191f31] p-3">
@@ -138,7 +136,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ── Stats Strip ── */}
+        {}
         <section className="mx-auto max-w-7xl px-6 py-20">
           <div className="flex flex-wrap items-center justify-center gap-8 rounded-2xl bg-[#151b2d]/50 px-12 py-8 md:justify-between">
             <div className="flex items-center gap-3">
@@ -164,7 +162,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ── Features Section ── */}
+        {}
         <section id="features" className="mx-auto max-w-7xl px-6 py-20">
           <div className="mb-16 text-center lg:text-left">
             <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-on-surface md:text-5xl">
@@ -192,7 +190,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ── How It Works ── */}
+        {}
         <section
           id="how-it-works"
           className="relative mx-auto max-w-7xl overflow-hidden px-6 py-20"
@@ -204,7 +202,7 @@ const HomePage = () => {
             </h2>
           </div>
           <div className="relative grid grid-cols-1 gap-12 lg:grid-cols-3">
-            {/* Step 1 */}
+            {}
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="mb-8 flex size-16 items-center justify-center rounded-full border-4 border-[#0c1324] bg-[#23293c] shadow-xl">
                 <span className="font-mono text-xl font-bold text-accent-primary">01</span>
@@ -216,7 +214,7 @@ const HomePage = () => {
                 </p>
               </div>
             </div>
-            {/* Step 2 */}
+            {}
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="ai-glow mb-8 flex size-16 items-center justify-center rounded-full border-4 border-[#0c1324] bg-[#23293c] shadow-xl">
                 <span className="font-mono text-xl font-bold text-accent-secondary">02</span>
@@ -229,7 +227,7 @@ const HomePage = () => {
                 </p>
               </div>
             </div>
-            {/* Step 3 */}
+            {}
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="mb-8 flex size-16 items-center justify-center rounded-full border-4 border-[#0c1324] bg-[#23293c] shadow-xl">
                 <span className="font-mono text-xl font-bold text-accent-primary">03</span>
@@ -244,7 +242,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ── Final CTA Card ── */}
+        {}
         <section id="cta" className="mx-auto max-w-5xl px-6 py-20">
           <div className="gradient-border-card px-8 py-20 text-center">
             <div className="mx-auto max-w-2xl">
@@ -269,7 +267,7 @@ const HomePage = () => {
         </section>
       </main>
 
-      {/* ── Footer ── */}
+      {}
       <Footer />
     </div>
   );

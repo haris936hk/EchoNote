@@ -1,32 +1,9 @@
-/**
- * Custom LLM Inference Service
- *
- * Handles AI-powered meeting summarization using a hosted LLM
- * via the OpenAI-compatible API.
- *
- * Pipeline Integration:
- *   Deepgram → SpaCy NLP → [THIS SERVICE] → Formatted Summary
- *
- * Public interface: generateSummary(transcript, nlpFeatures)
- * Return shape: { success, data: { executiveSummary, keyDecisions,
- *                 actionItems, nextSteps, keyTopics, sentiment } }
- */
-
-const { Groq } = require('groq-sdk'); // SDK kept as transport layer
+const { Groq } = require('groq-sdk');
 const logger = require('../utils/logger');
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
 const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
-const DEFAULT_TIMEOUT_MS = 30_000; // 30 s — typically <5 s in practice
+const DEFAULT_TIMEOUT_MS = 30_000;
 
-// ─── JSON Schema (strict constrained decoding) ──────────────────────────────
-
-/**
- * Strict JSON Schema for meeting summary output.
- * With `strict: true`, the model uses constrained decoding at the token level —
- * the model literally cannot produce output that violates this schema.
- */
 const SUMMARY_JSON_SCHEMA = {
   name: 'meeting_summary',
   strict: true,
@@ -94,8 +71,6 @@ const VERIFICATION_JSON_SCHEMA = {
   },
 };
 
-// ─── System Prompt ────────────────────────────────────────────────────────────
-
 const SYSTEM_PROMPT = `You are an expert linguist and data extraction engine specializing in structural meeting analysis. Your task is to accurately distill a meeting transcript into actionable documentation.
 
 You MUST respond with ONLY a single valid JSON object matching the provided schema.
@@ -136,8 +111,6 @@ EXTRACTION EXAMPLES (follow these patterns for action items):
 
 Output your valid JSON now:`;
 
-// ─── Category-Aware Prompt Supplements ───────────────────────────────────────
-
 const CATEGORY_SUPPLEMENTS = {
   STANDUP: `\nADDITIONAL CONTEXT: This is a daily standup meeting. Focus on:
 - Blockers and impediments (mark as high priority action items)
@@ -177,8 +150,6 @@ const CATEGORY_SUPPLEMENTS = {
 - Blockers or concerns raised.`,
 };
 
-// ─── Verification Prompt ─────────────────────────────────────────────────────
-
 const VERIFICATION_SYSTEM_PROMPT = `You are a critical fact-checker for AI-generated meeting summaries. Your job is to verify the accuracy of the <summary> against the <transcript>.
 
 Check EACH of the following:
@@ -203,33 +174,31 @@ CRITICAL JSON RULES FOR CORRECTIONS:
 2. "correction": This field MUST NOT contain any sentences. It MUST be exclusively the EXACT primitive replacement value (e.g., 'null', 'Marcus', 'Friday').`;
 
 const FOLLOWUP_SYSTEM_PROMPT = `You are a professional communications assistant inside EchoNote. Your task is to draft a high-fidelity follow-up email based on meeting insights.
- 
+
 You MUST respond with ONLY a single valid JSON object. Do NOT include markdown code blocks.
- 
+
 Follow this EXACT JSON schema:
 {
   "subject": "<string: a professional, concise email subject line starting with [EchoNote]>",
   "body": "<string: the full email body, formatted with newlines (\\n)>"
 }
- 
+
 TONE CONSTRAINTS:
 - FORMAL: Professional, structured, uses "Dear all", "Best regards", and objective language.
 - CASUAL: Friendly, energetic, uses "Hey everyone", "Cheers/Thanks", and accessible language.
- 
+
 CONTENT STRUCTURE:
 1. Opening: Brief appreciation for the time and a 1-sentence summary of the meeting's goal.
 2. Decisions: A bulleted list of what was decided.
 3. Action Items: A clear list of tasks, assignees, and deadlines. Format as: "• [Task] - [Assignee] (by [Deadline])".
 4. Closing: Mention next steps and encourage follow-up.
- 
-Output your valid JSON now:`;
 
-// ─── Class ────────────────────────────────────────────────────────────────────
+Output your valid JSON now:`;
 
 class CustomLLMService {
   constructor() {
     this.apiKey = process.env.CUSTOM_LLM_API_KEY || '';
-    this.model = DEFAULT_MODEL; // Forcing Llama 3.3, ignoring legacy .env variable
+    this.model = DEFAULT_MODEL;
     this.timeout = parseInt(process.env.CUSTOM_LLM_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
 
     this.client = new Groq({
@@ -246,16 +215,6 @@ class CustomLLMService {
     logger.info('[CustomLLMService] Initialized', { model: this.model });
   }
 
-  // ─── Public API ──────────────────────────────────────────────────────────────
-
-  /**
-   * Generate a structured meeting summary with optional verification pass.
-   *
-   * @param {string} transcript        - Raw or diarized meeting transcript.
-   * @param {object|null} nlpFeatures  - SpaCy NLP + Deepgram ASR features.
-   * @param {object} options           - { category, enableVerification }.
-   * @returns {Promise<{success: boolean, data?: object, error?: string}>}
-   */
   async generateSummary(transcript, nlpFeatures = null, options = {}) {
     try {
       const { category = null, enableVerification = true } = options;
@@ -267,16 +226,12 @@ class CustomLLMService {
         model: this.model,
       });
 
-      // Build system prompt with optional category supplement
       const systemPrompt = this._buildSystemPrompt(category);
 
-      // Combine transcript + NLP context into a single user message
       const userMessage = this._buildUserMessage(transcript, nlpFeatures);
 
-      // Dynamic max_tokens based on transcript length
       const maxTokens = this._calculateMaxTokens(userMessage);
 
-      // Pass 1: Generate summary
       const rawJson = await this._callWithRetry(
         userMessage,
         1,
@@ -285,10 +240,8 @@ class CustomLLMService {
         maxTokens
       );
 
-      // Parse + validate the JSON response
       let formattedSummary = this._parseAndValidate(rawJson);
 
-      // Pass 2: Verification (enabled by default)
       if (enableVerification && transcript.length > 200) {
         formattedSummary = await this._verifyAndCorrect(formattedSummary, transcript);
       }
@@ -311,13 +264,6 @@ class CustomLLMService {
     }
   }
 
-  /**
-   * Generate a professional follow-up email draft.
-   *
-   * @param {object} meetingData - { title, summary, attendees }.
-   * @param {string} tone        - 'formal' | 'casual'.
-   * @returns {Promise<{success: boolean, data?: object, error?: string}>}
-   */
   async generateFollowUpEmail(meetingData, tone = 'formal') {
     try {
       logger.info('[CustomLLMService] Starting follow-up email generation', {
@@ -363,11 +309,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     }
   }
 
-  /**
-   * Health check — verifies the LLM API is reachable and the key is valid.
-   *
-   * @returns {Promise<{success: boolean, data?: object, error?: string}>}
-   */
   async healthCheck() {
     try {
       const response = await this.client.models.list();
@@ -390,11 +331,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     }
   }
 
-  // ─── Private helpers ────────────────────────────────────────────────────────
-
-  /**
-   * Build the system prompt with optional category-specific supplement.
-   */
   _buildSystemPrompt(category) {
     let prompt = SYSTEM_PROMPT;
     if (category && CATEGORY_SUPPLEMENTS[category]) {
@@ -403,9 +339,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     return prompt;
   }
 
-  /**
-   * Build the user message that contains the transcript + optional NLP context.
-   */
   _buildUserMessage(transcript, nlpFeatures) {
     const transcriptBlock = `<transcript>\n${transcript}\n</transcript>`;
 
@@ -413,7 +346,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       return transcriptBlock;
     }
 
-    // Log received features during development
     if (process.env.NODE_ENV === 'development') {
       logger.debug('[CustomLLMService] NLP features received', {
         entities: nlpFeatures.entities?.length ?? 0,
@@ -430,14 +362,12 @@ ${JSON.stringify(meetingData.attendees || [])}
 
     let message = `${transcriptBlock}\n\n<nlp_metadata>\n`;
 
-    // Entities — already formatted as "Name (LABEL)" strings by summarization.service.js
     if (nlpFeatures.entities?.length > 0) {
       message += `Entities: ${nlpFeatures.entities.join(', ')}\n`;
     } else {
       message += `Entities: None\n`;
     }
 
-    // SVO Triplets
     if (nlpFeatures.svoTriplets?.length > 0) {
       const svoStrs = nlpFeatures.svoTriplets.map(
         (t) => `[${t.subject} -> ${t.verb} -> ${t.object}]`
@@ -447,7 +377,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       message += `SVO Triplets: None\n`;
     }
 
-    // Transcript stats
     if (nlpFeatures.nlpMetadata?.sentenceCount) {
       const meta = nlpFeatures.nlpMetadata;
       message += `Stats: ${meta.sentenceCount} sentences, ${meta.wordCount} words\n`;
@@ -455,7 +384,6 @@ ${JSON.stringify(meetingData.attendees || [])}
 
     message += `</nlp_metadata>`;
 
-    // Action signals — pre-detected commitment patterns (highest value for action items)
     if (nlpFeatures.actionSignals?.length > 0) {
       message += `\n\n<action_signals>\n`;
       for (const signal of nlpFeatures.actionSignals) {
@@ -465,7 +393,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       message += `</action_signals>`;
     }
 
-    // Questions — unresolved issues for nextSteps
     if (nlpFeatures.questions?.length > 0) {
       message += `\n\n<questions>\n`;
       for (const q of nlpFeatures.questions) {
@@ -474,7 +401,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       message += `</questions>`;
     }
 
-    // Speaker-entity map — who mentioned which entities
     if (nlpFeatures.speakerEntityMap && Object.keys(nlpFeatures.speakerEntityMap).length > 0) {
       message += `\n\n<speaker_map>\n`;
       for (const [speaker, entities] of Object.entries(nlpFeatures.speakerEntityMap)) {
@@ -483,7 +409,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       message += `</speaker_map>`;
     }
 
-    // ASR metadata — high-confidence entities, topics, and intents from Deepgram
     if (
       nlpFeatures.deepgramEntities?.length > 0 ||
       nlpFeatures.deepgramTopics?.length > 0 ||
@@ -511,13 +436,12 @@ ${JSON.stringify(meetingData.attendees || [])}
       message += `</asr_metadata>`;
     }
 
-    // Transcript quality — let the LLM know which words had low confidence
     if (nlpFeatures.lowConfidenceWords?.length > 0) {
       message += `\n\n<transcript_quality>\n`;
 
       const lcWords = nlpFeatures.lowConfidenceWords
         .map((w) => `"${w.word}" (${(w.confidence * 100).toFixed(0)}%)`)
-        .slice(0, 100); // cap at 100 words to avoid prompt bloat
+        .slice(0, 100);
 
       message += `Low-confidence words (treat cautiously): ${lcWords.join(', ')}\n`;
       message += `</transcript_quality>`;
@@ -526,26 +450,11 @@ ${JSON.stringify(meetingData.attendees || [])}
     return message;
   }
 
-  /**
-   * Calculate dynamic max_tokens based on transcript length.
-   * Short meetings get fewer tokens; long meetings get more.
-   */
   _calculateMaxTokens(userMessage) {
     const inputTokenEstimate = Math.ceil(userMessage.length / 4);
     return Math.min(4096, Math.max(1024, Math.ceil(inputTokenEstimate * 0.5)));
   }
 
-  /**
-   * Send chat completion request to the LLM API via the SDK.
-   * Uses built-in SDK retries, bypassing custom exponential backoff wrapper.
-   *
-   * @param {string} userMessage   - The assembled user message.
-   * @param {number} attempt       - (Deprecated) previously attempt number.
-   * @param {string} systemPrompt  - The system prompt to use.
-   * @param {object|null} jsonSchema - JSON schema for explicit format adherence.
-   * @param {number} maxTokens     - Max output tokens.
-   * @returns {Promise<string>}    - Raw JSON string from the model.
-   */
   async _callWithRetry(
     userMessage,
     attempt = 1,
@@ -554,8 +463,7 @@ ${JSON.stringify(meetingData.attendees || [])}
     maxTokens = 4096
   ) {
     try {
-      // For JSON mode without explicit strict schema inputs,
-      // appending the schema to the prompt ensures the model follows the necessary structure.
+
       const finalSystemPrompt = jsonSchema
         ? `${systemPrompt}\n\nStrict JSON Format required:\n${JSON.stringify(jsonSchema, null, 2)}`
         : systemPrompt;
@@ -567,9 +475,9 @@ ${JSON.stringify(meetingData.attendees || [])}
           { role: 'user', content: userMessage },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.1, // Very low temperature for deterministic, factual extraction
+        temperature: 0.1,
         max_tokens: maxTokens,
-        stream: false, // Explicitly no streaming
+        stream: false,
       });
 
       const content = response.choices?.[0]?.message?.content;
@@ -578,7 +486,6 @@ ${JSON.stringify(meetingData.attendees || [])}
         throw new Error('LLM API returned an empty response body');
       }
 
-      // Log token usage for monitoring
       const usage = response.usage;
       if (usage) {
         logger.info('[CustomLLMService] Token usage', {
@@ -600,14 +507,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     }
   }
 
-  /**
-   * Verification pass: Send the generated summary + transcript back to the model
-   * for fact-checking. Applies corrections automatically.
-   *
-   * @param {object} summary    - The initial summary from Pass 1.
-   * @param {string} transcript - The original transcript.
-   * @returns {object}          - Corrected summary.
-   */
   async _verifyAndCorrect(summary, transcript) {
     try {
       logger.info('[CustomLLMService] Starting verification pass');
@@ -631,7 +530,6 @@ ${JSON.stringify(meetingData.attendees || [])}
         return summary;
       }
 
-      // Apply corrections
       logger.info(
         `[CustomLLMService] Verification found ${verification.corrections.length} issues in ${duration}s`
       );
@@ -642,7 +540,6 @@ ${JSON.stringify(meetingData.attendees || [])}
         const { field, issue, correction: fix } = correction;
         logger.warn(`[CustomLLMService] Correction: ${field} — ${issue}`);
 
-        // Handle action item removals (hallucinated items)
         if (field.startsWith('actionItems[') && issue.toLowerCase().includes('not committed')) {
           const match = field.match(/actionItems\[(\d+)\]/);
           if (match) {
@@ -651,12 +548,11 @@ ${JSON.stringify(meetingData.attendees || [])}
               logger.info(
                 `[CustomLLMService] Removing hallucinated action item: "${corrected.actionItems[idx].task}"`
               );
-              corrected.actionItems[idx] = null; // Mark for removal
+              corrected.actionItems[idx] = null;
             }
           }
         }
 
-        // Handle assignee corrections
         if (field.includes('.assignee') && fix) {
           const match = field.match(/actionItems\[(\d+)\]/);
           if (match) {
@@ -667,7 +563,6 @@ ${JSON.stringify(meetingData.attendees || [])}
           }
         }
 
-        // Handle deadline corrections
         if (field.includes('.deadline') && fix) {
           const match = field.match(/actionItems\[(\d+)\]/);
           if (match) {
@@ -678,18 +573,16 @@ ${JSON.stringify(meetingData.attendees || [])}
           }
         }
 
-        // Handle executive summary corrections
         if (field === 'executiveSummary' && fix) {
           corrected.executiveSummary = fix;
         }
       }
 
-      // Remove nulled-out action items (hallucinations caught by verifier)
       corrected.actionItems = corrected.actionItems.filter((item) => item !== null);
 
       return corrected;
     } catch (error) {
-      // Verification is best-effort — if it fails, return original summary
+
       logger.warn(
         `[CustomLLMService] Verification pass failed, using original summary: ${error.message}`
       );
@@ -697,15 +590,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     }
   }
 
-  /**
-   * Parse the model's JSON string and validate / normalise against EchoNote schema.
-   *
-   * With strict: true schema enforcement, most validation is handled at the
-   * token level. This function now focuses on semantic quality checks.
-   *
-   * @param {string} rawJson - JSON string from the model.
-   * @returns {object}       - Validated summary object.
-   */
   _parseAndValidate(rawJson) {
     let parsed;
     try {
@@ -714,7 +598,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       throw new Error(`Failed to parse model JSON response: ${rawJson?.slice(0, 200)}`);
     }
 
-    // With strict schema, all fields are guaranteed present. Still validate defensively.
     const requiredFields = [
       'executiveSummary',
       'keyDecisions',
@@ -729,7 +612,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       logger.warn('[CustomLLMService] Response missing fields — applying defaults', { missingFields });
     }
 
-    // Normalise action items (filter empty tasks)
     const rawActions = Array.isArray(parsed.actionItems) ? parsed.actionItems : [];
     const actionItems = rawActions
       .filter((item) => item && item.task && String(item.task).trim().length > 0)
@@ -742,12 +624,10 @@ ${JSON.stringify(meetingData.attendees || [])}
         sourceQuote: item.sourceQuote ?? null,
       }));
 
-    // Normalise sentiment
     const validSentiments = ['positive', 'neutral', 'negative'];
     const rawSentiment = String(parsed.sentiment ?? '').toLowerCase();
     const sentiment = validSentiments.includes(rawSentiment) ? rawSentiment : 'neutral';
 
-    // Deduplicate keyTopics (case-insensitive)
     const topicsRaw = Array.isArray(parsed.keyTopics) ? parsed.keyTopics : [];
     const topicsSeen = new Set();
     const keyTopics = topicsRaw.filter((t) => {
@@ -757,7 +637,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       return true;
     });
 
-    // Deduplicate keyDecisions (exact match)
     const decisionsRaw = Array.isArray(parsed.keyDecisions)
       ? parsed.keyDecisions
       : parsed.keyDecisions
@@ -784,7 +663,6 @@ ${JSON.stringify(meetingData.attendees || [])}
       sentiment,
     };
 
-    // Quality warnings
     if (formatted.executiveSummary.length < 150) {
       logger.warn('[CustomLLMService] Executive summary is shorter than expected', {
         length: formatted.executiveSummary.length,
@@ -794,7 +672,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     return formatted;
   }
 
-  /** Normalise priority to one of: high, medium, low. */
   _normalisePriority(raw) {
     const valid = ['high', 'medium', 'low'];
     const normalised = String(raw ?? '')
@@ -803,7 +680,6 @@ ${JSON.stringify(meetingData.attendees || [])}
     return valid.includes(normalised) ? normalised : 'medium';
   }
 
-  /** Normalise confidence to one of: high, medium, low. */
   _normaliseConfidence(raw) {
     const valid = ['high', 'medium', 'low'];
     const normalised = String(raw ?? '')
@@ -812,7 +688,5 @@ ${JSON.stringify(meetingData.attendees || [])}
     return valid.includes(normalised) ? normalised : 'medium';
   }
 }
-
-// ─── Singleton ────────────────────────────────────────────────────────────────
 
 module.exports = new CustomLLMService();

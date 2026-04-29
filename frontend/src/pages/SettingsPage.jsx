@@ -61,7 +61,7 @@ const SettingsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        {/* Sidebar Nav */}
+        {}
         <div className="lg:col-span-1">
           <div className="sticky top-[88px] rounded-card border border-echo-border bg-echo-surface p-3">
             <nav className="space-y-1">
@@ -86,7 +86,7 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        {/* Content */}
+        {}
         <div className="lg:col-span-3">{renderContent()}</div>
       </div>
     </div>
@@ -170,7 +170,7 @@ const PreferencesContent = () => {
           slackWebhookUrl,
           jiraDomain,
           jiraEmail,
-          jiraApiToken: jiraApiToken || undefined, // Only send if changed
+          jiraApiToken: jiraApiToken || undefined,
           jiraProjectKey,
           jiraAutoSync,
           autoDeleteDays: autoDelete ? parseInt(retentionDays) : null,
@@ -179,7 +179,7 @@ const PreferencesContent = () => {
       const data = await response.json();
       if (response.ok && data.success) {
         showToast('Preferences saved successfully!', 'success');
-        await refreshUserData(); // Sync changes to AuthContext
+        await refreshUserData();
       } else {
         showToast(data.error || 'Failed to save preferences', 'error');
       }
@@ -247,7 +247,7 @@ const PreferencesContent = () => {
       <div className="space-y-5 rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="text-lg font-semibold text-white">App Preferences</h2>
 
-        {/* Dark Mode — Always on */}
+        {}
         <div className="flex items-center justify-between border-b border-echo-border py-3">
           <div>
             <p className="text-sm font-medium text-white">Dark Mode</p>
@@ -256,7 +256,7 @@ const PreferencesContent = () => {
           <Toggle enabled={true} onToggle={() => {}} />
         </div>
 
-        {/* Push Notifications */}
+        {}
         <div className="flex items-center justify-between border-b border-echo-border py-3">
           <div>
             <p className="text-sm font-medium text-white">Browser Push Notifications</p>
@@ -285,7 +285,7 @@ const PreferencesContent = () => {
           />
         </div>
 
-        {/* Email Notifications */}
+        {}
         <div className="flex items-center justify-between border-b border-echo-border py-3">
           <div>
             <p className="text-sm font-medium text-white">Email Notifications</p>
@@ -298,7 +298,7 @@ const PreferencesContent = () => {
           />
         </div>
 
-        {/* Auto Delete */}
+        {}
         <div className="py-3">
           <div className="mb-3 flex items-center justify-between">
             <div>
@@ -665,7 +665,7 @@ const PrivacyContent = () => {
 
   return (
     <div className="space-y-4">
-      {/* Storage Stats */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">Storage & Usage</h2>
         {isLoading ? (
@@ -694,7 +694,7 @@ const PrivacyContent = () => {
         )}
       </div>
 
-      {/* B4 — Google Calendar connection */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">Google Calendar</h2>
         <div className="flex items-center justify-between">
@@ -735,7 +735,7 @@ const PrivacyContent = () => {
         </div>
       </div>
 
-      {/* B5 — Session management */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">Active Sessions</h2>
         {sessions.length === 0 ? (
@@ -785,7 +785,7 @@ const PrivacyContent = () => {
         </div>
       </div>
 
-      {/* AI Models */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">AI Processing Pipeline</h2>
         <div className="space-y-3">
@@ -805,7 +805,7 @@ const PrivacyContent = () => {
         </div>
       </div>
 
-      {/* Privacy Notice */}
+      {}
       <div className="rounded-card border border-accent-primary/10 bg-accent-primary/5 p-5">
         <div className="flex items-start gap-3">
           <Shield size={18} className="mt-0.5 shrink-0 text-accent-primary" />
@@ -819,7 +819,7 @@ const PrivacyContent = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {}
       <div className="space-y-3">
         <div className="flex items-center justify-between rounded-card border border-echo-border bg-echo-surface p-4">
           <div>
@@ -924,7 +924,7 @@ const HelpContent = () => {
 
   return (
     <div className="space-y-4">
-      {/* Quick Links */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">Quick Links</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -947,7 +947,7 @@ const HelpContent = () => {
         </div>
       </div>
 
-      {/* FAQs */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">Frequently Asked Questions</h2>
         <Accordion variant="splitted" className="px-0">
@@ -967,7 +967,7 @@ const HelpContent = () => {
         </Accordion>
       </div>
 
-      {/* Support CTA */}
+      {}
       <div className="rounded-card border border-accent-primary/10 bg-accent-primary/5 p-6 text-center">
         <p className="mb-1 text-sm font-semibold text-accent-primary">Still need help?</p>
         <p className="mb-4 text-xs text-slate-400">Our support team is here to assist you</p>

@@ -1,13 +1,6 @@
 import { useContext } from 'react';
 import { MeetingContext } from '../contexts/MeetingContext';
 
-/**
- * Custom hook to access meeting context
- * Provides meeting data, recording state, and meeting management methods
- *
- * @throws {Error} 
- * @returns {Object} 
- */
 const useMeetings = () => {
   const context = useContext(MeetingContext);
 
@@ -23,7 +16,6 @@ const useMeetings = () => {
 
 export default useMeetings;
 
-
 export const useMeetingsByStatus = (status) => {
   const { meetings } = useMeetings();
 
@@ -34,7 +26,6 @@ export const useMeetingsByStatus = (status) => {
     count: filteredMeetings.length,
   };
 };
-
 
 export const useMeetingsByCategory = (category) => {
   const { meetings } = useMeetings();
@@ -53,7 +44,6 @@ export const useMeetingsByCategory = (category) => {
     count: filteredMeetings.length,
   };
 };
-
 
 export const useMeetingStats = () => {
   const { meetings } = useMeetings();
@@ -77,7 +67,6 @@ export const useMeetingStats = () => {
   return stats;
 };
 
-
 export const useSearchMeetings = (searchQuery) => {
   const { meetings } = useMeetings();
 
@@ -96,23 +85,21 @@ export const useSearchMeetings = (searchQuery) => {
   );
 };
 
-
 export const useRecentMeetings = (limit = 5) => {
   const { meetings } = useMeetings();
 
   return meetings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit);
 };
 
-
 export const useCanRecord = () => {
   const { isRecording, recordingSeconds } = useMeetings();
 
-  const MAX_RECORDING_TIME = 600; 
+  const MAX_RECORDING_TIME = 600;
 
   return {
     canRecord: !isRecording,
     isRecording,
     timeRemaining: MAX_RECORDING_TIME - recordingSeconds,
-    isNearLimit: recordingSeconds >= MAX_RECORDING_TIME * 0.9, 
+    isNearLimit: recordingSeconds >= MAX_RECORDING_TIME * 0.9,
   };
 };

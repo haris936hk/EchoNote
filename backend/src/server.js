@@ -6,11 +6,9 @@ const path = require('path');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
 
-
 dotenv.config();
 
 const ffmpeg = require('fluent-ffmpeg');
-
 
 if (process.env.FFMPEG_PATH) {
   ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
@@ -19,14 +17,11 @@ if (process.env.FFPROBE_PATH) {
   ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
 }
 
-
 const { prisma } = require('./config/database');
-
 
 const storageService = require('./services/storage.service');
 const queueService = require('./services/queue.service');
 const transcriptionService = require('./services/transcription.service');
-
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
@@ -40,26 +35,20 @@ const workspaceRoutes = require('./routes/workspace.routes');
 const liveblocksRoutes = require('./routes/liveblocks.routes');
 const jiraRoutes = require('./routes/jira.routes');
 
-
 const { errorHandler } = require('./middleware/error.middleware');
 const { apiLimiter } = require('./middleware/rateLimit.middleware');
 
-
 const app = express();
-
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-
- 
 
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
-
 
 app.use(
   cors({
@@ -70,10 +59,8 @@ app.use(
   })
 );
 
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
 
 if (NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -81,20 +68,15 @@ if (NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-
 app.use('/api/', apiLimiter);
-
 
 app.use('/storage', express.static(path.join(__dirname, 'storage')));
 
-
-
 app.get('/health', async (req, res) => {
   try {
-    
+
     await prisma.$queryRaw`SELECT 1`;
 
-    
     const storageStats = await storageService.getStorageStats();
 
     res.json({
@@ -117,10 +99,6 @@ app.get('/health', async (req, res) => {
   }
 });
 
-
-
-
-
 app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -132,7 +110,6 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/liveblocks', liveblocksRoutes);
 app.use('/api/jira', jiraRoutes);
-
 
 app.get('/api', (req, res) => {
   res.json({
@@ -149,8 +126,6 @@ app.get('/api', (req, res) => {
   });
 });
 
-
-
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -160,13 +135,7 @@ app.use('*', (req, res) => {
   });
 });
 
-
-
 app.use(errorHandler);
-
-
-
-
 
 cron.schedule('0 * * * *', async () => {
   console.log('🧹 Running scheduled storage cleanup...');
@@ -186,7 +155,6 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 
-
 cron.schedule('*/5 * * * *', async () => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -196,21 +164,17 @@ cron.schedule('*/5 * * * *', async () => {
   }
 });
 
-
-
 async function gracefulShutdown(signal) {
   console.log(`\n${signal} received. Starting graceful shutdown...`);
 
- 
   server.close(async () => {
     console.log('✅ HTTP server closed');
 
     try {
-      
+
       queueService.stopWorker();
       console.log('✅ Queue worker stopped');
 
-    
       await prisma.$disconnect();
       console.log('✅ Database connection closed');
 
@@ -222,17 +186,14 @@ async function gracefulShutdown(signal) {
     }
   });
 
-  
   setTimeout(() => {
     console.error('⚠️  Forced shutdown after timeout');
     process.exit(1);
   }, 10000);
 }
 
-
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
 
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
@@ -244,18 +205,14 @@ process.on('unhandledRejection', (reason, promise) => {
   gracefulShutdown('unhandledRejection');
 });
 
-
-
 async function initializeServer() {
   try {
     console.log('\n🚀 Starting EchoNote Backend Server...\n');
 
-    
     console.log('📊 Connecting to database...');
     await prisma.$connect();
     console.log('✅ Database connected');
 
-    
     console.log('📁 Initializing storage...');
     const storageResult = await storageService.initializeStorage();
     if (storageResult.success) {
@@ -264,7 +221,6 @@ async function initializeServer() {
       throw new Error(`Storage initialization failed: ${storageResult.error}`);
     }
 
-   
     if (process.env.GMAIL_USER && process.env.GMAIL_REFRESH_TOKEN) {
       console.log('📧 Checking email service (Gmail OAuth2)...');
       console.log('✅ Email service configured');
@@ -274,7 +230,6 @@ async function initializeServer() {
       );
     }
 
-  
     console.log('🐍 Checking Python dependencies...');
     const { execSync } = require('child_process');
     const pythonCmd = process.env.PYTHON_PATH || 'python3';
@@ -285,7 +240,6 @@ async function initializeServer() {
       console.log(`⚠️  Python not found (tried: ${pythonCmd}). Audio processing may fail.`);
     }
 
-    
     console.log('🎵 Checking FFmpeg/FFprobe dependencies...');
     try {
       const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg';
@@ -305,7 +259,6 @@ async function initializeServer() {
       );
     }
 
-   
     console.log('🤖 Initializing transcription service...');
     try {
       const result = await transcriptionService.initialize();
@@ -330,8 +283,6 @@ async function initializeServer() {
   }
 }
 
-
-
 let server;
 
 initializeServer().then((initialized) => {
@@ -340,7 +291,6 @@ initializeServer().then((initialized) => {
     process.exit(1);
   }
 
-  
   server = app.listen(PORT, () => {
     console.log('🎉 EchoNote Backend Server Running\n');
     console.log(`📍 Environment: ${NODE_ENV}`);
@@ -366,12 +316,10 @@ initializeServer().then((initialized) => {
     console.log('='.repeat(60) + '\n');
     console.log('🎯 Server ready to accept requests!\n');
 
-    
     queueService.startWorker();
     console.log('⚙️  Meeting processing queue worker started\n');
   });
 
-  
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
       console.error(`❌ Port ${PORT} is already in use`);
@@ -383,6 +331,4 @@ initializeServer().then((initialized) => {
   });
 });
 
-
 module.exports = app;
-

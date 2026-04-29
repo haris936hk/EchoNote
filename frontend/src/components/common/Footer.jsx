@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 
-
 const Footer = () => {
   return (
     <footer
@@ -8,7 +7,7 @@ const Footer = () => {
       style={{ backgroundColor: '#0c1324' }}
     >
       <div className="mx-auto max-w-7xl px-8">
-        {/* 4-Column Grid */}
+        {}
         <div className="mb-16 grid grid-cols-2 gap-12 md:grid-cols-4">
           <div>
             <h5 className="mb-6 font-mono text-xs uppercase tracking-widest text-slate-500">
@@ -110,7 +109,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {}
         <div className="flex flex-col items-center justify-between border-t border-[#454653]/10 pt-8 md:flex-row">
           <div className="mb-4 text-lg font-black text-white md:mb-0">EchoNote</div>
           <div className="text-sm font-medium text-slate-500">

@@ -152,7 +152,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
 
   const handleSyncToJira = async (actionItem) => {
     if (actionItem.jiraIssueKey) return;
-    
+
     setSyncingTaskId(actionItem.id);
     try {
       const token = localStorage.getItem('token');
@@ -161,11 +161,11 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         showToast(`Synced to Jira: ${data.data.key}`, 'success');
-        // Update local state
-        setLocalActions(prev => prev.map(t => 
+
+        setLocalActions(prev => prev.map(t =>
           t.id === actionItem.id ? { ...t, jiraIssueKey: data.data.key } : t
         ));
       } else {
@@ -210,7 +210,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
               <p className="text-[11px] text-slate-500 font-medium">Refine AI-generated insights and tasks</p>
             </div>
           </div>
-          <Button 
+          <Button
             size="sm"
             color="primary"
             className="rounded-full bg-accent-primary hover:bg-accent-primary/90 font-bold text-[11px] px-6"
@@ -221,7 +221,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       )}
 
-      {/* ── Executive Summary ── */}
+      {}
       {summaryData.executive && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -253,7 +253,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       )}
 
-      {/* ── Key Decisions ── */}
+      {}
       {summaryData.decisions.length > 0 && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -279,7 +279,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       )}
 
-      {/* ── Action Items ── */}
+      {}
       {summaryData.actions.length > 0 && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -403,7 +403,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       )}
 
-      {/* ── Next Steps ── */}
+      {}
       {summaryData.nextSteps.length > 0 && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -429,7 +429,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       )}
 
-      {/* ── Key Topics ── */}
+      {}
       {summaryData.keyTopics.length > 0 && (
         <div className="rounded-card border border-echo-border bg-echo-surface p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -451,7 +451,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       )}
 
-      {/* ── Sentiment ── */}
+      {}
       <div className="rounded-card border border-echo-border bg-echo-surface p-4">
         <div className="flex items-center gap-2">
           <span className={`size-2 rounded-full ${sentiment.dot}`}></span>
@@ -460,7 +460,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         </div>
       </div>
 
-      {/* ── AI Follow-up Modal ── */}
+      {}
       <FollowUpModal
         isOpen={isFollowUpOpen}
         onClose={() => setIsFollowUpOpen(false)}
@@ -468,7 +468,7 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
         meetingTitle={meetingTitle}
       />
 
-      {/* ── Edit Task Modal ── */}
+      {}
       <EditTaskModal
         isOpen={!!editingTask}
         onClose={() => setEditingTask(null)}

@@ -10,12 +10,12 @@ import { useMeeting } from '../../contexts/MeetingContext';
 
 const CalendarSidebar = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const { meetings } = useMeeting();
 
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorStatus, setErrorStatus] = useState(null); 
+  const [errorStatus, setErrorStatus] = useState(null);
 
   const fetchEvents = async () => {
     try {
@@ -26,7 +26,7 @@ const CalendarSidebar = () => {
       }
     } catch (err) {
       if (err.name === 'CanceledError') {
-       
+
         return;
       }
       if (err.response?.status === 403 || err.response?.status === 401) {
@@ -53,7 +53,6 @@ const CalendarSidebar = () => {
     });
   };
 
-  
   const groupedEvents = {
     today: [],
     tomorrow: [],
@@ -136,7 +135,6 @@ const CalendarSidebar = () => {
     );
   };
 
-  
   if (errorStatus === 403 || errorStatus === 401) {
     return (
       <div className="rounded-card border border-echo-border bg-echo-surface p-5">
@@ -215,13 +213,13 @@ const CalendarSidebar = () => {
         </div>
       )}
 
-      {/* Mini Meeting History Grid */}
+      {}
       <div className="border-t border-echo-border pt-4">
         <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
           Meeting History
         </h4>
         <div className="grid grid-cols-7 gap-1">
-          {/* Generate 28 days of mini dots */}
+          {}
           {Array.from({ length: 28 }).map((_, i) => {
             const d = new Date();
             d.setDate(d.getDate() - (27 - i));

@@ -45,7 +45,7 @@ const WorkspaceDetailPage = () => {
 
   useEffect(() => {
     fetchWorkspaceData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [id]);
 
   const handleRemoveMember = async (userId) => {
@@ -96,12 +96,12 @@ const WorkspaceDetailPage = () => {
   const isOwner = myRole === 'OWNER';
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="mx-auto max-w-7xl space-y-10 p-8 lg:p-12"
     >
-      {/* Breadcrumbs / Header area */}
+      {}
       <div className="space-y-6">
         <div className="flex items-center gap-3 font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-widest text-slate-600">
            <button onClick={() => navigate('/workspaces')} className="hover:text-accent-primary transition-colors">Workspaces</button>
@@ -145,7 +145,7 @@ const WorkspaceDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-        {/* --- Meetings List (Left) --- */}
+        {}
         <div className="space-y-6 lg:col-span-2">
           <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
             <h3 className="flex items-center gap-3 font-['Plus_Jakarta_Sans'] text-lg font-bold text-white">
@@ -159,7 +159,7 @@ const WorkspaceDetailPage = () => {
 
           <AnimatePresence mode="wait">
             {meetings.length === 0 ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="flex flex-col items-center justify-center rounded-[24px] bg-[#0c1324]/50 py-20 text-center ring-1 ring-white/[0.04] backdrop-blur-sm"
@@ -215,7 +215,7 @@ const WorkspaceDetailPage = () => {
           </AnimatePresence>
         </div>
 
-        {/* --- Sidebar (Right) --- */}
+        {}
         <div className="space-y-8">
           <div className="rounded-[24px] bg-[#0c1324] p-6 ring-1 ring-white/[0.08]">
             <div className="mb-6 flex items-center justify-between">
@@ -225,7 +225,7 @@ const WorkspaceDetailPage = () => {
                </h3>
                <span className="font-['JetBrains_Mono'] text-[11px] font-bold text-slate-600">{workspace.members.length}</span>
             </div>
-            
+
             <div className="space-y-3">
               {workspace.members.map((member) => (
                 <MemberCard

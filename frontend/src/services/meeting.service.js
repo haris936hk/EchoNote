@@ -1,6 +1,5 @@
 import { meetingsAPI } from './api';
 
-
 export const getAllMeetings = async () => {
   try {
     const result = await meetingsAPI.getAllMeetings();
@@ -26,7 +25,6 @@ export const getAllMeetings = async () => {
     };
   }
 };
-
 
 export const getMeetingById = async (id) => {
   try {
@@ -57,7 +55,6 @@ export const getMeetingById = async (id) => {
     };
   }
 };
-
 
 export const uploadMeeting = async (meetingData) => {
   try {
@@ -103,7 +100,6 @@ export const uploadMeeting = async (meetingData) => {
   }
 };
 
-
 export const updateMeeting = async (id, updates) => {
   try {
     if (!id) {
@@ -141,7 +137,6 @@ export const updateMeeting = async (id, updates) => {
   }
 };
 
-
 export const deleteMeeting = async (id) => {
   try {
     if (!id) {
@@ -171,7 +166,6 @@ export const deleteMeeting = async (id) => {
     };
   }
 };
-
 
 export const deleteMeetings = async (ids) => {
   try {
@@ -204,7 +198,6 @@ export const deleteMeetings = async (ids) => {
   }
 };
 
-
 export const searchMeetings = async (query) => {
   try {
     if (!query || query.trim() === '') {
@@ -235,7 +228,6 @@ export const searchMeetings = async (query) => {
   }
 };
 
-
 export const filterMeetings = (meetings, filters) => {
   let filtered = [...meetings];
 
@@ -254,7 +246,7 @@ export const filterMeetings = (meetings, filters) => {
 
   if (filters.dateTo) {
     const toDate = new Date(filters.dateTo);
-    toDate.setHours(23, 59, 59, 999); 
+    toDate.setHours(23, 59, 59, 999);
     filtered = filtered.filter((m) => new Date(m.createdAt) <= toDate);
   }
 
@@ -271,7 +263,6 @@ export const filterMeetings = (meetings, filters) => {
 
   return filtered;
 };
-
 
 export const sortMeetings = (meetings, field, order = 'desc') => {
   const sorted = [...meetings];
@@ -300,11 +291,9 @@ export const sortMeetings = (meetings, field, order = 'desc') => {
   return sorted;
 };
 
-
 export const sortMeetingsByDate = (meetings, order = 'desc') => {
   return sortMeetings(meetings, 'createdAt', order);
 };
-
 
 export const groupMeetingsBy = (meetings, field) => {
   return meetings.reduce((groups, meeting) => {
@@ -317,16 +306,13 @@ export const groupMeetingsBy = (meetings, field) => {
   }, {});
 };
 
-
 export const groupMeetingsByCategory = (meetings) => {
   return groupMeetingsBy(meetings, 'category');
 };
 
-
 export const groupMeetingsByStatus = (meetings) => {
   return groupMeetingsBy(meetings, 'status');
 };
-
 
 export const groupMeetingsByDate = (meetings) => {
   return meetings.reduce((groups, meeting) => {
@@ -339,7 +325,6 @@ export const groupMeetingsByDate = (meetings) => {
   }, {});
 };
 
-
 export const calculateMeetingStats = (meetings) => {
   const stats = {
     total: meetings.length,
@@ -350,7 +335,7 @@ export const calculateMeetingStats = (meetings) => {
     averageDuration: 0,
     byCategory: {},
     byStatus: {},
-    recentCount: 0, 
+    recentCount: 0,
   };
 
   const weekAgo = new Date();
@@ -381,22 +366,18 @@ export const calculateMeetingStats = (meetings) => {
   return stats;
 };
 
-
 export const getRecentMeetings = (meetings, limit = 5) => {
   return sortMeetingsByDate(meetings, 'desc').slice(0, limit);
 };
-
 
 export const getMeetingsByStatus = (meetings, status) => {
   return meetings.filter((m) => m.status === status);
 };
 
-
 export const getMeetingsByCategory = (meetings, category) => {
   if (category === 'ALL') return meetings;
   return meetings.filter((m) => m.category === category);
 };
-
 
 export const validateMeetingData = (data) => {
   if (!data.title || data.title.trim() === '') {
@@ -427,18 +408,16 @@ export const validateMeetingData = (data) => {
   return { valid: true };
 };
 
-
 export const validateAudioFile = (file) => {
   if (!file) {
     return { valid: false, error: 'No audio file provided' };
   }
 
-  const maxSize = 10 * 1024 * 1024; 
+  const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
     return { valid: false, error: 'Audio file is too large (max 10MB)' };
   }
 
-  
   const validTypes = ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/ogg'];
   if (!validTypes.includes(file.type)) {
     return { valid: false, error: 'Invalid audio file type' };
@@ -446,7 +425,6 @@ export const validateAudioFile = (file) => {
 
   return { valid: true };
 };
-
 
 export const formatDuration = (seconds) => {
   if (!seconds || seconds === 0) return '0s';
@@ -462,7 +440,6 @@ export const formatDuration = (seconds) => {
 
   return parts.join(' ');
 };
-
 
 export const formatMeetingDate = (dateString) => {
   const date = new Date(dateString);
@@ -481,7 +458,6 @@ export const formatMeetingDate = (dateString) => {
   }
 };
 
-
 export const getStatusColor = (status) => {
   const colors = {
     COMPLETED: 'success',
@@ -490,7 +466,6 @@ export const getStatusColor = (status) => {
   };
   return colors[status] || 'default';
 };
-
 
 export const getCategoryLabel = (category) => {
   const labels = {
@@ -502,7 +477,6 @@ export const getCategoryLabel = (category) => {
   };
   return labels[category] || category;
 };
-
 
 export const exportMeetingsAsJSON = (meetings) => {
   const dataStr = JSON.stringify(meetings, null, 2);
@@ -516,7 +490,6 @@ export const exportMeetingsAsJSON = (meetings) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
-
 
 export const exportMeetingsAsCSV = (meetings) => {
   const headers = ['ID', 'Title', 'Category', 'Status', 'Duration', 'Created At'];
@@ -545,7 +518,6 @@ export const exportMeetingsAsCSV = (meetings) => {
   URL.revokeObjectURL(url);
 };
 
-
 export const getDecisions = async () => {
   try {
     const result = await meetingsAPI.getDecisions();
@@ -569,7 +541,6 @@ export const getDecisions = async () => {
   }
 };
 
-
 export const generateFollowUp = async (id, tone = 'formal') => {
   try {
     if (!id) return { success: false, error: 'Meeting ID is required' };
@@ -581,7 +552,6 @@ export const generateFollowUp = async (id, tone = 'formal') => {
     return { success: false, error: 'An unexpected error occurred' };
   }
 };
-
 
 export const shareMeetingToSlack = async (id) => {
   try {

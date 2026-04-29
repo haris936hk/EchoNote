@@ -23,7 +23,7 @@ export const MeetingProvider = ({ children }) => {
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const timerRef = useRef(null);
-  const fetchingRef = useRef(false); 
+  const fetchingRef = useRef(false);
 
   const stopRecordingInternal = useCallback(() => {
     return new Promise((resolve) => {

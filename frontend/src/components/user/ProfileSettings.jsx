@@ -17,7 +17,7 @@ const ProfileSettings = () => {
 
   return (
     <div className="space-y-6">
-      {/* Profile Information */}
+      {}
       <Card>
         <CardHeader>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
@@ -27,7 +27,7 @@ const ProfileSettings = () => {
         </CardHeader>
         <Divider />
         <CardBody className="gap-6">
-          {/* Avatar and Basic Info */}
+          {}
           <div className="flex items-center gap-4">
             <Avatar
               src={user.picture}
@@ -58,7 +58,7 @@ const ProfileSettings = () => {
 
           <Divider />
 
-          {/* Account Details */}
+          {}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
@@ -85,7 +85,7 @@ const ProfileSettings = () => {
         </CardBody>
       </Card>
 
-      {/* Privacy & Data */}
+      {}
       <Card>
         <CardHeader>
           <h2 className="flex items-center gap-2 text-xl font-semibold">

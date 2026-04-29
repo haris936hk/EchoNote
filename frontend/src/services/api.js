@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, 
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -49,7 +49,7 @@ api.request = (config) => {
 
 api.interceptors.request.use(
   (config) => {
-    
+
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -179,10 +179,8 @@ api.interceptors.response.use(
   }
 );
 
-
-
 export const authAPI = {
-  
+
   googleLogin: async (credential) => {
     try {
       const response = await api.post('/auth/google', { credential });
@@ -195,7 +193,6 @@ export const authAPI = {
     }
   },
 
-  
   logout: async () => {
     try {
       const response = await api.post('/auth/logout');
@@ -208,7 +205,6 @@ export const authAPI = {
     }
   },
 
-  
   verifySession: async () => {
     try {
       const response = await api.get('/auth/verify');
@@ -219,13 +215,8 @@ export const authAPI = {
   },
 };
 
-
-
 export const calendarAPI = {
-  /**
-   * Get upcoming calendar events
-   * @param {number} days 
-   */
+
   getEvents: async (days = 30) => {
     try {
       const response = await api.get('/calendar/events', {
@@ -242,10 +233,8 @@ export const calendarAPI = {
   },
 };
 
-
-
 export const meetingsAPI = {
- 
+
   getAllMeetings: async () => {
     try {
       const response = await api.get('/meetings');
@@ -258,7 +247,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   getMeetingById: async (id) => {
     try {
       const response = await api.get(`/meetings/${id}`);
@@ -271,7 +259,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   uploadMeeting: async ({ title, description, category, audioFile }) => {
     try {
       const formData = new FormData();
@@ -284,7 +271,7 @@ export const meetingsAPI = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000, 
+        timeout: 60000,
       });
 
       return { success: true, data: response.data };
@@ -296,7 +283,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   updateMeeting: async (id, updates) => {
     try {
       const response = await api.patch(`/meetings/${id}`, updates);
@@ -309,7 +295,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   deleteMeeting: async (id) => {
     try {
       const response = await api.delete(`/meetings/${id}`);
@@ -322,7 +307,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   searchMeetings: async (query) => {
     try {
       const response = await api.get('/meetings/search', {
@@ -337,7 +321,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   getDecisions: async () => {
     try {
       const response = await api.get('/meetings/decisions');
@@ -350,7 +333,6 @@ export const meetingsAPI = {
     }
   },
 
-  
   getStatistics: async () => {
     try {
       const response = await api.get('/meetings/stats');
@@ -363,7 +345,6 @@ export const meetingsAPI = {
     }
   },
 
- 
   generateFollowUp: async (id, tone = 'formal') => {
     try {
       const response = await api.post(
@@ -381,7 +362,7 @@ export const meetingsAPI = {
       };
     }
   },
-  
+
   shareToSlack: async (id) => {
     try {
       const response = await api.post(`/meetings/${id}/share/slack`);
@@ -395,10 +376,8 @@ export const meetingsAPI = {
   },
 };
 
-
-
 export const userAPI = {
- 
+
   getProfile: async () => {
     try {
       const response = await api.get('/user/profile');
@@ -411,7 +390,6 @@ export const userAPI = {
     }
   },
 
-  
   updatePreferences: async (preferences) => {
     try {
       const response = await api.put('/user/preferences', preferences);
@@ -424,7 +402,6 @@ export const userAPI = {
     }
   },
 
-  
   deleteAccount: async () => {
     try {
       const response = await api.delete('/users/me', {
@@ -439,7 +416,6 @@ export const userAPI = {
     }
   },
 
-  
   exportData: async () => {
     try {
       const response = await api.get('/user/export', {
@@ -455,10 +431,8 @@ export const userAPI = {
   },
 };
 
-
-
 export const tasksAPI = {
- 
+
   getTasks: async () => {
     try {
       const response = await api.get('/tasks');
@@ -483,7 +457,6 @@ export const tasksAPI = {
     }
   },
 
- 
   updateTask: async (id, updates) => {
     try {
       const response = await api.patch(`/tasks/${id}`, updates);
@@ -509,7 +482,6 @@ export const tasksAPI = {
   },
 };
 
-
 export const checkAPIHealth = async () => {
   try {
     const response = await api.get('/health');
@@ -518,7 +490,6 @@ export const checkAPIHealth = async () => {
     return { success: false, error: 'API unreachable' };
   }
 };
-
 
 export const downloadFile = (url, filename) => {
   const link = document.createElement('a');

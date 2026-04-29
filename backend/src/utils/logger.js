@@ -1,11 +1,6 @@
 
-
 const winston = require('winston');
 
-/**
- * Create and configure Winston logger instance
- * Used across all backend services for consistent logging
- */
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -18,14 +13,13 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'echonote-backend' },
   transports: [
-    
+
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.printf(({ level, message, timestamp, ...metadata }) => {
           let msg = `${timestamp} [${level}]: ${message}`;
 
-          
           if (Object.keys(metadata).length > 0) {
             msg += ` ${JSON.stringify(metadata)}`;
           }
@@ -36,7 +30,6 @@ const logger = winston.createLogger({
     }),
   ],
 });
-
 
 if (process.env.NODE_ENV === 'production') {
   logger.add(

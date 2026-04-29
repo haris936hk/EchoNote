@@ -7,7 +7,7 @@ function mapSentimentToScore(sentiment) {
   const s = String(sentiment).toLowerCase();
   if (s === 'positive') return 0.85;
   if (s === 'negative') return 0.15;
-  return 0.5; 
+  return 0.5;
 }
 
 async function backfill() {

@@ -111,7 +111,7 @@ const MeetingDetail = ({ meeting }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header Card */}
+      {}
       <Card>
         <CardHeader className="flex flex-col items-start gap-3 p-6">
           <div className="flex w-full items-start justify-between">
@@ -122,7 +122,7 @@ const MeetingDetail = ({ meeting }) => {
               )}
             </div>
 
-            {/* Download Buttons */}
+            {}
             <div className="flex gap-2">
               {meeting.audioUrl && (
                 <Button
@@ -157,7 +157,7 @@ const MeetingDetail = ({ meeting }) => {
             </div>
           </div>
 
-          {/* Metadata */}
+          {}
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <CategoryBadge category={meeting.category} />
 
@@ -174,7 +174,7 @@ const MeetingDetail = ({ meeting }) => {
         </CardHeader>
       </Card>
 
-      {/* Content Tabs */}
+      {}
       <Card>
         <CardBody className="p-0">
           <Tabs
@@ -190,7 +190,7 @@ const MeetingDetail = ({ meeting }) => {
               panel: 'w-full p-0',
             }}
           >
-            {/* Summary Tab */}
+            {}
             <Tab
               key="summary"
               title={
@@ -203,7 +203,7 @@ const MeetingDetail = ({ meeting }) => {
               <div className="space-y-6 p-6">
                 {summaryData ? (
                   <>
-                    {/* Executive Summary */}
+                    {}
                     {summaryData.executive && (
                       <div>
                         <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
@@ -216,7 +216,7 @@ const MeetingDetail = ({ meeting }) => {
 
                     <Divider />
 
-                    {/* Key Decisions */}
+                    {}
                     {summaryData.decisions.length > 0 && (
                       <div>
                         <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
@@ -239,7 +239,7 @@ const MeetingDetail = ({ meeting }) => {
 
                     <Divider />
 
-                    {/* Action Items */}
+                    {}
                     {summaryData.actions.length > 0 && (
                       <div>
                         <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
@@ -260,7 +260,7 @@ const MeetingDetail = ({ meeting }) => {
                       </div>
                     )}
 
-                    {/* Next Steps */}
+                    {}
                     {summaryData.nextSteps && (
                       <>
                         <Divider />
@@ -284,7 +284,7 @@ const MeetingDetail = ({ meeting }) => {
               </div>
             </Tab>
 
-            {/* Transcript Tab */}
+            {}
             <Tab
               key="transcript"
               title={

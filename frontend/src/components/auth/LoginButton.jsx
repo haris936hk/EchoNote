@@ -38,10 +38,10 @@ const LoginButton = ({ size = 'lg', fullWidth = false }) => {
   return (
     <div className="flex flex-col gap-2">
       <div className="group relative flex justify-center">
-        {/* Glowing background effect */}
+        {}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary to-secondary opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-30"></div>
 
-        {/* Button wrapper with glow */}
+        {}
         <div className="relative animate-gradient rounded-3xl bg-gradient-to-r from-primary via-secondary to-primary bg-200 p-[2px] shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/60">
           <div className="w-full overflow-hidden rounded-3xl bg-content1">
             <Button

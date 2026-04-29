@@ -42,7 +42,7 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
 
   return (
     <div className="space-y-5">
-      {/* Header row: count + view toggle */}
+      {}
       <div className="flex items-center justify-between">
         <p className="font-mono text-xs text-slate-500">
           {startIndex + 1}–{Math.min(endIndex, meetings.length)} of {meetings.length}
@@ -73,7 +73,7 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
         </div>
       </div>
 
-      {/* Meeting Cards */}
+      {}
       <div
         className={
           viewMode === 'grid'
@@ -86,7 +86,7 @@ const MeetingList = ({ meetings = [], loading = false, onDelete, onEdit, itemsPe
         ))}
       </div>
 
-      {/* Pagination */}
+      {}
       {totalPages > 1 && (
         <div className="flex justify-center pt-4">
           <Pagination

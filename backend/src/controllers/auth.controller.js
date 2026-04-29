@@ -2,11 +2,6 @@
 const authService = require('../services/auth.service');
 const { prisma } = require('../config/database');
 
-/**
- * Google OAuth authentication (client-side flow)
- * POST /api/auth/google
- * @body { code: string }
- */
 const googleAuth = async (req, res) => {
   try {
     const { code } = req.body;
@@ -42,11 +37,9 @@ const googleAuth = async (req, res) => {
   }
 };
 
-
 const getGoogleAuthUrl = async (req, res) => {
   try {
-    
-    
+
     return res.status(501).json({
       success: false,
       error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
@@ -60,10 +53,9 @@ const getGoogleAuthUrl = async (req, res) => {
   }
 };
 
-
 const googleCallback = async (req, res) => {
   try {
-    
+
     return res.status(501).json({
       success: false,
       error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
@@ -77,11 +69,6 @@ const googleCallback = async (req, res) => {
   }
 };
 
-/**
- * Refresh access token
- * POST /api/auth/refresh
- * @body { refreshToken: string }
- */
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -115,11 +102,6 @@ const refreshToken = async (req, res) => {
   }
 };
 
-/**
- * Logout user
- * POST /api/auth/logout
- * @requires authenticate middleware (req.userId)
- */
 const logout = async (req, res) => {
   try {
     const result = await authService.logout(req.userId);
@@ -141,14 +123,9 @@ const logout = async (req, res) => {
   }
 };
 
-/**
- * Get current authenticated user
- * GET /api/auth/me
- * @requires authenticate middleware (req.user, req.userId)
- */
 const getCurrentUser = async (req, res) => {
   try {
-    
+
     return res.status(200).json({
       success: true,
       data: {
@@ -164,11 +141,6 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-/**
- * Verify token validity
- * POST /api/auth/verify
- * @body { token: string }
- */
 const verifyToken = async (req, res) => {
   try {
     const { token } = req.body;
@@ -196,7 +168,7 @@ const verifyToken = async (req, res) => {
       data: {
         valid: true,
         user: {
-          userId: decoded.id, 
+          userId: decoded.id,
           email: decoded.email,
           name: decoded.name,
         },
@@ -211,14 +183,9 @@ const verifyToken = async (req, res) => {
   }
 };
 
-/**
- * Revoke Google OAuth access (placeholder)
- * POST /api/auth/revoke
- * @requires authenticate middleware
- */
 const revokeGoogleAccess = async (req, res) => {
   try {
-    
+
     await authService.logout(req.userId);
     res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
@@ -230,11 +197,6 @@ const revokeGoogleAccess = async (req, res) => {
   }
 };
 
-/**
- * Get Google Calendar connection status (B4)
- * GET /api/auth/calendar/status
- * @requires authenticate middleware
- */
 const getCalendarStatus = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -254,12 +216,6 @@ const getCalendarStatus = async (req, res) => {
   }
 };
 
-/**
- * Connect Google Calendar (B4)
- * POST /api/auth/calendar/connect
- * Informs client of the calendar scope — re-consent is handled client-side.
- * @requires authenticate middleware
- */
 const connectCalendar = async (req, res) => {
   try {
     const calendarScope = 'https://www.googleapis.com/auth/calendar.readonly';
@@ -274,11 +230,6 @@ const connectCalendar = async (req, res) => {
   }
 };
 
-/**
- * Disconnect Google Calendar (B4)
- * POST /api/auth/calendar/disconnect
- * @requires authenticate middleware
- */
 const disconnectCalendar = async (req, res) => {
   try {
     await prisma.user.update({
@@ -292,12 +243,6 @@ const disconnectCalendar = async (req, res) => {
   }
 };
 
-/**
- * Get active sessions (B5)
- * GET /api/auth/sessions
- * Single refresh-token model — returns current session from lastLoginAt.
- * @requires authenticate middleware
- */
 const getActiveSessions = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -324,12 +269,6 @@ const getActiveSessions = async (req, res) => {
   }
 };
 
-/**
- * Revoke all other sessions (B5)
- * DELETE /api/auth/sessions/:sessionId
- * Nulls the stored refresh token, invalidating all non-current sessions.
- * @requires authenticate middleware
- */
 const revokeSession = async (req, res) => {
   try {
     await prisma.user.update({

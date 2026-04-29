@@ -48,7 +48,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
   return (
     <Card className="w-full">
       <CardBody className="gap-6 p-6">
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-semibold">Record Meeting</h3>
           {isRecording && (
@@ -62,9 +62,9 @@ const AudioRecorder = ({ onRecordingComplete }) => {
           )}
         </div>
 
-        {/* Recording Visualization */}
+        {}
         <div className="flex flex-col items-center justify-center gap-6 py-8">
-          {/* Microphone Icon with Animation */}
+          {}
           <div className={`relative ${isRecording ? 'animate-pulse' : ''}`}>
             <div
               className={`
@@ -80,7 +80,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
               <FiMic size={48} className={isRecording ? 'text-danger' : 'text-primary'} />
             </div>
 
-            {/* Pulse rings when recording */}
+            {}
             {isRecording && (
               <>
                 <div className="absolute inset-0 animate-ping rounded-full bg-danger/20" />
@@ -89,13 +89,13 @@ const AudioRecorder = ({ onRecordingComplete }) => {
             )}
           </div>
 
-          {/* Timer */}
+          {}
           <div className="text-center">
             <p className="font-mono text-4xl font-bold">{recordingTime}</p>
             {isRecording && <p className="mt-2 text-sm text-default-500">{getRemainingTime()}</p>}
           </div>
 
-          {/* Progress Bar */}
+          {}
           {isRecording && (
             <div className="w-full max-w-md">
               <Progress
@@ -108,7 +108,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
           )}
         </div>
 
-        {/* Controls */}
+        {}
         <div className="flex justify-center gap-3">
           {!isRecording ? (
             <Button
@@ -135,7 +135,7 @@ const AudioRecorder = ({ onRecordingComplete }) => {
           )}
         </div>
 
-        {/* Info/Error Messages */}
+        {}
         {error && (
           <div className="flex items-start gap-3 rounded-lg border border-danger/20 bg-danger/10 p-4">
             <FiAlertCircle className="mt-0.5 shrink-0 text-danger" size={20} />

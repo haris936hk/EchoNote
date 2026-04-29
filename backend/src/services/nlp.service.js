@@ -1,11 +1,8 @@
-// backend/src/services/nlp.service.js
-// NLP processing service using SpaCy
 
 const { PythonShell } = require('python-shell');
 const path = require('path');
 const winston = require('winston');
 
-// Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -16,7 +13,6 @@ const logger = winston.createLogger({
   ],
 });
 
-// Configuration
 const NLP_CONFIG = {
   pythonPath: process.env.PYTHON_PATH || 'python3',
   scriptsDir: path.join(__dirname, '../python_scripts'),
@@ -24,17 +20,6 @@ const NLP_CONFIG = {
   enableAllComponents: true,
 };
 
-/**
- * Complete NLP pipeline for meeting transcripts
- * Runs all NLP analyses in sequence
- * Returns data in dataset format
- *
- * NOTE: Sentiment is NOT extracted by SpaCy/TextBlob anymore.
- * It is derived from the AI LLM which has full transcript context.
- *
- * @param {string} text - Transcript text
- * @returns {Object} Complete NLP analysis in dataset format
- */
 const processMeetingTranscript = async (text) => {
   try {
     logger.info(`🚀 Starting complete NLP pipeline`);
@@ -47,7 +32,6 @@ const processMeetingTranscript = async (text) => {
       args: [text, 'full'],
     };
 
-    // Run SpaCy NLP processor with updated format
     const results = await PythonShell.run('nlp_processor.py', pythonOptions).catch((err) => {
       logger.error(`❌ NLP script failed: ${err.message}`);
       if (err.message.includes('JSON')) {
@@ -65,15 +49,14 @@ const processMeetingTranscript = async (text) => {
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Complete NLP pipeline finished in ${totalTime}s`);
 
-    // Return in enriched format for the LLM
     return {
       success: result.success || true,
-      entities: result.entities || [], // [{text, label, count}]
-      svoTriplets: result.svoTriplets || [], // [{subject, verb, object}]
-      actionSignals: result.actionSignals || [], // [{text, verb, speaker}]
-      questions: result.questions || [], // [{text, type}]
-      speakerEntityMap: result.speakerEntityMap || {}, // {SPEAKER_00: ["John (PERSON)"]}
-      nlpMetadata: result.metadata || {}, // {sentenceCount, wordCount, avgSentenceLength}
+      entities: result.entities || [],
+      svoTriplets: result.svoTriplets || [],
+      actionSignals: result.actionSignals || [],
+      questions: result.questions || [],
+      speakerEntityMap: result.speakerEntityMap || {},
+      nlpMetadata: result.metadata || {},
       processingTime: parseFloat(totalTime),
     };
   } catch (error) {

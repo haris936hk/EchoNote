@@ -1,12 +1,9 @@
-// backend/src/services/audio.service.js
-// Audio processing service - handles audio optimization and analysis
 
 const { PythonShell } = require('python-shell');
 const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 
-// Configure FFmpeg/FFprobe paths if provided in .env
 if (process.env.FFMPEG_PATH) {
   ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
 }
@@ -16,7 +13,6 @@ if (process.env.FFPROBE_PATH) {
 
 const winston = require('winston');
 
-// Initialize logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -27,30 +23,21 @@ const logger = winston.createLogger({
   ],
 });
 
-// Configuration
 const AUDIO_CONFIG = {
   pythonPath: process.env.PYTHON_PATH || 'python3',
   scriptsDir: path.join(__dirname, '../python_scripts'),
-  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 180, // 3 minutes
-  targetSampleRate: 48000, // Deepgram handles natively, preserve quality
-  targetChannels: 1, // Mono
+  maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 180,
+  targetSampleRate: 48000,
+  targetChannels: 1,
   targetFormat: 'wav',
   useFfmpegFallback: process.env.USE_FFMPEG_FALLBACK === 'true',
 };
 
-/**
- * Process audio file using Python script
- * Applies noise reduction, normalization, and optimization
- * @param {string} inputPath - Path to input audio file
- * @param {string} outputPath - Path for processed audio file
- * @returns {Object} Processing result with metadata
- */
 const processAudioWithPython = async (inputPath, outputPath) => {
   try {
     logger.info(`🎵 Processing audio with Python: ${path.basename(inputPath)}`);
     const startTime = Date.now();
 
-    // Python script options
     const options = {
       mode: 'json',
       pythonPath: AUDIO_CONFIG.pythonPath,
@@ -58,7 +45,6 @@ const processAudioWithPython = async (inputPath, outputPath) => {
       args: [inputPath, outputPath],
     };
 
-    // Run conversion script
     const results = await PythonShell.run('audio_processor.py', options).catch((err) => {
       logger.error(`❌ Audio processing script failed: ${err.message}`);
       if (err.message.includes('JSON')) {
@@ -71,7 +57,6 @@ const processAudioWithPython = async (inputPath, outputPath) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Python audio processing completed in ${duration}s`);
 
-    // Get file size from the output file
     const fileSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
 
     return {
@@ -90,13 +75,6 @@ const processAudioWithPython = async (inputPath, outputPath) => {
   }
 };
 
-/**
- * Process audio file using FFmpeg (fallback method)
- * Faster but lower quality than Python processing
- * @param {string} inputPath - Path to input audio file
- * @param {string} outputPath - Path for processed audio file
- * @returns {Object} Processing result with metadata
- */
 const processAudioWithFFmpeg = (inputPath, outputPath) => {
   return new Promise((resolve, reject) => {
     logger.info(`🎵 Processing audio with FFmpeg: ${path.basename(inputPath)}`);
@@ -109,9 +87,9 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
       .format('wav')
       .audioBitrate('256k')
       .audioFilters([
-        'highpass=f=85', // Remove frequencies below 85Hz
-        'lowpass=f=8000', // Remove frequencies above 8kHz
-        'loudnorm', // Normalize audio levels
+        'highpass=f=85',
+        'lowpass=f=8000',
+        'loudnorm',
       ])
       .on('start', (commandLine) => {
         logger.debug(`FFmpeg command: ${commandLine}`);
@@ -123,10 +101,8 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
         const duration = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info(`✅ FFmpeg audio processing completed in ${duration}s`);
 
-        // Get output file stats
         const stats = fs.statSync(outputPath);
 
-        // Get audio metadata
         ffmpeg.ffprobe(outputPath, (err, metadata) => {
           if (err) {
             logger.warn('Could not get audio metadata:', err.message);
@@ -164,12 +140,6 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
   });
 };
 
-/**
- * Validate audio file
- * Checks duration, format, and basic quality
- * @param {string} filePath - Path to audio file
- * @returns {Object} Validation result with metadata
- */
 const validateAudio = (filePath) => {
   return new Promise((resolve, reject) => {
     logger.info(`🔍 Validating audio: ${path.basename(filePath)}`);
@@ -180,7 +150,6 @@ const validateAudio = (filePath) => {
         return reject(new Error(`Invalid audio file: ${err.message}`));
       }
 
-      // Check if file has audio stream
       const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
       if (!audioStream) {
         return reject(new Error('No audio stream found in file'));
@@ -192,7 +161,6 @@ const validateAudio = (filePath) => {
       const channels = audioStream.channels;
       const codec = audioStream.codec_name;
 
-      // Validate duration (max 3 minutes)
       if (duration > AUDIO_CONFIG.maxDuration) {
         return reject(
           new Error(
@@ -201,7 +169,6 @@ const validateAudio = (filePath) => {
         );
       }
 
-      // Validate minimum duration (at least 1 second)
       if (duration < 1) {
         return reject(new Error('Audio duration too short (minimum 1 second)'));
       }
@@ -222,11 +189,6 @@ const validateAudio = (filePath) => {
   });
 };
 
-/**
- * Extract audio metadata without validation
- * @param {string} filePath - Path to audio file
- * @returns {Object} Audio metadata
- */
 const getAudioMetadata = (filePath) => {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(filePath, (err, metadata) => {
@@ -249,12 +211,6 @@ const getAudioMetadata = (filePath) => {
   });
 };
 
-/**
- * Convert audio to WAV format for Whisper
- * @param {string} inputPath - Path to input audio file
- * @param {string} outputPath - Path for WAV output
- * @returns {Object} Conversion result
- */
 const convertToWav = (inputPath, outputPath) => {
   return new Promise((resolve, reject) => {
     logger.info(`🔄 Converting to WAV: ${path.basename(inputPath)}`);
@@ -276,14 +232,6 @@ const convertToWav = (inputPath, outputPath) => {
   });
 };
 
-/**
- * Extract audio segment (for testing or preview)
- * @param {string} inputPath - Path to input audio file
- * @param {string} outputPath - Path for output segment
- * @param {number} startTime - Start time in seconds
- * @param {number} duration - Duration in seconds
- * @returns {Object} Extraction result
- */
 const extractSegment = (inputPath, outputPath, startTime, duration) => {
   return new Promise((resolve, reject) => {
     logger.info(`✂️ Extracting segment: ${startTime}s to ${startTime + duration}s`);
@@ -306,11 +254,6 @@ const extractSegment = (inputPath, outputPath, startTime, duration) => {
   });
 };
 
-/**
- * Analyze audio quality
- * @param {string} filePath - Path to audio file
- * @returns {Object} Quality analysis
- */
 const analyzeQuality = async (filePath) => {
   try {
     logger.info(`📊 Analyzing audio quality: ${path.basename(filePath)}`);
@@ -322,7 +265,6 @@ const analyzeQuality = async (filePath) => {
       args: [filePath],
     };
 
-    // Run Python quality analyzer
     const results = await PythonShell.run('analyze_quality.py', options);
     const analysis = results[0];
 
@@ -330,8 +272,8 @@ const analyzeQuality = async (filePath) => {
 
     return {
       success: true,
-      snr: analysis.snr, // Signal-to-noise ratio
-      quality: analysis.quality, // 'good', 'fair', 'poor'
+      snr: analysis.snr,
+      quality: analysis.quality,
       recommendations: analysis.recommendations,
     };
   } catch (error) {
@@ -344,12 +286,6 @@ const analyzeQuality = async (filePath) => {
   }
 };
 
-/**
- * Generate waveform data for visualization
- * @param {string} filePath - Path to audio file
- * @param {number} points - Number of data points
- * @returns {Array} Waveform data
- */
 const generateWaveform = async (filePath, points = 100) => {
   try {
     logger.info(`📈 Generating waveform: ${path.basename(filePath)}`);
@@ -361,7 +297,6 @@ const generateWaveform = async (filePath, points = 100) => {
       args: [filePath, points.toString()],
     };
 
-    // Run Python waveform generator
     const results = await PythonShell.run('generate_waveform.py', options);
     const waveform = results[0];
 
@@ -378,19 +313,11 @@ const generateWaveform = async (filePath, points = 100) => {
   }
 };
 
-/**
- * Main audio processing pipeline
- * Validates, processes, and optimizes audio for transcription
- * @param {string} inputPath - Path to uploaded audio file
- * @param {string} outputDir - Directory for processed output
- * @returns {Object} Complete processing result
- */
 const processAudioPipeline = async (inputPath, outputDir) => {
   try {
     logger.info(`🚀 Starting Python-only audio processing pipeline`);
     const startTime = Date.now();
 
-    // Check if input file exists
     if (!fs.existsSync(inputPath)) {
       throw new Error(`Input file not found: ${inputPath}`);
     }
@@ -400,7 +327,6 @@ const processAudioPipeline = async (inputPath, outputDir) => {
       `📁 Input file: ${path.basename(inputPath)} (${(inputStats.size / 1024).toFixed(1)} KB)`
     );
 
-    // Process audio with Python (Python script handles all validation internally)
     logger.info(
       '🐍 Processing audio with Python (includes validation, noise reduction, optimization)...'
     );
@@ -409,7 +335,6 @@ const processAudioPipeline = async (inputPath, outputDir) => {
 
     const processing = await processAudioWithPython(inputPath, outputPath);
 
-    // Get output file stats
     const outputStats = fs.statSync(outputPath);
     const outputFileSize = outputStats.size;
 
@@ -441,11 +366,6 @@ const processAudioPipeline = async (inputPath, outputDir) => {
   }
 };
 
-/**
- * Clean up temporary audio files
- * @param {Array<string>} filePaths - Array of file paths to delete
- * @returns {Object} Cleanup result
- */
 const cleanupAudioFiles = (filePaths) => {
   let deleted = 0;
   let failed = 0;
@@ -466,26 +386,17 @@ const cleanupAudioFiles = (filePaths) => {
   return { deleted, failed, total: filePaths.length };
 };
 
-/**
- * Simple wrapper for processAudioPipeline - used by meeting service
- * Uses unified storage/processed directory for output
- * @param {string} inputPath - Path to input audio file
- * @returns {Object} Processing result with simplified structure
- */
 const processAudioFile = async (inputPath) => {
   try {
-    // Use unified storage/processed directory for output
+
     const outputDir = path.join(process.cwd(), 'storage', 'processed');
 
-    // Ensure output directory exists
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    // Run the full pipeline
     const result = await processAudioPipeline(inputPath, outputDir);
 
-    // Return simplified format for meeting service
     return {
       success: true,
       outputPath: result.output.path,

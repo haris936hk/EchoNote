@@ -1,5 +1,4 @@
 
-
 self.addEventListener('push', function(event) {
   if (event.data) {
     try {
@@ -30,23 +29,21 @@ self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
   let targetUrl = event.notification.data.url;
-  
-  
+
   if (targetUrl && !targetUrl.startsWith('http')) {
-    
+
     targetUrl = new URL(targetUrl, self.location.origin).href;
   }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      
+
       for (const client of clientList) {
         if (client.url === targetUrl && 'focus' in client) {
           return client.focus();
         }
       }
-      
-      
+
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }

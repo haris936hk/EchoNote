@@ -65,7 +65,6 @@ const MeetingDetailPage = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Open share modal
   const handleShare = () => {
     setIsShareModalOpen(true);
   };
@@ -596,13 +595,13 @@ const MeetingDetailPage = () => {
         </div>
       )}
 
-      {/* ── Completed State — Split View ── */}
+      {}
       {isCompleted && (
         <>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-            {/* Left Column — Transcript (60%) */}
+            {}
             <div className="space-y-4 lg:col-span-3">
-              {/* Audio Player */}
+              {}
               {currentMeeting.audioUrl && (
                 <div className="rounded-card border border-echo-border bg-echo-surface p-4">
                   <div className="mb-3 flex items-center gap-2">
@@ -613,7 +612,7 @@ const MeetingDetailPage = () => {
                 </div>
               )}
 
-              {/* Transcript */}
+              {}
               <div className="rounded-card border border-echo-border bg-echo-surface p-6">
                 <TranscriptViewer
                   transcript={currentMeeting.transcript}
@@ -626,7 +625,7 @@ const MeetingDetailPage = () => {
               </div>
             </div>
 
-            {/* Right Column — AI Insights (40%, sticky) */}
+            {}
             <div className="lg:col-span-2">
               <div className="space-y-4 lg:sticky lg:top-[88px]">
                 {isEditing ? (
@@ -641,7 +640,7 @@ const MeetingDetailPage = () => {
                           <p className="text-[11px] text-slate-500 font-medium">Changes are saved automatically</p>
                         </div>
                       </div>
-                      <Button 
+                      <Button
                         size="sm"
                         variant="flat"
                         color="primary"
@@ -670,7 +669,7 @@ const MeetingDetailPage = () => {
             </div>
           </div>
 
-          {/* F3 — Processing History accordion, full width below split view */}
+          {}
           <ProcessingLogAccordion
             meetingId={id}
             processingDuration={currentMeeting.processingDuration}
@@ -680,7 +679,7 @@ const MeetingDetailPage = () => {
         </>
       )}
 
-      {/* Edit Modal */}
+      {}
       <EditMeetingModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -688,7 +687,7 @@ const MeetingDetailPage = () => {
         onSave={handleSaveEdit}
       />
 
-      {/* Speaker Rename Modal */}
+      {}
       <SpeakerRenameModal
         isOpen={isSpeakerModalOpen}
         onClose={() => setIsSpeakerModalOpen(false)}
@@ -697,7 +696,7 @@ const MeetingDetailPage = () => {
         onSave={handleSaveSpeaker}
       />
 
-      {/* Share Modal */}
+      {}
       <ShareMeetingModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}

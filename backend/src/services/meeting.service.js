@@ -11,12 +11,6 @@ const jiraService = require('./jira.service');
 const path = require('path');
 const fs = require('fs').promises;
 
-/**
- * Helper function to deserialize JSON string fields back to arrays
- * Used for keyDecisions and nextSteps which are stored as JSON strings in the database
- * @param {string|Array} value - The value from database (JSON string or already parsed array)
- * @returns {Array|null} Parsed array or original value
- */
 function deserializeArrayField(value) {
   if (!value) return null;
   if (typeof value === 'string' && value.startsWith('[')) {
@@ -24,33 +18,20 @@ function deserializeArrayField(value) {
       return JSON.parse(value);
     } catch (e) {
       console.error('Failed to parse JSON array:', e);
-      return value; // Return original if parse fails
+      return value;
     }
   }
-  return value; // Already an array or other value
+  return value;
 }
-/**
- * Helper function to map string sentiment (AI LLM) to numeric score (Analytics)
- * @param {string} sentiment - 'positive', 'neutral', 'negative'
- * @returns {number|null} Score between 0 and 1
- */
+
 function mapSentimentToScore(sentiment) {
   if (!sentiment) return 0.5;
   const s = String(sentiment).toLowerCase();
   if (s === 'positive') return 0.85;
   if (s === 'negative') return 0.15;
-  return 0.5; // neutral
+  return 0.5;
 }
 
-/**
- * Create new meeting without audio (separate from processing)
- * @param {Object} params - Meeting parameters
- * @param {string} params.userId - User ID
- * @param {string} params.title - Meeting title
- * @param {string} params.description - Meeting description (optional)
- * @param {string} params.category - Meeting category (SALES, PLANNING, etc.)
- * @returns {Promise<Object>} Created meeting object
- */
 async function createMeeting({ userId, title, description, category }) {
   try {
     const meeting = await prisma.meeting.create({
@@ -85,14 +66,6 @@ async function createMeeting({ userId, title, description, category }) {
   }
 }
 
-/**
- * Upload and process audio for existing meeting
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @param {Object} audioFile - Uploaded audio file object
- * @param {Object} options - Processing options
- * @returns {Promise<Object>} Processing result
- */
 async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {}) {
   let tempPath = null;
   let processedAudioPath = null;
@@ -100,7 +73,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
   try {
     console.log(`\n🎬 Starting audio processing for meeting: ${meetingId}`);
 
-    // Verify meeting exists and belongs to user
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
@@ -121,17 +93,13 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       throw new Error('Meeting not found or unauthorized');
     }
 
-    // With multer, file is already saved to disk
-    // audioFile can be either req.uploadedFile (after validateAudioFile) or req.file
-    tempPath = audioFile.path; // Multer saves file here
+    tempPath = audioFile.path;
     const originalFileName = audioFile.originalname || audioFile.filename;
 
     console.log(`📁 Audio file saved: ${originalFileName} at ${tempPath}`);
 
-    // Step 1: Update status to PROCESSING_AUDIO
     await updateMeetingStatus(meetingId, 'PROCESSING_AUDIO');
 
-    // Step 2: Process audio (noise reduction + optimization)
     console.log(`\n🔊 Step 1/4: Processing audio...`);
     const audioResult = await audioService.processAudioFile(tempPath);
 
@@ -144,7 +112,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
 
     console.log(`✅ Audio processed: ${audioDuration}s duration`);
 
-    // Step 3: Transcribe audio using Deepgram
     await updateMeetingStatus(meetingId, 'TRANSCRIBING');
     console.log(`\n📝 Step 2/4: Transcribing audio...`);
     const transcriptionResult = await transcriptionService.transcribeAudio(processedAudioPath);
@@ -177,7 +144,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       `✅ Transcription complete: ${transcript.length} characters, ${(transcriptionConfidence * 100).toFixed(1)}% confidence`
     );
 
-    // Step 4: Process transcript with NLP (SpaCy)
     await updateMeetingStatus(meetingId, 'PROCESSING_NLP');
     console.log(`\n🧠 Step 3/4: Processing NLP...`);
     const nlpResult = await nlpService.processMeetingTranscript(diarizedTranscriptText);
@@ -190,21 +156,20 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.svoTriplets?.length || 0} SVOs, ${nlpResult.actionSignals?.length || 0} action signals, ${nlpResult.questions?.length || 0} questions`
     );
 
-    // Step 5: Generate AI summary
     await updateMeetingStatus(meetingId, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
       title: meeting.title,
       category: meeting.category,
       duration: audioDuration,
-      // SpaCy NLP features
+
       entities: nlpResult.success ? nlpResult.entities : [],
       svoTriplets: nlpResult.success ? nlpResult.svoTriplets : [],
       actionSignals: nlpResult.success ? nlpResult.actionSignals : [],
       questions: nlpResult.success ? nlpResult.questions : [],
       speakerEntityMap: nlpResult.success ? nlpResult.speakerEntityMap : {},
       nlpMetadata: nlpResult.success ? nlpResult.nlpMetadata : {},
-      // Deepgram native intelligence (high-confidence ASR-derived data)
+
       deepgramEntities,
       deepgramTopics,
       deepgramIntents,
@@ -215,7 +180,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       throw new Error(`Summary generation failed: ${summaryResult.error}`);
     }
 
-    // Extract summary fields (they're at top level of summaryResult, not nested)
     const summary = {
       executiveSummary: summaryResult.executiveSummary,
       keyDecisions: summaryResult.keyDecisions,
@@ -225,7 +189,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       sentiment: summaryResult.sentiment,
     };
 
-    // Enhance summary with NLP data if available
     const enhancedSummary = nlpResult.success
       ? summarizationService.enhanceSummaryWithNLP(summary, nlpResult)
       : summary;
@@ -248,26 +211,21 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       sentiment: enhancedSummary.sentiment || 'null',
     });
 
-    // Step 6: Store processed audio in permanent location
     const audioStoragePath = await storeAudioFile(processedAudioPath, meetingId);
 
-    // Step 7: Update meeting with all processed data
     const wordCount = transcript.split(/\s+/).length;
 
-    // Extract audio metadata
     const audioFormat =
       path
         .extname(audioFile.originalname || audioFile.filename)
         .toLowerCase()
         .replace('.', '') || 'unknown';
 
-    // Calculate processing duration
     const processingEndTime = new Date();
     const processingDurationSeconds = meeting.processingStartedAt
       ? Math.round((processingEndTime - new Date(meeting.processingStartedAt)) / 1000)
       : null;
 
-    // Format NLP data to match dataset structure
     const nlpEntitiesText =
       nlpResult.success && nlpResult.entities
         ? nlpResult.entities.map((e) => `${e.text} (${e.label})`).join(', ')
@@ -292,14 +250,12 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         transcriptWordCount: wordCount,
         transcriptConfidence: transcriptionConfidence,
 
-        // NLP Features
         nlpEntities: nlpEntitiesText,
         nlpActionPatterns: nlpActionPatternsText,
-        // Sentiment is now derived from AI summary output (authoritative, full-context)
+
         nlpSentiment: enhancedSummary.sentiment || null,
         nlpSentimentScore: mapSentimentToScore(enhancedSummary.sentiment),
 
-        // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
         summaryKeyDecisions: Array.isArray(enhancedSummary.keyDecisions)
           ? JSON.stringify(enhancedSummary.keyDecisions)
@@ -311,7 +267,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         summaryKeyTopics: enhancedSummary.keyTopics || null,
         summarySentiment: enhancedSummary.sentiment || null,
 
-        // Processing timestamps
         processingDuration: processingDurationSeconds,
         processingCompletedAt: processingEndTime,
         status: 'COMPLETED',
@@ -329,7 +284,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
 
     console.log(`✅ Meeting updated in database`);
 
-    // --- NEW: Create relational Action Items ---
     if (enhancedSummary.actionItems && enhancedSummary.actionItems.length > 0) {
       const actionItemsData = enhancedSummary.actionItems.map((item) => ({
         task: item.task,
@@ -348,7 +302,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       });
       console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
 
-      // Sync IDs back into the meeting summaryActionItems
       const allActionItems1 = await prisma.actionItem.findMany({
         where: { meetingId: updatedMeeting.id },
         orderBy: { createdAt: 'asc' },
@@ -369,7 +322,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         data: { summaryActionItems: summaryActionItems1 },
       });
 
-      // --- NEW: Jira Auto-Sync ---
       const userWithJira = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -394,15 +346,12 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       }
     }
 
-    // Step 8: Clean up temporary files
     await cleanupTempFiles([tempPath, processedAudioPath]);
 
-    // Step 9: Post-Pipeline Notifications (Parallelized)
     console.log(`\n📧💬 Sending notifications in parallel...`);
 
     const notificationPromises = [];
 
-    // Email Promise
     notificationPromises.push(
       emailService
         .sendMeetingCompletedEmail({
@@ -432,7 +381,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         .catch((err) => console.error(`⚠️ Email send failed:`, err.message))
     );
 
-    // Slack Promise
     const userWithWebhook = await prisma.user.findUnique({
       where: { id: userId },
       select: { slackWebhookUrl: true },
@@ -446,7 +394,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
       );
     }
 
-    // Web Push Promise
     notificationPromises.push(
       notificationService
         .sendMeetingCompletedPush(userId, updatedMeeting)
@@ -457,7 +404,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
     );
 
-    // Wait for all notifications to finish
     await Promise.allSettled(notificationPromises);
 
     console.log(`\n🎉 Meeting processing complete! ID: ${meetingId}\n`);
@@ -466,17 +412,14 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
   } catch (error) {
     console.error(`\n❌ Meeting processing failed:`, error.message);
 
-    // Update meeting status to FAILED
     await updateMeetingStatus(meetingId, 'FAILED', error.message);
 
-    // Clean up temp file if exists and not keeping it for retries
     if (tempPath && !options.keepTempOnError) {
       const pathsToClean = [tempPath];
       if (processedAudioPath) pathsToClean.push(processedAudioPath);
       await cleanupTempFiles(pathsToClean);
     }
 
-    // Send failure email
     const meeting = await prisma.meeting.findUnique({
       where: { id: meetingId },
       include: {
@@ -502,16 +445,6 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
   }
 }
 
-/**
- * Create new meeting and process audio through complete pipeline
- * @param {Object} params - Meeting parameters
- * @param {string} params.userId - User ID
- * @param {string} params.title - Meeting title
- * @param {string} params.category - Meeting category (SALES, PLANNING, etc.)
- * @param {string} params.audioPath - Path to uploaded audio file
- * @param {string} params.originalFilename - Original filename
- * @returns {Promise<Object>} Created meeting object
- */
 async function createAndProcessMeeting({ userId, title, category, audioPath, originalFilename }) {
   let meeting = null;
   let processedAudioPath = null;
@@ -520,7 +453,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     console.log(`\n🎬 Starting meeting processing pipeline for: ${title}`);
     console.log(`📁 Audio file: ${originalFilename}`);
 
-    // Step 1: Create meeting record with UPLOADING status
     meeting = await prisma.meeting.create({
       data: {
         title,
@@ -536,10 +468,8 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
     console.log(`✅ Meeting record created: ${meeting.id}`);
 
-    // Step 2: Update status to PROCESSING_AUDIO
     await updateMeetingStatus(meeting.id, 'PROCESSING_AUDIO');
 
-    // Step 3: Process audio (noise reduction + optimization)
     console.log(`\n🔊 Step 1/4: Processing audio...`);
     const audioResult = await audioService.processAudioFile(audioPath);
 
@@ -552,7 +482,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
     console.log(`✅ Audio processed: ${audioDuration}s duration`);
 
-    // Step 4: Transcribe audio using Deepgram
     await updateMeetingStatus(meeting.id, 'TRANSCRIBING');
     console.log(`\n📝 Step 2/4: Transcribing audio...`);
     const transcriptionResult = await transcriptionService.transcribeAudio(processedAudioPath);
@@ -585,35 +514,33 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       `✅ Transcription complete: ${transcript.length} characters, ${(transcriptionConfidence * 100).toFixed(1)}% confidence`
     );
 
-    // Step 5: Process transcript with NLP (SpaCy)
     await updateMeetingStatus(meeting.id, 'PROCESSING_NLP');
     console.log(`\n🧠 Step 3/4: Processing NLP...`);
     const nlpResult = await nlpService.processMeetingTranscript(diarizedTranscriptText);
 
     if (!nlpResult.success) {
       console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
-      // Continue without NLP data (not critical)
+
     }
 
     console.log(
       `✅ NLP complete: ${nlpResult.entities?.length || 0} entities, ${nlpResult.svoTriplets?.length || 0} SVOs, ${nlpResult.actionSignals?.length || 0} action signals, ${nlpResult.questions?.length || 0} questions`
     );
 
-    // Step 6: Generate AI summary
     await updateMeetingStatus(meeting.id, 'SUMMARIZING');
     console.log(`\n🤖 Step 4/4: Generating summary...`);
     const summaryResult = await summarizationService.generateSummary(diarizedTranscriptText, {
       title,
       category,
       audioDuration,
-      // SpaCy NLP features
+
       entities: nlpResult.success ? nlpResult.entities : [],
       svoTriplets: nlpResult.success ? nlpResult.svoTriplets : [],
       actionSignals: nlpResult.success ? nlpResult.actionSignals : [],
       questions: nlpResult.success ? nlpResult.questions : [],
       speakerEntityMap: nlpResult.success ? nlpResult.speakerEntityMap : {},
       nlpMetadata: nlpResult.success ? nlpResult.nlpMetadata : {},
-      // Deepgram native intelligence
+
       deepgramEntities,
       deepgramTopics,
       deepgramIntents,
@@ -624,7 +551,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       throw new Error(`Summary generation failed: ${summaryResult.error}`);
     }
 
-    // Extract summary fields (they're at top level of summaryResult, not nested)
     const summary = {
       executiveSummary: summaryResult.executiveSummary,
       keyDecisions: summaryResult.keyDecisions,
@@ -634,7 +560,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       sentiment: summaryResult.sentiment,
     };
 
-    // Enhance summary with NLP data if available
     const enhancedSummary = nlpResult.success
       ? summarizationService.enhanceSummaryWithNLP(summary, nlpResult)
       : summary;
@@ -643,13 +568,10 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       `✅ Summary generated with ${enhancedSummary.actionItems?.length || 0} action items`
     );
 
-    // Step 7: Store processed audio in permanent location
     const audioStoragePath = await storeAudioFile(processedAudioPath, meeting.id);
 
-    // Step 8: Update meeting with all processed data
     const wordCount = transcript.split(/\s+/).length;
 
-    // Format NLP data to match dataset structure
     const nlpEntitiesText =
       nlpResult.success && nlpResult.entities
         ? nlpResult.entities.map((e) => `${e.text} (${e.label})`).join(', ')
@@ -672,14 +594,12 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         transcriptWordCount: wordCount,
         transcriptConfidence: transcriptionConfidence,
 
-        // NLP Features
         nlpEntities: nlpEntitiesText,
         nlpActionPatterns: nlpActionPatternsText,
-        // Sentiment from AI summary output (authoritative, full-context)
+
         nlpSentiment: enhancedSummary.sentiment || null,
         nlpSentimentScore: mapSentimentToScore(enhancedSummary.sentiment),
 
-        // Summary fields - serialize arrays to JSON strings for text fields
         summaryExecutive: enhancedSummary.executiveSummary || null,
         summaryKeyDecisions: Array.isArray(enhancedSummary.keyDecisions)
           ? JSON.stringify(enhancedSummary.keyDecisions)
@@ -706,7 +626,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
 
     console.log(`✅ Meeting updated in database`);
 
-    // --- NEW: Create relational Action Items ---
     if (enhancedSummary.actionItems && enhancedSummary.actionItems.length > 0) {
       const actionItemsData = enhancedSummary.actionItems.map((item) => ({
         task: item.task,
@@ -725,7 +644,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       });
       console.log(`✅ Created ${actionItemsData.length} Action Items for Kanban board`);
 
-      // Sync IDs back into the meeting summaryActionItems
       const allActionItems2 = await prisma.actionItem.findMany({
         where: { meetingId: meeting.id },
         orderBy: { createdAt: 'asc' },
@@ -746,7 +664,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         data: { summaryActionItems: summaryActionItems2 },
       });
 
-      // --- NEW: Jira Auto-Sync ---
       const userWithJira = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -771,15 +688,12 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       }
     }
 
-    // Step 9: Clean up temporary files
     await cleanupTempFiles([audioPath, processedAudioPath]);
 
-    // Step 10: Post-Pipeline Notifications (Parallelized)
     console.log(`\n📧💬 Sending notifications in parallel...`);
 
     const notificationPromises = [];
 
-    // Email Promise
     notificationPromises.push(
       emailService
         .sendMeetingCompletedEmail({
@@ -808,7 +722,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         .catch((err) => console.error(`⚠️ Email send failed:`, err.message))
     );
 
-    // Slack Promise
     const userWithWebhook = await prisma.user.findUnique({
       where: { id: userId },
       select: { slackWebhookUrl: true },
@@ -822,7 +735,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       );
     }
 
-    // Web Push Promise
     notificationPromises.push(
       notificationService
         .sendMeetingCompletedPush(userId, meeting)
@@ -833,7 +745,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
     );
 
-    // Wait for all notifications to finish
     await Promise.allSettled(notificationPromises);
 
     console.log(`\n🎉 Meeting processing complete! ID: ${meeting.id}\n`);
@@ -845,11 +756,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
   } catch (error) {
     console.error(`\n❌ Meeting processing failed:`, error.message);
 
-    // Update meeting status to FAILED if meeting was created
     if (meeting) {
       await updateMeetingStatus(meeting.id, 'FAILED', error.message);
 
-      // Send failure email
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
@@ -864,7 +773,6 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       }
     }
 
-    // Clean up temp files if they exist
     const pathsToClean = [];
     if (audioPath) pathsToClean.push(audioPath);
     if (processedAudioPath) pathsToClean.push(processedAudioPath);
@@ -881,28 +789,20 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
   }
 }
 
-/**
- * Transform meeting data from database format to frontend format
- * @param {Object} meeting - Raw meeting from database
- * @returns {Object} Transformed meeting
- */
 function transformMeetingForFrontend(meeting) {
   if (!meeting) return null;
 
-  // Prioritize relational action items if they were included in the query
   const actionItems = meeting.actionItems || meeting.summaryActionItems || [];
 
   return {
     ...meeting,
-    // Map transcript fields
+
     transcript: meeting.transcriptText || null,
     transcriptSegments: meeting.transcriptSegments || null,
     speakerMap: meeting.speakerMap || {},
 
-    // Map duration field
     duration: meeting.audioDuration || null,
 
-    // Combine summary fields into single object - deserialize JSON strings back to arrays
     summary:
       meeting.summaryExecutive ||
       meeting.summaryKeyDecisions ||
@@ -920,18 +820,12 @@ function transformMeetingForFrontend(meeting) {
   };
 }
 
-/**
- * Get meeting by ID with user validation
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID (for authorization)
- * @returns {Promise<Object|null>} Meeting object or null if not found
- */
 async function getMeetingById(meetingId, userId) {
   try {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
-        userId, // Ensure user can only access their own meetings
+        userId,
       },
       include: {
         user: {
@@ -949,7 +843,6 @@ async function getMeetingById(meetingId, userId) {
 
     if (!meeting) return null;
 
-    // Transform meeting data for frontend
     return transformMeetingForFrontend(meeting);
   } catch (error) {
     console.error('Get meeting error:', error.message);
@@ -957,22 +850,10 @@ async function getMeetingById(meetingId, userId) {
   }
 }
 
-/**
- * Get all meetings for a user with filters
- * @param {Object} params - Query parameters
- * @param {string} params.userId - User ID
- * @param {string} params.category - Filter by category (optional)
- * @param {string} params.status - Filter by status (optional)
- * @param {string} params.search - Search in title/transcript (optional)
- * @param {number} params.page - Page number (default: 1)
- * @param {number} params.limit - Items per page (default: 10)
- * @returns {Promise<Object>} Paginated meetings list
- */
 async function getUserMeetings({ userId, category, status, search, page = 1, limit = 10 }) {
   try {
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where = {
       userId,
     };
@@ -992,7 +873,6 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
       ];
     }
 
-    // Run count and findMany in parallel — they are independent queries
     const [total, meetings] = await Promise.all([
       prisma.meeting.count({ where }),
       prisma.meeting.findMany({
@@ -1015,7 +895,6 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
       }),
     ]);
 
-    // Transform meetings for frontend
     const transformedMeetings = meetings.map((m) => transformMeetingForFrontend(m));
 
     return {
@@ -1031,25 +910,17 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
   }
 }
 
-/**
- * Search meetings by keyword in title or transcript
- * @param {string} userId - User ID
- * @param {string} query - Search query
- * @param {Object} options - Search options (category, limit)
- * @returns {Promise<Array>} Search results
- */
 async function searchMeetings(userId, query, options = {}) {
   try {
     const where = {
       userId,
-      status: 'COMPLETED', // Only search completed meetings
+      status: 'COMPLETED',
       OR: [
         { title: { contains: query, mode: 'insensitive' } },
         { transcriptText: { contains: query, mode: 'insensitive' } },
       ],
     };
 
-    // Add category filter if provided
     if (options.category && options.category !== 'ALL') {
       where.category = options.category;
     }
@@ -1057,20 +928,20 @@ async function searchMeetings(userId, query, options = {}) {
     const meetings = await prisma.meeting.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      take: options.limit || 20, // Limit search results
+      take: options.limit || 20,
       select: {
         id: true,
         title: true,
         category: true,
         createdAt: true,
         audioDuration: true,
-        transcriptText: true, // Include for highlighting matches
+        transcriptText: true,
       },
     });
 
     return meetings.map((meeting) => ({
       ...meeting,
-      transcriptText: meeting.transcriptText?.substring(0, 200) + '...', // Preview only
+      transcriptText: meeting.transcriptText?.substring(0, 200) + '...',
     }));
   } catch (error) {
     console.error('Search meetings error:', error.message);
@@ -1078,21 +949,14 @@ async function searchMeetings(userId, query, options = {}) {
   }
 }
 
-/**
- * Update meeting metadata (title, category, description)
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @param {Object} updates - Fields to update
- * @returns {Promise<Object>} Updated meeting
- */
 async function updateMeeting(meetingId, userId, updates) {
   try {
-    // Only allow updating specific fields
+
     const allowedUpdates = {};
     if (updates.title !== undefined) allowedUpdates.title = updates.title;
     if (updates.description !== undefined) allowedUpdates.description = updates.description;
     if (updates.category) allowedUpdates.category = updates.category;
-    
+
     if (updates.shareToken !== undefined) allowedUpdates.shareToken = updates.shareToken;
     if (updates.shareEnabled !== undefined) allowedUpdates.shareEnabled = updates.shareEnabled;
     if (updates.sharedAt !== undefined) allowedUpdates.sharedAt = updates.sharedAt;
@@ -1100,16 +964,15 @@ async function updateMeeting(meetingId, userId, updates) {
     const updatedMeeting = await prisma.meeting.updateMany({
       where: {
         id: meetingId,
-        userId, // Ensure user owns this meeting
+        userId,
       },
       data: allowedUpdates,
     });
 
     if (updatedMeeting.count === 0) {
-      return null; // Meeting not found or unauthorized
+      return null;
     }
 
-    // Return the updated meeting
     return await getMeetingById(meetingId, userId);
   } catch (error) {
     console.error('Update meeting error:', error.message);
@@ -1117,15 +980,9 @@ async function updateMeeting(meetingId, userId, updates) {
   }
 }
 
-/**
- * Delete meeting and associated files
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @returns {Promise<void>}
- */
 async function deleteMeeting(meetingId, userId) {
   try {
-    // Get meeting to delete associated files
+
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
@@ -1137,12 +994,11 @@ async function deleteMeeting(meetingId, userId) {
       throw new Error('Meeting not found');
     }
 
-    // Delete audio file if exists
     if (meeting.audioUrl) {
       try {
-        // Check if it's a Supabase URL or local path
+
         if (meeting.audioUrl.startsWith('http')) {
-          // Supabase URL - delete from cloud storage
+
           const result = await supabaseStorage.deleteAudioFromSupabase(meeting.audioUrl);
           if (result.success) {
             console.log(`✅ Deleted audio from Supabase: ${meeting.audioUrl}`);
@@ -1150,7 +1006,7 @@ async function deleteMeeting(meetingId, userId) {
             console.warn(`⚠️ Could not delete from Supabase: ${result.error}`);
           }
         } else {
-          // Local file path - delete from filesystem
+
           await fs.unlink(meeting.audioUrl);
           console.log(`✅ Deleted local audio file: ${meeting.audioUrl}`);
         }
@@ -1159,7 +1015,6 @@ async function deleteMeeting(meetingId, userId) {
       }
     }
 
-    // Delete meeting record
     await prisma.meeting.delete({
       where: { id: meetingId },
     });
@@ -1171,11 +1026,6 @@ async function deleteMeeting(meetingId, userId) {
   }
 }
 
-/**
- * Get meeting statistics for a user
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Statistics
- */
 async function getMeetingStatistics(userId) {
   try {
     const thirtyDaysAgo = new Date();
@@ -1184,7 +1034,6 @@ async function getMeetingStatistics(userId) {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // All queries run in parallel — 0 serial DB round-trips
     const [
       totalMeetings,
       completedMeetings,
@@ -1230,7 +1079,7 @@ async function getMeetingStatistics(userId) {
         },
         orderBy: { createdAt: 'asc' },
       }),
-      // Previously serial — now parallel
+
       prisma.meeting.groupBy({
         by: ['category'],
         where: { userId, status: 'COMPLETED' },
@@ -1241,12 +1090,10 @@ async function getMeetingStatistics(userId) {
       }),
     ]);
 
-    // Calculate productivity score: (Done Items / Total Items) * 100
     const totalItems = actionItemsStatus.reduce((acc, item) => acc + item._count, 0);
     const doneItems = actionItemsStatus.find((item) => item.status === 'DONE')?._count || 0;
     const productivityScore = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
 
-    // Process Sentiment Trends & Entities
     const sentimentTrend = [];
     const entityCounts = {};
     const dailyData = {};
@@ -1261,7 +1108,6 @@ async function getMeetingStatistics(userId) {
         dailyData[date].count += 1;
       }
 
-      // Aggregate Entities
       if (meeting.nlpEntities) {
         const entities = meeting.nlpEntities.split(',').map((e) => e.trim());
         entities.forEach((entity) => {
@@ -1272,7 +1118,6 @@ async function getMeetingStatistics(userId) {
       }
     });
 
-    // Fill in sentiment trend array
     Object.keys(dailyData)
       .sort()
       .forEach((date) => {
@@ -1285,7 +1130,6 @@ async function getMeetingStatistics(userId) {
         });
       });
 
-    // Sort and limit top entities
     const topEntities = Object.entries(entityCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
@@ -1322,13 +1166,6 @@ async function getMeetingStatistics(userId) {
   }
 }
 
-/**
- * Regenerate summary for existing meeting
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @param {Object} options - Summary generation options
- * @returns {Promise<Object>} Updated meeting with new summary
- */
 async function regenerateSummary(meetingId, userId, options = {}) {
   try {
     const meeting = await prisma.meeting.findFirst({
@@ -1348,7 +1185,6 @@ async function regenerateSummary(meetingId, userId, options = {}) {
 
     console.log(`🔄 Regenerating summary for meeting: ${meetingId}`);
 
-    // Generate new summary
     const summaryResult = await summarizationService.regenerateSummary(
       meeting.transcript,
       {
@@ -1363,7 +1199,6 @@ async function regenerateSummary(meetingId, userId, options = {}) {
       throw new Error(`Summary regeneration failed: ${summaryResult.error}`);
     }
 
-    // Update meeting
     const updatedMeeting = await prisma.meeting.update({
       where: { id: meetingId },
       data: {
@@ -1386,12 +1221,6 @@ async function regenerateSummary(meetingId, userId, options = {}) {
   }
 }
 
-/**
- * Get meeting transcript
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Transcript data
- */
 async function getTranscript(meetingId, userId) {
   try {
     const meeting = await prisma.meeting.findFirst({
@@ -1424,12 +1253,6 @@ async function getTranscript(meetingId, userId) {
   }
 }
 
-/**
- * Get meeting summary
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Summary data
- */
 async function getSummary(meetingId, userId) {
   try {
     const meeting = await prisma.meeting.findFirst({
@@ -1466,12 +1289,6 @@ async function getSummary(meetingId, userId) {
   }
 }
 
-/**
- * Get full meeting data with NLP features formatted like dataset
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Complete meeting data in dataset format
- */
 async function getMeetingWithNLP(meetingId, userId) {
   try {
     const meeting = await prisma.meeting.findFirst({
@@ -1503,7 +1320,6 @@ async function getMeetingWithNLP(meetingId, userId) {
       return null;
     }
 
-    // Format the response to match dataset structure
     const response = {
       transcript: meeting.transcriptText
         ? `MEETING TRANSCRIPT:\n${meeting.transcriptText}\n\nNLP FEATURES:\n**Entities:** ${meeting.nlpEntities || 'None'}\n\n**Action Patterns:**\n  • ${meeting.nlpActionPatterns || 'None'}\n\n**Sentiment:** ${meeting.nlpSentiment || 'Unknown'} (polarity: ${meeting.nlpSentimentScore || 0})`
@@ -1525,12 +1341,6 @@ async function getMeetingWithNLP(meetingId, userId) {
   }
 }
 
-/**
- * Get audio download URL for meeting
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Audio download info
- */
 async function getAudioDownloadUrl(meetingId, userId) {
   try {
     const meeting = await prisma.meeting.findFirst({
@@ -1549,18 +1359,17 @@ async function getAudioDownloadUrl(meetingId, userId) {
       return null;
     }
 
-    // Check if it's a Supabase URL or local path
     if (meeting.audioUrl.startsWith('http')) {
-      // Supabase URL - return directly or get signed URL
+
       return {
         url: meeting.audioUrl,
         filename: `${meetingId}.wav`,
         size: meeting.audioSize || null,
         isRemote: true,
-        expiresAt: null, // Public URL, no expiration
+        expiresAt: null,
       };
     } else {
-      // Local file - check if exists
+
       try {
         const stats = await fs.stat(meeting.audioUrl);
 
@@ -1569,7 +1378,7 @@ async function getAudioDownloadUrl(meetingId, userId) {
           filename: path.basename(meeting.audioUrl),
           size: stats.size,
           isRemote: false,
-          expiresAt: null, // Local file, no expiration
+          expiresAt: null,
         };
       } catch (error) {
         console.warn('Audio file not found:', meeting.audioUrl);
@@ -1582,12 +1391,6 @@ async function getAudioDownloadUrl(meetingId, userId) {
   }
 }
 
-/**
- * Get processing status for meeting
- * @param {string} meetingId - Meeting ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Processing status
- */
 async function getProcessingStatus(meetingId, userId) {
   try {
     const meeting = await prisma.meeting.findFirst({
@@ -1609,7 +1412,6 @@ async function getProcessingStatus(meetingId, userId) {
       throw new Error('Meeting not found');
     }
 
-    // Calculate progress percentage based on status
     const statusProgress = {
       UPLOADING: 10,
       PROCESSING_AUDIO: 25,
@@ -1620,7 +1422,6 @@ async function getProcessingStatus(meetingId, userId) {
       FAILED: 0,
     };
 
-    // Estimate time remaining (rough estimates in seconds)
     const statusTimeEstimates = {
       UPLOADING: 85,
       PROCESSING_AUDIO: 80,
@@ -1631,7 +1432,6 @@ async function getProcessingStatus(meetingId, userId) {
       FAILED: 0,
     };
 
-    // Current stage descriptions
     const stageDescriptions = {
       UPLOADING: 'Uploading audio file',
       PROCESSING_AUDIO: 'Optimizing audio quality',
@@ -1658,13 +1458,6 @@ async function getProcessingStatus(meetingId, userId) {
   }
 }
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-
-/**
- * Update meeting status
- */
 async function updateMeetingStatus(meetingId, status, errorMessage = null) {
   try {
     const updateData = { status };
@@ -1673,7 +1466,6 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
       updateData.processingError = errorMessage;
     }
 
-    // Update processing timestamps
     if (status === 'PROCESSING_AUDIO' && !errorMessage) {
       updateData.processingStartedAt = new Date();
     } else if (status === 'COMPLETED') {
@@ -1690,25 +1482,21 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
   }
 }
 
-/**
- * Store audio file in permanent location (Supabase or local fallback)
- */
 async function storeAudioFile(tempPath, meetingId) {
   try {
-    // Try uploading to Supabase Storage first
+
     if (supabaseStorage.isSupabaseConfigured()) {
       console.log('📤 Uploading audio to Supabase Storage...');
       const result = await supabaseStorage.uploadAudioToSupabase(tempPath, meetingId);
 
       if (result.success) {
         console.log(`✅ Audio uploaded to Supabase: ${result.url}`);
-        return result.url; // Return Supabase public URL
+        return result.url;
       } else {
         console.warn(`⚠️ Supabase upload failed: ${result.error}. Falling back to local storage.`);
       }
     }
 
-    // Fallback to local storage
     console.log('📁 Using local storage for audio file...');
     const storageDir = path.join(process.cwd(), 'storage', 'audio');
     await fs.mkdir(storageDir, { recursive: true });
@@ -1728,11 +1516,6 @@ async function storeAudioFile(tempPath, meetingId) {
   }
 }
 
-/**
- * Get all decisions across all meetings for a user
- * @param {string} userId - User ID
- * @returns {Promise<Array>} List of decisions with meeting context
- */
 async function getGlobalDecisions(userId) {
   try {
     const meetings = await prisma.meeting.findMany({
@@ -1756,7 +1539,7 @@ async function getGlobalDecisions(userId) {
       if (Array.isArray(decisions)) {
         decisions.forEach((d, index) => {
           allDecisions.push({
-            id: `${m.id}-dec-${index}`, // Unique ID for keying
+            id: `${m.id}-dec-${index}`,
             decision: typeof d === 'string' ? d : d.decision || d.text || JSON.stringify(d),
             meetingId: m.id,
             meetingTitle: m.title,
@@ -1773,9 +1556,6 @@ async function getGlobalDecisions(userId) {
   }
 }
 
-/**
- * Clean up temporary files
- */
 async function cleanupTempFiles(filePaths) {
   for (const filePath of filePaths) {
     try {
@@ -1788,36 +1568,31 @@ async function cleanupTempFiles(filePaths) {
 }
 
 module.exports = {
-  // Meeting CRUD
+
   createMeeting,
   createAndProcessMeeting,
   uploadAndProcessAudio,
   getMeetingById,
-  getMeetings: getUserMeetings, // Export as getMeetings to match controller
+  getMeetings: getUserMeetings,
   getUserMeetings,
   updateMeeting,
   deleteMeeting,
 
-  // Search and filters
   searchMeetings,
 
-  // Content retrieval
   getTranscript,
   getSummary,
-  getMeetingWithNLP, // Get meeting in dataset format
+  getMeetingWithNLP,
   getAudioDownloadUrl,
 
-  // Status and stats
   getProcessingStatus,
   getMeetingStatistics,
-  getUserMeetingStats: getMeetingStatistics, // Export as getUserMeetingStats to match controller
-  updateMeetingStatus, // Needed by queue service
+  getUserMeetingStats: getMeetingStatistics,
+  updateMeetingStatus,
 
-  // Advanced features
   regenerateSummary,
   getGlobalDecisions,
 
-  // Utils
   transformMeetingForFrontend,
   deserializeArrayField,
 };

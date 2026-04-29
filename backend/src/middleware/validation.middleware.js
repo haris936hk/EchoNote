@@ -1,11 +1,6 @@
-// backend/src/middleware/validation.middleware.js
-// Request validation middleware
 
 const { AppError } = require('./error.middleware');
 
-/**
- * Validation rules
- */
 const VALIDATION_RULES = {
   email: {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -37,9 +32,6 @@ const VALIDATION_RULES = {
   },
 };
 
-/**
- * Generic field validator
- */
 class Validator {
   constructor(data, location = 'body') {
     this.data = data;
@@ -47,9 +39,6 @@ class Validator {
     this.errors = [];
   }
 
-  /**
-   * Check if field is required and present
-   */
   required(field, customMessage) {
     if (this.data[field] === undefined || this.data[field] === null || this.data[field] === '') {
       this.errors.push({
@@ -60,9 +49,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check if field is a string
-   */
   isString(field, customMessage) {
     if (this.data[field] !== undefined && typeof this.data[field] !== 'string') {
       this.errors.push({
@@ -73,9 +59,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check if field is a number
-   */
   isNumber(field, customMessage) {
     if (this.data[field] !== undefined && typeof this.data[field] !== 'number') {
       this.errors.push({
@@ -86,9 +69,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check if field is a boolean
-   */
   isBoolean(field, customMessage) {
     if (this.data[field] !== undefined && typeof this.data[field] !== 'boolean') {
       this.errors.push({
@@ -99,9 +79,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check if field is an email
-   */
   isEmail(field, customMessage) {
     if (this.data[field] && !VALIDATION_RULES.email.pattern.test(this.data[field])) {
       this.errors.push({
@@ -112,9 +89,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check if field is a UUID
-   */
   isUUID(field, customMessage) {
     if (this.data[field] && !VALIDATION_RULES.uuid.pattern.test(this.data[field])) {
       this.errors.push({
@@ -125,9 +99,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check minimum length
-   */
   minLength(field, min, customMessage) {
     if (this.data[field] && this.data[field].length < min) {
       this.errors.push({
@@ -138,9 +109,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check maximum length
-   */
   maxLength(field, max, customMessage) {
     if (this.data[field] && this.data[field].length > max) {
       this.errors.push({
@@ -151,9 +119,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check if value is in allowed list
-   */
   isIn(field, allowedValues, customMessage) {
     if (this.data[field] && !allowedValues.includes(this.data[field])) {
       this.errors.push({
@@ -164,9 +129,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check minimum value
-   */
   min(field, minValue, customMessage) {
     if (this.data[field] !== undefined && this.data[field] < minValue) {
       this.errors.push({
@@ -177,9 +139,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Check maximum value
-   */
   max(field, maxValue, customMessage) {
     if (this.data[field] !== undefined && this.data[field] > maxValue) {
       this.errors.push({
@@ -190,9 +149,6 @@ class Validator {
     return this;
   }
 
-  /**
-   * Custom validation function
-   */
   custom(field, validatorFn, customMessage) {
     if (this.data[field] !== undefined) {
       const isValid = validatorFn(this.data[field]);
@@ -206,24 +162,15 @@ class Validator {
     return this;
   }
 
-  /**
-   * Get validation errors
-   */
   getErrors() {
     return this.errors;
   }
 
-  /**
-   * Check if validation passed
-   */
   isValid() {
     return this.errors.length === 0;
   }
 }
 
-/**
- * Create validation middleware
- */
 const validate = (validationFn) => {
   return (req, res, next) => {
     try {
@@ -239,9 +186,6 @@ const validate = (validationFn) => {
   };
 };
 
-/**
- * Validate meeting creation
- */
 const validateCreateMeeting = (req, res, next) => {
   const validator = new Validator(req.body);
 
@@ -274,9 +218,6 @@ const validateCreateMeeting = (req, res, next) => {
   next();
 };
 
-/**
- * Validate meeting update
- */
 const validateUpdateMeeting = (req, res, next) => {
   const validator = new Validator(req.body);
 
@@ -307,7 +248,6 @@ const validateUpdateMeeting = (req, res, next) => {
     );
   }
 
-  // Check if at least one field is provided
   if (Object.keys(req.body).length === 0) {
     return next(
       new AppError('At least one field must be provided for update', 400, 'VALIDATION_ERROR')
@@ -317,9 +257,6 @@ const validateUpdateMeeting = (req, res, next) => {
   next();
 };
 
-/**
- * Validate user profile update
- */
 const validateUpdateProfile = (req, res, next) => {
   const validator = new Validator(req.body);
 
@@ -350,13 +287,9 @@ const validateUpdateProfile = (req, res, next) => {
   next();
 };
 
-/**
- * Validate user settings update
- */
 const validateUpdateSettings = (req, res, next) => {
   const validator = new Validator(req.body);
 
-  // autoDeleteDays can be null (disable) or a number between 1-365
   if (req.body.autoDeleteDays !== undefined && req.body.autoDeleteDays !== null) {
     validator
       .isNumber('autoDeleteDays')
@@ -382,7 +315,6 @@ const validateUpdateSettings = (req, res, next) => {
     );
   }
 
-  // Check if at least one field is provided
   if (Object.keys(req.body).length === 0) {
     return next(new AppError('At least one setting must be provided', 400, 'VALIDATION_ERROR'));
   }
@@ -390,9 +322,6 @@ const validateUpdateSettings = (req, res, next) => {
   next();
 };
 
-/**
- * Validate query parameters for pagination
- */
 const validatePagination = (req, res, next) => {
   const validator = new Validator(req.query, 'query');
 
@@ -439,9 +368,6 @@ const validatePagination = (req, res, next) => {
   next();
 };
 
-/**
- * Validate search query
- */
 const validateSearch = (req, res, next) => {
   const { q, limit } = req.query;
 
@@ -466,9 +392,6 @@ const validateSearch = (req, res, next) => {
   next();
 };
 
-/**
- * Validate UUID parameter
- */
 const validateUUIDParam = (paramName = 'id') => {
   return (req, res, next) => {
     const id = req.params[paramName];
@@ -485,9 +408,6 @@ const validateUUIDParam = (paramName = 'id') => {
   };
 };
 
-/**
- * Validate user activity logging
- */
 const validateLogActivity = (req, res, next) => {
   const validator = new Validator(req.body);
 
@@ -504,9 +424,6 @@ const validateLogActivity = (req, res, next) => {
   next();
 };
 
-/**
- * Validate account deletion confirmation
- */
 const validateAccountDeletion = (req, res, next) => {
   const { confirmation } = req.body;
 
@@ -527,9 +444,6 @@ const validateAccountDeletion = (req, res, next) => {
   next();
 };
 
-/**
- * Validate download format
- */
 const validateDownloadFormat = (req, res, next) => {
   const { format } = req.query;
 
@@ -540,24 +454,16 @@ const validateDownloadFormat = (req, res, next) => {
   next();
 };
 
-/**
- * Sanitize string input (remove dangerous characters)
- */
 const sanitizeString = (str) => {
   if (typeof str !== 'string') return str;
 
-  // Remove null bytes
   str = str.replace(/\0/g, '');
 
-  // Trim whitespace
   str = str.trim();
 
   return str;
 };
 
-/**
- * Sanitize request body
- */
 const sanitizeBody = (req, res, next) => {
   if (req.body && typeof req.body === 'object') {
     Object.keys(req.body).forEach((key) => {
@@ -569,9 +475,6 @@ const sanitizeBody = (req, res, next) => {
   next();
 };
 
-/**
- * Sanitize query parameters
- */
 const sanitizeQuery = (req, res, next) => {
   if (req.query && typeof req.query === 'object') {
     Object.keys(req.query).forEach((key) => {
@@ -583,9 +486,6 @@ const sanitizeQuery = (req, res, next) => {
   next();
 };
 
-/**
- * Extend AppError to support validation details
- */
 AppError.prototype.setDetails = function (details) {
   this.details = details;
   return this;

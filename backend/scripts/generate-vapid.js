@@ -13,7 +13,7 @@ const envPath = path.join(__dirname, '../.env');
 
 if (fs.existsSync(envPath)) {
   let envConfig = fs.readFileSync(envPath, 'utf8');
-  
+
   const publicFound = envConfig.includes('VAPID_PUBLIC_KEY=');
   const privateFound = envConfig.includes('VAPID_PRIVATE_KEY=');
 

@@ -1,10 +1,8 @@
 
-
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs').promises;
 const path = require('path');
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -16,9 +14,7 @@ const logger = winston.createLogger({
   ],
 });
 
-
 let supabase = null;
-
 
 const getConfig = () => ({
   url: process.env.SUPABASE_URL,
@@ -47,12 +43,6 @@ const initSupabase = () => {
   return supabase;
 };
 
-/**
- * Upload audio file to Supabase Storage
- * @param {string} localFilePath - Path to local audio file
- * @param {string} meetingId - Meeting ID for the filename
- * @returns {Object} { success, url, path, error }
- */
 const uploadAudioToSupabase = async (localFilePath, meetingId) => {
   try {
     const client = initSupabase();
@@ -62,7 +52,6 @@ const uploadAudioToSupabase = async (localFilePath, meetingId) => {
       return { success: false, error: 'Supabase not configured' };
     }
 
-  
     const fileBuffer = await fs.readFile(localFilePath);
     const extension = path.extname(localFilePath);
     const filename = `${meetingId}${extension}`;
@@ -72,11 +61,10 @@ const uploadAudioToSupabase = async (localFilePath, meetingId) => {
       `📤 Uploading to Supabase: ${storagePath} (${(fileBuffer.length / 1024 / 1024).toFixed(2)} MB)`
     );
 
-   
     const config = getConfig();
     const { error } = await client.storage.from(config.bucketName).upload(storagePath, fileBuffer, {
       contentType: 'audio/wav',
-      upsert: true, 
+      upsert: true,
     });
 
     if (error) {
@@ -84,7 +72,6 @@ const uploadAudioToSupabase = async (localFilePath, meetingId) => {
       return { success: false, error: error.message };
     }
 
-   
     const { data: urlData } = client.storage.from(config.bucketName).getPublicUrl(storagePath);
 
     const publicUrl = urlData?.publicUrl;
@@ -103,11 +90,6 @@ const uploadAudioToSupabase = async (localFilePath, meetingId) => {
   }
 };
 
-/**
- * Delete audio file from Supabase Storage
- * @param {string} storagePath - Path in Supabase storage (e.g., "audio/meeting-id.wav")
- * @returns {Object} { success, error }
- */
 const deleteAudioFromSupabase = async (storagePath) => {
   try {
     const client = initSupabase();
@@ -118,10 +100,9 @@ const deleteAudioFromSupabase = async (storagePath) => {
 
     const config = getConfig();
 
-    
     let pathToDelete = storagePath;
     if (storagePath.startsWith('http')) {
-     
+
       const urlParts = storagePath.split(`${config.bucketName}/`);
       pathToDelete = urlParts[1] || storagePath;
     }
@@ -143,12 +124,6 @@ const deleteAudioFromSupabase = async (storagePath) => {
   }
 };
 
-/**
- * Get download URL for audio file (with optional expiration)
- * @param {string} storagePath - Path in Supabase storage
- * @param {number} expiresIn - Expiration time in seconds (default: 1 hour)
- * @returns {Object} { success, url, error }
- */
 const getSignedAudioUrl = async (storagePath, expiresIn = 3600) => {
   try {
     const client = initSupabase();
@@ -159,7 +134,6 @@ const getSignedAudioUrl = async (storagePath, expiresIn = 3600) => {
 
     const config = getConfig();
 
-   
     let pathToSign = storagePath;
     if (storagePath.startsWith('http')) {
       const urlParts = storagePath.split(`${config.bucketName}/`);
@@ -182,21 +156,11 @@ const getSignedAudioUrl = async (storagePath, expiresIn = 3600) => {
   }
 };
 
-/**
- * Check if Supabase Storage is configured and available
- * @returns {boolean}
- */
 const isSupabaseConfigured = () => {
   const config = getConfig();
   return !!(config.url && config.serviceKey);
 };
 
-/**
- * Download audio from Supabase to a local file
- * @param {string} storagePath - Path in Supabase storage or full URL
- * @param {string} localPath - Local path to save the file
- * @returns {Object} { success, error }
- */
 const downloadAudioFromSupabase = async (storagePath, localPath) => {
   try {
     const client = initSupabase();
@@ -207,7 +171,6 @@ const downloadAudioFromSupabase = async (storagePath, localPath) => {
 
     const config = getConfig();
 
-    
     let pathToDownload = storagePath;
     if (storagePath.startsWith('http')) {
       const urlParts = storagePath.split(`${config.bucketName}/`);
@@ -223,7 +186,6 @@ const downloadAudioFromSupabase = async (storagePath, localPath) => {
       return { success: false, error: error.message };
     }
 
-    
     const buffer = Buffer.from(await data.arrayBuffer());
     await fs.writeFile(localPath, buffer);
 

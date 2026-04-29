@@ -189,7 +189,7 @@ const MeetingsPage = () => {
 
   return (
     <div className="space-y-6 py-6">
-      {/* ── Page Header ── */}
+      {}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Meetings</h1>
@@ -216,12 +216,12 @@ const MeetingsPage = () => {
         </div>
       </div>
 
-      {/* ── Filter Toolbar ── */}
+      {}
       <div className="space-y-4">
-        {/* Search */}
+        {}
         <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search meetings..." />
 
-        {/* Status Tabs */}
+        {}
         <div className="flex flex-wrap items-center gap-1">
           {statusTabs.map((tab) => (
             <button
@@ -245,7 +245,7 @@ const MeetingsPage = () => {
             </button>
           ))}
 
-          {/* Category filter + clear */}
+          {}
           <div className="ml-auto flex items-center gap-2">
             {hasActiveFilters && (
               <button
@@ -259,7 +259,7 @@ const MeetingsPage = () => {
           </div>
         </div>
 
-        {/* Category chips */}
+        {}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
@@ -268,7 +268,7 @@ const MeetingsPage = () => {
         />
       </div>
 
-      {/* ── Meeting Cards ── */}
+      {}
       <MeetingList
         meetings={filteredMeetings}
         loading={loading}
@@ -277,7 +277,7 @@ const MeetingsPage = () => {
         itemsPerPage={12}
       />
 
-      {/* ── Bulk Actions Bar ── */}
+      {}
       {selectedMeetings.length > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border border-echo-border bg-echo-surface px-6 py-3 shadow-2xl backdrop-blur-xl">
           <span className="text-sm font-medium text-white">{selectedMeetings.length} selected</span>
@@ -299,7 +299,7 @@ const MeetingsPage = () => {
         </div>
       )}
 
-      {/* Scroll to Top */}
+      {}
       {showScrollTop && (
         <div className="fixed bottom-8 right-8 z-50">
           <Button
@@ -312,7 +312,7 @@ const MeetingsPage = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
+      {}
       <EditMeetingModal
         isOpen={isEditModalOpen}
         onClose={() => {

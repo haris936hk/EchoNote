@@ -7,7 +7,6 @@ import {
   MAX_RECORDING_TIME,
 } from './constants';
 
-
 export const validateMeetingTitle = (title) => {
   if (!title || title.trim() === '') {
     return {
@@ -35,10 +34,9 @@ export const validateMeetingTitle = (title) => {
   return { isValid: true };
 };
 
-
 export const validateMeetingDescription = (description) => {
   if (!description) {
-    return { isValid: true }; 
+    return { isValid: true };
   }
 
   if (description.length > VALIDATION.MEETING_DESCRIPTION.MAX_LENGTH) {
@@ -50,7 +48,6 @@ export const validateMeetingDescription = (description) => {
 
   return { isValid: true };
 };
-
 
 export const validateMeetingCategory = (category) => {
   const validCategories = ['SALES', 'PLANNING', 'STANDUP', 'ONE_ON_ONE', 'OTHER'];
@@ -71,7 +68,6 @@ export const validateMeetingCategory = (category) => {
 
   return { isValid: true };
 };
-
 
 export const validateMeetingData = (data) => {
   const errors = {};
@@ -97,7 +93,6 @@ export const validateMeetingData = (data) => {
   };
 };
 
-
 export const validateAudioFileType = (file) => {
   if (!file) {
     return {
@@ -115,7 +110,6 @@ export const validateAudioFileType = (file) => {
 
   return { isValid: true };
 };
-
 
 export const validateAudioFileSize = (file) => {
   if (!file) {
@@ -143,7 +137,6 @@ export const validateAudioFileSize = (file) => {
   return { isValid: true };
 };
 
-
 export const validateAudioFile = (file) => {
   if (!file) {
     return {
@@ -157,7 +150,6 @@ export const validateAudioFile = (file) => {
     return typeValidation;
   }
 
-  // Validate size
   const sizeValidation = validateAudioFileSize(file);
   if (!sizeValidation.isValid) {
     return sizeValidation;
@@ -166,11 +158,6 @@ export const validateAudioFile = (file) => {
   return { isValid: true };
 };
 
-/**
- * Validate audio file duration using HTML5 Audio API
- * @param {File} file - The audio file to validate
- * @returns {Promise<{isValid: boolean, error?: string, duration?: number}>}
- */
 export const validateAudioFileDuration = (file) => {
   return new Promise((resolve) => {
     const audio = new Audio();
@@ -219,7 +206,6 @@ export const validateAudioFileDuration = (file) => {
   });
 };
 
-
 export const validateEmail = (email) => {
   if (!email || email.trim() === '') {
     return {
@@ -237,7 +223,6 @@ export const validateEmail = (email) => {
 
   return { isValid: true };
 };
-
 
 export const validateName = (name) => {
   if (!name || name.trim() === '') {
@@ -266,7 +251,6 @@ export const validateName = (name) => {
   return { isValid: true };
 };
 
-
 export const validateURL = (url) => {
   if (!url || url.trim() === '') {
     return {
@@ -285,7 +269,6 @@ export const validateURL = (url) => {
   return { isValid: true };
 };
 
-
 export const validatePhone = (phone) => {
   if (!phone || phone.trim() === '') {
     return {
@@ -303,7 +286,6 @@ export const validatePhone = (phone) => {
 
   return { isValid: true };
 };
-
 
 export const validatePassword = (password, minLength = 8) => {
   if (!password) {
@@ -349,7 +331,6 @@ export const validatePassword = (password, minLength = 8) => {
   };
 };
 
-
 export const validatePasswordConfirmation = (password, confirmation) => {
   if (!confirmation) {
     return {
@@ -367,7 +348,6 @@ export const validatePasswordConfirmation = (password, confirmation) => {
 
   return { isValid: true };
 };
-
 
 export const validateSearchQuery = (query, minLength = 2, maxLength = 100) => {
   if (!query || query.trim() === '') {
@@ -395,7 +375,6 @@ export const validateSearchQuery = (query, minLength = 2, maxLength = 100) => {
 
   return { isValid: true };
 };
-
 
 export const validateNumberRange = (value, min, max) => {
   if (value === null || value === undefined || value === '') {
@@ -431,7 +410,6 @@ export const validateNumberRange = (value, min, max) => {
   return { isValid: true };
 };
 
-
 export const validatePositiveNumber = (value) => {
   const num = Number(value);
 
@@ -452,7 +430,6 @@ export const validatePositiveNumber = (value) => {
   return { isValid: true };
 };
 
-
 export const validateDate = (date) => {
   if (!date) {
     return {
@@ -472,7 +449,6 @@ export const validateDate = (date) => {
 
   return { isValid: true };
 };
-
 
 export const validateDateRange = (startDate, endDate) => {
   const startValidation = validateDate(startDate);
@@ -504,7 +480,6 @@ export const validateDateRange = (startDate, endDate) => {
   return { isValid: true };
 };
 
-
 export const validateFutureDate = (date) => {
   const dateValidation = validateDate(date);
   if (!dateValidation.isValid) {
@@ -524,7 +499,6 @@ export const validateFutureDate = (date) => {
   return { isValid: true };
 };
 
-
 export const validateRequired = (value, fieldName = 'Field') => {
   if (value === null || value === undefined || value === '') {
     return {
@@ -543,10 +517,9 @@ export const validateRequired = (value, fieldName = 'Field') => {
   return { isValid: true };
 };
 
-
 export const validateMinLength = (value, minLength, fieldName = 'Field') => {
   if (!value) {
-    return { isValid: true }; 
+    return { isValid: true };
   }
 
   if (value.length < minLength) {
@@ -558,7 +531,6 @@ export const validateMinLength = (value, minLength, fieldName = 'Field') => {
 
   return { isValid: true };
 };
-
 
 export const validateMaxLength = (value, maxLength, fieldName = 'Field') => {
   if (!value) {
@@ -575,7 +547,6 @@ export const validateMaxLength = (value, maxLength, fieldName = 'Field') => {
   return { isValid: true };
 };
 
-
 export const validatePattern = (value, pattern, errorMessage) => {
   if (!value) {
     return { isValid: true };
@@ -591,7 +562,6 @@ export const validatePattern = (value, pattern, errorMessage) => {
   return { isValid: true };
 };
 
-
 export const runValidators = (value, validators) => {
   for (const validator of validators) {
     const result = validator(value);
@@ -601,7 +571,6 @@ export const runValidators = (value, validators) => {
   }
   return { isValid: true };
 };
-
 
 export const validateForm = (formData, validationRules) => {
   const errors = {};
@@ -620,16 +589,14 @@ export const validateForm = (formData, validationRules) => {
   return { isValid, errors };
 };
 
-
 export const sanitizeString = (str) => {
   if (!str) return '';
 
   return str
     .trim()
-    .replace(/[<>]/g, '') 
-    .replace(/\s+/g, ' '); 
+    .replace(/[<>]/g, '')
+    .replace(/\s+/g, ' ');
 };
-
 
 export const sanitizeFilename = (filename) => {
   if (!filename) return '';
@@ -639,8 +606,6 @@ export const sanitizeFilename = (filename) => {
     .replace(/_{2,}/g, '_')
     .substring(0, 255);
 };
-
-
 
 const validators = {
   validateMeetingTitle,
@@ -663,7 +628,6 @@ const validators = {
 
   validateSearchQuery,
 
-  
   validateNumberRange,
   validatePositiveNumber,
 
@@ -671,7 +635,6 @@ const validators = {
   validateDateRange,
   validateFutureDate,
 
-  
   validateRequired,
   validateMinLength,
   validateMaxLength,
@@ -679,7 +642,6 @@ const validators = {
   runValidators,
   validateForm,
 
-  
   sanitizeString,
   sanitizeFilename,
 };

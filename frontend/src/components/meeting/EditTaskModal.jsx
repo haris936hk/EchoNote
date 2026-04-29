@@ -63,7 +63,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8">
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -73,7 +73,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
             className="absolute inset-0 bg-[#020617]/70 backdrop-blur-xl"
           />
 
-          {/* Modal Container */}
+          {}
           <motion.div
             initial={{ y: 20, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -81,10 +81,10 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative flex max-h-[min(85vh,800px)] w-full max-w-2xl flex-col overflow-hidden rounded-card bg-[#0c1324] shadow-[0_0_80px_-20px_rgba(189,194,255,0.15)] ring-1 ring-white/[0.06]"
           >
-            {/* Outline Glow Fallback / Additional ambient light */}
+            {}
             <div className="pointer-events-none absolute inset-0 rounded-card shadow-[inset_0_1px_rgba(255,255,255,0.05)]" />
 
-            {/* Header (Fixed) */}
+            {}
             <div className="z-10 flex-none bg-[#0c1324] p-8 pb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-5">
@@ -113,10 +113,10 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
               </div>
             </div>
 
-            {/* Scrollable Body */}
+            {}
             <div className="relative z-0 flex-1 overflow-y-auto px-8 pb-4 scrollbar-hide">
               <div className="space-y-6">
-                {/* Task Description */}
+                {}
                 <div className="space-y-3.5">
                   <label className="flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
                     <LuListChecks size={14} /> TASK DESCRIPTION
@@ -130,7 +130,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {/* Assignee */}
+                  {}
                   <div className="space-y-3.5">
                     <label className="flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
                       <LuUser size={14} /> ASSIGNEE
@@ -143,7 +143,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
                     />
                   </div>
 
-                  {/* Deadline (Custom Ethereal Date Picker) */}
+                  {}
                   <div className="space-y-3.5">
                     <label className="flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
                       <LuCalendar size={14} /> DEADLINE
@@ -155,7 +155,7 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
                   </div>
                 </div>
 
-                {/* Priority Selector */}
+                {}
                 <div className="space-y-3.5">
                   <label className="flex items-center gap-2 font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
                     <LuAlertCircle size={14} /> PRIORITY LEVEL
@@ -187,9 +187,9 @@ export default function EditTaskModal({ isOpen, onClose, task, onSave }) {
               </div>
             </div>
 
-            {/* Footer (Fixed) */}
+            {}
             <div className="relative z-10 flex flex-none items-center justify-between bg-[#0c1324] p-8 pt-6">
-              {/* Tonal Transition instead of border line */}
+              {}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-10 -translate-y-full bg-gradient-to-b from-transparent to-[#0c1324]" />
 
               <div className="flex w-full items-center justify-end gap-8">

@@ -1,5 +1,4 @@
 
-
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const { getGmailTransport, closeGmailTransport } = require('../src/utils/emailTransport');
 
@@ -7,17 +6,14 @@ async function testTransport() {
   try {
     console.log('🧪 Testing Gmail transport creation...\n');
 
-    
     console.log('1️⃣ Creating Gmail transport...');
     const transport = await getGmailTransport();
     console.log('   ✅ Transport created successfully\n');
 
-    
     console.log('2️⃣ Verifying Gmail connection...');
     const isValid = await transport.verify();
     console.log('   ✅ Gmail connection verified\n');
 
-    
     console.log('3️⃣ Closing transport...');
     await closeGmailTransport();
     console.log('   ✅ Transport closed\n');

@@ -127,13 +127,13 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
       }`}
       onClick={isCompleted ? handleView : undefined}
     >
-      {/* Colored left border accent */}
+      {}
       <div
         className={`absolute inset-y-0 left-0 w-[3px] ${catColors.border.replace('border-l-', 'bg-')}`}
       ></div>
 
       <div className="space-y-3 p-5 pl-6">
-        {/* Top row: Category chip + Status dot + Actions */}
+        {}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <CategoryBadge category={meeting.category} />
@@ -171,17 +171,17 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
           </div>
         </div>
 
-        {/* Title */}
+        {}
         <h3 className="truncate-2 text-sm font-semibold leading-snug text-white transition-colors group-hover:text-accent-primary">
           {meeting.title}
         </h3>
 
-        {/* Description */}
+        {}
         {meeting.description && (
           <p className="truncate-2 text-xs leading-relaxed text-slate-500">{meeting.description}</p>
         )}
 
-        {/* Date & Duration */}
+        {}
         <div className="flex items-center gap-3 font-mono text-[11px] text-slate-500">
           <span className="inline-flex items-center gap-1">
             <Calendar size={10} className="opacity-60" />
@@ -200,7 +200,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
           )}
         </div>
 
-        {/* Topic chips */}
+        {}
         {topics.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {topics.map((topic) => (
@@ -214,7 +214,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
           </div>
         )}
 
-        {/* Processing indicator */}
+        {}
         {isProcessing && (
           <div className="flex items-center gap-2 rounded-lg border border-amber-500/10 bg-amber-500/5 px-3 py-2">
             <div className="ai-dot"></div>
@@ -224,7 +224,7 @@ const MeetingCard = ({ meeting, onDelete, onEdit }) => {
           </div>
         )}
 
-        {/* Failed indicator */}
+        {}
         {isFailed && (
           <div className="rounded-lg border border-red-500/10 bg-red-500/5 px-3 py-2">
             <span className="text-[11px] text-red-400/80">

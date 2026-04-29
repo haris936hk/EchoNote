@@ -1,5 +1,4 @@
 
-
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const emailService = require('../src/config/email');
 
@@ -36,7 +35,7 @@ async function testEmail() {
         </div>
       `,
       text: 'Success! Gmail OAuth2 SMTP is working correctly for EchoNote.',
-      skipPreferenceCheck: true, 
+      skipPreferenceCheck: true,
     });
 
     if (result.success) {

@@ -1,8 +1,6 @@
 
-
 const customLLMService = require('./customLLMService');
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -14,20 +12,11 @@ const logger = winston.createLogger({
   ],
 });
 
-/**
- * Generate comprehensive meeting summary
- * Uses the custom LLM with strict schema enforcement
- * @param {string} transcript - Meeting transcript
- * @param {Object} metadata - Meeting metadata (title, category, duration)
- * @param {Object} nlpData - NLP analysis results (optional)
- * @returns {Object} Structured summary
- */
 const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
   try {
     logger.info(`📝 Generating summary for: ${metadata.title || 'Untitled Meeting'}`);
     const startTime = Date.now();
 
-    
     const nlpFeatures = nlpData || {
       entities: (metadata.entities || []).map((e) =>
         typeof e === 'string' ? e : `${e.text} (${e.label})`
@@ -35,7 +24,6 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       svoTriplets: metadata.svoTriplets || [],
     };
 
-    
     if (metadata.actionSignals?.length > 0) {
       nlpFeatures.actionSignals = metadata.actionSignals;
     }
@@ -49,7 +37,6 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       nlpFeatures.nlpMetadata = metadata.nlpMetadata;
     }
 
-    
     if (metadata.deepgramEntities?.length > 0) {
       nlpFeatures.deepgramEntities = metadata.deepgramEntities;
     }
@@ -63,7 +50,6 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
       nlpFeatures.lowConfidenceWords = metadata.lowConfidenceWords;
     }
 
-    
     const result = await customLLMService.generateSummary(transcript, nlpFeatures, {
       category: metadata.category || null,
     });
@@ -75,7 +61,6 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     logger.info(`✅ Summary generated in ${duration}s`);
 
-    
     const summary = {
       executiveSummary: result.data.executiveSummary || '',
       keyDecisions: Array.isArray(result.data.keyDecisions) ? result.data.keyDecisions : [],
@@ -99,7 +84,6 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
   } catch (error) {
     logger.error(`❌ Summary generation failed: ${error.message}`);
 
-   
     let userMessage = error.message;
     if (
       error.message.includes('ECONNREFUSED') ||
@@ -115,13 +99,6 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
     throw new Error(userMessage);
   }
 };
-
-/**
- * Generate executive summary only (brief overview)
- * @param {string} transcript - Meeting transcript
- * @param {Object} metadata - Meeting metadata
- * @returns {Object} Executive summary
- */
 
 const generateExecutiveSummary = async (transcript, metadata = {}) => {
   try {
@@ -145,7 +122,6 @@ const generateExecutiveSummary = async (transcript, metadata = {}) => {
   } catch (error) {
     logger.error(`❌ Executive summary generation failed: ${error.message}`);
 
-    
     let userMessage = error.message;
     if (
       error.message.includes('ECONNREFUSED') ||
@@ -160,18 +136,11 @@ const generateExecutiveSummary = async (transcript, metadata = {}) => {
   }
 };
 
-/**
- * Extract action items only
- * Uses full summary generation then extracts action items
- * @param {string} transcript - Meeting transcript
- * @returns {Object} Action items
- */
 const extractActions = async (transcript) => {
   try {
     logger.info(`✅ Extracting action items`);
     const startTime = Date.now();
 
-   
     const result = await customLLMService.generateSummary(transcript, null);
 
     if (!result.success) {
@@ -191,7 +160,6 @@ const extractActions = async (transcript) => {
   } catch (error) {
     logger.error(`❌ Action item extraction failed: ${error.message}`);
 
-    
     let userMessage = error.message;
     if (
       error.message.includes('ECONNREFUSED') ||
@@ -206,19 +174,11 @@ const extractActions = async (transcript) => {
   }
 };
 
-/**
- * Enhance summary with NLP insights
- * Combines AI summary with NLP extracted data
- * @param {Object} summary - AI-generated summary
- * @param {Object} nlpData - NLP analysis results
- * @returns {Object} Enhanced summary
- */
 const enhanceSummaryWithNLP = (summary, nlpData) => {
   if (!nlpData) return summary;
 
   const enhanced = { ...summary };
 
- 
   if (nlpData.entities) {
     enhanced.metadata = enhanced.metadata || {};
     enhanced.metadata.entitiesDetected = nlpData.entities.length;
@@ -229,23 +189,15 @@ const enhanceSummaryWithNLP = (summary, nlpData) => {
   return enhanced;
 };
 
-/**
- * Regenerate summary with different parameters
- * @param {string} transcript - Meeting transcript
- * @param {Object} metadata - Meeting metadata
- * @param {Object} options - Regeneration options
- * @returns {Object} New summary
- */
 const regenerateSummary = async (transcript, metadata, options = {}) => {
   try {
     logger.info(`🔄 Regenerating summary with new parameters`);
 
-    
     const enhancedMetadata = {
       ...metadata,
-      focusArea: options.focusArea || null, 
-      detailLevel: options.detailLevel || 'standard', 
-      tone: options.tone || 'professional', 
+      focusArea: options.focusArea || null,
+      detailLevel: options.detailLevel || 'standard',
+      tone: options.tone || 'professional',
     };
 
     return await generateSummary(transcript, enhancedMetadata);
@@ -255,12 +207,6 @@ const regenerateSummary = async (transcript, metadata, options = {}) => {
   }
 };
 
-/**
- * Compare two summaries (useful for A/B testing)
- * @param {Object} summary1 - First summary
- * @param {Object} summary2 - Second summary
- * @returns {Object} Comparison results
- */
 const compareSummaries = (summary1, summary2) => {
   return {
     lengthDiff: {
@@ -285,11 +231,6 @@ const compareSummaries = (summary1, summary2) => {
   };
 };
 
-/**
- * Validate and normalize action items
- * @param {Array} actionItems - Raw action items
- * @returns {Array} Validated action items
- */
 const validateActionItems = (actionItems) => {
   if (!Array.isArray(actionItems)) return [];
 
@@ -305,11 +246,6 @@ const validateActionItems = (actionItems) => {
     }));
 };
 
-/**
- * Validate confidence level
- * @param {string} confidence - Confidence value
- * @returns {string} Valid confidence
- */
 const validateConfidence = (confidence) => {
   const validLevels = ['high', 'medium', 'low'];
   if (
@@ -319,14 +255,9 @@ const validateConfidence = (confidence) => {
   ) {
     return confidence.toLowerCase();
   }
-  return 'medium'; 
+  return 'medium';
 };
 
-/**
- * Validate priority level
- * @param {string} priority - Priority value
- * @returns {string} Valid priority
- */
 const validatePriority = (priority) => {
   const validPriorities = ['high', 'medium', 'low'];
   if (
@@ -336,15 +267,9 @@ const validatePriority = (priority) => {
   ) {
     return priority.toLowerCase();
   }
-  return 'medium'; 
+  return 'medium';
 };
 
-/**
- * Format summary for email notification
- * @param {Object} summary - Summary object
- * @param {Object} meeting - Meeting object
- * @returns {string} Formatted text
- */
 const formatSummaryForEmail = (summary, meeting) => {
   let formatted = `Meeting Summary: ${meeting.title}\n`;
   formatted += `Category: ${meeting.category}\n`;
@@ -370,11 +295,6 @@ const formatSummaryForEmail = (summary, meeting) => {
   return formatted;
 };
 
-/**
- * Get summary quality score
- * @param {Object} summary - Summary object
- * @returns {Object} Quality metrics
- */
 const getSummaryQuality = (summary) => {
   const scores = {
     completeness: 0,
@@ -383,7 +303,6 @@ const getSummaryQuality = (summary) => {
     overall: 0,
   };
 
-  
   let completeSections = 0;
   if (summary.executiveSummary && summary.executiveSummary.length > 50) completeSections++;
   if (summary.keyDecisions && summary.keyDecisions.length > 20) completeSections++;
@@ -391,13 +310,11 @@ const getSummaryQuality = (summary) => {
   if (summary.nextSteps && summary.nextSteps.length > 20) completeSections++;
   scores.completeness = (completeSections / 4) * 100;
 
-
   if (summary.actionItems && summary.actionItems.length > 0) {
     const detailedActions = summary.actionItems.filter((a) => a.assignee || a.deadline).length;
     scores.actionability = Math.min((detailedActions / summary.actionItems.length) * 100, 100);
   }
 
-  
   const totalLength =
     (summary.executiveSummary?.length || 0) +
     (summary.keyDecisions?.length || 0) +
@@ -411,7 +328,6 @@ const getSummaryQuality = (summary) => {
     scores.clarity = 75;
   }
 
- 
   scores.overall = Math.round((scores.completeness + scores.actionability + scores.clarity) / 3);
 
   return scores;

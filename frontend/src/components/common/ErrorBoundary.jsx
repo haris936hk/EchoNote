@@ -33,16 +33,16 @@ class ErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-echo-base p-6">
-          {/* Glass error card */}
+          {}
           <div className="w-full max-w-lg rounded-card border border-white/[0.06] bg-echo-surface px-8 py-10 shadow-2xl">
-            {/* Icon */}
+            {}
             <div className="mb-6 flex justify-center">
               <div className="flex size-16 items-center justify-center rounded-full border border-[#F87171]/20 bg-[#F87171]/[0.08]">
                 <AlertTriangle size={28} className="text-[#F87171]" />
               </div>
             </div>
 
-            {/* Title */}
+            {}
             <div className="mb-6 text-center">
               <h1 className="mb-2 text-xl font-bold tracking-tight text-white">
                 Something went wrong
@@ -52,7 +52,7 @@ class ErrorBoundary extends Component {
               </p>
             </div>
 
-            {/* Dev-only error details */}
+            {}
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <div className="mb-6 max-h-56 overflow-auto rounded-btn border border-white/[0.06] bg-echo-base p-4">
                 <p className="mb-2 font-mono text-xs text-[#F87171]">
@@ -72,7 +72,7 @@ class ErrorBoundary extends Component {
               </div>
             )}
 
-            {/* Action buttons */}
+            {}
             <div className="flex flex-wrap justify-center gap-3">
               <button
                 onClick={this.handleReset}
@@ -90,7 +90,7 @@ class ErrorBoundary extends Component {
               </button>
             </div>
 
-            {/* Footer note */}
+            {}
             <p className="mt-6 text-center text-xs text-white/30">
               If this keeps happening, please contact support.
             </p>

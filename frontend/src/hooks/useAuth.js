@@ -2,13 +2,6 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
-/**
- * Custom hook to access authentication context
- * Provides user data, authentication status, and auth methods
- *
- * @throws {Error} 
- * @returns {Object} 
- */
 const useAuth = () => {
   const context = useContext(AuthContext);
 
@@ -23,7 +16,6 @@ const useAuth = () => {
 };
 
 export default useAuth;
-
 
 export const usePermissions = () => {
   const { user } = useAuth();
@@ -44,7 +36,6 @@ export const usePermissions = () => {
   };
 };
 
-
 export const useAuthStatus = () => {
   const { user, loading } = useAuth();
 
@@ -54,7 +45,6 @@ export const useAuthStatus = () => {
     user,
   };
 };
-
 
 export const useRequireAuth = (redirectUrl = '/login') => {
   const { user, loading } = useAuth();

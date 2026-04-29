@@ -30,7 +30,7 @@ const MemberCard = ({ member, isOwner, onRemove }) => {
             </div>
           )}
         </div>
-        
+
         <div className="flex flex-col truncate">
           <span className="truncate font-['Plus_Jakarta_Sans'] text-sm font-bold text-white group-hover:text-accent-primary transition-colors">
             {member.user.name}

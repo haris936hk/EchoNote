@@ -1,6 +1,5 @@
 import api from './api';
 
-
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -13,7 +12,7 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 const notificationService = {
-  
+
   async registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       console.warn('Service Workers not supported');
@@ -30,7 +29,6 @@ const notificationService = {
     }
   },
 
-  
   async getPushStatus() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       return { supported: false, granted: false };
@@ -44,19 +42,17 @@ const notificationService = {
     };
   },
 
- 
   async requestPermission() {
     if (!('Notification' in window)) return false;
-    
+
     const permission = await Notification.requestPermission();
     return permission === 'granted';
   },
 
-  
   async subscribeUser() {
     try {
       const registration = await navigator.serviceWorker.ready;
-      
+
       const existingSubscription = await registration.pushManager.getSubscription();
       if (existingSubscription) {
         return existingSubscription;
@@ -71,7 +67,7 @@ const notificationService = {
       });
 
       await api.post('/notifications/subscribe', subscription);
-      
+
       console.log('✅ User subscribed to push notifications');
       return subscription;
     } catch (error) {
@@ -80,17 +76,16 @@ const notificationService = {
     }
   },
 
-  
   async unsubscribeUser() {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
-      
+
       if (subscription) {
         await subscription.unsubscribe();
-        
+
         await api.post('/notifications/unsubscribe', { endpoint: subscription.endpoint });
-        
+
         console.log('🚫 User unsubscribed from push notifications');
         return true;
       }

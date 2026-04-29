@@ -3,7 +3,6 @@ import { authAPI } from './api';
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
 
-
 export const saveToken = (token) => {
   try {
     localStorage.setItem(TOKEN_KEY, token);
@@ -13,7 +12,6 @@ export const saveToken = (token) => {
   }
 };
 
-
 export const getToken = () => {
   try {
     return localStorage.getItem(TOKEN_KEY);
@@ -21,7 +19,6 @@ export const getToken = () => {
     return null;
   }
 };
-
 
 export const removeToken = () => {
   try {
@@ -32,11 +29,9 @@ export const removeToken = () => {
   }
 };
 
-
 export const hasToken = () => {
   return !!getToken();
 };
-
 
 export const saveUser = (user) => {
   try {
@@ -56,7 +51,6 @@ export const getUser = () => {
   }
 };
 
-
 export const removeUser = () => {
   try {
     localStorage.removeItem(USER_KEY);
@@ -66,11 +60,9 @@ export const removeUser = () => {
   }
 };
 
-
 export const isAuthenticated = () => {
   return hasToken() && !!getUser();
 };
-
 
 export const loginWithGoogle = async (credential) => {
   try {
@@ -100,7 +92,6 @@ export const loginWithGoogle = async (credential) => {
   }
 };
 
-
 export const logout = async () => {
   try {
     await authAPI.logout();
@@ -116,7 +107,6 @@ export const logout = async () => {
     return { success: true };
   }
 };
-
 
 export const verifySession = async () => {
   try {
@@ -152,7 +142,6 @@ export const verifySession = async () => {
   }
 };
 
-
 export const refreshAuthState = () => {
   const token = getToken();
   const user = getUser();
@@ -172,33 +161,27 @@ export const refreshAuthState = () => {
   };
 };
 
-
 export const clearAuthData = () => {
   removeToken();
   removeUser();
 };
-
 
 export const getUserId = () => {
   const user = getUser();
   return user?.id || null;
 };
 
-
 export const getUserEmail = () => {
   const user = getUser();
   return user?.email || null;
 };
 
-
 export const isTokenExpired = () => {
   const token = getToken();
   if (!token) return true;
 
- 
   return false;
 };
-
 
 export const initializeAuth = async () => {
   try {
@@ -210,8 +193,6 @@ export const initializeAuth = async () => {
         error: 'Not authenticated',
       };
     }
-
-  
 
     return {
       success: true,
@@ -226,7 +207,6 @@ export const initializeAuth = async () => {
   }
 };
 
-
 export const initGoogleAuth = () => {
   return new Promise((resolve, reject) => {
     if (typeof window === 'undefined' || !window.google) {
@@ -237,7 +217,7 @@ export const initGoogleAuth = () => {
     try {
       window.google.accounts.id.initialize({
         client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-        callback: () => {}, 
+        callback: () => {},
         auto_select: false,
         cancel_on_tap_outside: true,
       });
@@ -249,13 +229,11 @@ export const initGoogleAuth = () => {
   });
 };
 
-
 export const promptGoogleOneTap = () => {
   if (typeof window !== 'undefined' && window.google) {
     window.google.accounts.id.prompt();
   }
 };
-
 
 export const renderGoogleButton = (elementId, options = {}) => {
   if (typeof window !== 'undefined' && window.google) {

@@ -35,7 +35,6 @@ const getEntityStyle = (label) =>
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// ─── Speaker initial avatar (reused in analytics + rename chip) ───
 const SpeakerAvatar = ({ name, size = 5 }) => {
   const initial = (name || '?').charAt(0).toUpperCase();
   return (
@@ -165,7 +164,6 @@ const TranscriptViewer = ({
     setCurrentMatchIndex((i) => (i >= matchCount - 1 ? 0 : i + 1));
   }, [matchCount]);
 
-
   const highlightSearch = useCallback(
     (text) => {
       if (!searchQuery) return [text];
@@ -242,7 +240,7 @@ const TranscriptViewer = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* silent */
+
     }
   };
 
@@ -260,7 +258,7 @@ const TranscriptViewer = ({
 
   return (
     <div className="space-y-4">
-      {/* ── Header ── */}
+      {}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText size={16} className="text-accent-primary" />
@@ -270,7 +268,7 @@ const TranscriptViewer = ({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {/* F6: Entity toggle */}
+          {}
           {hasSegments && hasNlpEntities && (
             <button
               onClick={() => setShowEntities((v) => !v)}
@@ -297,7 +295,7 @@ const TranscriptViewer = ({
         </div>
       </div>
 
-      {/* F6: Entity legend */}
+      {}
       {showEntities && activeEntityTypes.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           {activeEntityTypes.map((type) => {
@@ -322,7 +320,7 @@ const TranscriptViewer = ({
         </div>
       )}
 
-      {/* ── F2: Search ── */}
+      {}
       <div className="space-y-1.5">
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -345,7 +343,7 @@ const TranscriptViewer = ({
           )}
         </div>
 
-        {/* F2: Match count + Prev / Next */}
+        {}
         {searchQuery && (
           <div className="flex items-center gap-2">
             <p className="font-mono text-[11px] text-slate-500">
@@ -375,7 +373,7 @@ const TranscriptViewer = ({
         )}
       </div>
 
-      {/* ── F5: Speaker Analytics ── */}
+      {}
       {showSpeakerAnalytics && !searchQuery && (
         <div className="rounded-btn bg-echo-base p-4">
           <div className="mb-3 flex items-center gap-2">
@@ -387,7 +385,7 @@ const TranscriptViewer = ({
               <div key={s.speakerId} className="flex items-center gap-3">
                 <SpeakerAvatar name={s.speakerName} size={5} />
                 <span className="w-24 truncate text-xs text-slate-300">{s.speakerName}</span>
-                {/* Bar track */}
+                {}
                 <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-echo-surface">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-accent-primary to-accent-secondary"
@@ -408,7 +406,7 @@ const TranscriptViewer = ({
         </div>
       )}
 
-      {/* ── Transcript Content ── */}
+      {}
       <div
         ref={transcriptRef}
         className="custom-scrollbar max-h-[600px] overflow-y-auto rounded-btn bg-echo-base p-4 text-sm leading-relaxed text-slate-300"
@@ -444,7 +442,7 @@ const TranscriptViewer = ({
                       <User size={10} />
                       {speakerName}
 
-                      {/* Rename on hover */}
+                      {}
                       {onRenameSpeaker && (
                         <button
                           onClick={(e) => {

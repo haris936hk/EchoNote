@@ -1,16 +1,5 @@
 import { useState, useEffect } from 'react';
 
-/**
- * Custom hook that debounces a value
- * Useful for search inputs, API calls, and expensive operations
- *
- * @param {any} value 
- * @param {number} delay 
- * @returns {any} 
- *
- * @example
- * const debouncedSearch = useDebounce(searchQuery, 500);
- */
 const useDebounce = (value, delay = 500) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -28,7 +17,6 @@ const useDebounce = (value, delay = 500) => {
 };
 
 export default useDebounce;
-
 
 export const useDebouncedCallback = (callback, delay = 500) => {
   const [timeoutId, setTimeoutId] = useState(null);
@@ -55,7 +43,6 @@ export const useDebouncedCallback = (callback, delay = 500) => {
 
   return debouncedCallback;
 };
-
 
 export const useDebounceImmediate = (value, delay = 500, immediate = false) => {
   const [debouncedValue, setDebouncedValue] = useState(value);

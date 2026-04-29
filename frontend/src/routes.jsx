@@ -24,7 +24,6 @@ import WorkspacesPage from './pages/WorkspacesPage';
 import WorkspaceDetailPage from './pages/WorkspaceDetailPage';
 import WorkspaceMeetingDetail from './pages/WorkspaceMeetingDetail';
 
-
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -47,11 +46,10 @@ PublicRoute.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+      {}
       <Route path="/" element={<HomePage />} />
       <Route path="/share/:token" element={<PublicMeetingSummary />} />
       <Route
@@ -63,7 +61,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Protected Routes - Wrapped in MainLayout */}
+      {}
       <Route
         path="/dashboard"
         element={
@@ -195,7 +193,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Placeholder routes for footer links */}
+      {}
       <Route path="/about" element={<NotFoundPage />} />
       <Route path="/privacy" element={<NotFoundPage />} />
       <Route path="/terms" element={<NotFoundPage />} />
@@ -206,7 +204,7 @@ const AppRoutes = () => {
       <Route path="/features" element={<NotFoundPage />} />
       <Route path="/pricing" element={<NotFoundPage />} />
 
-      {/* 404 Not Found - Must be last */}
+      {}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

@@ -1,8 +1,6 @@
 
-
 const { prisma } = require('../config/database');
 const winston = require('winston');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -13,7 +11,6 @@ const logger = winston.createLogger({
     }),
   ],
 });
-
 
 const getCurrentUser = async (req, res) => {
   try {
@@ -62,13 +59,11 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.userId;
     const { name, autoDeleteDays, emailNotifications } = req.body;
 
-    
     const updateData = {};
 
     if (name !== undefined) {
@@ -141,7 +136,6 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-
 const getUserSettings = async (req, res) => {
   try {
     const userId = req.userId;
@@ -157,7 +151,7 @@ const getUserSettings = async (req, res) => {
         jiraEmail: true,
         jiraProjectKey: true,
         jiraAutoSync: true,
-        // jiraApiToken is excluded for security, user only sees it when setting it
+
       },
     });
 
@@ -182,13 +176,12 @@ const getUserSettings = async (req, res) => {
   }
 };
 
-
 const updateUserSettings = async (req, res) => {
   try {
     const userId = req.userId;
-    const { 
-      autoDeleteDays, 
-      emailNotifications, 
+    const {
+      autoDeleteDays,
+      emailNotifications,
       slackWebhookUrl,
       jiraDomain,
       jiraEmail,
@@ -199,13 +192,11 @@ const updateUserSettings = async (req, res) => {
 
     const updateData = {};
 
-   
     if (autoDeleteDays !== undefined) {
       if (autoDeleteDays === null) {
-        
+
         updateData.autoDeleteDays = null;
 
-        
         await prisma.meeting.updateMany({
           where: {
             userId: userId,
@@ -219,7 +210,7 @@ const updateUserSettings = async (req, res) => {
 
         logger.info(`⚙️ Auto-delete disabled for user: ${userId}`);
       } else {
-        
+
         const days = parseInt(autoDeleteDays);
         if (isNaN(days) || days < 1 || days > 365) {
           return res.status(400).json({
@@ -229,7 +220,6 @@ const updateUserSettings = async (req, res) => {
         }
         updateData.autoDeleteDays = days;
 
-        
         const newDate = new Date();
         newDate.setDate(newDate.getDate() + days);
 
@@ -327,12 +317,10 @@ const updateUserSettings = async (req, res) => {
   }
 };
 
-
 const getUserStats = async (req, res) => {
   try {
     const userId = req.userId;
 
-    
     const [
       totalMeetings,
       completedMeetings,
@@ -344,17 +332,15 @@ const getUserStats = async (req, res) => {
       storageUsed,
       recentActivity,
     ] = await Promise.all([
-      
+
       prisma.meeting.count({
         where: { userId },
       }),
 
-      
       prisma.meeting.count({
         where: { userId, status: 'COMPLETED' },
       }),
 
-      
       prisma.meeting.count({
         where: {
           userId,
@@ -364,37 +350,31 @@ const getUserStats = async (req, res) => {
         },
       }),
 
-      
       prisma.meeting.count({
         where: { userId, status: 'FAILED' },
       }),
 
-      
       prisma.meeting.groupBy({
         by: ['category'],
         where: { userId },
         _count: true,
       }),
 
-      
       prisma.meeting.aggregate({
         where: { userId, status: 'COMPLETED' },
         _sum: { audioDuration: true },
       }),
 
-      
       prisma.meeting.aggregate({
         where: { userId, status: 'COMPLETED' },
         _sum: { transcriptWordCount: true },
       }),
 
-      
       prisma.meeting.aggregate({
         where: { userId, audioUrl: { not: null } },
         _sum: { audioSize: true },
       }),
 
-      
       prisma.meeting.count({
         where: {
           userId,
@@ -405,13 +385,11 @@ const getUserStats = async (req, res) => {
       }),
     ]);
 
-    
     const byCategory = {};
     categoryStats.forEach((stat) => {
       byCategory[stat.category] = stat._count;
     });
 
-   
     const avgDuration =
       completedMeetings > 0
         ? Math.round((totalDuration._sum.audioDuration || 0) / completedMeetings)
@@ -455,7 +433,6 @@ const getUserStats = async (req, res) => {
   }
 };
 
-
 const getUserActivity = async (req, res) => {
   try {
     const userId = req.userId;
@@ -495,13 +472,11 @@ const getUserActivity = async (req, res) => {
   }
 };
 
-
 const deleteUserAccount = async (req, res) => {
   try {
     const userId = req.userId;
     const { confirmation } = req.body;
 
-    
     if (confirmation !== 'DELETE_MY_ACCOUNT') {
       return res.status(400).json({
         success: false,
@@ -510,7 +485,6 @@ const deleteUserAccount = async (req, res) => {
       });
     }
 
-    
     const meetings = await prisma.meeting.findMany({
       where: { userId, audioUrl: { not: null } },
       select: { id: true, audioUrl: true },
@@ -518,14 +492,12 @@ const deleteUserAccount = async (req, res) => {
 
     logger.warn(`⚠️ Deleting user account: ${userId} with ${meetings.length} meetings`);
 
-    
     await prisma.user.delete({
       where: { id: userId },
     });
 
     logger.info(`🗑️ User account deleted: ${userId}`);
 
-    
     const audioFilesToDelete = meetings.filter((m) => m.audioUrl).map((m) => m.audioUrl);
 
     return res.status(200).json({
@@ -546,12 +518,10 @@ const deleteUserAccount = async (req, res) => {
   }
 };
 
-
 const exportUserData = async (req, res) => {
   try {
     const userId = req.userId;
 
-    
     const [user, meetings, activities] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -620,7 +590,6 @@ const exportUserData = async (req, res) => {
       },
     };
 
-    
     const filename = `echonote_data_export_${user.email}_${Date.now()}.json`;
 
     res.setHeader('Content-Type', 'application/json');
@@ -636,7 +605,6 @@ const exportUserData = async (req, res) => {
     });
   }
 };
-
 
 const updateLastLogin = async (req, res) => {
   try {
@@ -659,7 +627,6 @@ const updateLastLogin = async (req, res) => {
     });
   }
 };
-
 
 const logUserActivity = async (req, res) => {
   try {
@@ -711,7 +678,6 @@ const logUserActivity = async (req, res) => {
   }
 };
 
-
 const testSlackWebhook = async (req, res) => {
   try {
     const userId = req.userId;
@@ -735,7 +701,7 @@ const testSlackWebhook = async (req, res) => {
     const mockMeeting = {
       title: 'EchoNote Slack Integration Test',
       category: 'OTHER',
-      audioDuration: 305, 
+      audioDuration: 305,
       transcriptConfidence: 95,
       nlpSentiment: 'positive',
       nlpSentimentScore: 0.85,

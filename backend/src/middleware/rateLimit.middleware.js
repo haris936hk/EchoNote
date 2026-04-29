@@ -1,11 +1,8 @@
 
-
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
 
-
 const { ipKeyGenerator } = require('express-rate-limit');
-
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -17,19 +14,18 @@ const logger = winston.createLogger({
   ],
 });
 
-
 const apiLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, 
-  max: 100, 
+  windowMs: 60 * 60 * 1000,
+  max: 100,
   message: {
     success: false,
     error: 'Too many requests from this user/IP. Please try again later.',
     code: 'RATE_LIMIT_EXCEEDED',
   },
-  standardHeaders: true, 
-  legacyHeaders: false, 
+  standardHeaders: true,
+  legacyHeaders: false,
   keyGenerator: (req, res) => {
-    
+
     return req.userId || ipKeyGenerator(req, res);
   },
   handler: (req, res) => {
@@ -43,10 +39,9 @@ const apiLimiter = rateLimit({
   },
 });
 
-
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 10, 
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: {
     success: false,
     error: 'Too many authentication attempts. Please try again later.',
@@ -54,9 +49,9 @@ const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: false, 
+  skipSuccessfulRequests: false,
   keyGenerator: (req, res) => {
-    return ipKeyGenerator(req, res); 
+    return ipKeyGenerator(req, res);
   },
   handler: (req, res) => {
     logger.warn(`⚠️ Auth rate limit exceeded for IP ${req.ip}`);
@@ -69,10 +64,9 @@ const authLimiter = rateLimit({
   },
 });
 
-
 const uploadLimiter = rateLimit({
-  windowMs: 60 * 1000, 
-  max: 5, 
+  windowMs: 60 * 1000,
+  max: 5,
   message: {
     success: false,
     error: 'Too many upload attempts. Please wait before uploading again.',
@@ -95,10 +89,9 @@ const uploadLimiter = rateLimit({
   },
 });
 
-
 const searchLimiter = rateLimit({
-  windowMs: 60 * 1000, 
-  max: 30, 
+  windowMs: 60 * 1000,
+  max: 30,
   message: {
     success: false,
     error: 'Too many search requests. Please slow down.',

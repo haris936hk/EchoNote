@@ -3,12 +3,10 @@ const fsSync = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-
 const STORAGE_BASE = path.join(process.cwd(), 'storage');
 const AUDIO_DIR = path.join(STORAGE_BASE, 'audio');
 const TEMP_DIR = path.join(STORAGE_BASE, 'temp');
 const PROCESSED_DIR = path.join(STORAGE_BASE, 'processed');
-
 
 async function initializeStorage() {
   try {
@@ -37,11 +35,6 @@ async function initializeStorage() {
   }
 }
 
-/**
- * Store uploaded audio file temporarily
- * @param {Object} file - Multer file object
- * @returns {Promise<Object>} File info with temp path
- */
 async function storeTempAudioFile(file) {
   try {
     const fileId = generateFileId();
@@ -49,7 +42,6 @@ async function storeTempAudioFile(file) {
     const filename = `${fileId}${extension}`;
     const tempPath = path.join(TEMP_DIR, filename);
 
-    
     await fs.rename(file.path, tempPath);
 
     console.log(`✅ Temp audio stored: ${filename}`);
@@ -74,22 +66,14 @@ async function storeTempAudioFile(file) {
   }
 }
 
-/**
- * Store processed audio file permanently
- * @param {string} processedPath - Path to processed audio file
- * @param {string} meetingId - Meeting ID
- * @returns {Promise<Object>} Permanent storage info
- */
 async function storeProcessedAudio(processedPath, meetingId) {
   try {
     const extension = path.extname(processedPath);
     const filename = `${meetingId}${extension}`;
     const permanentPath = path.join(AUDIO_DIR, filename);
 
-    
     await fs.copyFile(processedPath, permanentPath);
 
-    
     const stats = await fs.stat(permanentPath);
 
     console.log(`✅ Processed audio stored: ${filename} (${formatFileSize(stats.size)})`);
@@ -100,7 +84,7 @@ async function storeProcessedAudio(processedPath, meetingId) {
         path: permanentPath,
         filename,
         size: stats.size,
-        url: `/storage/audio/${filename}`, 
+        url: `/storage/audio/${filename}`,
       },
     };
   } catch (error) {
@@ -112,14 +96,9 @@ async function storeProcessedAudio(processedPath, meetingId) {
   }
 }
 
-/**
- * Get audio file by meeting ID
- * @param {string} meetingId - Meeting ID
- * @returns {Promise<Object>} File path and info
- */
 async function getAudioFile(meetingId) {
   try {
-    
+
     const files = await fs.readdir(AUDIO_DIR);
     const audioFile = files.find((file) => file.startsWith(meetingId));
 
@@ -151,14 +130,9 @@ async function getAudioFile(meetingId) {
   }
 }
 
-/**
- * Delete audio file
- * @param {string} filePath - Full path to file
- * @returns {Promise<Object>} Delete result
- */
 async function deleteAudioFile(filePath) {
   try {
-   
+
     if (!fsSync.existsSync(filePath)) {
       return {
         success: false,
@@ -182,15 +156,10 @@ async function deleteAudioFile(filePath) {
   }
 }
 
-/**
- * Delete temporary file
- * @param {string} tempPath - Path to temp file
- * @returns {Promise<Object>} Delete result
- */
 async function deleteTempFile(tempPath) {
   try {
     if (!fsSync.existsSync(tempPath)) {
-      return { success: true }; 
+      return { success: true };
     }
 
     await fs.unlink(tempPath);
@@ -209,10 +178,6 @@ async function deleteTempFile(tempPath) {
   }
 }
 
-/**
- * Clean up old temporary files (older than 1 hour)
- * @returns {Promise<Object>} Cleanup result
- */
 async function cleanupOldTempFiles() {
   try {
     const files = await fs.readdir(TEMP_DIR);
@@ -246,10 +211,6 @@ async function cleanupOldTempFiles() {
   }
 }
 
-/**
- * Clean up old processed files in processed directory
- * @returns {Promise<Object>} Cleanup result
- */
 async function cleanupProcessedFiles() {
   try {
     const files = await fs.readdir(PROCESSED_DIR);
@@ -278,10 +239,6 @@ async function cleanupProcessedFiles() {
   }
 }
 
-/**
- * Get storage statistics
- * @returns {Promise<Object>} Storage stats
- */
 async function getStorageStats() {
   try {
     const [audioFiles, tempFiles, processedFiles] = await Promise.all([
@@ -290,7 +247,6 @@ async function getStorageStats() {
       fs.readdir(PROCESSED_DIR),
     ]);
 
-    
     let audioSize = 0;
     let tempSize = 0;
     let processedSize = 0;
@@ -344,20 +300,10 @@ async function getStorageStats() {
   }
 }
 
-/**
- * Check if file exists
- * @param {string} filePath - Path to file
- * @returns {boolean} True if file exists
- */
 function fileExists(filePath) {
   return fsSync.existsSync(filePath);
 }
 
-/**
- * Get file size
- * @param {string} filePath - Path to file
- * @returns {Promise<Object>} File size info
- */
 async function getFileSize(filePath) {
   try {
     const stats = await fs.stat(filePath);
@@ -377,17 +323,11 @@ async function getFileSize(filePath) {
   }
 }
 
-/**
- * Validate audio file
- * @param {Object} file - Multer file object
- * @returns {Object} Validation result
- */
 function validateAudioFile(file) {
-  const MAX_FILE_SIZE = 50 * 1024 * 1024; 
+  const MAX_FILE_SIZE = 50 * 1024 * 1024;
   const ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/mp4', 'audio/x-m4a'];
   const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4'];
 
-  
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
@@ -395,7 +335,6 @@ function validateAudioFile(file) {
     };
   }
 
-  
   if (!ALLOWED_TYPES.includes(file.mimetype)) {
     return {
       valid: false,
@@ -403,7 +342,6 @@ function validateAudioFile(file) {
     };
   }
 
- 
   const extension = path.extname(file.originalname).toLowerCase();
   if (!ALLOWED_EXTENSIONS.includes(extension)) {
     return {
@@ -417,11 +355,6 @@ function validateAudioFile(file) {
   };
 }
 
-/**
- * Create a download stream for audio file
- * @param {string} meetingId - Meeting ID
- * @returns {Promise<Object>} Stream and file info
- */
 async function createAudioDownloadStream(meetingId) {
   try {
     const fileResult = await getAudioFile(meetingId);
@@ -450,14 +383,9 @@ async function createAudioDownloadStream(meetingId) {
   }
 }
 
-
-
-
-
 function generateFileId() {
   return crypto.randomBytes(16).toString('hex');
 }
-
 
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
@@ -468,7 +396,6 @@ function formatFileSize(bytes) {
 
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
-
 
 function getMimeType(filename) {
   const extension = path.extname(filename).toLowerCase();
@@ -481,7 +408,6 @@ function getMimeType(filename) {
 
   return mimeTypes[extension] || 'application/octet-stream';
 }
-
 
 function getStoragePaths() {
   return {

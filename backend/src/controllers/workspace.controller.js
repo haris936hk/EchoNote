@@ -3,7 +3,6 @@ const emailService = require('../services/email.service');
 const meetingService = require('../services/meeting.service');
 const logger = require('../utils/logger');
 
-
 const createWorkspace = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -38,7 +37,6 @@ const createWorkspace = async (req, res) => {
   }
 };
 
-
 const getMyWorkspaces = async (req, res) => {
   try {
     const userId = req.userId;
@@ -70,7 +68,6 @@ const getMyWorkspaces = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
-
 
 const getWorkspaceById = async (req, res) => {
   try {
@@ -120,7 +117,6 @@ const getWorkspaceById = async (req, res) => {
   }
 };
 
-
 const deleteWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
@@ -149,7 +145,6 @@ const deleteWorkspace = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
-
 
 const inviteMember = async (req, res) => {
   try {
@@ -188,7 +183,6 @@ const inviteMember = async (req, res) => {
         },
       });
 
-      
       emailService.sendWorkspaceInvitationEmail({
         to: email,
         inviterName: membership.user.name || 'A teammate',
@@ -210,7 +204,6 @@ const inviteMember = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
-
 
 const removeMember = async (req, res) => {
   try {
@@ -251,8 +244,6 @@ const removeMember = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
-
-
 
 const updateMemberRole = async (req, res) => {
   try {
@@ -295,7 +286,6 @@ const updateMemberRole = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
-
 
 const addMeeting = async (req, res) => {
   try {
@@ -356,7 +346,6 @@ const addMeeting = async (req, res) => {
   }
 };
 
-
 const removeMeeting = async (req, res) => {
   try {
     const { id: workspaceId, meetingId } = req.params;
@@ -389,7 +378,6 @@ const removeMeeting = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
-
 
 const getWorkspaceMeetings = async (req, res) => {
   try {
@@ -438,7 +426,6 @@ const getWorkspaceMeetings = async (req, res) => {
   }
 };
 
-
 const getWorkspaceMeeting = async (req, res) => {
   try {
     const { id: workspaceId, meetingId } = req.params;
@@ -474,7 +461,6 @@ const getWorkspaceMeeting = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Meeting not found in this workspace' });
     }
 
-    
     const transformedMeeting = meetingService.transformMeetingForFrontend(wmLink.meeting);
 
     const data = {

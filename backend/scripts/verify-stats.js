@@ -6,7 +6,7 @@ const meetingService = require('../src/services/meeting.service');
 async function verify() {
   console.log('🧪 Starting verification...');
   try {
-    
+
     const user = await prisma.user.findFirst({
       where: { meetings: { some: {} } }
     });

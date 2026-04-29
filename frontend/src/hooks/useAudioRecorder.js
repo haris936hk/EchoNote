@@ -14,7 +14,7 @@ const useAudioRecorder = () => {
   const timerRef = useRef(null);
   const recordingTimeRef = useRef(0);
 
-  const MAX_RECORDING_TIME = 600; 
+  const MAX_RECORDING_TIME = 600;
 
   useEffect(() => {
     recordingTimeRef.current = recordingTime;
