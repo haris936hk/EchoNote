@@ -790,9 +790,9 @@ const PrivacyContent = () => {
         <h2 className="mb-4 text-lg font-semibold text-white">AI Processing Pipeline</h2>
         <div className="space-y-3">
           {[
-            { name: 'Qwen2.5-7B', desc: 'Fine-tuned LLM for meeting summarization' },
-            { name: 'Whisper base.en', desc: 'Speech-to-text transcription' },
+            { name: 'Deepgram Nova-3', desc: 'Speech-to-text transcription' },
             { name: 'SpaCy en_core_web_lg', desc: 'NLP entity extraction' },
+            { name: 'Qwen2.5-7B', desc: 'Fine-tuned LLM for meeting summarization' },
           ].map((model, i) => (
             <div key={i} className="flex items-center gap-3 rounded-btn bg-echo-base p-3">
               <Check size={14} className="shrink-0 text-emerald-400" />
@@ -882,7 +882,7 @@ const HelpContent = () => {
     {
       question: 'How accurate is the transcription?',
       answer:
-        'Our Whisper ASR model achieves 90%+ accuracy for clear English speech. Accuracy varies based on audio quality, accents, and background noise.',
+        'Deepgram Nova-3 ASR model achieves 90%+ accuracy for clear English speech. Accuracy varies based on audio quality, accents, and background noise.',
     },
     {
       question: 'Can I edit transcripts?',
@@ -903,12 +903,12 @@ const HelpContent = () => {
     {
       icon: BookOpen,
       label: 'Documentation',
-      href: 'https://github.com/haris936hk/EchoNote/wiki',
+      href: 'https://github.com/haris936hk/EchoNote',
     },
     {
       icon: MessageSquare,
       label: 'Contact Support',
-      href: 'mailto:support@echonote.app',
+      href: 'mailto:hariskhan936.hk@gmail.com',
     },
     {
       icon: Bug,

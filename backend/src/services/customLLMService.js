@@ -1,8 +1,6 @@
 const { Groq } = require('groq-sdk');
 const logger = require('../utils/logger');
 
-const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
-const DEFAULT_TIMEOUT_MS = 30_000;
 
 const SUMMARY_JSON_SCHEMA = {
   name: 'meeting_summary',
@@ -197,9 +195,9 @@ Output your valid JSON now:`;
 
 class CustomLLMService {
   constructor() {
-    this.apiKey = process.env.CUSTOM_LLM_API_KEY || '';
-    this.model = DEFAULT_MODEL;
-    this.timeout = parseInt(process.env.CUSTOM_LLM_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
+    this.apiKey = process.env.CUSTOM_LLM_API_KEY;
+    this.model = process.env.CUSTOM_LLM_MODEL;
+    this.timeout = parseInt(process.env.CUSTOM_LLM_TIMEOUT_MS);
 
     this.client = new Groq({
       apiKey: this.apiKey,
@@ -212,7 +210,7 @@ class CustomLLMService {
       );
     }
 
-    logger.info('[CustomLLMService] Initialized', { model: this.model });
+    logger.info('[CustomLLMService] Initialized');
   }
 
   async generateSummary(transcript, nlpFeatures = null, options = {}) {
