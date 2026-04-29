@@ -1,4 +1,3 @@
-
 const { OAuth2Client } = require('google-auth-library');
 const nodemailer = require('nodemailer');
 
@@ -50,7 +49,6 @@ async function getGmailAccessToken() {
 
     return token;
   } catch (error) {
-
     if (error.message.includes('invalid_grant')) {
       throw new Error(
         'Invalid or expired refresh token.\n' +

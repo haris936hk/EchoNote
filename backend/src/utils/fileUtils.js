@@ -1,4 +1,3 @@
-
 const sanitizeTitle = (title, maxLength = 50) => {
   if (!title) return 'meeting';
 
@@ -23,7 +22,6 @@ const sanitizeTitle = (title, maxLength = 50) => {
 const formatDateForFilename = (date) => {
   const d = new Date(date);
   if (isNaN(d.getTime())) {
-
     return new Date().toISOString().slice(0, 10);
   }
   return d.toISOString().slice(0, 10);

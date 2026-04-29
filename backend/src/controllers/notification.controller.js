@@ -1,4 +1,3 @@
-
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
@@ -19,19 +18,19 @@ const getVapidPublicKey = async (req, res) => {
     if (!publicKey) {
       return res.status(500).json({
         success: false,
-        error: 'VAPID public key not configured'
+        error: 'VAPID public key not configured',
       });
     }
 
     return res.status(200).json({
       success: true,
-      publicKey
+      publicKey,
     });
   } catch (error) {
     logger.error(`Error getting VAPID public key: ${error.message}`);
     return res.status(500).json({
       success: false,
-      error: 'Failed to retrieve VAPID public key'
+      error: 'Failed to retrieve VAPID public key',
     });
   }
 };
@@ -41,10 +40,16 @@ const subscribe = async (req, res) => {
     const userId = req.userId;
     const subscription = req.body;
 
-    if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
+    if (
+      !subscription ||
+      !subscription.endpoint ||
+      !subscription.keys ||
+      !subscription.keys.p256dh ||
+      !subscription.keys.auth
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid subscription object'
+        error: 'Invalid subscription object',
       });
     }
 
@@ -53,14 +58,14 @@ const subscribe = async (req, res) => {
       update: {
         userId,
         p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth
+        auth: subscription.keys.auth,
       },
       create: {
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
-        userId
-      }
+        userId,
+      },
     });
 
     logger.info(`✅ User subscribed to push: ${userId}`);
@@ -68,14 +73,14 @@ const subscribe = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Subscribed successfully',
-      data: savedSubscription
+      data: savedSubscription,
     });
   } catch (error) {
     logger.error(`Error subscribing to notifications: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to subscribe',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -87,25 +92,25 @@ const unsubscribe = async (req, res) => {
     if (!endpoint) {
       return res.status(400).json({
         success: false,
-        error: 'Endpoint is required'
+        error: 'Endpoint is required',
       });
     }
 
     await prisma.pushSubscription.deleteMany({
-      where: { endpoint }
+      where: { endpoint },
     });
 
     logger.info(`🚫 Device unsubscribed: ${endpoint}`);
 
     return res.status(200).json({
       success: true,
-      message: 'Unsubscribed successfully'
+      message: 'Unsubscribed successfully',
     });
   } catch (error) {
     logger.error(`Error unsubscribing: ${error.message}`);
     return res.status(500).json({
       success: false,
-      error: 'Failed to unsubscribe'
+      error: 'Failed to unsubscribe',
     });
   }
 };
@@ -113,5 +118,5 @@ const unsubscribe = async (req, res) => {
 module.exports = {
   getVapidPublicKey,
   subscribe,
-  unsubscribe
+  unsubscribe,
 };

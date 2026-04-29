@@ -12,7 +12,6 @@ class QueueService {
 
   async addToQueue(meetingId, userId, audioFile) {
     try {
-
       this.queue.push({
         meetingId,
         userId,
@@ -38,7 +37,6 @@ class QueueService {
   }
 
   async processNext() {
-
     if (this.processing) {
       return;
     }
@@ -53,7 +51,6 @@ class QueueService {
     logger.info(`Processing meeting ${job.meetingId} (${this.queue.length} remaining in queue)`);
 
     try {
-
       await prisma.meeting.update({
         where: { id: job.meetingId },
         data: {
@@ -67,7 +64,6 @@ class QueueService {
       });
 
       logger.info(`Meeting ${job.meetingId} processed successfully`);
-
     } catch (error) {
       logger.error(`Meeting ${job.meetingId} processing failed:`, error);
 
@@ -79,7 +75,6 @@ class QueueService {
       const retryCount = meeting?.retryCount || 0;
 
       if (retryCount < 3) {
-
         const retryDelay = Math.pow(2, retryCount) * 60000;
         logger.info(
           `Scheduling retry for meeting ${job.meetingId} in ${retryDelay / 1000}s (attempt ${retryCount + 1}/3)`
@@ -102,7 +97,6 @@ class QueueService {
 
         this.retryTimeouts.set(job.meetingId, timeout);
       } else {
-
         logger.error(`Meeting ${job.meetingId} failed after 3 attempts`);
         await prisma.meeting.update({
           where: { id: job.meetingId },
@@ -118,12 +112,11 @@ class QueueService {
             await fs.unlink(job.audioFile.path);
             logger.info(`🗑️ Cleaned up temp file after max retries: ${job.audioFile.path}`);
           } catch (cleanupError) {
-
+            // ignore
           }
         }
       }
     } finally {
-
       this.processing = null;
     }
   }
@@ -165,7 +158,6 @@ class QueueService {
   }
 
   async cancelMeeting(meetingId) {
-
     const index = this.queue.findIndex((job) => job.meetingId === meetingId);
     if (index !== -1) {
       this.queue.splice(index, 1);

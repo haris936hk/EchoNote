@@ -1,4 +1,3 @@
-
 const { AppError } = require('./error.middleware');
 
 const VALIDATION_RULES = {

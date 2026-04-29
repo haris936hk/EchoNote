@@ -1,4 +1,3 @@
-
 const { PythonShell } = require('python-shell');
 const path = require('path');
 const fs = require('fs');
@@ -86,11 +85,7 @@ const processAudioWithFFmpeg = (inputPath, outputPath) => {
       .audioCodec('pcm_s16le')
       .format('wav')
       .audioBitrate('256k')
-      .audioFilters([
-        'highpass=f=85',
-        'lowpass=f=8000',
-        'loudnorm',
-      ])
+      .audioFilters(['highpass=f=85', 'lowpass=f=8000', 'loudnorm'])
       .on('start', (commandLine) => {
         logger.debug(`FFmpeg command: ${commandLine}`);
       })
@@ -388,7 +383,6 @@ const cleanupAudioFiles = (filePaths) => {
 
 const processAudioFile = async (inputPath) => {
   try {
-
     const outputDir = path.join(process.cwd(), 'storage', 'processed');
 
     if (!fs.existsSync(outputDir)) {

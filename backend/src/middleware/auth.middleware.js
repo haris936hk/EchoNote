@@ -1,4 +1,3 @@
-
 const { verifyToken, extractTokenFromHeader } = require('../config/auth');
 const { prisma } = require('../config/database');
 const winston = require('winston');
@@ -46,7 +45,6 @@ setInterval(
 
 const authenticate = async (req, res, next) => {
   try {
-
     const token = extractTokenFromHeader(req.headers.authorization);
 
     if (!token) {
@@ -408,7 +406,6 @@ const requireCompletedMeeting = async (req, res, next) => {
 
 const authenticateMedia = async (req, res, next) => {
   try {
-
     let token = extractTokenFromHeader(req.headers.authorization);
 
     if (!token && req.query.token) {

@@ -1,4 +1,3 @@
-
 const { getGmailTransport } = require('../utils/emailTransport');
 const { prisma } = require('./database');
 const winston = require('winston');
@@ -40,7 +39,6 @@ const sendEmail = async (options) => {
   const { to, subject, html, text, skipPreferenceCheck = false } = options;
 
   try {
-
     if (!skipPreferenceCheck) {
       const notificationsEnabled = await isEmailNotificationsEnabled(to);
       if (!notificationsEnabled) {

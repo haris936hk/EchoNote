@@ -1,4 +1,3 @@
-
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
 
@@ -25,7 +24,6 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req, res) => {
-
     return req.userId || ipKeyGenerator(req, res);
   },
   handler: (req, res) => {

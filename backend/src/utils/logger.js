@@ -1,4 +1,3 @@
-
 const winston = require('winston');
 
 const logger = winston.createLogger({
@@ -13,7 +12,6 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'echonote-backend' },
   transports: [
-
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),

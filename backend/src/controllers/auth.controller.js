@@ -1,4 +1,3 @@
-
 const authService = require('../services/auth.service');
 const { prisma } = require('../config/database');
 
@@ -39,7 +38,6 @@ const googleAuth = async (req, res) => {
 
 const getGoogleAuthUrl = async (req, res) => {
   try {
-
     return res.status(501).json({
       success: false,
       error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
@@ -55,7 +53,6 @@ const getGoogleAuthUrl = async (req, res) => {
 
 const googleCallback = async (req, res) => {
   try {
-
     return res.status(501).json({
       success: false,
       error: 'Server-side OAuth flow not implemented. Use client-side flow instead.',
@@ -125,7 +122,6 @@ const logout = async (req, res) => {
 
 const getCurrentUser = async (req, res) => {
   try {
-
     return res.status(200).json({
       success: true,
       data: {
@@ -185,7 +181,6 @@ const verifyToken = async (req, res) => {
 
 const revokeGoogleAccess = async (req, res) => {
   try {
-
     await authService.logout(req.userId);
     res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {

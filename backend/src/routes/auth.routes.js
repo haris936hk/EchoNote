@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
@@ -6,23 +5,13 @@ const { authenticate, optionalAuth } = require('../middleware/auth.middleware');
 const { authLimiter } = require('../middleware/rateLimit.middleware');
 const { sanitizeBody } = require('../middleware/validation.middleware');
 
-router.post(
-  '/google',
-  authLimiter,
-  sanitizeBody,
-  authController.googleAuth
-);
+router.post('/google', authLimiter, sanitizeBody, authController.googleAuth);
 
 router.get('/google/url', authController.getGoogleAuthUrl);
 
 router.get('/google/callback', authController.googleCallback);
 
-router.post(
-  '/refresh',
-  authLimiter,
-  sanitizeBody,
-  authController.refreshToken
-);
+router.post('/refresh', authLimiter, sanitizeBody, authController.refreshToken);
 
 router.post('/logout', authenticate, authController.logout);
 

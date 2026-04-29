@@ -28,7 +28,7 @@ const auth = async (req, res) => {
       const meetingId = id;
       const meeting = await prisma.meeting.findUnique({
         where: { id: meetingId },
-        include: { user: true }
+        include: { user: true },
       });
 
       if (!meeting || meeting.userId !== userId) {
@@ -42,7 +42,6 @@ const auth = async (req, res) => {
       };
       canEdit = true;
     } else {
-
       const workspaceId = prefix;
       const meetingId = id;
 
@@ -102,15 +101,9 @@ const auth = async (req, res) => {
 };
 
 const getUserColor = (id) => {
-  const colors = [
-    '#818CF8',
-    '#A78BFA',
-    '#F472B6',
-    '#FB923C',
-    '#34D399',
-    '#60A5FA',
-  ];
-  const index = Math.abs(id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % colors.length;
+  const colors = ['#818CF8', '#A78BFA', '#F472B6', '#FB923C', '#34D399', '#60A5FA'];
+  const index =
+    Math.abs(id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % colors.length;
   return colors[index];
 };
 

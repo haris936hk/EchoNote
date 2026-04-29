@@ -1,4 +1,3 @@
-
 const meetingService = require('../services/meeting.service');
 const queueService = require('../services/queue.service');
 const supabaseStorage = require('../services/supabase-storage.service');
@@ -405,7 +404,6 @@ const downloadAudio = async (req, res) => {
     let sourceWavPath;
 
     if (audioData.isRemote || audioData.url.startsWith('http')) {
-
       logger.info(`📥 Downloading audio from Supabase for meeting ${meetingId}`);
       tempWavPath = path.join(tempDir, `${meetingId}_source.wav`);
 
@@ -424,7 +422,6 @@ const downloadAudio = async (req, res) => {
 
       sourceWavPath = tempWavPath;
     } else {
-
       if (!fs.existsSync(audioData.url)) {
         return res.status(404).json({
           success: false,
@@ -467,7 +464,6 @@ const downloadAudio = async (req, res) => {
     fileStream.pipe(res);
 
     fileStream.on('close', () => {
-
       cleanupTempMp3(tempMp3Path);
     });
 
@@ -562,7 +558,6 @@ const downloadSummary = async (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(JSON.stringify(summary, null, 2));
     } else {
-
       let textContent = `Meeting Summary: ${meeting.title}\n`;
       textContent += `Category: ${meeting.category}\n`;
       textContent += `Date: ${new Date(meeting.createdAt).toLocaleString()}\n\n`;
@@ -728,7 +723,6 @@ const streamAudio = async (req, res) => {
 
       audioFilePath = tempFile;
     } else {
-
       if (!fs.existsSync(audioData.url)) {
         return res.status(404).json({
           success: false,
@@ -753,7 +747,6 @@ const streamAudio = async (req, res) => {
     };
 
     if (range) {
-
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
@@ -776,7 +769,6 @@ const streamAudio = async (req, res) => {
 
       fileStream.on('close', cleanupTemp);
     } else {
-
       res.setHeader('Content-Length', fileSize);
       const fileStream = fs.createReadStream(audioFilePath);
       fileStream.pipe(res);
@@ -954,7 +946,6 @@ const downloadAll = async (req, res) => {
     zipStream.pipe(res);
 
     zipStream.on('close', () => {
-
       if (tempMp3Path) cleanupTempMp3(tempMp3Path);
       if (tempZipPath && fs.existsSync(tempZipPath)) {
         fs.unlinkSync(tempZipPath);
@@ -1031,7 +1022,6 @@ const exportAllMeetings = async (req, res) => {
         try {
           for (const meeting of meetings) {
             try {
-
               const folderName = meeting.title
                 .replace(/[<>:"/\\|?*]/g, '_')
                 .replace(/\s+/g, '_')
@@ -1115,7 +1105,6 @@ const exportAllMeetings = async (req, res) => {
               logger.warn(
                 `Error processing meeting ${meeting.id} for export: ${meetingError.message}`
               );
-
             }
           }
 
@@ -1136,13 +1125,12 @@ const exportAllMeetings = async (req, res) => {
     fileStream.pipe(res);
 
     fileStream.on('close', () => {
-
       tempFiles.forEach((file) => {
         if (fs.existsSync(file)) {
           try {
             fs.unlinkSync(file);
           } catch (e) {
-
+            // ignore
           }
         }
       });
@@ -1150,7 +1138,7 @@ const exportAllMeetings = async (req, res) => {
         try {
           fs.unlinkSync(tempZipPath);
         } catch (e) {
-
+          // ignore
         }
       }
     });
@@ -1163,7 +1151,7 @@ const exportAllMeetings = async (req, res) => {
           try {
             fs.unlinkSync(file);
           } catch (e) {
-
+            // ignore
           }
         }
       });
@@ -1171,7 +1159,7 @@ const exportAllMeetings = async (req, res) => {
         try {
           fs.unlinkSync(tempZipPath);
         } catch (e) {
-
+          // ignore
         }
       }
       if (!res.headersSent) {
@@ -1189,7 +1177,7 @@ const exportAllMeetings = async (req, res) => {
         try {
           fs.unlinkSync(file);
         } catch (e) {
-
+          // ignore
         }
       }
     });
@@ -1197,7 +1185,7 @@ const exportAllMeetings = async (req, res) => {
       try {
         fs.unlinkSync(tempZipPath);
       } catch (e) {
-
+        // ignore
       }
     }
     return res.status(500).json({
@@ -1226,7 +1214,6 @@ const updateSpeakerMap = async (req, res) => {
     });
 
     if (!meeting) {
-
       return res.status(404).json({
         success: false,
         error: 'Meeting not found',
@@ -1275,12 +1262,10 @@ const reprocessMeeting = async (req, res) => {
     });
 
     if (!meeting) {
-
       return res.status(404).json({ success: false, error: 'Meeting not found' });
     }
 
     if (meeting.status !== 'FAILED') {
-
       return res.status(400).json({
         success: false,
         error: 'Only failed meetings can be reprocessed',
@@ -1288,7 +1273,6 @@ const reprocessMeeting = async (req, res) => {
     }
 
     if (!meeting.audioUrl) {
-
       return res.status(400).json({
         success: false,
         error: 'No audio file found for this meeting. Please upload a new recording.',
@@ -1353,12 +1337,12 @@ const generateShareLink = async (req, res) => {
       await meetingService.updateMeeting(meetingId, userId, {
         shareToken,
         shareEnabled: true,
-        sharedAt: new Date()
+        sharedAt: new Date(),
       });
     } else if (!meeting.shareEnabled) {
       await meetingService.updateMeeting(meetingId, userId, {
         shareEnabled: true,
-        sharedAt: new Date()
+        sharedAt: new Date(),
       });
     }
 
@@ -1369,9 +1353,9 @@ const generateShareLink = async (req, res) => {
       success: true,
       data: {
         shareToken,
-        shareUrl
+        shareUrl,
       },
-      message: isNewToken ? 'Share link generated' : 'Existing share link retrieved'
+      message: isNewToken ? 'Share link generated' : 'Existing share link retrieved',
     });
   } catch (error) {
     logger.error(`Error generating share link: ${error.message}`);
@@ -1397,12 +1381,12 @@ const revokeShareLink = async (req, res) => {
     await meetingService.updateMeeting(meetingId, userId, {
       shareEnabled: false,
       shareToken: null,
-      sharedAt: null
+      sharedAt: null,
     });
 
     return res.status(200).json({
       success: true,
-      message: 'Share link revoked successfully'
+      message: 'Share link revoked successfully',
     });
   } catch (error) {
     logger.error(`Error revoking share link: ${error.message}`);
@@ -1587,7 +1571,6 @@ const updateMeetingSummary = async (req, res) => {
   const { executiveSummary, actionItems, keyDecisions, nextSteps } = req.body;
 
   try {
-
     // 1. Check if the meeting exists and if the user is the owner
     const meeting = await prisma.meeting.findUnique({
       where: { id: meetingId },
@@ -1603,7 +1586,7 @@ const updateMeetingSummary = async (req, res) => {
             },
           },
         },
-      }
+      },
     });
 
     if (!meeting) {
@@ -1632,7 +1615,10 @@ const updateMeetingSummary = async (req, res) => {
       if (!val) return [];
       if (Array.isArray(val)) return val;
       if (typeof val === 'string') {
-        return val.split('\n').map(s => s.trim()).filter(Boolean);
+        return val
+          .split('\n')
+          .map((s) => s.trim())
+          .filter(Boolean);
       }
       return [val];
     };
@@ -1651,7 +1637,9 @@ const updateMeetingSummary = async (req, res) => {
       },
     });
 
-    logger.info(`Meeting summary updated: ${meetingId} by user ${userId} (Context: ${meeting.workspaceMeeting ? 'Workspace' : 'Personal'})`);
+    logger.info(
+      `Meeting summary updated: ${meetingId} by user ${userId} (Context: ${meeting.workspaceMeeting ? 'Workspace' : 'Personal'})`
+    );
 
     const transformedMeeting = meetingService.transformMeetingForFrontend(updatedMeeting);
 

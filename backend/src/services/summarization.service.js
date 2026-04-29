@@ -1,4 +1,3 @@
-
 const customLLMService = require('./customLLMService');
 const winston = require('winston');
 
@@ -100,7 +99,7 @@ const generateSummary = async (transcript, metadata = {}, nlpData = null) => {
   }
 };
 
-const generateExecutiveSummary = async (transcript, metadata = {}) => {
+const generateExecutiveSummary = async (transcript, _metadata = {}) => {
   try {
     logger.info(`📋 Generating executive summary`);
     const startTime = Date.now();

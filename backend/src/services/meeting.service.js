@@ -1,4 +1,5 @@
 const { prisma } = require('../config/database');
+const logger = require('../utils/logger');
 const audioService = require('./audio.service');
 const transcriptionService = require('./transcription.service');
 const nlpService = require('./nlp.service');
@@ -149,7 +150,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
     const nlpResult = await nlpService.processMeetingTranscript(diarizedTranscriptText);
 
     if (!nlpResult.success) {
-      console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
+      logger.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
     }
 
     console.log(
@@ -340,7 +341,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
             await jiraService.createIssue(userWithJira, item);
             console.log(`✅ Synced item "${item.task.substring(0, 20)}..." to Jira`);
           } catch (err) {
-            console.error(`⚠️ Jira sync failed for item ${item.id}:`, err.message);
+            logger.error(`⚠️ Jira sync failed for item ${item.id}:`, err.message);
           }
         }
       }
@@ -378,7 +379,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
             data: { emailSent: true, emailSentAt: new Date() },
           });
         })
-        .catch((err) => console.error(`⚠️ Email send failed:`, err.message))
+        .catch((err) => logger.error(`⚠️ Email send failed:`, err.message))
     );
 
     const userWithWebhook = await prisma.user.findUnique({
@@ -390,7 +391,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
         slackService
           .sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, updatedMeeting)
           .then(() => console.log(`✅ Slack notification sent`))
-          .catch((err) => console.error(`⚠️ Slack send failed:`, err.message))
+          .catch((err) => logger.error(`⚠️ Slack send failed:`, err.message))
       );
     }
 
@@ -401,7 +402,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
           if (res.success) console.log(`✅ Web Push notification sent`);
           else logger.debug(`ℹ️ Web Push skipped: ${res.message || res.error}`);
         })
-        .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
+        .catch((err) => logger.error(`⚠️ Web Push failed:`, err.message))
     );
 
     await Promise.allSettled(notificationPromises);
@@ -410,7 +411,7 @@ async function uploadAndProcessAudio(meetingId, userId, audioFile, options = {})
 
     return updatedMeeting;
   } catch (error) {
-    console.error(`\n❌ Meeting processing failed:`, error.message);
+    logger.error(`\n❌ Meeting processing failed:`, error.message);
 
     await updateMeetingStatus(meetingId, 'FAILED', error.message);
 
@@ -519,8 +520,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
     const nlpResult = await nlpService.processMeetingTranscript(diarizedTranscriptText);
 
     if (!nlpResult.success) {
-      console.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
-
+      logger.warn(`⚠️ NLP processing failed: ${nlpResult.error}`);
     }
 
     console.log(
@@ -682,7 +682,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
             await jiraService.createIssue(userWithJira, item);
             console.log(`✅ Synced item "${item.task.substring(0, 20)}..." to Jira`);
           } catch (err) {
-            console.error(`⚠️ Jira sync failed for item ${item.id}:`, err.message);
+            logger.error(`⚠️ Jira sync failed for item ${item.id}:`, err.message);
           }
         }
       }
@@ -719,7 +719,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
             data: { emailSent: true, emailSentAt: new Date() },
           });
         })
-        .catch((err) => console.error(`⚠️ Email send failed:`, err.message))
+        .catch((err) => logger.error(`⚠️ Email send failed:`, err.message))
     );
 
     const userWithWebhook = await prisma.user.findUnique({
@@ -731,7 +731,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         slackService
           .sendMeetingCompletedNotification(userWithWebhook.slackWebhookUrl, meeting)
           .then(() => console.log(`✅ Slack notification sent`))
-          .catch((err) => console.error(`⚠️ Slack send failed:`, err.message))
+          .catch((err) => logger.error(`⚠️ Slack send failed:`, err.message))
       );
     }
 
@@ -740,9 +740,9 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
         .sendMeetingCompletedPush(userId, meeting)
         .then((res) => {
           if (res.success) console.log(`✅ Web Push notification sent`);
-          else console.log(`ℹ️ Web Push skipped: ${res.message || res.error}`);
+          else logger.debug(`ℹ️ Web Push skipped: ${res.message || res.error}`);
         })
-        .catch((err) => console.error(`⚠️ Web Push failed:`, err.message))
+        .catch((err) => logger.error(`⚠️ Web Push failed:`, err.message))
     );
 
     await Promise.allSettled(notificationPromises);
@@ -754,7 +754,7 @@ async function createAndProcessMeeting({ userId, title, category, audioPath, ori
       data: meeting,
     };
   } catch (error) {
-    console.error(`\n❌ Meeting processing failed:`, error.message);
+    logger.error(`\n❌ Meeting processing failed:`, error.message);
 
     if (meeting) {
       await updateMeetingStatus(meeting.id, 'FAILED', error.message);
@@ -836,8 +836,8 @@ async function getMeetingById(meetingId, userId) {
           },
         },
         actionItems: {
-          orderBy: { createdAt: 'asc' }
-        }
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 
@@ -845,7 +845,7 @@ async function getMeetingById(meetingId, userId) {
 
     return transformMeetingForFrontend(meeting);
   } catch (error) {
-    console.error('Get meeting error:', error.message);
+    logger.error('Get meeting error:', error.message);
     throw error;
   }
 }
@@ -869,7 +869,7 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
-        { transcript: { contains: search, mode: 'insensitive' } },
+        { transcriptText: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -905,7 +905,7 @@ async function getUserMeetings({ userId, category, status, search, page = 1, lim
       totalPages: Math.ceil(total / limit),
     };
   } catch (error) {
-    console.error('Get user meetings error:', error.message);
+    logger.error('Get user meetings error:', error.message);
     throw error;
   }
 }
@@ -944,14 +944,13 @@ async function searchMeetings(userId, query, options = {}) {
       transcriptText: meeting.transcriptText?.substring(0, 200) + '...',
     }));
   } catch (error) {
-    console.error('Search meetings error:', error.message);
+    logger.error('Search meetings error:', error.message);
     throw error;
   }
 }
 
 async function updateMeeting(meetingId, userId, updates) {
   try {
-
     const allowedUpdates = {};
     if (updates.title !== undefined) allowedUpdates.title = updates.title;
     if (updates.description !== undefined) allowedUpdates.description = updates.description;
@@ -975,14 +974,13 @@ async function updateMeeting(meetingId, userId, updates) {
 
     return await getMeetingById(meetingId, userId);
   } catch (error) {
-    console.error('Update meeting error:', error.message);
+    logger.error('Update meeting error:', error.message);
     throw error;
   }
 }
 
 async function deleteMeeting(meetingId, userId) {
   try {
-
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingId,
@@ -996,22 +994,19 @@ async function deleteMeeting(meetingId, userId) {
 
     if (meeting.audioUrl) {
       try {
-
         if (meeting.audioUrl.startsWith('http')) {
-
           const result = await supabaseStorage.deleteAudioFromSupabase(meeting.audioUrl);
           if (result.success) {
             console.log(`✅ Deleted audio from Supabase: ${meeting.audioUrl}`);
           } else {
-            console.warn(`⚠️ Could not delete from Supabase: ${result.error}`);
+            logger.warn(`⚠️ Could not delete from Supabase: ${result.error}`);
           }
         } else {
-
           await fs.unlink(meeting.audioUrl);
           console.log(`✅ Deleted local audio file: ${meeting.audioUrl}`);
         }
       } catch (error) {
-        console.warn(`⚠️ Could not delete audio file: ${error.message}`);
+        logger.warn(`⚠️ Could not delete audio file: ${error.message}`);
       }
     }
 
@@ -1021,7 +1016,7 @@ async function deleteMeeting(meetingId, userId) {
 
     console.log(`✅ Meeting deleted: ${meetingId}`);
   } catch (error) {
-    console.error('Delete meeting error:', error.message);
+    logger.error('Delete meeting error:', error.message);
     throw error;
   }
 }
@@ -1161,7 +1156,7 @@ async function getMeetingStatistics(userId) {
 
     return result;
   } catch (error) {
-    console.error('Get meeting statistics error:', error.message);
+    logger.error('Get meeting statistics error:', error.message);
     throw error;
   }
 }
@@ -1186,11 +1181,11 @@ async function regenerateSummary(meetingId, userId, options = {}) {
     console.log(`🔄 Regenerating summary for meeting: ${meetingId}`);
 
     const summaryResult = await summarizationService.regenerateSummary(
-      meeting.transcript,
+      meeting.transcriptText,
       {
         title: meeting.title,
         category: meeting.category,
-        duration: meeting.duration,
+        duration: meeting.audioDuration,
       },
       options
     );
@@ -1202,7 +1197,12 @@ async function regenerateSummary(meetingId, userId, options = {}) {
     const updatedMeeting = await prisma.meeting.update({
       where: { id: meetingId },
       data: {
-        summary: summaryResult.summary,
+        summaryExecutive: summaryResult.summary.executiveSummary,
+        summaryKeyDecisions: JSON.stringify(summaryResult.summary.keyDecisions),
+        summaryActionItems: summaryResult.summary.actionItems,
+        summaryNextSteps: JSON.stringify(summaryResult.summary.nextSteps),
+        summaryKeyTopics: summaryResult.summary.keyTopics,
+        summarySentiment: summaryResult.summary.sentiment,
       },
     });
 
@@ -1213,7 +1213,7 @@ async function regenerateSummary(meetingId, userId, options = {}) {
       data: updatedMeeting,
     };
   } catch (error) {
-    console.error('Regenerate summary error:', error.message);
+    logger.error('Regenerate summary error:', error.message);
     return {
       success: false,
       error: error.message,
@@ -1248,7 +1248,7 @@ async function getTranscript(meetingId, userId) {
       wordCount: meeting.transcriptWordCount || meeting.transcriptText.split(/\s+/).length,
     };
   } catch (error) {
-    console.error('Get transcript error:', error.message);
+    logger.error('Get transcript error:', error.message);
     throw error;
   }
 }
@@ -1262,9 +1262,9 @@ async function getSummary(meetingId, userId) {
       },
       include: {
         actionItems: {
-          orderBy: { createdAt: 'asc' }
-        }
-      }
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     });
 
     if (!meeting) {
@@ -1278,13 +1278,14 @@ async function getSummary(meetingId, userId) {
     return {
       executiveSummary: meeting.summaryExecutive,
       keyDecisions: deserializeArrayField(meeting.summaryKeyDecisions),
-      actionItems: meeting.actionItems.length > 0 ? meeting.actionItems : (meeting.summaryActionItems || []),
+      actionItems:
+        meeting.actionItems.length > 0 ? meeting.actionItems : meeting.summaryActionItems || [],
       nextSteps: deserializeArrayField(meeting.summaryNextSteps),
       keyTopics: meeting.summaryKeyTopics || [],
       sentiment: meeting.summarySentiment,
     };
   } catch (error) {
-    console.error('Get summary error:', error.message);
+    logger.error('Get summary error:', error.message);
     throw error;
   }
 }
@@ -1336,7 +1337,7 @@ async function getMeetingWithNLP(meetingId, userId) {
 
     return response;
   } catch (error) {
-    console.error('Get meeting with NLP error:', error.message);
+    logger.error('Get meeting with NLP error:', error.message);
     throw error;
   }
 }
@@ -1360,7 +1361,6 @@ async function getAudioDownloadUrl(meetingId, userId) {
     }
 
     if (meeting.audioUrl.startsWith('http')) {
-
       return {
         url: meeting.audioUrl,
         filename: `${meetingId}.wav`,
@@ -1369,7 +1369,6 @@ async function getAudioDownloadUrl(meetingId, userId) {
         expiresAt: null,
       };
     } else {
-
       try {
         const stats = await fs.stat(meeting.audioUrl);
 
@@ -1381,12 +1380,12 @@ async function getAudioDownloadUrl(meetingId, userId) {
           expiresAt: null,
         };
       } catch (error) {
-        console.warn('Audio file not found:', meeting.audioUrl);
+        logger.warn('Audio file not found:', meeting.audioUrl);
         return null;
       }
     }
   } catch (error) {
-    console.error('Get audio download URL error:', error.message);
+    logger.error('Get audio download URL error:', error.message);
     throw error;
   }
 }
@@ -1453,7 +1452,7 @@ async function getProcessingStatus(meetingId, userId) {
       error: meeting.processingError || null,
     };
   } catch (error) {
-    console.error('Get processing status error:', error.message);
+    logger.error('Get processing status error:', error.message);
     throw error;
   }
 }
@@ -1478,13 +1477,12 @@ async function updateMeetingStatus(meetingId, status, errorMessage = null) {
     });
     console.log(`📊 Meeting status updated: ${status}`);
   } catch (error) {
-    console.error('Update status error:', error.message);
+    logger.error('Update status error:', error.message);
   }
 }
 
 async function storeAudioFile(tempPath, meetingId) {
   try {
-
     if (supabaseStorage.isSupabaseConfigured()) {
       console.log('📤 Uploading audio to Supabase Storage...');
       const result = await supabaseStorage.uploadAudioToSupabase(tempPath, meetingId);
@@ -1493,7 +1491,7 @@ async function storeAudioFile(tempPath, meetingId) {
         console.log(`✅ Audio uploaded to Supabase: ${result.url}`);
         return result.url;
       } else {
-        console.warn(`⚠️ Supabase upload failed: ${result.error}. Falling back to local storage.`);
+        logger.warn(`⚠️ Supabase upload failed: ${result.error}. Falling back to local storage.`);
       }
     }
 
@@ -1511,7 +1509,7 @@ async function storeAudioFile(tempPath, meetingId) {
 
     return storagePath;
   } catch (error) {
-    console.error('Store audio file error:', error.message);
+    logger.error('Store audio file error:', error.message);
     throw error;
   }
 }
@@ -1551,7 +1549,7 @@ async function getGlobalDecisions(userId) {
 
     return allDecisions;
   } catch (error) {
-    console.error('Get global decisions error:', error.message);
+    logger.error('Get global decisions error:', error.message);
     throw error;
   }
 }
@@ -1568,7 +1566,6 @@ async function cleanupTempFiles(filePaths) {
 }
 
 module.exports = {
-
   createMeeting,
   createAndProcessMeeting,
   uploadAndProcessAudio,

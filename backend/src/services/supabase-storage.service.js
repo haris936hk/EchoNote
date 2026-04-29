@@ -1,4 +1,3 @@
-
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs').promises;
 const path = require('path');
@@ -102,7 +101,6 @@ const deleteAudioFromSupabase = async (storagePath) => {
 
     let pathToDelete = storagePath;
     if (storagePath.startsWith('http')) {
-
       const urlParts = storagePath.split(`${config.bucketName}/`);
       pathToDelete = urlParts[1] || storagePath;
     }

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
@@ -59,7 +58,6 @@ router.get('/export', authenticate, userController.exportUserData);
 router.post('/login-timestamp', authenticate, userController.updateLastLogin);
 
 router.get('/preferences', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Preferences feature not yet implemented',
@@ -68,7 +66,6 @@ router.get('/preferences', authenticate, (req, res) => {
 });
 
 router.patch('/preferences', authenticate, sanitizeBody, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Preferences feature not yet implemented',
@@ -77,7 +74,6 @@ router.patch('/preferences', authenticate, sanitizeBody, (req, res) => {
 });
 
 router.post('/avatar', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Avatar upload not yet implemented',
@@ -86,7 +82,6 @@ router.post('/avatar', authenticate, (req, res) => {
 });
 
 router.delete('/avatar', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Avatar removal not yet implemented',
@@ -95,7 +90,6 @@ router.delete('/avatar', authenticate, (req, res) => {
 });
 
 router.get('/notifications', authenticate, sanitizeQuery, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Notifications feature not yet implemented',
@@ -104,7 +98,6 @@ router.get('/notifications', authenticate, sanitizeQuery, (req, res) => {
 });
 
 router.patch('/notifications/:id/read', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Notifications feature not yet implemented',
@@ -113,7 +106,6 @@ router.patch('/notifications/:id/read', authenticate, (req, res) => {
 });
 
 router.post('/notifications/mark-all-read', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Notifications feature not yet implemented',
@@ -122,7 +114,6 @@ router.post('/notifications/mark-all-read', authenticate, (req, res) => {
 });
 
 router.get('/subscription', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Subscription feature not yet implemented',
@@ -131,7 +122,6 @@ router.get('/subscription', authenticate, (req, res) => {
 });
 
 router.post('/subscription/upgrade', authenticate, sanitizeBody, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Subscription feature not yet implemented',
@@ -140,7 +130,6 @@ router.post('/subscription/upgrade', authenticate, sanitizeBody, (req, res) => {
 });
 
 router.post('/subscription/cancel', authenticate, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Subscription feature not yet implemented',
@@ -189,7 +178,6 @@ router.get('/storage', authenticate, async (req, res) => {
 });
 
 router.post('/feedback', authenticate, sanitizeBody, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Feedback feature not yet implemented',

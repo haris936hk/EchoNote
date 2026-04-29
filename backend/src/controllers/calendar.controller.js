@@ -1,4 +1,3 @@
-
 const { google } = require('googleapis');
 const { prisma } = require('../config/database');
 const logger = require('../utils/logger');
@@ -110,7 +109,6 @@ const getEvents = async (req, res) => {
       const events = response.data.items || [];
 
       const parsedEvents = events.map((event) => {
-
         const start = event.start?.dateTime || event.start?.date;
         const end = event.end?.dateTime || event.end?.date;
 

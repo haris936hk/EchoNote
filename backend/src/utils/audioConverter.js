@@ -1,4 +1,3 @@
-
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +8,6 @@ const FFMPEG_PATH =
 
 const convertWavToMp3 = (inputPath, outputPath) => {
   return new Promise((resolve) => {
-
     if (!fs.existsSync(inputPath)) {
       return resolve({
         success: false,

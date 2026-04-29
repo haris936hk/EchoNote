@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 const winston = require('winston');
 
@@ -14,7 +13,6 @@ const logger = winston.createLogger({
 
 async function sendMeetingCompletedNotification(webhookUrl, meetingData) {
   try {
-
     const durationSeconds = meetingData.audioDuration || 0;
     const mins = Math.floor(durationSeconds / 60);
     const secs = Math.floor(durationSeconds % 60);

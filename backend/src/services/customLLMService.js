@@ -457,13 +457,12 @@ ${JSON.stringify(meetingData.attendees || [])}
 
   async _callWithRetry(
     userMessage,
-    attempt = 1,
+    _attempt = 1,
     systemPrompt = SYSTEM_PROMPT,
     jsonSchema = null,
     maxTokens = 4096
   ) {
     try {
-
       const finalSystemPrompt = jsonSchema
         ? `${systemPrompt}\n\nStrict JSON Format required:\n${JSON.stringify(jsonSchema, null, 2)}`
         : systemPrompt;
@@ -498,7 +497,9 @@ ${JSON.stringify(meetingData.attendees || [])}
       return content;
     } catch (error) {
       if (error.status === 401) {
-        throw new Error('Invalid API key. Please set a valid CUSTOM_LLM_API_KEY in your .env file.');
+        throw new Error(
+          'Invalid API key. Please set a valid CUSTOM_LLM_API_KEY in your .env file.'
+        );
       }
       if (error.status === 429) {
         throw new Error('LLM API rate limit exceeded. Please try again in a moment.');
@@ -526,7 +527,9 @@ ${JSON.stringify(meetingData.attendees || [])}
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
       if (verification.verified) {
-        logger.info(`[CustomLLMService] Verification passed in ${duration}s — no corrections needed`);
+        logger.info(
+          `[CustomLLMService] Verification passed in ${duration}s — no corrections needed`
+        );
         return summary;
       }
 
@@ -582,7 +585,6 @@ ${JSON.stringify(meetingData.attendees || [])}
 
       return corrected;
     } catch (error) {
-
       logger.warn(
         `[CustomLLMService] Verification pass failed, using original summary: ${error.message}`
       );
@@ -609,7 +611,9 @@ ${JSON.stringify(meetingData.attendees || [])}
 
     const missingFields = requiredFields.filter((f) => !(f in parsed));
     if (missingFields.length > 0) {
-      logger.warn('[CustomLLMService] Response missing fields — applying defaults', { missingFields });
+      logger.warn('[CustomLLMService] Response missing fields — applying defaults', {
+        missingFields,
+      });
     }
 
     const rawActions = Array.isArray(parsed.actionItems) ? parsed.actionItems : [];

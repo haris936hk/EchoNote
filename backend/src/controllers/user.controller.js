@@ -1,4 +1,3 @@
-
 const { prisma } = require('../config/database');
 const winston = require('winston');
 
@@ -151,7 +150,6 @@ const getUserSettings = async (req, res) => {
         jiraEmail: true,
         jiraProjectKey: true,
         jiraAutoSync: true,
-
       },
     });
 
@@ -187,14 +185,13 @@ const updateUserSettings = async (req, res) => {
       jiraEmail,
       jiraApiToken,
       jiraProjectKey,
-      jiraAutoSync
+      jiraAutoSync,
     } = req.body;
 
     const updateData = {};
 
     if (autoDeleteDays !== undefined) {
       if (autoDeleteDays === null) {
-
         updateData.autoDeleteDays = null;
 
         await prisma.meeting.updateMany({
@@ -210,7 +207,6 @@ const updateUserSettings = async (req, res) => {
 
         logger.info(`⚙️ Auto-delete disabled for user: ${userId}`);
       } else {
-
         const days = parseInt(autoDeleteDays);
         if (isNaN(days) || days < 1 || days > 365) {
           return res.status(400).json({
@@ -332,7 +328,6 @@ const getUserStats = async (req, res) => {
       storageUsed,
       recentActivity,
     ] = await Promise.all([
-
       prisma.meeting.count({
         where: { userId },
       }),

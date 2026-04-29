@@ -74,7 +74,6 @@ app.use('/storage', express.static(path.join(__dirname, 'storage')));
 
 app.get('/health', async (req, res) => {
   try {
-
     await prisma.$queryRaw`SELECT 1`;
 
     const storageStats = await storageService.getStorageStats();
@@ -171,7 +170,6 @@ async function gracefulShutdown(signal) {
     console.log('✅ HTTP server closed');
 
     try {
-
       queueService.stopWorker();
       console.log('✅ Queue worker stopped');
 

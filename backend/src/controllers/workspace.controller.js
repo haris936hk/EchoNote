@@ -171,7 +171,9 @@ const inviteMember = async (req, res) => {
 
     const invitedUser = await prisma.user.findUnique({ where: { email } });
     if (!invitedUser) {
-      return res.status(404).json({ success: false, error: 'No EchoNote account found with that email' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'No EchoNote account found with that email' });
     }
 
     try {
@@ -183,19 +185,23 @@ const inviteMember = async (req, res) => {
         },
       });
 
-      emailService.sendWorkspaceInvitationEmail({
-        to: email,
-        inviterName: membership.user.name || 'A teammate',
-        workspaceName: membership.workspace.name,
-        role,
-      }).catch(err => logger.error(`Failed to send workspace invite email to ${email}:`, err));
+      emailService
+        .sendWorkspaceInvitationEmail({
+          to: email,
+          inviterName: membership.user.name || 'A teammate',
+          workspaceName: membership.workspace.name,
+          role,
+        })
+        .catch((err) => logger.error(`Failed to send workspace invite email to ${email}:`, err));
 
       logger.info(`User ${invitedUser.id} invited to workspace ${id} by ${userId}`);
 
       return res.status(201).json({ success: true, data: newMember });
     } catch (e) {
       if (e.code === 'P2002') {
-        return res.status(400).json({ success: false, error: 'User is already a member of this workspace' });
+        return res
+          .status(400)
+          .json({ success: false, error: 'User is already a member of this workspace' });
       }
       throw e;
     }
@@ -278,7 +284,9 @@ const updateMemberRole = async (req, res) => {
       data: { role },
     });
 
-    logger.info(`Member ${targetUserId} role updated to ${role} in workspace ${id} by ${currentUserId}`);
+    logger.info(
+      `Member ${targetUserId} role updated to ${role} in workspace ${id} by ${currentUserId}`
+    );
 
     return res.status(200).json({ success: true, data: updatedMember });
   } catch (error) {
@@ -303,7 +311,9 @@ const addMeeting = async (req, res) => {
     });
 
     if (!membership || membership.role !== 'OWNER') {
-      return res.status(403).json({ success: false, error: 'Only owners can add meetings to workspaces' });
+      return res
+        .status(403)
+        .json({ success: false, error: 'Only owners can add meetings to workspaces' });
     }
 
     const meeting = await prisma.meeting.findUnique({
@@ -316,15 +326,21 @@ const addMeeting = async (req, res) => {
     }
 
     if (meeting.userId !== userId) {
-      return res.status(403).json({ success: false, error: 'You can only add your own meetings to a workspace' });
+      return res
+        .status(403)
+        .json({ success: false, error: 'You can only add your own meetings to a workspace' });
     }
 
     if (meeting.status !== 'COMPLETED') {
-      return res.status(400).json({ success: false, error: 'Only completed meetings can be added to a workspace' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'Only completed meetings can be added to a workspace' });
     }
 
     if (meeting.workspaceMeeting) {
-      return res.status(400).json({ success: false, error: 'This meeting already belongs to another workspace' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'This meeting already belongs to another workspace' });
     }
 
     const workspaceMeeting = await prisma.workspaceMeeting.create({
@@ -339,7 +355,9 @@ const addMeeting = async (req, res) => {
     return res.status(201).json({ success: true, data: workspaceMeeting });
   } catch (error) {
     if (error.code === 'P2002') {
-      return res.status(400).json({ success: false, error: 'This meeting already belongs to another workspace' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'This meeting already belongs to another workspace' });
     }
     logger.error('Error adding meeting to workspace:', error);
     return res.status(500).json({ success: false, error: 'Internal server error' });
@@ -361,7 +379,9 @@ const removeMeeting = async (req, res) => {
     });
 
     if (!membership || membership.role !== 'OWNER') {
-      return res.status(403).json({ success: false, error: 'Only owners can remove meetings from workspaces' });
+      return res
+        .status(403)
+        .json({ success: false, error: 'Only owners can remove meetings from workspaces' });
     }
 
     await prisma.workspaceMeeting.delete({
@@ -450,9 +470,9 @@ const getWorkspaceMeeting = async (req, res) => {
         meeting: {
           include: {
             actionItems: {
-              orderBy: { createdAt: 'asc' }
-            }
-          }
+              orderBy: { createdAt: 'asc' },
+            },
+          },
         },
       },
     });

@@ -33,7 +33,6 @@ async function verifyGoogleToken(token) {
 
 async function authenticateWithGoogle(authCode) {
   try {
-
     const { tokens } = await client.getToken(authCode);
 
     if (!tokens.id_token) {
@@ -54,7 +53,6 @@ async function authenticateWithGoogle(authCode) {
     const refreshToken = generateRefreshToken(tokenUser);
 
     if (user) {
-
       const updates = {
         name: googleProfile.name,
         picture: googleProfile.picture,
@@ -75,7 +73,6 @@ async function authenticateWithGoogle(authCode) {
       });
       console.log(`✅ User logged in: ${user.email}`);
     } else {
-
       user = await prisma.user.create({
         data: {
           id: userId,
@@ -100,7 +97,6 @@ async function authenticateWithGoogle(authCode) {
         });
         console.log(`📧 Welcome email sent to ${user.email}`);
       } catch (error) {
-
         console.error('Failed to send welcome email:', error.message);
       }
     }
@@ -158,7 +154,6 @@ function generateRefreshToken(user) {
 
 async function refreshAccessToken(refreshToken) {
   try {
-
     const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
     const decoded = jwt.verify(refreshToken, secret, {
       issuer: 'echonote-api',
@@ -264,7 +259,6 @@ async function getUserProfile(userId) {
 
 async function updateUserProfile(userId, updates) {
   try {
-
     const allowedUpdates = {};
     if (updates.name) {
       allowedUpdates.name = updates.name;
@@ -298,7 +292,6 @@ async function updateUserProfile(userId, updates) {
 
 async function deleteUserAccount(userId) {
   try {
-
     await prisma.user.delete({
       where: { id: userId },
     });

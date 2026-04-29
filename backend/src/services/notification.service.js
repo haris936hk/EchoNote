@@ -1,4 +1,3 @@
-
 const webpush = require('web-push');
 const { prisma } = require('../config/database');
 const winston = require('winston');
@@ -37,10 +36,9 @@ const sendPushNotificationToUser = async (userId, payload) => {
   if (!isConfigured) return { success: false, error: 'Web Push not configured' };
 
   try {
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { pushNotifications: true }
+      select: { pushNotifications: true },
     });
 
     if (!user || !user.pushNotifications) {
@@ -49,7 +47,7 @@ const sendPushNotificationToUser = async (userId, payload) => {
     }
 
     const subscriptions = await prisma.pushSubscription.findMany({
-      where: { userId }
+      where: { userId },
     });
 
     if (subscriptions.length === 0) {
@@ -63,15 +61,14 @@ const sendPushNotificationToUser = async (userId, payload) => {
         endpoint: sub.endpoint,
         keys: {
           p256dh: sub.p256dh,
-          auth: sub.auth
-        }
+          auth: sub.auth,
+        },
       };
 
       try {
         await webpush.sendNotification(pushConfig, payloadString);
         return { endpoint: sub.endpoint, success: true };
       } catch (error) {
-
         if (error.statusCode === 404 || error.statusCode === 410) {
           logger.info(`🗑️ Removing expired push subscription: ${sub.endpoint}`);
           await prisma.pushSubscription.delete({ where: { id: sub.id } });
@@ -102,8 +99,8 @@ const sendMeetingCompletedPush = async (userId, meeting) => {
     badge: '/badge.png',
     data: {
       meetingId: meeting.id,
-      url: `/meetings/${meeting.id}`
-    }
+      url: `/meetings/${meeting.id}`,
+    },
   };
 
   return sendPushNotificationToUser(userId, payload);
@@ -111,5 +108,5 @@ const sendMeetingCompletedPush = async (userId, meeting) => {
 
 module.exports = {
   sendPushNotificationToUser,
-  sendMeetingCompletedPush
+  sendMeetingCompletedPush,
 };

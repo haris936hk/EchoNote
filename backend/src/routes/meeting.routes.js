@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const meetingController = require('../controllers/meeting.controller');
@@ -229,7 +228,6 @@ router.get(
 );
 
 router.post('/batch-delete', authenticate, sanitizeBody, (req, res) => {
-
   res.status(501).json({
     success: false,
     error: 'Batch delete not yet implemented',

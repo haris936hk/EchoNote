@@ -1,4 +1,3 @@
-
 const winston = require('winston');
 
 const logger = winston.createLogger({
@@ -38,7 +37,6 @@ const notFound = (req, res, next) => {
 };
 
 const handlePrismaError = (error) => {
-
   if (error.code === 'P2002') {
     const field = error.meta?.target?.[0] || 'field';
     return new AppError(`This ${field} already exists`, 409, 'DUPLICATE_ENTRY');
@@ -105,7 +103,6 @@ const handleMulterError = (error) => {
 
 const handleAxiosError = (error) => {
   if (error.response) {
-
     const status = error.response.status;
     const message = error.response.data?.error || error.message;
 
@@ -125,7 +122,6 @@ const handleAxiosError = (error) => {
   }
 
   if (error.request) {
-
     return new AppError('External service is unavailable', 503, 'SERVICE_UNAVAILABLE');
   }
 
@@ -158,7 +154,6 @@ const sendErrorDev = (err, req, res) => {
 };
 
 const sendErrorProd = (err, req, res) => {
-
   if (err.isOperational) {
     logger.error('Operational error:', {
       message: err.message,
@@ -189,8 +184,7 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 
-const errorHandler = (err, req, res, next) => {
-
+const errorHandler = (err, req, res, _next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

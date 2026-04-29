@@ -1,4 +1,3 @@
-
 const path = require('path');
 const fs = require('fs');
 const winston = require('winston');
@@ -48,7 +47,6 @@ const computeWordConfidence = (words) => {
   let weightedSum = 0;
 
   for (const w of words) {
-
     const duration = (w.end || 0) - (w.start || 0);
     const weight = Math.max(duration, 0.01);
     weightedSum += (w.confidence || 0) * weight;
@@ -179,7 +177,6 @@ const transcribeAudio = async (audioPath, options = {}) => {
 
     while (attempt <= maxRetries) {
       try {
-
         const audioStream = fs.createReadStream(audioPath);
         response = await deepgram.listen.v1.media.transcribeFile(audioStream, deepgramOptions);
 
@@ -309,7 +306,7 @@ const formatTranscriptWithParagraphs = (segments) => {
   return formatted.trim();
 };
 
-const extractSpeakers = async (audioPath) => {
+const extractSpeakers = async (_audioPath) => {
   logger.warn('⚠️ Speaker diarization is handled natively by Deepgram');
 
   return {

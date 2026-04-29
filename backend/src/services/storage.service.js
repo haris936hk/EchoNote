@@ -98,7 +98,6 @@ async function storeProcessedAudio(processedPath, meetingId) {
 
 async function getAudioFile(meetingId) {
   try {
-
     const files = await fs.readdir(AUDIO_DIR);
     const audioFile = files.find((file) => file.startsWith(meetingId));
 
@@ -132,7 +131,6 @@ async function getAudioFile(meetingId) {
 
 async function deleteAudioFile(filePath) {
   try {
-
     if (!fsSync.existsSync(filePath)) {
       return {
         success: false,

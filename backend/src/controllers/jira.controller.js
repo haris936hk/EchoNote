@@ -19,7 +19,7 @@ const testConnection = async (req, res) => {
     if (!jiraDomain || !jiraEmail || !jiraApiToken) {
       return res.status(400).json({
         success: false,
-        error: 'Missing Jira credentials'
+        error: 'Missing Jira credentials',
       });
     }
 
@@ -28,20 +28,20 @@ const testConnection = async (req, res) => {
     if (result.success) {
       return res.status(200).json({
         success: true,
-        message: `Successfully connected to Jira as ${result.user}`
+        message: `Successfully connected to Jira as ${result.user}`,
       });
     } else {
       return res.status(401).json({
         success: false,
         error: 'Failed to connect to Jira',
-        details: result.error
+        details: result.error,
       });
     }
   } catch (error) {
     logger.error(`Jira test connection error: ${error.message}`);
     return res.status(500).json({
       success: false,
-      error: 'An internal error occurred during connection test'
+      error: 'An internal error occurred during connection test',
     });
   }
 };
@@ -52,32 +52,32 @@ const syncActionItem = async (req, res) => {
     const userId = req.userId;
 
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user || !user.jiraDomain || !user.jiraApiToken) {
       return res.status(400).json({
         success: false,
-        error: 'Jira is not configured for your account'
+        error: 'Jira is not configured for your account',
       });
     }
 
     const actionItem = await prisma.actionItem.findUnique({
       where: { id: actionItemId },
-      include: { meeting: true }
+      include: { meeting: true },
     });
 
     if (!actionItem) {
       return res.status(404).json({
         success: false,
-        error: 'Action item not found'
+        error: 'Action item not found',
       });
     }
 
     if (actionItem.userId !== userId) {
       return res.status(403).json({
         success: false,
-        error: 'Unauthorized to sync this item'
+        error: 'Unauthorized to sync this item',
       });
     }
 
@@ -85,7 +85,7 @@ const syncActionItem = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'Action item is already synced to Jira',
-        key: actionItem.jiraIssueKey
+        key: actionItem.jiraIssueKey,
       });
     }
 
@@ -94,19 +94,19 @@ const syncActionItem = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Action item synced to Jira successfully',
-      data: result
+      data: result,
     });
   } catch (error) {
     logger.error(`Jira manual sync error: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Failed to sync action item to Jira',
-      details: error.message
+      details: error.message,
     });
   }
 };
 
 module.exports = {
   testConnection,
-  syncActionItem
+  syncActionItem,
 };

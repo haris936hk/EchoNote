@@ -1,4 +1,3 @@
-
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -75,7 +74,6 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-
   if (!UPLOAD_CONFIG.allowedFormats.includes(file.mimetype)) {
     logger.warn(`❌ Invalid file type: ${file.mimetype}`);
     return cb(
@@ -128,7 +126,6 @@ const validateAudioFile = async (req, res, next) => {
     logger.info(`📤 File uploaded: ${file.filename} (${file.size} bytes)`);
 
     if (file.size > UPLOAD_CONFIG.maxFileSize) {
-
       fs.unlinkSync(file.path);
 
       return next(
