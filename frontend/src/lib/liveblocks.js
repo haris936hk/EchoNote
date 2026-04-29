@@ -1,8 +1,18 @@
 import { createClient } from "@liveblocks/client";
 import { createRoomContext } from "@liveblocks/react";
 
+import api from '../services/api';
+
 const client = createClient({
-  authEndpoint: "/api/liveblocks/auth",
+  authEndpoint: async (room) => {
+    try {
+      const response = await api.post('/liveblocks/auth', { room });
+      return response.data;
+    } catch (error) {
+      console.error('Liveblocks auth failed:', error);
+      throw error;
+    }
+  },
 });
 
 export const {

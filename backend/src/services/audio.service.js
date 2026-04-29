@@ -26,7 +26,7 @@ const AUDIO_CONFIG = {
   pythonPath: process.env.PYTHON_PATH || 'python3',
   scriptsDir: path.join(__dirname, '../python_scripts'),
   maxDuration: parseInt(process.env.MAX_AUDIO_DURATION) || 180,
-  targetSampleRate: 48000,
+  targetSampleRate: 16000,
   targetChannels: 1,
   targetFormat: 'wav',
   useFfmpegFallback: process.env.USE_FFMPEG_FALLBACK === 'true',

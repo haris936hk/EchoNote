@@ -149,11 +149,16 @@ const transcribeAudio = async (audioPath, options = {}) => {
       paragraphs: true,
       language: options.language || 'en',
 
+      encoding: 'linear16',
+      sample_rate: 16000,
+      container: 'wav',
+
       detect_entities: true,
       topics: true,
       intents: true,
 
-      filler_words: false,
+      filler_words: true,
+      utterance_end_ms: 1000,
 
       keyterm: [
         'EchoNote',
