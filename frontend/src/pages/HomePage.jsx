@@ -31,6 +31,33 @@ const NAV_LINKS = [
   { path: '#cta', label: 'Benefits' },
 ];
 
+const STORY_STEPS = [
+  {
+    eyebrow: 'Capture',
+    title: 'Record once. Keep every detail.',
+    description:
+      'Start from a live meeting or upload audio. EchoNote keeps context intact so nothing is lost after the call.',
+  },
+  {
+    eyebrow: 'Understand',
+    title: 'AI turns raw dialogue into structure.',
+    description:
+      'Get transcripts, sentiment, key entities, decisions, and next steps generated from one meeting flow.',
+  },
+  {
+    eyebrow: 'Align',
+    title: 'Turn summaries into accountable work.',
+    description:
+      'Action items become trackable tasks with assignees, priorities, and optional Jira sync to keep execution moving.',
+  },
+  {
+    eyebrow: 'Scale',
+    title: 'Collaborate across teams and workspaces.',
+    description:
+      'Share read-only links, send updates to Slack, and collaborate inside role-based workspaces with your team.',
+  },
+];
+
 const HomePage = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -84,6 +111,8 @@ const HomePage = () => {
 
   useGSAP(
     () => {
+      const mm = gsap.matchMedia();
+
       // Hero Section Animation
       const heroTl = gsap.timeline();
       heroTl
@@ -170,9 +199,12 @@ const HomePage = () => {
         scrollTrigger: {
           trigger: howItWorksRef.current,
           pin: true,
-          scrub: 1,
-          snap: 1 / (steps.length - 1),
-          end: () => '+=' + howItWorksRef.current.offsetWidth * 2,
+          scrub: 0.9,
+          start: 'top top+=88',
+          end: () => '+=' + window.innerWidth * (steps.length - 1),
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          refreshPriority: -1,
         },
       });
 
@@ -234,8 +266,63 @@ const HomePage = () => {
           start: 'top 80%',
         },
       });
+
+      // Scroll Storytelling
+      mm.add('(min-width: 1024px)', () => {
+        const stepCount = STORY_STEPS.length;
+        const storyTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.story-pin-wrap',
+            start: 'top top+=96',
+            end: `+=${(stepCount - 1) * 380}`,
+            pin: '.story-pin-wrap',
+            pinSpacing: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            refreshPriority: 2,
+          },
+        });
+
+        gsap.set('.story-step', { autoAlpha: 0.2, y: 30 });
+        gsap.set('.story-step-0', { autoAlpha: 1, y: 0 });
+        gsap.set('.story-visual-card', { yPercent: 16, scale: 0.92, autoAlpha: 0 });
+        gsap.set('.story-visual-card-0', { yPercent: 0, scale: 1, autoAlpha: 1 });
+        gsap.set('.story-progress-bar', { scaleX: 0, transformOrigin: 'left center' });
+        storyTl.addLabel('step-0', 0);
+
+        STORY_STEPS.forEach((_, index) => {
+          if (index > 0) {
+            const at = index;
+            storyTl
+              .addLabel(`step-${index}`, at)
+              .to(
+                '.story-progress-bar',
+                { scaleX: index / (stepCount - 1), duration: 0.35 },
+                at
+              )
+              .to(`.story-step-${index - 1}`, { autoAlpha: 0.2, y: -20, duration: 0.35 }, at)
+              .to(`.story-step-${index}`, { autoAlpha: 1, y: 0, duration: 0.35 }, at)
+              .to(
+                `.story-visual-card-${index - 1}`,
+                { yPercent: -12, scale: 0.9, autoAlpha: 0, duration: 0.35 },
+                at
+              )
+              .to(
+                `.story-visual-card-${index}`,
+                { yPercent: 0, scale: 1, autoAlpha: 1, duration: 0.45 },
+                at
+              );
+          }
+        });
+      });
+
+      return () => mm.revert();
     },
-    { scope: containerRef }
+    {
+      scope: containerRef,
+      revertOnUpdate: true,
+    }
   );
 
   return (
@@ -330,6 +417,62 @@ const HomePage = () => {
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Processing
               </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="story-section relative mx-auto max-w-7xl px-6 py-12 lg:py-20">
+          <div className="story-pin-wrap rounded-3xl border border-[#454653]/20 bg-[#0f172e]/60 p-6 lg:p-10">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <h2 className="text-2xl font-extrabold tracking-tighter text-on-surface md:text-4xl">
+                From meeting chaos to team clarity
+              </h2>
+              <span className="hidden rounded-full border border-accent-primary/30 bg-accent-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent-primary md:inline-flex">
+                Scroll to explore
+              </span>
+            </div>
+
+            <div className="mb-8 h-1.5 w-full overflow-hidden rounded-full bg-[#23293c]">
+              <div className="story-progress-bar h-full w-full rounded-full bg-gradient-to-r from-accent-primary to-accent-secondary" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div className="space-y-5">
+                {STORY_STEPS.map((step, index) => (
+                  <article
+                    key={step.title}
+                    className={`story-step story-step-${index} rounded-2xl border border-[#454653]/10 bg-[#151b2d]/80 p-5 ${index === 0 ? 'opacity-100' : 'opacity-20'}`}
+                  >
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-primary">
+                      {step.eyebrow}
+                    </p>
+                    <h3 className="mb-2 text-xl font-bold text-on-surface">{step.title}</h3>
+                    <p className="text-sm leading-relaxed text-on-surface-variant">{step.description}</p>
+                  </article>
+                ))}
+              </div>
+
+              <div className="relative hidden min-h-[280px] rounded-2xl border border-[#454653]/20 bg-[#0c1324] p-4 lg:block lg:min-h-[430px]">
+                {STORY_STEPS.map((step, index) => (
+                  <div
+                    key={step.title}
+                    className={`story-visual-card story-visual-card-${index} absolute inset-4 rounded-2xl border border-[#454653]/20 bg-gradient-to-br from-[#151b2d] via-[#1a2340] to-[#0f172e] p-6 ${index === 0 ? 'opacity-100' : 'opacity-0'}`}
+                  >
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-secondary">
+                      Phase {index + 1}
+                    </p>
+                    <h4 className="mb-3 text-2xl font-extrabold text-on-surface">{step.eyebrow}</h4>
+                    <p className="max-w-sm text-sm leading-relaxed text-on-surface-variant">
+                      {step.title}
+                    </p>
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                      <div className="h-16 rounded-xl bg-accent-primary/10" />
+                      <div className="h-16 rounded-xl bg-accent-secondary/10" />
+                      <div className="col-span-2 h-20 rounded-xl bg-[#23293c]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

@@ -1,4 +1,5 @@
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Chip } from '@heroui/react';
+import { useState, useRef, useEffect } from 'react';
+import { Chip } from '@heroui/react';
 import PropTypes from 'prop-types';
 import {
   LuClock as Clock,
@@ -14,48 +15,90 @@ import { useNavigate } from 'react-router-dom';
 import { CategoryBadge } from './CategoryFilter';
 import { categoryColors, statusColors } from '../../styles/theme';
 
-const ActionsDropdown = ({ isCompleted, handleView, handleEdit, handleDelete, audioUrl }) => (
-  <Dropdown placement="bottom-end">
-    <DropdownTrigger>
+const ActionsDropdown = ({ isCompleted, handleView, handleEdit, handleDelete, audioUrl }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
       <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         className="flex size-7 items-center justify-center rounded-md text-slate-500 opacity-0 transition-all hover:bg-echo-surface-hover hover:text-white group-hover:opacity-100"
         aria-label="Meeting actions"
       >
         <MoreVertical size={14} />
       </button>
-    </DropdownTrigger>
-    <DropdownMenu
-      aria-label="Meeting actions"
-      className="border border-echo-border bg-echo-elevated"
-    >
-      {isCompleted && (
-        <DropdownItem key="view" startContent={<Eye size={14} />} onPress={handleView}>
-          View Details
-        </DropdownItem>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-[16px] border border-white/10 bg-[#020617]/80 p-1.5 shadow-[0_0_30px_rgba(129,140,248,0.1)] backdrop-blur-xl">
+          <div className="flex flex-col">
+            {isCompleted && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                  handleView();
+                }}
+                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white"
+              >
+                <Eye size={14} />
+                View Details
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+                handleEdit();
+              }}
+              className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white"
+            >
+              <Edit3 size={14} />
+              Edit
+            </button>
+            {isCompleted && audioUrl && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                  window.open(audioUrl, '_blank');
+                }}
+                className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white"
+              >
+                <Download size={14} />
+                Download Audio
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+                handleDelete();
+              }}
+              className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-red-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+            >
+              <Trash2 size={14} />
+              Delete
+            </button>
+          </div>
+        </div>
       )}
-      <DropdownItem key="edit" startContent={<Edit3 size={14} />} onPress={handleEdit}>
-        Edit
-      </DropdownItem>
-      {isCompleted && audioUrl && (
-        <DropdownItem
-          key="download"
-          startContent={<Download size={14} />}
-          onPress={() => window.open(audioUrl, '_blank')}
-        >
-          Download Audio
-        </DropdownItem>
-      )}
-      <DropdownItem
-        key="delete"
-        className="text-red-400"
-        startContent={<Trash2 size={14} />}
-        onPress={handleDelete}
-      >
-        Delete
-      </DropdownItem>
-    </DropdownMenu>
-  </Dropdown>
-);
+    </div>
+  );
+};
 
 ActionsDropdown.propTypes = {
   isCompleted: PropTypes.bool.isRequired,
