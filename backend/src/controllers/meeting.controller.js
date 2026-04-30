@@ -987,7 +987,8 @@ const exportAllMeetings = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const allMeetings = await meetingService.getMeetings(userId, {
+    const allMeetings = await meetingService.getMeetings({
+      userId,
       page: 1,
       limit: 1000,
       status: 'COMPLETED',

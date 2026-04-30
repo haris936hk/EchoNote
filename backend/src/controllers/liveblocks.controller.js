@@ -89,7 +89,7 @@ const auth = async (req, res) => {
     if (canEdit) {
       session.allow(room, session.FULL_ACCESS);
     } else {
-      session.allow(room, session.READ_ONLY);
+      session.allow(room, session.READ_ACCESS);
     }
 
     const { status, body } = await session.authorize();

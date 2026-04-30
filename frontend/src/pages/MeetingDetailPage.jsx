@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
 import {
   LuArrowLeft as ArrowLeft,
   LuDownload as Download,
@@ -64,6 +64,18 @@ const MeetingDetailPage = () => {
   const [isSendingToSlack, setIsSendingToSlack] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -463,54 +475,56 @@ const MeetingDetailPage = () => {
               Download Audio
             </button>
           )}
-          <Dropdown>
-            <DropdownTrigger>
-              <button
-                className="flex size-9 items-center justify-center rounded-btn border border-echo-border text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
-                type="button"
-                aria-label="More actions"
-              >
-                <MoreVertical size={16} />
-              </button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Meeting actions"
-              className="min-w-[200px]"
-              itemClasses={{
-                base: 'rounded-full px-4 py-2.5 transition-all duration-200 text-slate-300 hover:bg-white/5 hover:text-white',
-                selected: 'bg-accent-primary/20 text-accent-primary font-bold',
-              }}
-              classNames={{
-                base: 'bg-[#020617]/80 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(129,140,248,0.15)] rounded-[24px] p-2',
-              }}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex size-9 items-center justify-center rounded-btn border border-echo-border text-slate-400 transition-all hover:bg-echo-surface-hover hover:text-white"
+              type="button"
+              aria-label="More actions"
             >
-              <DropdownItem
-                key="edit"
-                startContent={<Edit3 size={14} />}
-                onPress={handleEdit}
-                isDisabled={!!currentMeeting.workspaceMeeting}
-              >
-                Edit Meeting {currentMeeting.workspaceMeeting ? '(Managed by Workspace)' : ''}
-              </DropdownItem>
-              <DropdownItem
-                key="download-all"
-                startContent={<Download size={14} />}
-                onPress={handleDownloadAll}
-                isDisabled={!isCompleted || downloadingAll}
-              >
-                {downloadingAll ? 'Downloading...' : 'Download All (ZIP)'}
-              </DropdownItem>
-              <DropdownItem
-                key="delete"
-                startContent={<Trash2 size={14} />}
-                className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
-                onPress={handleDelete}
-                isDisabled={deleting}
-              >
-                {deleting ? 'Deleting...' : 'Delete Meeting'}
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              <MoreVertical size={16} />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute right-0 top-full z-50 mt-2 min-w-[200px] rounded-[24px] border border-white/10 bg-[#020617]/80 p-2 shadow-[0_0_50px_rgba(129,140,248,0.15)] backdrop-blur-3xl">
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      if (!currentMeeting.workspaceMeeting) handleEdit();
+                    }}
+                    disabled={!!currentMeeting.workspaceMeeting}
+                    className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <Edit3 size={14} />
+                    Edit Meeting {currentMeeting.workspaceMeeting ? '(Managed by Workspace)' : ''}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      if (isCompleted && !downloadingAll) handleDownloadAll();
+                    }}
+                    disabled={!isCompleted || downloadingAll}
+                    className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <Download size={14} />
+                    {downloadingAll ? 'Downloading...' : 'Download All (ZIP)'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      if (!deleting) handleDelete();
+                    }}
+                    disabled={deleting}
+                    className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm text-red-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <Trash2 size={14} />
+                    {deleting ? 'Deleting...' : 'Delete Meeting'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -615,10 +629,15 @@ const MeetingDetailPage = () => {
               {}
               <div className="rounded-card border border-echo-border bg-echo-surface p-6">
                 <TranscriptViewer
-                  transcript={currentMeeting.transcript}
+                  transcript={currentMeeting.transcriptText || currentMeeting.transcript}
                   transcriptSegments={currentMeeting.transcriptSegments}
                   speakerMap={currentMeeting.speakerMap}
-                  nlpData={currentMeeting.nlpAnalysis}
+                  nlpData={{
+                    entities: currentMeeting.nlpEntities ? currentMeeting.nlpEntities.split(',').map(e => {
+                      const [text, label] = e.trim().split(' (');
+                      return { text, label: label?.replace(')', '') };
+                    }) : []
+                  }}
                   onRenameSpeaker={handleRenameSpeaker}
                   onSeek={handleSeek}
                 />
