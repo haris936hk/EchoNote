@@ -156,6 +156,7 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
       canEdit={canEdit}
       others={others}
       onUpdateTasks={handleUpdateTasks}
+      isLiveEditor={true}
     />
   );
 };

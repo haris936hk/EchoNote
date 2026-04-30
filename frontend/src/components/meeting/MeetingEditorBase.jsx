@@ -15,7 +15,8 @@ const MeetingEditorBase = ({
   canEdit,
   others = [],
   onEditTask,
-  onUpdateTasks
+  onUpdateTasks,
+  isLiveEditor = false
 }) => {
   const [editingTask, setEditingTask] = useState(null);
 
@@ -30,38 +31,40 @@ const MeetingEditorBase = ({
   return (
     <div className="space-y-8">
       {}
-      <div className="flex items-center justify-between rounded-[20px] bg-[#0c1324] px-6 py-4 ring-1 ring-white/[0.06] shadow-xl">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-             <div className="flex size-8 items-center justify-center rounded-[10px] bg-accent-primary/10 text-accent-primary ring-1 ring-accent-primary/20">
-                <LuUsers size={16} />
-             </div>
-             <div className="flex -space-x-2 overflow-hidden">
-                {others.map(({ connectionId, presence: otherPresence, info }) => (
-                  <div
-                    key={connectionId}
-                    className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0c1324] bg-accent-primary/10 ring-1 ring-accent-primary/20 transition-transform hover:z-10 hover:scale-110"
-                  >
-                    {info?.avatar ? (
-                      <img src={info.avatar} alt={info.name} className="h-full w-full rounded-full object-cover" />
-                    ) : (
-                      <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-bold text-accent-primary">
-                        {info?.name?.charAt(0) || '?'}
-                      </span>
-                    )}
-                    <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-max -translate-x-1/2 rounded-md bg-[#1e253c] px-2 py-1 font-['Plus_Jakarta_Sans'] text-[10px] font-bold text-white opacity-0 shadow-lg ring-1 ring-white/[0.1] transition-opacity group-hover:opacity-100">
-                      {info?.name} {otherPresence?.focusedField ? `• Editing ${otherPresence.focusedField}` : '• Viewing'}
+      <div className={`flex items-center ${isLiveEditor ? 'justify-between' : 'justify-end'} rounded-[20px] bg-[#0c1324] px-6 py-4 ring-1 ring-white/[0.06] shadow-xl`}>
+        {isLiveEditor && (
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+               <div className="flex size-8 items-center justify-center rounded-[10px] bg-accent-primary/10 text-accent-primary ring-1 ring-accent-primary/20">
+                  <LuUsers size={16} />
+               </div>
+               <div className="flex -space-x-2 overflow-hidden">
+                  {others.map(({ connectionId, presence: otherPresence, info }) => (
+                    <div
+                      key={connectionId}
+                      className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0c1324] bg-accent-primary/10 ring-1 ring-accent-primary/20 transition-transform hover:z-10 hover:scale-110"
+                    >
+                      {info?.avatar ? (
+                        <img src={info.avatar} alt={info.name} className="h-full w-full rounded-full object-cover" />
+                      ) : (
+                        <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-bold text-accent-primary">
+                          {info?.name?.charAt(0) || '?'}
+                        </span>
+                      )}
+                      <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-max -translate-x-1/2 rounded-md bg-[#1e253c] px-2 py-1 font-['Plus_Jakarta_Sans'] text-[10px] font-bold text-white opacity-0 shadow-lg ring-1 ring-white/[0.1] transition-opacity group-hover:opacity-100">
+                        {info?.name} {otherPresence?.focusedField ? `• Editing ${otherPresence.focusedField}` : '• Viewing'}
+                      </div>
                     </div>
-                  </div>
-                ))}
-             </div>
-          </div>
-          {others.length > 0 && (
-            <div className="font-['JetBrains_Mono'] text-[11px] font-bold tracking-tight text-slate-500">
-              <span className="text-accent-primary">{others.length}</span> OTHER SYNCED MINDS
+                  ))}
+               </div>
             </div>
-          )}
-        </div>
+            {others.length > 0 && (
+              <div className="font-['JetBrains_Mono'] text-[11px] font-bold tracking-tight text-slate-500">
+                <span className="text-accent-primary">{others.length}</span> OTHER SYNCED MINDS
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
