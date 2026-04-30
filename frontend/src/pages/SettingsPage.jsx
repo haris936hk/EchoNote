@@ -248,13 +248,7 @@ const PreferencesContent = () => {
         <h2 className="text-lg font-semibold text-white">App Preferences</h2>
 
         {}
-        <div className="flex items-center justify-between border-b border-echo-border py-3">
-          <div>
-            <p className="text-sm font-medium text-white">Dark Mode</p>
-            <p className="text-xs text-slate-500">Always enabled for optimal viewing</p>
-          </div>
-          <Toggle enabled={true} onToggle={() => {}} />
-        </div>
+
 
         {}
         <div className="flex items-center justify-between border-b border-echo-border py-3">
