@@ -13,6 +13,7 @@
     "format": "prettier --write \"src/**/*.{js,jsx,css,html}\""
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@heroui/react": "2.6.11",
     "@heroui/theme": "2.4.15",
     "@liveblocks/client": "^3.18.0",
@@ -21,6 +22,7 @@
     "axios": "^1.6.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.11.0",
+    "gsap": "^3.15.0",
     "lodash.debounce": "^4.0.8",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
