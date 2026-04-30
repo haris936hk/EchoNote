@@ -537,48 +537,50 @@ const MeetingDetailPage = () => {
           </div>
 
           {/* Pipeline Steps */}
-          <div className="mb-4 flex w-full items-start justify-between">
+          <div className="mb-8 flex w-full items-start px-2">
             {PIPELINE_STEPS.map((step, index) => {
               const currentIdx = getCurrentStepIndex();
               const isComplete = index < currentIdx;
               const isActive = index === currentIdx;
 
               return (
-                <div key={step.key} className={`relative flex flex-col items-center ${index < PIPELINE_STEPS.length - 1 ? 'flex-1' : 'w-16'}`}>
-                  {/* Line under the circle */}
-                  {index < PIPELINE_STEPS.length - 1 && (
+                <div key={step.key} className={`flex items-start ${index < PIPELINE_STEPS.length - 1 ? 'flex-1' : ''}`}>
+                  {/* Step Node */}
+                  <div className="flex flex-col items-center w-24 shrink-0">
                     <div
-                      className={`absolute top-4 h-px left-[calc(50%+20px)] w-[calc(100%-40px)] ${
-                        isComplete ? 'bg-emerald-500/30' : 'bg-echo-border'
+                      className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-500 ${
+                        isComplete
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : isActive
+                            ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/50 shadow-[0_0_20px_rgba(129,140,248,0.4)] animate-ai-glow'
+                            : 'bg-slate-800/50 text-slate-500 border border-white/5'
                       }`}
-                    />
-                  )}
-                  
-                  {/* Circle */}
-                  <div
-                    className={`relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                      isComplete
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : isActive
-                          ? 'animate-ai-glow bg-accent-primary/20 text-accent-primary'
-                          : 'bg-echo-surface-hover text-slate-600'
-                    }`}
-                  >
-                    {isComplete ? <CheckCircle size={14} /> : index + 1}
+                    >
+                      {isComplete ? <CheckCircle size={14} /> : index + 1}
+                    </div>
+                    <span
+                      className={`mt-3 text-center text-[10px] font-semibold leading-tight transition-colors duration-300 ${
+                        isComplete
+                          ? 'text-emerald-400/90'
+                          : isActive
+                            ? 'text-accent-primary'
+                            : 'text-slate-500'
+                      }`}
+                    >
+                      {step.label}
+                    </span>
                   </div>
-                  
-                  {/* Label */}
-                  <span
-                    className={`mt-2 text-center text-[10px] font-medium leading-tight px-1 ${
-                      isComplete
-                        ? 'text-emerald-400'
-                        : isActive
-                          ? 'text-accent-primary'
-                          : 'text-slate-600'
-                    }`}
-                  >
-                    {step.label}
-                  </span>
+
+                  {/* Connector Line */}
+                  {index < PIPELINE_STEPS.length - 1 && (
+                    <div className="flex-1 mt-4">
+                      <div 
+                        className={`h-[2px] w-full transition-all duration-1000 ${
+                          isComplete ? 'bg-gradient-to-r from-emerald-500/40 to-emerald-500/40' : 'bg-white/5'
+                        }`} 
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
