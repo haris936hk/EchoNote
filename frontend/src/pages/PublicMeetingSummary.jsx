@@ -134,7 +134,9 @@ const PublicMeetingSummary = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#020617] p-6">
         <div className="size-8 animate-spin rounded-full border-2 border-[#818cf8] border-t-transparent" />
-        <p className="mt-4 text-[13px] font-medium text-[#64748b] tracking-wider uppercase">Loading Workspace...</p>
+        <p className="mt-4 text-[13px] font-medium text-[#64748b] tracking-wider uppercase">
+          Loading Workspace...
+        </p>
       </div>
     );
   }
@@ -146,8 +148,12 @@ const PublicMeetingSummary = () => {
           <div className="h-16 w-16 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mb-2">
             <FileText size={32} />
           </div>
-          <h2 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold tracking-tight text-white">Meeting Unavailable</h2>
-          <p className="text-[#94a3b8] text-[14px] leading-[1.8]">{error || 'This link is invalid or has been revoked.'}</p>
+          <h2 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold tracking-tight text-white">
+            Meeting Unavailable
+          </h2>
+          <p className="text-[#94a3b8] text-[14px] leading-[1.8]">
+            {error || 'This link is invalid or has been revoked.'}
+          </p>
         </div>
       </div>
     );
@@ -157,7 +163,9 @@ const PublicMeetingSummary = () => {
     typeof meeting.summary === 'object' && meeting.summary !== null
       ? {
           executive: meeting.summary.executiveSummary || '',
-          decisions: Array.isArray(meeting.summary.keyDecisions) ? meeting.summary.keyDecisions : [],
+          decisions: Array.isArray(meeting.summary.keyDecisions)
+            ? meeting.summary.keyDecisions
+            : [],
           actions: Array.isArray(meeting.summary.actionItems) ? meeting.summary.actionItems : [],
           nextSteps: Array.isArray(meeting.summary.nextSteps) ? meeting.summary.nextSteps : [],
           keyTopics: Array.isArray(meeting.summary.keyTopics) ? meeting.summary.keyTopics : [],
@@ -172,12 +180,13 @@ const PublicMeetingSummary = () => {
           sentiment: 'neutral',
         };
 
-  const sentimentObj = fallbackSentimentColors[summaryData.sentiment?.toLowerCase()] || fallbackSentimentColors.neutral;
+  const sentimentObj =
+    fallbackSentimentColors[summaryData.sentiment?.toLowerCase()] ||
+    fallbackSentimentColors.neutral;
 
   return (
     <div className="min-h-screen bg-[#020617] py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-[1100px] mx-auto space-y-6">
-
         {}
         <header className="flex items-center mb-8 opacity-60">
           <div className="flex items-center gap-2.5 select-none">
@@ -225,7 +234,6 @@ const PublicMeetingSummary = () => {
 
         {}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
           <div className="space-y-6">
             {}
             {summaryData.executive && (
@@ -233,14 +241,23 @@ const PublicMeetingSummary = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <Sparkles size={16} className="text-[#818cf8]" />
-                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">Executive Summary</h4>
+                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">
+                      Executive Summary
+                    </h4>
                     <span className="ai-dot"></span>
                   </div>
-                  <CopyBtn section="executive" content={summaryData.executive} copiedSection={copiedSection} onCopy={copySection} />
+                  <CopyBtn
+                    section="executive"
+                    content={summaryData.executive}
+                    copiedSection={copiedSection}
+                    onCopy={copySection}
+                  />
                 </div>
                 <div className="prose prose-invert prose-p:leading-[1.8] max-w-none">
                   {summaryData.executive.split('\n').map((paragraph, index) => (
-                      <p key={index} className="mb-4 last:mb-0 text-[14px] text-[#94a3b8] font-sans">{paragraph}</p>
+                    <p key={index} className="mb-4 last:mb-0 text-[14px] text-[#94a3b8] font-sans">
+                      {paragraph}
+                    </p>
                   ))}
                 </div>
               </div>
@@ -252,9 +269,16 @@ const PublicMeetingSummary = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <CheckCircle size={16} className="text-[#22c55e]" />
-                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">Key Decisions</h4>
+                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">
+                      Key Decisions
+                    </h4>
                   </div>
-                  <CopyBtn section="decisions" content={summaryData.decisions} copiedSection={copiedSection} onCopy={copySection} />
+                  <CopyBtn
+                    section="decisions"
+                    content={summaryData.decisions}
+                    copiedSection={copiedSection}
+                    onCopy={copySection}
+                  />
                 </div>
                 <div className="space-y-3">
                   {summaryData.decisions.map((decision, i) => (
@@ -273,9 +297,16 @@ const PublicMeetingSummary = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <ArrowRight size={16} className="text-[#22c55e]" />
-                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">Next Steps</h4>
+                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">
+                      Next Steps
+                    </h4>
                   </div>
-                  <CopyBtn section="nextSteps" content={summaryData.nextSteps} copiedSection={copiedSection} onCopy={copySection} />
+                  <CopyBtn
+                    section="nextSteps"
+                    content={summaryData.nextSteps}
+                    copiedSection={copiedSection}
+                    onCopy={copySection}
+                  />
                 </div>
                 <div className="space-y-3">
                   {summaryData.nextSteps.map((step, i) => (
@@ -296,19 +327,29 @@ const PublicMeetingSummary = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <ListChecks size={16} className="text-[#fbbf24]" />
-                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">Action Items</h4>
+                    <h4 className="font-['Plus_Jakarta_Sans'] text-[15px] font-semibold text-white">
+                      Action Items
+                    </h4>
                     <span className="font-mono text-[11px] font-bold text-[#64748b]">
                       {summaryData.actions.length}
                     </span>
                   </div>
-                  <CopyBtn section="actions" content={summaryData.actions} copiedSection={copiedSection} onCopy={copySection} />
+                  <CopyBtn
+                    section="actions"
+                    content={summaryData.actions}
+                    copiedSection={copiedSection}
+                    onCopy={copySection}
+                  />
                 </div>
                 <div className="space-y-3 relative">
                   {}
                   <div className="absolute left-[11px] top-4 bottom-4 w-px bg-white/[0.02]"></div>
 
                   {summaryData.actions.map((action, i) => (
-                    <div key={`action-${i}`} className="relative space-y-2.5 rounded-[12px] border border-[rgba(255,255,255,0.03)] bg-[#020617] p-4 z-10 transition-colors hover:border-white/[0.08]">
+                    <div
+                      key={`action-${i}`}
+                      className="relative space-y-2.5 rounded-[12px] border border-[rgba(255,255,255,0.03)] bg-[#020617] p-4 z-10 transition-colors hover:border-white/[0.08]"
+                    >
                       <div className="flex items-start gap-3">
                         <div className="mt-1 flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-[#334155] bg-transparent"></div>
                         <p className="text-[14px] font-medium leading-[1.6] text-white">
@@ -328,7 +369,9 @@ const PublicMeetingSummary = () => {
                             </span>
                           )}
                           {action.priority && (
-                            <span className={`rounded-[6px] px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${getPriorityClasses(action.priority)}`}>
+                            <span
+                              className={`rounded-[6px] px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${getPriorityClasses(action.priority)}`}
+                            >
                               {action.priority}
                             </span>
                           )}
@@ -346,7 +389,9 @@ const PublicMeetingSummary = () => {
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <Tag size={15} className="text-[#a78bfa]" />
-                    <h4 className="font-['Plus_Jakarta_Sans'] text-[14px] font-semibold text-white">Key Topics</h4>
+                    <h4 className="font-['Plus_Jakarta_Sans'] text-[14px] font-semibold text-white">
+                      Key Topics
+                    </h4>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -365,23 +410,29 @@ const PublicMeetingSummary = () => {
             {}
             <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-5">
               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <span className={`size-3 rounded-full shadow-[0_0_12px_rgba(255,255,255,0.1)] ${sentimentObj.dot}`}></span>
-                   <span className="font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-white tracking-wide">{sentimentObj.label}</span>
-                 </div>
-                 <span className="font-mono text-[11px] font-bold text-[#64748b] tracking-widest uppercase">
-                   Sentiment
-                 </span>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`size-3 rounded-full shadow-[0_0_12px_rgba(255,255,255,0.1)] ${sentimentObj.dot}`}
+                  ></span>
+                  <span className="font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-white tracking-wide">
+                    {sentimentObj.label}
+                  </span>
+                </div>
+                <span className="font-mono text-[11px] font-bold text-[#64748b] tracking-widest uppercase">
+                  Sentiment
+                </span>
               </div>
             </div>
 
             {}
-            {(meeting.speakers && meeting.speakers.length > 0) && (
+            {meeting.speakers && meeting.speakers.length > 0 && (
               <div className="rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[#0c1324] p-5">
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <User size={15} className="text-[#64748b]" />
-                    <h4 className="font-['Plus_Jakarta_Sans'] text-[14px] font-semibold text-white">Participants</h4>
+                    <h4 className="font-['Plus_Jakarta_Sans'] text-[14px] font-semibold text-white">
+                      Participants
+                    </h4>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -397,9 +448,7 @@ const PublicMeetingSummary = () => {
               </div>
             )}
           </div>
-
         </div>
-
       </div>
     </div>
   );

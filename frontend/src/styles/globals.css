@@ -1,10 +1,8 @@
-
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 :root {
-
   --echo-base: #020617;
   --echo-surface: #0f172a;
   --echo-surface-hover: #1e293b;
@@ -70,7 +68,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
-
   }
 
   body {
@@ -124,7 +121,6 @@
 }
 
 @layer components {
-
   .container {
     @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
   }

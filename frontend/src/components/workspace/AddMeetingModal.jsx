@@ -56,7 +56,7 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
   };
 
   const handleToggleMeeting = (id) => {
-    setSelectedMeeting(prev => prev === id ? null : id);
+    setSelectedMeeting((prev) => (prev === id ? null : id));
   };
 
   const modalContent = (
@@ -91,7 +91,9 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
                     <h2 className="font-['Plus_Jakarta_Sans'] text-xl font-bold tracking-tight text-white">
                       Add Meeting
                     </h2>
-                    <p className="text-sm font-medium text-slate-500">Share archives with the workspace</p>
+                    <p className="text-sm font-medium text-slate-500">
+                      Share archives with the workspace
+                    </p>
                   </div>
                 </div>
                 <button
@@ -112,8 +114,11 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
 
                 {fetching ? (
                   <div className="space-y-3">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="h-20 w-full animate-pulse rounded-[16px] bg-[#151b2d] ring-1 ring-white/[0.06]" />
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="h-20 w-full animate-pulse rounded-[16px] bg-[#151b2d] ring-1 ring-white/[0.06]"
+                      />
                     ))}
                   </div>
                 ) : meetings.length > 0 ? (
@@ -129,10 +134,19 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
                         }`}
                       >
                         <div className="flex items-center gap-4 truncate">
-                          <div className={`flex h-10 w-10 flex-none items-center justify-center rounded-[10px] ring-1 ${
-                             selectedMeeting === m.id ? 'bg-accent-primary/20 ring-accent-primary/40' : 'bg-[#0c1324] ring-white/[0.1]'
-                          }`}>
-                            <LuCalendar className={selectedMeeting === m.id ? 'text-accent-primary' : 'text-slate-500'} size={20} />
+                          <div
+                            className={`flex h-10 w-10 flex-none items-center justify-center rounded-[10px] ring-1 ${
+                              selectedMeeting === m.id
+                                ? 'bg-accent-primary/20 ring-accent-primary/40'
+                                : 'bg-[#0c1324] ring-white/[0.1]'
+                            }`}
+                          >
+                            <LuCalendar
+                              className={
+                                selectedMeeting === m.id ? 'text-accent-primary' : 'text-slate-500'
+                              }
+                              size={20}
+                            />
                           </div>
                           <div className="flex flex-col items-start truncate text-left">
                             <span className="truncate font-['Plus_Jakarta_Sans'] text-[14px] font-bold text-white group-hover:text-accent-primary transition-colors">
@@ -150,18 +164,25 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
                         </div>
                         <div className="flex flex-none items-center gap-4">
                           <div className="flex flex-col items-end gap-1">
-                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                                DONE
-                             </div>
-                             <span className="font-['JetBrains_Mono'] text-[10px] text-slate-600">
-                               {Math.floor(m.audioDuration / 60)}:{(m.audioDuration % 60).toString().padStart(2, '0')}
-                             </span>
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+                              DONE
+                            </div>
+                            <span className="font-['JetBrains_Mono'] text-[10px] text-slate-600">
+                              {Math.floor(m.audioDuration / 60)}:
+                              {(m.audioDuration % 60).toString().padStart(2, '0')}
+                            </span>
                           </div>
-                          <div className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ring-1 ${
-                            selectedMeeting === m.id ? 'bg-accent-primary ring-accent-primary' : 'bg-transparent ring-white/[0.1]'
-                          }`}>
-                            {selectedMeeting === m.id && <LuCheckCircle size={14} className="text-[#020617]" />}
+                          <div
+                            className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ring-1 ${
+                              selectedMeeting === m.id
+                                ? 'bg-accent-primary ring-accent-primary'
+                                : 'bg-transparent ring-white/[0.1]'
+                            }`}
+                          >
+                            {selectedMeeting === m.id && (
+                              <LuCheckCircle size={14} className="text-[#020617]" />
+                            )}
                           </div>
                         </div>
                       </button>
@@ -191,11 +212,11 @@ const AddMeetingModal = ({ isOpen, onClose, workspaceId, onAdded }) => {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                   {selectedMeeting && (
-                     <>
-                        <span className="text-accent-primary">1</span> meeting selected
-                     </>
-                   )}
+                  {selectedMeeting && (
+                    <>
+                      <span className="text-accent-primary">1</span> meeting selected
+                    </>
+                  )}
                 </div>
                 <div className="flex items-center gap-4">
                   <button

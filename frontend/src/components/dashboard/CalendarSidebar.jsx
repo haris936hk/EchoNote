@@ -26,7 +26,6 @@ const CalendarSidebar = () => {
       }
     } catch (err) {
       if (err.name === 'CanceledError') {
-
         return;
       }
       if (err.response?.status === 403 || err.response?.status === 401) {

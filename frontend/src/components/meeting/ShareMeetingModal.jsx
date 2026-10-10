@@ -133,7 +133,8 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
             {}
             <div className="relative z-0 px-8 pb-8 pt-2">
               <p className="font-['Plus_Jakarta_Sans'] text-[14px] leading-relaxed text-[#94a3b8] mb-8">
-                Create a public URL that anyone can use to view this meeting&#39;s summary. No sign-up required. Access to the transcript and audio will remain restricted.
+                Create a public URL that anyone can use to view this meeting&#39;s summary. No
+                sign-up required. Access to the transcript and audio will remain restricted.
               </p>
 
               {localShareToken ? (
@@ -142,34 +143,38 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3.5"
                 >
-                   <div className="flex items-center justify-between mb-1">
-                     <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
-                       Your Share Link
-                     </label>
-                   </div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-['Plus_Jakarta_Sans'] text-[11px] font-bold uppercase tracking-widest text-[#64748b]">
+                      Your Share Link
+                    </label>
+                  </div>
 
-                   <div className="flex items-center gap-3">
-                     <div className="relative flex-1">
-                       <input
-                         readOnly
-                         value={shareHref}
-                         className="h-12 w-full rounded-[10px] bg-[#151b2d] px-4 pr-12 font-['JetBrains_Mono'] text-[13px] text-[#f8fafc] ring-1 ring-white/[0.06] transition-all hover:ring-white/[0.12] focus:outline-none"
-                       />
-                       <button
-                         onClick={copyToClipboard}
-                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-white/[0.05] p-2 text-[#94a3b8] transition-all hover:bg-white/[0.1] hover:text-[#f8fafc]"
-                       >
-                         {copiedLink ? <LuCheck size={14} className="text-[#22C55E]" /> : <LuCopy size={14} />}
-                       </button>
-                     </div>
-                   </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-1">
+                      <input
+                        readOnly
+                        value={shareHref}
+                        className="h-12 w-full rounded-[10px] bg-[#151b2d] px-4 pr-12 font-['JetBrains_Mono'] text-[13px] text-[#f8fafc] ring-1 ring-white/[0.06] transition-all hover:ring-white/[0.12] focus:outline-none"
+                      />
+                      <button
+                        onClick={copyToClipboard}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-white/[0.05] p-2 text-[#94a3b8] transition-all hover:bg-white/[0.1] hover:text-[#f8fafc]"
+                      >
+                        {copiedLink ? (
+                          <LuCheck size={14} className="text-[#22C55E]" />
+                        ) : (
+                          <LuCopy size={14} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </motion.div>
               ) : (
                 <button
                   disabled={isGenerating}
                   onClick={handleGenerate}
                   className="group relative flex h-12 w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-br from-[#bdc2ff] to-[#818cf8] px-6 font-['Plus_Jakarta_Sans'] text-[14px] font-extrabold text-echo-base shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_24px_-8px_rgba(129,140,248,0.5)] transition-all hover:-translate-y-0.5 hover:shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_12px_32px_-8px_rgba(129,140,248,0.6)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
-                  >
+                >
                   {isGenerating ? (
                     <div className="size-4 animate-spin rounded-full border-2 border-echo-base border-t-transparent" />
                   ) : (
@@ -181,7 +186,7 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
             </div>
 
             {}
-            {(localShareToken) && (
+            {localShareToken && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -195,11 +200,13 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
                   className="group flex items-center gap-2.5 rounded-[10px] bg-red-500/10 px-4 py-2.5 text-red-400 ring-1 ring-red-500/20 transition-all hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isRevoking ? (
-                     <div className="size-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                    <div className="size-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
                   ) : (
-                     <LuTrash2 size={16} />
+                    <LuTrash2 size={16} />
                   )}
-                  <span className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold">Revoke Link</span>
+                  <span className="font-['Plus_Jakarta_Sans'] text-[13px] font-bold">
+                    Revoke Link
+                  </span>
                 </button>
 
                 <button
@@ -210,7 +217,6 @@ const ShareMeetingModal = ({ isOpen, onClose, meeting, onShareUpdate }) => {
                 </button>
               </motion.div>
             )}
-
           </motion.div>
         </div>
       )}

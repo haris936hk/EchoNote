@@ -49,7 +49,6 @@ api.request = (config) => {
 
 api.interceptors.request.use(
   (config) => {
-
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -87,6 +86,10 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
+          if (originalRequest.url?.includes('/calendar')) {
+            return Promise.reject(error);
+          }
+
           if (originalRequest.url?.includes('/auth/refresh')) {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
@@ -180,7 +183,6 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-
   googleLogin: async (credential) => {
     try {
       const response = await api.post('/auth/google', { credential });
@@ -216,7 +218,6 @@ export const authAPI = {
 };
 
 export const calendarAPI = {
-
   getEvents: async (days = 30) => {
     try {
       const response = await api.get('/calendar/events', {
@@ -234,7 +235,6 @@ export const calendarAPI = {
 };
 
 export const meetingsAPI = {
-
   getAllMeetings: async () => {
     try {
       const response = await api.get('/meetings');
@@ -377,7 +377,6 @@ export const meetingsAPI = {
 };
 
 export const userAPI = {
-
   getProfile: async () => {
     try {
       const response = await api.get('/user/profile');
@@ -432,7 +431,6 @@ export const userAPI = {
 };
 
 export const tasksAPI = {
-
   getTasks: async () => {
     try {
       const response = await api.get('/tasks');

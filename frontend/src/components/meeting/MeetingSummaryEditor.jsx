@@ -11,13 +11,21 @@ const MeetingSummaryEditor = ({ meetingId, initialData, canEdit }) => {
     executiveSummary: s.executiveSummary || initialData.summaryExecutive || '',
     keyDecisions: Array.isArray(s.keyDecisions)
       ? s.keyDecisions
-      : (initialData.summaryKeyDecisions ? (typeof initialData.summaryKeyDecisions === 'string' ? JSON.parse(initialData.summaryKeyDecisions) : initialData.summaryKeyDecisions) : []),
+      : initialData.summaryKeyDecisions
+        ? typeof initialData.summaryKeyDecisions === 'string'
+          ? JSON.parse(initialData.summaryKeyDecisions)
+          : initialData.summaryKeyDecisions
+        : [],
     actionItems: Array.isArray(s.actionItems)
       ? s.actionItems
-      : (initialData.summaryActionItems || []),
+      : initialData.summaryActionItems || [],
     nextSteps: Array.isArray(s.nextSteps)
       ? s.nextSteps
-      : (initialData.summaryNextSteps ? (typeof initialData.summaryNextSteps === 'string' ? JSON.parse(initialData.summaryNextSteps) : initialData.summaryNextSteps) : []),
+      : initialData.summaryNextSteps
+        ? typeof initialData.summaryNextSteps === 'string'
+          ? JSON.parse(initialData.summaryNextSteps)
+          : initialData.summaryNextSteps
+        : [],
   });
 
   const [saving, setSaving] = useState(false);
@@ -103,7 +111,7 @@ const MeetingSummaryEditor = ({ meetingId, initialData, canEdit }) => {
             assignee: updatedTask.assignee,
             deadline: updatedTask.deadline,
             priority: updatedTask.priority,
-            status: updatedTask.status
+            status: updatedTask.status,
           });
           showToast('Action item updated', 'success');
         } catch (err) {

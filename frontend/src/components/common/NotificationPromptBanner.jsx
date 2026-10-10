@@ -61,7 +61,8 @@ const NotificationPromptBanner = () => {
         <div
           className="pointer-events-auto relative flex items-center gap-5 p-5 rounded-[20px] bg-[#0c1324]/80 backdrop-blur-xl ring-1 ring-white/[0.06] overflow-hidden"
           style={{
-            boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 80px -20px rgba(129, 140, 248, 0.15)',
+            boxShadow:
+              '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 80px -20px rgba(129, 140, 248, 0.15)',
           }}
         >
           {}
@@ -89,7 +90,7 @@ const NotificationPromptBanner = () => {
           </div>
 
           <div className="flex flex-col items-end gap-2">
-             <button
+            <button
               onClick={handleDismiss}
               className="absolute top-3 right-3 p-1.5 rounded-full text-[#64748b] transition-all hover:bg-white/5 hover:text-[#94a3b8]"
             >

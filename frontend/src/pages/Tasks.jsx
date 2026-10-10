@@ -139,15 +139,15 @@ export default function Tasks() {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/jira/sync/${task.id}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
 
       if (response.ok && data.success) {
         showToast(`Synced to Jira: ${data.data.key}`, 'success');
-        setTasks(prev => prev.map(t =>
-          t.id === task.id ? { ...t, jiraIssueKey: data.data.key } : t
-        ));
+        setTasks((prev) =>
+          prev.map((t) => (t.id === task.id ? { ...t, jiraIssueKey: data.data.key } : t))
+        );
       } else {
         showToast(data.error || 'Failed to sync to Jira', 'error');
       }

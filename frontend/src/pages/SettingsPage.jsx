@@ -249,7 +249,6 @@ const PreferencesContent = () => {
 
         {}
 
-
         {}
         <div className="flex items-center justify-between border-b border-echo-border py-3">
           <div>
@@ -442,7 +441,7 @@ const PreferencesContent = () => {
             <input
               type="password"
               className="w-full rounded-btn border border-echo-border bg-echo-base p-2.5 text-sm text-white shadow-inner placeholder:text-slate-500 focus:border-accent-primary focus:outline-none"
-              placeholder={jiraApiToken ? "••••••••••••" : "Paste your API token"}
+              placeholder={jiraApiToken ? '••••••••••••' : 'Paste your API token'}
               value={jiraApiToken}
               onChange={(e) => setJiraApiToken(e.target.value)}
             />

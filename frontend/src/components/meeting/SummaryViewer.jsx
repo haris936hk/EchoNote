@@ -158,16 +158,16 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/jira/sync/${actionItem.id}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
 
       if (response.ok && data.success) {
         showToast(`Synced to Jira: ${data.data.key}`, 'success');
 
-        setLocalActions(prev => prev.map(t =>
-          t.id === actionItem.id ? { ...t, jiraIssueKey: data.data.key } : t
-        ));
+        setLocalActions((prev) =>
+          prev.map((t) => (t.id === actionItem.id ? { ...t, jiraIssueKey: data.data.key } : t))
+        );
       } else {
         showToast(data.error || 'Failed to sync to Jira', 'error');
       }
@@ -207,7 +207,9 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
             </div>
             <div>
               <h4 className="text-sm font-bold text-white">Editor Mode</h4>
-              <p className="text-[11px] text-slate-500 font-medium">Refine AI-generated insights and tasks</p>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Refine AI-generated insights and tasks
+              </p>
             </div>
           </div>
           <Button
@@ -346,7 +348,8 @@ const SummaryViewer = ({ summary, meetingId, meetingTitle, canEdit, onEdit }) =>
                             <Jira size={10} /> {action.jiraIssueKey}
                           </a>
                         ) : (
-                          action.id && !isChecked && (
+                          action.id &&
+                          !isChecked && (
                             <button
                               type="button"
                               onClick={() => handleSyncToJira(action)}

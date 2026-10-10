@@ -1,4 +1,3 @@
-
 export const formatDate = (date, options = {}) => {
   if (!date) return '';
 
@@ -335,7 +334,7 @@ export const formatStatus = (status) => {
 
 export const formatURL = (url) => {
   if (!url) return '';
-  return url.replace(/^https?:\/\
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 };
 
 export const maskEmail = (email) => {
@@ -377,7 +376,6 @@ export const formatList = (array, conjunction = 'and') => {
 };
 
 const formatHelpers = {
-
   formatDate,
   formatDateTime,
   formatTime,

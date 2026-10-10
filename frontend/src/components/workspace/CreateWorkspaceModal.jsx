@@ -76,7 +76,9 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onCreated }) => {
                     <h2 className="font-['Plus_Jakarta_Sans'] text-xl font-bold tracking-tight text-white">
                       Create Workspace
                     </h2>
-                    <p className="text-sm font-medium text-slate-500">Collaborative hub for your team</p>
+                    <p className="text-sm font-medium text-slate-500">
+                      Collaborative hub for your team
+                    </p>
                   </div>
                 </div>
                 <button

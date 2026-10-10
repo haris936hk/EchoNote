@@ -45,7 +45,6 @@ const WorkspaceDetailPage = () => {
 
   useEffect(() => {
     fetchWorkspaceData();
-
   }, [id]);
 
   const handleRemoveMember = async (userId) => {
@@ -77,17 +76,22 @@ const WorkspaceDetailPage = () => {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-         <div className="relative">
-            <div className="h-12 w-12 animate-spin rounded-full border-2 border-accent-primary/20 border-t-accent-primary" />
-            <div className="absolute inset-0 flex items-center justify-center">
-               <LuSparkles className="animate-pulse text-accent-primary" size={16} />
-            </div>
-         </div>
+        <div className="relative">
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-accent-primary/20 border-t-accent-primary" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <LuSparkles className="animate-pulse text-accent-primary" size={16} />
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (!workspace) return <div className="p-20 text-center font-['Plus_Jakarta_Sans'] text-slate-500">Workspace not found</div>;
+  if (!workspace)
+    return (
+      <div className="p-20 text-center font-['Plus_Jakarta_Sans'] text-slate-500">
+        Workspace not found
+      </div>
+    );
 
   const myMember = workspace.members.find(
     (m) => m.user.email === JSON.parse(localStorage.getItem('user'))?.email
@@ -104,9 +108,14 @@ const WorkspaceDetailPage = () => {
       {}
       <div className="space-y-6">
         <div className="flex items-center gap-3 font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-widest text-slate-600">
-           <button onClick={() => navigate('/workspaces')} className="hover:text-accent-primary transition-colors">Workspaces</button>
-           <LuChevronRight size={12} />
-           <span className="text-slate-400">{workspace.name}</span>
+          <button
+            onClick={() => navigate('/workspaces')}
+            className="hover:text-accent-primary transition-colors"
+          >
+            Workspaces
+          </button>
+          <LuChevronRight size={12} />
+          <span className="text-slate-400">{workspace.name}</span>
         </div>
 
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -118,8 +127,12 @@ const WorkspaceDetailPage = () => {
               <LuArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="font-['Plus_Jakarta_Sans'] text-3xl font-extrabold tracking-tight text-white lg:text-4xl">{workspace.name}</h1>
-              <p className="mt-1 font-['Plus_Jakarta_Sans'] text-[15px] font-medium text-slate-500">{workspace.description || 'Collective intelligence hub.'}</p>
+              <h1 className="font-['Plus_Jakarta_Sans'] text-3xl font-extrabold tracking-tight text-white lg:text-4xl">
+                {workspace.name}
+              </h1>
+              <p className="mt-1 font-['Plus_Jakarta_Sans'] text-[15px] font-medium text-slate-500">
+                {workspace.description || 'Collective intelligence hub.'}
+              </p>
             </div>
           </div>
 
@@ -165,7 +178,9 @@ const WorkspaceDetailPage = () => {
                 className="flex flex-col items-center justify-center rounded-[24px] bg-[#0c1324]/50 py-20 text-center ring-1 ring-white/[0.04] backdrop-blur-sm"
               >
                 <LuCalendar size={32} className="mb-4 text-slate-700" />
-                <p className="font-['Plus_Jakarta_Sans'] text-[15px] font-medium text-slate-600">The archive is currently empty.</p>
+                <p className="font-['Plus_Jakarta_Sans'] text-[15px] font-medium text-slate-600">
+                  The archive is currently empty.
+                </p>
               </motion.div>
             ) : (
               <div className="grid gap-4">
@@ -183,7 +198,9 @@ const WorkspaceDetailPage = () => {
                         <LuExternalLink size={20} />
                       </div>
                       <div className="overflow-hidden">
-                        <h4 className="truncate font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-white group-hover:text-accent-primary transition-colors">{m.title}</h4>
+                        <h4 className="truncate font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-white group-hover:text-accent-primary transition-colors">
+                          {m.title}
+                        </h4>
                         <div className="mt-1 flex items-center gap-4">
                           <span className="font-['JetBrains_Mono'] text-[10px] font-bold text-slate-600">
                             {new Date(m.createdAt).toLocaleDateString()}
@@ -195,18 +212,21 @@ const WorkspaceDetailPage = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                       <LuChevronRight size={18} className="text-slate-800 transition-transform group-hover:translate-x-1 group-hover:text-accent-primary" />
-                       {isOwner && (
-                         <button
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             handleRemoveMeeting(m.id);
-                           }}
-                           className="flex h-9 w-9 items-center justify-center rounded-full bg-transparent text-slate-800 transition-all hover:bg-red-500/10 hover:text-red-400"
-                         >
-                           <LuTrash2 size={16} />
-                         </button>
-                       )}
+                      <LuChevronRight
+                        size={18}
+                        className="text-slate-800 transition-transform group-hover:translate-x-1 group-hover:text-accent-primary"
+                      />
+                      {isOwner && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveMeeting(m.id);
+                          }}
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-transparent text-slate-800 transition-all hover:bg-red-500/10 hover:text-red-400"
+                        >
+                          <LuTrash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -219,11 +239,13 @@ const WorkspaceDetailPage = () => {
         <div className="space-y-8">
           <div className="rounded-[24px] bg-[#0c1324] p-6 ring-1 ring-white/[0.08]">
             <div className="mb-6 flex items-center justify-between">
-               <h3 className="flex items-center gap-3 font-['Plus_Jakarta_Sans'] text-lg font-bold text-white">
-                 <LuUsers className="text-accent-primary" size={20} />
-                 The Collective
-               </h3>
-               <span className="font-['JetBrains_Mono'] text-[11px] font-bold text-slate-600">{workspace.members.length}</span>
+              <h3 className="flex items-center gap-3 font-['Plus_Jakarta_Sans'] text-lg font-bold text-white">
+                <LuUsers className="text-accent-primary" size={20} />
+                The Collective
+              </h3>
+              <span className="font-['JetBrains_Mono'] text-[11px] font-bold text-slate-600">
+                {workspace.members.length}
+              </span>
             </div>
 
             <div className="space-y-3">
@@ -239,28 +261,38 @@ const WorkspaceDetailPage = () => {
           </div>
 
           <div className="rounded-[24px] bg-[#0c1324] p-8 ring-1 ring-white/[0.08] shadow-[0_0_80px_-20px_rgba(189,194,255,0.08)]">
-             <div className="mb-8 flex items-center gap-3 text-accent-primary">
-                <LuLayout size={20} />
-                <span className="font-['Plus_Jakarta_Sans'] text-sm font-extrabold uppercase tracking-widest">Workspace Insights</span>
-             </div>
-             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                   <span className="font-['Plus_Jakarta_Sans'] text-xs font-medium text-slate-500">Established</span>
-                   <span className="font-['JetBrains_Mono'] text-xs font-bold text-slate-300">
-                     {new Date(workspace.createdAt).toLocaleDateString()}
-                   </span>
+            <div className="mb-8 flex items-center gap-3 text-accent-primary">
+              <LuLayout size={20} />
+              <span className="font-['Plus_Jakarta_Sans'] text-sm font-extrabold uppercase tracking-widest">
+                Workspace Insights
+              </span>
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <span className="font-['Plus_Jakarta_Sans'] text-xs font-medium text-slate-500">
+                  Established
+                </span>
+                <span className="font-['JetBrains_Mono'] text-xs font-bold text-slate-300">
+                  {new Date(workspace.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-['Plus_Jakarta_Sans'] text-xs font-medium text-slate-500">
+                  Service Role
+                </span>
+                <div className="rounded-full bg-accent-primary/10 px-2.5 py-0.5 font-['JetBrains_Mono'] text-[9px] font-extrabold uppercase tracking-tighter text-accent-primary ring-1 ring-accent-primary/20">
+                  {myRole}
                 </div>
-                <div className="flex items-center justify-between">
-                   <span className="font-['Plus_Jakarta_Sans'] text-xs font-medium text-slate-500">Service Role</span>
-                   <div className="rounded-full bg-accent-primary/10 px-2.5 py-0.5 font-['JetBrains_Mono'] text-[9px] font-extrabold uppercase tracking-tighter text-accent-primary ring-1 ring-accent-primary/20">
-                      {myRole}
-                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                   <span className="font-['Plus_Jakarta_Sans'] text-xs font-medium text-slate-500">Total Intel</span>
-                   <span className="font-['JetBrains_Mono'] text-xs font-bold text-slate-300">{meetings.length} Shared</span>
-                </div>
-             </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-['Plus_Jakarta_Sans'] text-xs font-medium text-slate-500">
+                  Total Intel
+                </span>
+                <span className="font-['JetBrains_Mono'] text-xs font-bold text-slate-300">
+                  {meetings.length} Shared
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

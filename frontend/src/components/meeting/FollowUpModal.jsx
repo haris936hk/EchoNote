@@ -80,8 +80,7 @@ const FollowUpModal = ({ isOpen, onClose, meetingId, meetingTitle }) => {
     try {
       await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
       showToast('Draft copied to clipboard!', 'success');
-    } catch (e) {
-    }
+    } catch (e) {}
 
     if (mailtoUrl.length > 2000) {
       setTimeout(() => {

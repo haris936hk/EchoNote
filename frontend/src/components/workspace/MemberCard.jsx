@@ -4,17 +4,23 @@ import { LuTrash2, LuShieldCheck, LuEye } from 'react-icons/lu';
 const MemberCard = ({ member, isOwner, onRemove }) => {
   const getRoleIcon = () => {
     switch (member.role) {
-      case 'OWNER': return <LuShieldCheck className="text-amber-400" size={12} />;
-      case 'EDITOR': return <LuShieldCheck className="text-accent-primary" size={12} />;
-      default: return <LuEye className="text-slate-500" size={12} />;
+      case 'OWNER':
+        return <LuShieldCheck className="text-amber-400" size={12} />;
+      case 'EDITOR':
+        return <LuShieldCheck className="text-accent-primary" size={12} />;
+      default:
+        return <LuEye className="text-slate-500" size={12} />;
     }
   };
 
   const getRoleStyles = () => {
     switch (member.role) {
-      case 'OWNER': return 'bg-amber-500/10 text-amber-400 ring-amber-500/20';
-      case 'EDITOR': return 'bg-accent-primary/10 text-accent-primary ring-accent-primary/20';
-      default: return 'bg-slate-500/10 text-slate-500 ring-white/10';
+      case 'OWNER':
+        return 'bg-amber-500/10 text-amber-400 ring-amber-500/20';
+      case 'EDITOR':
+        return 'bg-accent-primary/10 text-accent-primary ring-accent-primary/20';
+      default:
+        return 'bg-slate-500/10 text-slate-500 ring-white/10';
     }
   };
 
@@ -23,7 +29,11 @@ const MemberCard = ({ member, isOwner, onRemove }) => {
       <div className="flex items-center gap-3">
         <div className="relative h-10 w-10 flex-none overflow-hidden rounded-full ring-1 ring-white/[0.1]">
           {member.user.picture ? (
-            <img src={member.user.picture} alt={member.user.name} className="h-full w-full object-cover" />
+            <img
+              src={member.user.picture}
+              alt={member.user.name}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-accent-primary/20 font-bold text-accent-primary">
               {member.user.name?.charAt(0)}
@@ -42,7 +52,9 @@ const MemberCard = ({ member, isOwner, onRemove }) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 font-['JetBrains_Mono'] text-[9px] font-extrabold uppercase tracking-tighter ring-1 ${getRoleStyles()}`}>
+        <div
+          className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 font-['JetBrains_Mono'] text-[9px] font-extrabold uppercase tracking-tighter ring-1 ${getRoleStyles()}`}
+        >
           {getRoleIcon()}
           {member.role}
         </div>

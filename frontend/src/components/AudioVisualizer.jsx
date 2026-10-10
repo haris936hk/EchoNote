@@ -78,11 +78,9 @@ const AudioVisualizer = ({ stream, isActive = true }) => {
           gradient.addColorStop(0, 'rgba(129, 140, 248, 1)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 1)');
         } else if (normalizedHeight > 0.35) {
-
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.75)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 0.85)');
         } else {
-
           gradient.addColorStop(0, 'rgba(129, 140, 248, 0.30)');
           gradient.addColorStop(1, 'rgba(167, 139, 250, 0.45)');
         }

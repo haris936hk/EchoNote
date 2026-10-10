@@ -292,10 +292,8 @@ const RecordPage = () => {
       />
 
       <div className="mx-auto w-full max-w-2xl px-6 py-12">
-
         {step === 'record' && (
           <div className="flex flex-col items-center space-y-8 text-center">
-
             <div
               className={`recording-halo ${isRecording && !isPaused ? 'active' : ''} ${isPaused ? 'paused' : ''}`}
               style={

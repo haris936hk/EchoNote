@@ -83,7 +83,9 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInvited }) => {
                     <h2 className="font-['Plus_Jakarta_Sans'] text-xl font-bold tracking-tight text-white">
                       Invite Member
                     </h2>
-                    <p className="text-sm font-medium text-slate-500">Expand your collaboration circle</p>
+                    <p className="text-sm font-medium text-slate-500">
+                      Expand your collaboration circle
+                    </p>
                   </div>
                 </div>
                 <button
@@ -102,7 +104,10 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInvited }) => {
                   EMAIL ADDRESS
                 </label>
                 <div className="relative">
-                  <LuMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <LuMail
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                    size={18}
+                  />
                   <input
                     type="email"
                     placeholder="partner@ecosystem.com"
@@ -136,9 +141,13 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInvited }) => {
                         >
                           {r.label}
                         </span>
-                        {role === r.id && <LuShieldCheck className="text-accent-primary" size={16} />}
+                        {role === r.id && (
+                          <LuShieldCheck className="text-accent-primary" size={16} />
+                        )}
                       </div>
-                      <span className="font-['Plus_Jakarta_Sans'] text-[11px] text-slate-500">{r.desc}</span>
+                      <span className="font-['Plus_Jakarta_Sans'] text-[11px] text-slate-500">
+                        {r.desc}
+                      </span>
                     </button>
                   ))}
                 </div>

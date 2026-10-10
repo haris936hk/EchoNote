@@ -1,4 +1,3 @@
-
 export const APP_NAME = 'EchoNote';
 export const APP_VERSION = '1.0.0';
 export const APP_DESCRIPTION = 'AI-powered meeting transcription and summarization';

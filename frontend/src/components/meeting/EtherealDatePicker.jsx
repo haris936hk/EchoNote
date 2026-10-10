@@ -14,11 +14,11 @@ import {
   isSameDay,
   isToday,
   parseISO,
-  isValid
+  isValid,
 } from 'date-fns';
 import { LuCalendar, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
-const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." }) => {
+const EtherealDatePicker = ({ value, onChange, placeholder = 'Select date...' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const containerRef = useRef(null);
@@ -27,12 +27,17 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
   const [placement, setPlacement] = useState('bottom');
 
   const selectedDate = value ? (typeof value === 'string' ? parseISO(value) : value) : null;
-  const displayValue = selectedDate && isValid(selectedDate) ? format(selectedDate, 'MMM dd, yyyy') : '';
+  const displayValue =
+    selectedDate && isValid(selectedDate) ? format(selectedDate, 'MMM dd, yyyy') : '';
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-          containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -52,11 +57,9 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
 
       setPlacement(shouldFlip ? 'top' : 'bottom');
       setCoords({
-        top: shouldFlip
-          ? rect.top + window.scrollY - 8
-          : rect.bottom + window.scrollY + 8,
+        top: shouldFlip ? rect.top + window.scrollY - 8 : rect.bottom + window.scrollY + 8,
         left: rect.left + window.scrollX,
-        width: rect.width
+        width: rect.width,
       });
     }
   };
@@ -97,7 +100,7 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
           style={{
             top: coords.top,
             left: Math.min(Math.max(20, coords.left), window.innerWidth - 340),
-            transform: placement === 'top' ? 'translateY(-100%)' : 'none'
+            transform: placement === 'top' ? 'translateY(-100%)' : 'none',
           }}
         >
           <motion.div
@@ -108,75 +111,75 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
             className="w-full overflow-hidden rounded-xl bg-[#0c1324]/90 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] ring-1 ring-white/[0.08] backdrop-blur-2xl max-h-[calc(100vh-60px)] overflow-y-auto scrollbar-hide"
           >
             {}
-          <div className="mb-4 flex items-center justify-between px-1">
-            <h3 className="font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-[#f8fafc]">
-              {format(currentMonth, 'MMMM yyyy')}
-            </h3>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                className="rounded-lg p-1.5 text-[#94a3b8] transition-colors hover:bg-white/5 hover:text-[#f8fafc]"
-              >
-                <LuChevronLeft size={18} />
-              </button>
-              <button
-                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                className="rounded-lg p-1.5 text-[#94a3b8] transition-colors hover:bg-white/5 hover:text-[#f8fafc]"
-              >
-                <LuChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-
-          {}
-          <div className="mb-2 grid grid-cols-7">
-            {weekDays.map((day) => (
-              <div
-                key={day}
-                className="text-center font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-tighter text-[#64748b]"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {}
-          <div className="grid grid-cols-7 gap-y-1">
-            {calendarDays.map((day, idx) => {
-              const isSelected = selectedDate && isSameDay(day, selectedDate);
-              const isCurrentMonth = isSameMonth(day, monthStart);
-              const isTodayDate = isToday(day);
-
-              return (
+            <div className="mb-4 flex items-center justify-between px-1">
+              <h3 className="font-['Plus_Jakarta_Sans'] text-[15px] font-bold text-[#f8fafc]">
+                {format(currentMonth, 'MMMM yyyy')}
+              </h3>
+              <div className="flex items-center gap-1">
                 <button
-                  key={idx}
-                  onClick={() => handleDateSelect(day)}
-                  className={`group relative flex aspect-square items-center justify-center rounded-lg font-['JetBrains_Mono'] text-xs transition-all duration-200
+                  onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                  className="rounded-lg p-1.5 text-[#94a3b8] transition-colors hover:bg-white/5 hover:text-[#f8fafc]"
+                >
+                  <LuChevronLeft size={18} />
+                </button>
+                <button
+                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                  className="rounded-lg p-1.5 text-[#94a3b8] transition-colors hover:bg-white/5 hover:text-[#f8fafc]"
+                >
+                  <LuChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+
+            {}
+            <div className="mb-2 grid grid-cols-7">
+              {weekDays.map((day) => (
+                <div
+                  key={day}
+                  className="text-center font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-tighter text-[#64748b]"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {}
+            <div className="grid grid-cols-7 gap-y-1">
+              {calendarDays.map((day, idx) => {
+                const isSelected = selectedDate && isSameDay(day, selectedDate);
+                const isCurrentMonth = isSameMonth(day, monthStart);
+                const isTodayDate = isToday(day);
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleDateSelect(day)}
+                    className={`group relative flex aspect-square items-center justify-center rounded-lg font-['JetBrains_Mono'] text-xs transition-all duration-200
                     ${!isCurrentMonth ? 'text-[#334155] hover:text-[#475569]' : 'text-[#94a3b8] hover:text-[#f8fafc]'}
                     ${isSelected ? 'text-[#f8fafc] !text-white' : ''}
                     hover:bg-white/5
                   `}
-                >
-                  {}
-                  {isSelected && (
-                    <motion.div
-                      layoutId="selectedDay"
-                      className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#bdc2ff]/20 to-[#818cf8]/20 ring-1 ring-[#818cf8]/50 shadow-[0_0_15px_rgba(129,140,248,0.3)]"
-                    />
-                  )}
+                  >
+                    {}
+                    {isSelected && (
+                      <motion.div
+                        layoutId="selectedDay"
+                        className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#bdc2ff]/20 to-[#818cf8]/20 ring-1 ring-[#818cf8]/50 shadow-[0_0_15px_rgba(129,140,248,0.3)]"
+                      />
+                    )}
 
-                  {}
-                  {isTodayDate && !isSelected && (
-                    <div className="absolute bottom-1.5 size-1 rounded-full bg-[#818cf8]/50" />
-                  )}
+                    {}
+                    {isTodayDate && !isSelected && (
+                      <div className="absolute bottom-1.5 size-1 rounded-full bg-[#818cf8]/50" />
+                    )}
 
-                  <span className="relative z-10">{format(day, 'd')}</span>
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-      </div>
+                    <span className="relative z-10">{format(day, 'd')}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
@@ -192,7 +195,10 @@ const EtherealDatePicker = ({ value, onChange, placeholder = "Select date..." })
         `}
       >
         <span className="truncate">{displayValue || placeholder}</span>
-        <LuCalendar size={16} className={`shrink-0 transition-colors ${isOpen ? 'text-[#818cf8]' : 'text-[#64748b]'}`} />
+        <LuCalendar
+          size={16}
+          className={`shrink-0 transition-colors ${isOpen ? 'text-[#818cf8]' : 'text-[#64748b]'}`}
+        />
       </button>
 
       {typeof document !== 'undefined' && createPortal(pickerContent, document.body)}

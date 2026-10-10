@@ -34,25 +34,25 @@ const WorkspacesPage = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
+    visible: { y: 0, opacity: 1 },
   };
 
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-         <div className="relative">
-            <div className="h-12 w-12 animate-spin rounded-full border-2 border-accent-primary/20 border-t-accent-primary" />
-            <div className="absolute inset-0 flex items-center justify-center">
-               <LuSparkles className="animate-pulse text-accent-primary" size={16} />
-            </div>
-         </div>
+        <div className="relative">
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-accent-primary/20 border-t-accent-primary" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <LuSparkles className="animate-pulse text-accent-primary" size={16} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -67,10 +67,10 @@ const WorkspacesPage = () => {
       <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <motion.div variants={itemVariants}>
           <div className="flex items-center gap-3">
-             <LuLayout className="text-accent-primary" size={32} />
-             <h1 className="font-['Plus_Jakarta_Sans'] text-4xl font-extrabold tracking-tight text-white lg:text-5xl">
-               Workspaces
-             </h1>
+            <LuLayout className="text-accent-primary" size={32} />
+            <h1 className="font-['Plus_Jakarta_Sans'] text-4xl font-extrabold tracking-tight text-white lg:text-5xl">
+              Workspaces
+            </h1>
           </div>
           <p className="mt-3 font-['Plus_Jakarta_Sans'] text-lg font-medium text-slate-500">
             Collaborative archives for unified mission intelligence.
@@ -94,16 +94,19 @@ const WorkspacesPage = () => {
             className="flex flex-col items-center justify-center rounded-[32px] bg-[#0c1324]/50 py-32 text-center ring-1 ring-white/[0.04] backdrop-blur-sm"
           >
             <div className="relative mb-8">
-               <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#151b2d] ring-1 ring-white/[0.06] shadow-2xl">
-                 <LuLayout className="text-slate-600" size={40} />
-               </div>
-               <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-accent-primary/10 flex items-center justify-center ring-1 ring-accent-primary/20">
-                  <LuPlus className="text-accent-primary" size={16} />
-               </div>
+              <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#151b2d] ring-1 ring-white/[0.06] shadow-2xl">
+                <LuLayout className="text-slate-600" size={40} />
+              </div>
+              <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-accent-primary/10 flex items-center justify-center ring-1 ring-accent-primary/20">
+                <LuPlus className="text-accent-primary" size={16} />
+              </div>
             </div>
-            <h3 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-white">The Void of Collaboration</h3>
+            <h3 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-white">
+              The Void of Collaboration
+            </h3>
             <p className="mt-3 max-w-sm font-['Plus_Jakarta_Sans'] text-[15px] font-medium leading-relaxed text-slate-500">
-              No shared archives detected. Establish a workspace to begin collaborative synthesis with your peers.
+              No shared archives detected. Establish a workspace to begin collaborative synthesis
+              with your peers.
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
@@ -128,13 +131,15 @@ const WorkspacesPage = () => {
                   <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#151b2d] text-accent-primary ring-1 ring-white/[0.06] transition-all group-hover:bg-accent-primary group-hover:text-[#020617] group-hover:shadow-[0_0_20px_rgba(129,140,248,0.4)]">
                     <LuLayout size={24} />
                   </div>
-                  <div className={`rounded-full px-3 py-1 font-['JetBrains_Mono'] text-[10px] font-bold tracking-tighter ring-1 ${
+                  <div
+                    className={`rounded-full px-3 py-1 font-['JetBrains_Mono'] text-[10px] font-bold tracking-tighter ring-1 ${
                       workspace.myRole === 'OWNER'
                         ? 'bg-amber-500/10 text-amber-400 ring-amber-500/20'
                         : workspace.myRole === 'EDITOR'
                           ? 'bg-accent-primary/10 text-accent-primary ring-accent-primary/20'
                           : 'bg-slate-500/10 text-slate-400 ring-white/10'
-                    }`}>
+                    }`}
+                  >
                     {workspace.myRole}
                   </div>
                 </div>
@@ -149,27 +154,38 @@ const WorkspacesPage = () => {
                 </div>
 
                 <div className="mt-auto pt-8">
-                   <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6">
-                         <div className="flex flex-col gap-1">
-                            <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-bold uppercase tracking-widest text-[#64748b]">Members</span>
-                            <div className="flex items-center gap-2">
-                               <LuUsers className="text-[#818cf8]/60" size={14} />
-                               <span className="font-['JetBrains_Mono'] text-[13px] font-bold text-slate-300">{workspace._count?.members || 0}</span>
-                            </div>
-                         </div>
-                         <div className="flex flex-col gap-1">
-                            <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-bold uppercase tracking-widest text-[#64748b]">Archives</span>
-                            <div className="flex items-center gap-2">
-                               <LuCalendar className="text-[#a78bfa]/60" size={14} />
-                               <span className="font-['JetBrains_Mono'] text-[13px] font-bold text-slate-300">{workspace._count?.meetings || 0}</span>
-                            </div>
-                         </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-bold uppercase tracking-widest text-[#64748b]">
+                          Members
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <LuUsers className="text-[#818cf8]/60" size={14} />
+                          <span className="font-['JetBrains_Mono'] text-[13px] font-bold text-slate-300">
+                            {workspace._count?.members || 0}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.03] text-slate-500 transition-all group-hover:bg-accent-primary/10 group-hover:text-accent-primary ring-1 ring-white/[0.05]">
-                         <LuChevronRight size={20} className="transition-transform group-hover:translate-x-0.5" />
+                      <div className="flex flex-col gap-1">
+                        <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-bold uppercase tracking-widest text-[#64748b]">
+                          Archives
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <LuCalendar className="text-[#a78bfa]/60" size={14} />
+                          <span className="font-['JetBrains_Mono'] text-[13px] font-bold text-slate-300">
+                            {workspace._count?.meetings || 0}
+                          </span>
+                        </div>
                       </div>
-                   </div>
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.03] text-slate-500 transition-all group-hover:bg-accent-primary/10 group-hover:text-accent-primary ring-1 ring-white/[0.05]">
+                      <LuChevronRight
+                        size={20}
+                        className="transition-transform group-hover:translate-x-0.5"
+                      />
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}

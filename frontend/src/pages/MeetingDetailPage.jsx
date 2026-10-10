@@ -544,7 +544,10 @@ const MeetingDetailPage = () => {
               const isActive = index === currentIdx;
 
               return (
-                <div key={step.key} className={`flex items-start ${index < PIPELINE_STEPS.length - 1 ? 'flex-1' : ''}`}>
+                <div
+                  key={step.key}
+                  className={`flex items-start ${index < PIPELINE_STEPS.length - 1 ? 'flex-1' : ''}`}
+                >
                   {/* Step Node */}
                   <div className="flex flex-col items-center w-24 shrink-0">
                     <div
@@ -574,10 +577,12 @@ const MeetingDetailPage = () => {
                   {/* Connector Line */}
                   {index < PIPELINE_STEPS.length - 1 && (
                     <div className="flex-1 mt-4">
-                      <div 
+                      <div
                         className={`h-[2px] w-full transition-all duration-1000 ${
-                          isComplete ? 'bg-gradient-to-r from-emerald-500/40 to-emerald-500/40' : 'bg-white/5'
-                        }`} 
+                          isComplete
+                            ? 'bg-gradient-to-r from-emerald-500/40 to-emerald-500/40'
+                            : 'bg-white/5'
+                        }`}
                       />
                     </div>
                   )}
@@ -640,10 +645,12 @@ const MeetingDetailPage = () => {
                   transcriptSegments={currentMeeting.transcriptSegments}
                   speakerMap={currentMeeting.speakerMap}
                   nlpData={{
-                    entities: currentMeeting.nlpEntities ? currentMeeting.nlpEntities.split(',').map(e => {
-                      const [text, label] = e.trim().split(' (');
-                      return { text, label: label?.replace(')', '') };
-                    }) : []
+                    entities: currentMeeting.nlpEntities
+                      ? currentMeeting.nlpEntities.split(',').map((e) => {
+                          const [text, label] = e.trim().split(' (');
+                          return { text, label: label?.replace(')', '') };
+                        })
+                      : [],
                   }}
                   onRenameSpeaker={handleRenameSpeaker}
                   onSeek={handleSeek}
@@ -663,7 +670,9 @@ const MeetingDetailPage = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-white">Live Editor</h4>
-                          <p className="text-[11px] text-slate-500 font-medium">Changes are saved automatically</p>
+                          <p className="text-[11px] text-slate-500 font-medium">
+                            Changes are saved automatically
+                          </p>
                         </div>
                       </div>
                       <Button

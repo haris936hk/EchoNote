@@ -21,13 +21,21 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
     executiveSummary: s.executiveSummary || initialData.summaryExecutive || '',
     keyDecisions: Array.isArray(s.keyDecisions)
       ? s.keyDecisions
-      : (initialData.summaryKeyDecisions ? (typeof initialData.summaryKeyDecisions === 'string' ? JSON.parse(initialData.summaryKeyDecisions) : initialData.summaryKeyDecisions) : []),
+      : initialData.summaryKeyDecisions
+        ? typeof initialData.summaryKeyDecisions === 'string'
+          ? JSON.parse(initialData.summaryKeyDecisions)
+          : initialData.summaryKeyDecisions
+        : [],
     actionItems: Array.isArray(s.actionItems)
       ? s.actionItems
-      : (initialData.summaryActionItems || []),
+      : initialData.summaryActionItems || [],
     nextSteps: Array.isArray(s.nextSteps)
       ? s.nextSteps
-      : (initialData.summaryNextSteps ? (typeof initialData.summaryNextSteps === 'string' ? JSON.parse(initialData.summaryNextSteps) : initialData.summaryNextSteps) : []),
+      : initialData.summaryNextSteps
+        ? typeof initialData.summaryNextSteps === 'string'
+          ? JSON.parse(initialData.summaryNextSteps)
+          : initialData.summaryNextSteps
+        : [],
   });
 
   const [saving, setSaving] = useState(false);
@@ -74,16 +82,24 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
       return newData;
     });
 
-    try { broadcast({ type: 'UPDATE_FIELD', field, value }); } catch (_) {}
-    try { updatePresence({ lastSection: field }); } catch (_) {}
+    try {
+      broadcast({ type: 'UPDATE_FIELD', field, value });
+    } catch (_) {}
+    try {
+      updatePresence({ lastSection: field });
+    } catch (_) {}
   };
 
   const handleFocus = (field) => {
-    try { updatePresence({ focusedField: field }); } catch (_) {}
+    try {
+      updatePresence({ focusedField: field });
+    } catch (_) {}
   };
 
   const handleBlur = () => {
-    try { updatePresence({ focusedField: null }); } catch (_) {}
+    try {
+      updatePresence({ focusedField: null });
+    } catch (_) {}
   };
 
   const handleUpdateTasks = async (updatedTask) => {
@@ -132,7 +148,7 @@ const CollaborativeEditor = ({ workspaceId, meetingId, initialData, canEdit }) =
             assignee: updatedTask.assignee,
             deadline: updatedTask.deadline,
             priority: updatedTask.priority,
-            status: updatedTask.status
+            status: updatedTask.status,
           });
           showToast('Action item updated', 'success');
         } catch (err) {

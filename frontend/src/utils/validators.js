@@ -1,4 +1,3 @@
-
 import {
   VALIDATION,
   REGEX_PATTERNS,
@@ -592,10 +591,7 @@ export const validateForm = (formData, validationRules) => {
 export const sanitizeString = (str) => {
   if (!str) return '';
 
-  return str
-    .trim()
-    .replace(/[<>]/g, '')
-    .replace(/\s+/g, ' ');
+  return str.trim().replace(/[<>]/g, '').replace(/\s+/g, ' ');
 };
 
 export const sanitizeFilename = (filename) => {

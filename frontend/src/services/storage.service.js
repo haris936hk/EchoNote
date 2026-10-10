@@ -1,4 +1,3 @@
-
 export const setLocalItem = (key, value) => {
   try {
     const serializedValue = JSON.stringify(value);
@@ -344,8 +343,7 @@ export const cleanupExpiredItems = () => {
             cleaned++;
           }
         }
-      } catch {
-      }
+      } catch {}
     });
 
     return { success: true, cleaned };

@@ -222,27 +222,45 @@ const HomePage = () => {
 
       // Multiplayer fake cursor animation
       gsap.to('.fake-cursor-1', {
-        x: 100, y: 50, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut',
+        x: 100,
+        y: 50,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
       });
       gsap.to('.fake-cursor-2', {
-        x: -80, y: -40, duration: 2.5, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.5,
+        x: -80,
+        y: -40,
+        duration: 2.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: 0.5,
       });
 
       // Use Cases Stagger
       gsap.from('.use-case-card', {
-        y: 50, opacity: 0, duration: 0.6, stagger: 0.15,
-        scrollTrigger: { trigger: '#use-cases', start: 'top 75%' }
+        y: 50,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.15,
+        scrollTrigger: { trigger: '#use-cases', start: 'top 75%' },
       });
 
       // Ecosystem Lines
       gsap.from('.ecosystem-item', {
-        scale: 0, opacity: 0, duration: 0.8, stagger: 0.2, ease: 'back.out(1.5)',
-        scrollTrigger: { trigger: '#ecosystem', start: 'top 75%' }
+        scale: 0,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'back.out(1.5)',
+        scrollTrigger: { trigger: '#ecosystem', start: 'top 75%' },
       });
 
       // Workspaces Fan Out
       const workspaceCards = gsap.utils.toArray('.workspace-card');
-      gsap.set(workspaceCards, { transformOrigin: "bottom center" });
+      gsap.set(workspaceCards, { transformOrigin: 'bottom center' });
       gsap.to(workspaceCards, {
         rotation: (i) => (i - 1) * 15,
         x: (i) => (i - 1) * 40,
@@ -252,7 +270,7 @@ const HomePage = () => {
         scrollTrigger: {
           trigger: '#workspaces',
           start: 'top 60%',
-        }
+        },
       });
 
       // CTA Scale up
@@ -296,11 +314,7 @@ const HomePage = () => {
             const at = index;
             storyTl
               .addLabel(`step-${index}`, at)
-              .to(
-                '.story-progress-bar',
-                { scaleX: index / (stepCount - 1), duration: 0.35 },
-                at
-              )
+              .to('.story-progress-bar', { scaleX: index / (stepCount - 1), duration: 0.35 }, at)
               .to(`.story-step-${index - 1}`, { autoAlpha: 0.2, y: -20, duration: 0.35 }, at)
               .to(`.story-step-${index}`, { autoAlpha: 1, y: 0, duration: 0.35 }, at)
               .to(
@@ -326,7 +340,11 @@ const HomePage = () => {
   );
 
   return (
-    <div className="min-h-screen overflow-hidden" style={{ backgroundColor: '#0c1324', color: '#dce1fb' }} ref={containerRef}>
+    <div
+      className="min-h-screen overflow-hidden"
+      style={{ backgroundColor: '#0c1324', color: '#dce1fb' }}
+      ref={containerRef}
+    >
       {}
       <ScrollReveal>
         <Header navItems={NAV_LINKS} />
@@ -337,8 +355,10 @@ const HomePage = () => {
         <section className="hero-section mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
           <div className="space-y-8">
             <h1 className="hero-title text-5xl font-extrabold leading-tight tracking-tighter text-on-surface md:text-7xl">
-              <span className="inline-block">Your</span> <span className="inline-block">meetings,</span> <br/>
-              <span className="text-gradient inline-block">perfectly</span> <span className="inline-block">remembered.</span>
+              <span className="inline-block">Your</span>{' '}
+              <span className="inline-block">meetings,</span> <br />
+              <span className="text-gradient inline-block">perfectly</span>{' '}
+              <span className="inline-block">remembered.</span>
             </h1>
             <p className="hero-subtitle max-w-lg text-xl leading-relaxed text-on-surface-variant">
               Record. Transcribe. Summarize. Powered by a custom AI model.
@@ -399,21 +419,39 @@ const HomePage = () => {
         <section className="stats-section mx-auto max-w-7xl px-6 py-20">
           <div className="flex flex-wrap items-center justify-center gap-8 rounded-2xl bg-[#151b2d]/50 px-12 py-8 md:justify-between">
             <div className="flex items-center gap-3">
-              <span className="stat-number font-mono text-3xl font-bold text-accent-primary" data-value="88" data-suffix="%+">0</span>
+              <span
+                className="stat-number font-mono text-3xl font-bold text-accent-primary"
+                data-value="88"
+                data-suffix="%+"
+              >
+                0
+              </span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Summary Accuracy
               </span>
             </div>
             <div className="hidden h-8 w-px bg-[#454653]/10 md:block" />
             <div className="flex items-center gap-3">
-              <span className="stat-number font-mono text-3xl font-bold text-accent-primary" data-value="10" data-suffix=" min">0</span>
+              <span
+                className="stat-number font-mono text-3xl font-bold text-accent-primary"
+                data-value="10"
+                data-suffix=" min"
+              >
+                0
+              </span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Max Recording
               </span>
             </div>
             <div className="hidden h-8 w-px bg-[#454653]/10 md:block" />
             <div className="flex items-center gap-3">
-              <span className="stat-number font-mono text-3xl font-bold text-accent-primary" data-value="70" data-suffix="s">0</span>
+              <span
+                className="stat-number font-mono text-3xl font-bold text-accent-primary"
+                data-value="70"
+                data-suffix="s"
+              >
+                0
+              </span>
               <span className="text-xs font-medium uppercase tracking-widest text-[#c6c5d5]/60">
                 Processing
               </span>
@@ -447,7 +485,9 @@ const HomePage = () => {
                       {step.eyebrow}
                     </p>
                     <h3 className="mb-2 text-xl font-bold text-on-surface">{step.title}</h3>
-                    <p className="text-sm leading-relaxed text-on-surface-variant">{step.description}</p>
+                    <p className="text-sm leading-relaxed text-on-surface-variant">
+                      {step.description}
+                    </p>
                   </article>
                 ))}
               </div>
@@ -541,8 +581,8 @@ const HomePage = () => {
                 <div className="w-full rounded-2xl border border-[#454653]/10 bg-[#151b2d] p-6">
                   <h4 className="mb-2 text-lg font-bold text-on-surface">AI Processes</h4>
                   <p className="text-sm text-on-surface-variant">
-                    Our custom model transcribes and identifies key entities in real-time with sub-70s
-                    latency.
+                    Our custom model transcribes and identifies key entities in real-time with
+                    sub-70s latency.
                   </p>
                 </div>
               </div>
@@ -572,15 +612,27 @@ const HomePage = () => {
               <div className="h-4 w-full rounded bg-[#c6c5d5]/10 mb-2" />
               <div className="h-4 w-5/6 rounded bg-[#c6c5d5]/10 mb-2" />
               <div className="h-4 w-4/6 rounded bg-[#c6c5d5]/10" />
-              
+
               {}
               <div className="fake-cursor-1 absolute top-1/3 left-1/4 flex flex-col items-center">
-                <LuMousePointer2 className="text-accent-primary drop-shadow-md" size={24} fill="#818CF8" />
-                <span className="mt-1 rounded bg-accent-primary px-2 py-0.5 text-[10px] font-bold text-white">Alex</span>
+                <LuMousePointer2
+                  className="text-accent-primary drop-shadow-md"
+                  size={24}
+                  fill="#818CF8"
+                />
+                <span className="mt-1 rounded bg-accent-primary px-2 py-0.5 text-[10px] font-bold text-white">
+                  Alex
+                </span>
               </div>
               <div className="fake-cursor-2 absolute top-1/2 right-1/3 flex flex-col items-center">
-                <LuMousePointer2 className="text-accent-secondary drop-shadow-md" size={24} fill="#A78BFA" />
-                <span className="mt-1 rounded bg-accent-secondary px-2 py-0.5 text-[10px] font-bold text-white">Sam</span>
+                <LuMousePointer2
+                  className="text-accent-secondary drop-shadow-md"
+                  size={24}
+                  fill="#A78BFA"
+                />
+                <span className="mt-1 rounded bg-accent-secondary px-2 py-0.5 text-[10px] font-bold text-white">
+                  Sam
+                </span>
               </div>
             </div>
             <div className="order-1 lg:order-2 space-y-6">
@@ -591,20 +643,26 @@ const HomePage = () => {
                 Multiplayer by Design
               </h2>
               <p className="text-lg text-on-surface-variant leading-relaxed">
-                Think together, instantly. Jump into generated meeting summaries with your team and refine them in real-time. See live cursors, co-edit action items, and align effortlessly using our Liveblocks integration.
+                Think together, instantly. Jump into generated meeting summaries with your team and
+                refine them in real-time. See live cursors, co-edit action items, and align
+                effortlessly using our Liveblocks integration.
               </p>
             </div>
           </div>
         </section>
 
         {}
-        <section id="ecosystem" className="relative mx-auto max-w-7xl overflow-hidden px-6 py-20 text-center">
+        <section
+          id="ecosystem"
+          className="relative mx-auto max-w-7xl overflow-hidden px-6 py-20 text-center"
+        >
           <div className="mx-auto mb-16 max-w-2xl">
             <h2 className="mb-4 text-3xl font-extrabold tracking-tighter text-on-surface md:text-5xl">
               Seamless Ecosystem Integrations
             </h2>
             <p className="text-lg text-on-surface-variant">
-              EchoNote doesn't just summarize; it acts. Connect to your existing workflow and automate the busywork.
+              EchoNote doesn't just summarize; it acts. Connect to your existing workflow and
+              automate the busywork.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
@@ -642,14 +700,20 @@ const HomePage = () => {
                 Built for Teams
               </h2>
               <p className="text-lg text-on-surface-variant leading-relaxed">
-                Dedicated spaces for every project. Isolate your meetings, invite your team, and organize knowledge with secure workspaces and built-in calendar integrations.
+                Dedicated spaces for every project. Isolate your meetings, invite your team, and
+                organize knowledge with secure workspaces and built-in calendar integrations.
               </p>
             </div>
             <div className="relative h-80 w-full flex items-center justify-center">
               {[1, 2, 3].map((i) => (
-                <div key={i} className={`workspace-card absolute w-64 h-48 rounded-2xl border border-[#454653]/20 bg-[#151b2d] shadow-2xl p-6 flex flex-col justify-between z-[${4-i}]`}>
+                <div
+                  key={i}
+                  className={`workspace-card absolute w-64 h-48 rounded-2xl border border-[#454653]/20 bg-[#151b2d] shadow-2xl p-6 flex flex-col justify-between z-[${4 - i}]`}
+                >
                   <div className="flex items-center gap-3">
-                    <div className={`size-8 rounded-lg bg-gradient-to-br ${i === 2 ? 'from-accent-primary to-accent-secondary' : 'from-[#23293c] to-[#191f31]'}`} />
+                    <div
+                      className={`size-8 rounded-lg bg-gradient-to-br ${i === 2 ? 'from-accent-primary to-accent-secondary' : 'from-[#23293c] to-[#191f31]'}`}
+                    />
                     <div className="h-4 w-24 rounded bg-[#c6c5d5]/10" />
                   </div>
                   <div className="space-y-2">
@@ -676,7 +740,8 @@ const HomePage = () => {
               </div>
               <h3 className="mb-3 text-xl font-bold text-on-surface">Product Managers</h3>
               <p className="text-sm text-on-surface-variant">
-                Turn user interviews directly into Jira tickets and feature specs without lifting a finger.
+                Turn user interviews directly into Jira tickets and feature specs without lifting a
+                finger.
               </p>
             </div>
             <div className="use-case-card rounded-2xl bg-[#151b2d] p-8 text-center border border-transparent hover:border-accent-primary/20 transition-colors">
@@ -694,7 +759,8 @@ const HomePage = () => {
               </div>
               <h3 className="mb-3 text-xl font-bold text-on-surface">Engineering</h3>
               <p className="text-sm text-on-surface-variant">
-                Keep standup notes and architecture decisions perfectly documented in your team workspace.
+                Keep standup notes and architecture decisions perfectly documented in your team
+                workspace.
               </p>
             </div>
           </div>

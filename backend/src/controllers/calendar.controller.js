@@ -79,7 +79,7 @@ const getEvents = async (req, res) => {
       } catch (refreshErr) {
         logger.error(`Failed to refresh calendar token for user ${userId}: ${refreshErr.message}`);
 
-        return res.status(401).json({
+        return res.status(403).json({
           success: false,
           error: 'Calendar session expired. Please connect your Google Calendar again.',
           code: 'CALENDAR_SESSION_EXPIRED',

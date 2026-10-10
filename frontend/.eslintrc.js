@@ -10,6 +10,7 @@ module.exports = {
     ],
     'tailwindcss/classnames-order': 'warn',
     'tailwindcss/no-custom-classname': 'off',
+    'tailwindcss/no-contradicting-classname': 'off',
     'no-unused-vars': 'warn',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',

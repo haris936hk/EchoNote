@@ -239,9 +239,7 @@ const TranscriptViewer = ({
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-
-    }
+    } catch {}
   };
 
   if (!transcript && !hasSegments) {

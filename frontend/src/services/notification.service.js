@@ -12,7 +12,6 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 const notificationService = {
-
   async registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       console.warn('Service Workers not supported');
@@ -38,7 +37,7 @@ const notificationService = {
     return {
       supported: true,
       granted: permission === 'granted',
-      permission
+      permission,
     };
   },
 
@@ -63,7 +62,7 @@ const notificationService = {
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
 
       await api.post('/notifications/subscribe', subscription);
@@ -94,7 +93,7 @@ const notificationService = {
       console.error('❌ Push unsubscription failed:', error);
       throw error;
     }
-  }
+  },
 };
 
 export default notificationService;
