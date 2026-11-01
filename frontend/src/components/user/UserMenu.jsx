@@ -62,6 +62,7 @@ const UserMenu = () => {
           name={user?.name || 'User'}
           showFallback
           fallback={<FiUser size={18} className="text-primary" />}
+          imgProps={{ referrerPolicy: 'no-referrer' }}
         />
       </DropdownTrigger>
 
@@ -157,7 +158,14 @@ export const SimpleUserMenu = () => {
   return (
     <Dropdown placement="bottom-end">
       <DropdownTrigger>
-        <Avatar isBordered as="button" size="sm" src={user.picture} name={user.name} />
+        <Avatar
+          isBordered
+          as="button"
+          size="sm"
+          src={user.picture}
+          name={user.name}
+          imgProps={{ referrerPolicy: 'no-referrer' }}
+        />
       </DropdownTrigger>
 
       <DropdownMenu
@@ -201,7 +209,14 @@ export const UserMenuWithBadge = ({ badgeContent }) => {
     <div className="relative">
       <Dropdown placement="bottom-end">
         <DropdownTrigger>
-          <Avatar isBordered as="button" size="sm" src={user.picture} name={user.name} />
+          <Avatar
+            isBordered
+            as="button"
+            size="sm"
+            src={user.picture}
+            name={user.name}
+            imgProps={{ referrerPolicy: 'no-referrer' }}
+          />
         </DropdownTrigger>
 
         <DropdownMenu
@@ -249,7 +264,12 @@ export const MobileUserButton = () => {
     <Dropdown placement="bottom">
       <DropdownTrigger>
         <button className="flex w-full items-center gap-2 rounded-full p-2 transition-colors hover:bg-white/5">
-          <Avatar size="sm" src={user.picture} name={user.name} />
+          <Avatar
+            size="sm"
+            src={user.picture}
+            name={user.name}
+            imgProps={{ referrerPolicy: 'no-referrer' }}
+          />
           <div className="min-w-0 flex-1 text-left">
             <p className="truncate text-sm font-medium text-white">{user.name}</p>
             <p className="truncate font-mono text-xs text-slate-400">{user.email}</p>

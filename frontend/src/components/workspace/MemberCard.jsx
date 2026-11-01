@@ -32,6 +32,7 @@ const MemberCard = ({ member, isOwner, onRemove }) => {
             <img
               src={member.user.picture}
               alt={member.user.name}
+              referrerPolicy="no-referrer"
               className="h-full w-full object-cover"
             />
           ) : (

@@ -64,6 +64,7 @@ const MeetingEditorBase = ({
                       <img
                         src={info.avatar}
                         alt={info.name}
+                        referrerPolicy="no-referrer"
                         className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
@@ -209,6 +210,7 @@ const EditorSection = ({
                     <img
                       src={o.info.avatar}
                       alt={o.info.name}
+                      referrerPolicy="no-referrer"
                       className="h-full w-full object-cover"
                     />
                   )}
@@ -295,6 +297,7 @@ const StrategicDecisionsEditor = ({
                   <img
                     src={o.info.avatar}
                     alt={o.info.name}
+                    referrerPolicy="no-referrer"
                     className="h-full w-full object-cover"
                   />
                 )}
@@ -422,6 +425,7 @@ const AssignedInitiativesEditor = ({
                     <img
                       src={o.info.avatar}
                       alt={o.info.name}
+                      referrerPolicy="no-referrer"
                       className="h-full w-full object-cover"
                     />
                   )}
@@ -602,6 +606,7 @@ const ForwardProjectionEditor = ({
                   <img
                     src={o.info.avatar}
                     alt={o.info.name}
+                    referrerPolicy="no-referrer"
                     className="h-full w-full object-cover"
                   />
                 )}

@@ -91,6 +91,7 @@ const Header = ({ navItems = [] }) => {
                 <img
                   src={user.picture}
                   alt={user?.name || 'User'}
+                  referrerPolicy="no-referrer"
                   className={`size-8 cursor-pointer rounded-full border transition-all duration-300 ${
                     activeItem === '/settings'
                       ? 'scale-110 border-accent-primary shadow-[0_0_12px_rgba(129,140,248,0.4)]'

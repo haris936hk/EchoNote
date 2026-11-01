@@ -1,4 +1,4 @@
-import { Avatar, Divider, Button } from '@heroui/react';
+import { Avatar, Divider } from '@heroui/react';
 import { FiUser, FiMail, FiShield } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -36,9 +36,10 @@ const ProfileSettings = () => {
               color="primary"
               showFallback
               fallback={<FiUser size={32} className="text-accent-primary" />}
+              imgProps={{ referrerPolicy: 'no-referrer' }}
               classNames={{
                 base: 'w-20 h-20 ring-accent-primary/20',
-                img: 'w-full h-full object-cover !opacity-100',
+                img: 'w-full h-full object-cover',
               }}
             />
             <div className="flex-1">
@@ -149,9 +150,9 @@ export const ProfileCard = () => {
           color="primary"
           showFallback
           fallback={<FiUser size={18} className="text-accent-primary" />}
+          imgProps={{ referrerPolicy: 'no-referrer' }}
           classNames={{
             base: 'ring-accent-primary/20',
-            img: '!opacity-100',
           }}
         />
         <div className="min-w-0 flex-1">
